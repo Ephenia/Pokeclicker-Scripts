@@ -6,7 +6,7 @@ These are created and intended for the use of the browser extension known as [Ta
 
 **If you are looking to have something specific created or have any inquiries feel free to contact me (contact info on profile). More scripts and things that I create will be added in due time.**
 
-## **Simple Auto Farmer** ([sinpleautofarmer.js](https://gitlab.com/Ephenia/pokeclicker-scripts/-/blob/main/simpleautofarmer.js))
+## **Simple Auto Farmer** ([sinpleautofarmer.js](https://github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.js))
 This script is for a simplistic Auto Farmer which adds 2 new buttons below the Plant and Harvest all buttons as shown:<br>
 ![IMAGE_DESCRIPTION](https://i.imgur.com/9Y4ad5B.png)
 
