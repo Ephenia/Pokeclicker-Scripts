@@ -10,6 +10,6 @@ These are created and intended for the use of the browser extension known as [Ta
 This script is for a simplistic Auto Farmer which adds 2 new buttons below the Plant and Harvest all buttons as shown:<br>
 ![IMAGE_DESCRIPTION](https://i.imgur.com/9Y4ad5B.png)
 
-Auto Farm will plant the berry that you have selected and will harvest all of them as well when they are ready. Auto mulch works in conjunction with Auto Farm so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the Mulch that you have selected as well. This will also work with the Farm window closed.
+Auto Farm will plant the berry that you have selected and will harvest all of them as well when they are ready. Auto mulch works in conjunction with Auto Farm so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the Mulch that you have selected as well. This will also work with the Farm window closed and these settings will persist upon refresh.browser close.
 
 I plan to update this Auto Farmer with some additional features later on.
