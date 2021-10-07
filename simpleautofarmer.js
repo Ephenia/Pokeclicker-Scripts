@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name        [Pokéclicker] Simple Auto Farmer
-// @namespace   Pokéclicker Scripts
+// @name        [Pokeclicker] Simple Auto Farmer
+// @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Ephenia
 // @description Adds buttons to automatically plant and harvest all of any specific berry. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
 // ==/UserScript==
