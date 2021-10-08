@@ -6,6 +6,8 @@ These are created and intended for the use of the browser extension known as [Ta
 
 **If you are looking to have something specific created or have any inquiries feel free to contact me (contact info on profile). More scripts and things that I create will be added in due time.**
 
+<hr>
+
 ## **Simple Auto Farmer** ([sinpleautofarmer.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.js))
 This script is for a simplistic Auto Farmer which adds 2 new buttons below the Plant and Harvest all buttons as shown:<br>
 
@@ -14,6 +16,8 @@ This script is for a simplistic Auto Farmer which adds 2 new buttons below the P
 Auto Farm will plant the berry that you have selected and will harvest all of them as well when they are ready. Auto mulch works in conjunction with Auto Farm, so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the Mulch that you have selected as well. This will also work with the Farm window closed, and these settings will persist upon refresh/browser close.
 
 I plan to update this Auto Farmer with some additional features later on.
+
+<hr>
 
 ## **Additional Visual Settings** ([additionalvisualsettings.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/additionalvisualsettings.js))
 This script adds new options in the Visual settings tab. These new options are shown here:<br>
