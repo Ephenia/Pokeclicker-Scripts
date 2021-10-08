@@ -30,6 +30,6 @@ This script also includes support for a quick Settings button as shown below:<br
 
 ![](https://i.imgur.com/GHt61hr.png)
 
-To gear icon to the left of the Start Menu.
+The gear icon to the left of the Start Menu that you see there.
 <hr>
 <b>More to be added soon.</b>
