@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Ephenia
 // @description Adds additional settings for hiding some visual things to help out with performance.
 // ==/UserScript==
@@ -75,20 +75,24 @@ addGlobalStyle('.pageItemTitle { height:38px }');
 addGlobalStyle('#quick-settings { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
 addGlobalStyle('#quick-settings:hover { background-color:#ddd;border: 4px solid #ddd; }');
 
-if (checkWildPokeName == "ON") {
+if (checkWildPokeName == "OFF") {
     document.querySelector('#poke-name').checked = true
+} else {
     remPokeName();
 }
-if (checkWildPokeDefeat == "ON") {
+if (checkWildPokeDefeat == "OFF") {
     document.querySelector('#poke-defeat').checked = true
+} else {
     remPokeDefeat();
 }
-if (checkWildPokeImg == "ON") {
+if (checkWildPokeImg == "OFF") {
     document.querySelector('#poke-image').checked = true
+} else {
     remPokeImg();
 }
-if (checkWildPokeHealth == "ON") {
+if (checkWildPokeHealth == "OFF") {
     document.querySelector('#poke-health').checked = true
+} else {
     remPokeHealth();
 }
 
@@ -96,6 +100,9 @@ document.querySelector('#map').addEventListener('click', event => {
     if (event.target.matches('[data-bind*="MapHelper.calculateRouteCssClass"')) {
         if (checkWildPokeName == "ON") {
             remPokeName();
+        }
+        if (checkWildPokeDefeat == "ON") {
+            remPokeDefeat();
         }
         if (checkWildPokeImg == "ON") {
             remPokeImg();
@@ -107,7 +114,7 @@ document.querySelector('#map').addEventListener('click', event => {
 });
 
 document.querySelector('#poke-name').addEventListener('change', event => {
-    if (event.target.checked == false) {
+    if (event.target.checked == true) {
         checkWildPokeName = "OFF";
         localStorage.setItem("checkWildPokeName", "OFF");
     } else {
@@ -117,7 +124,7 @@ document.querySelector('#poke-name').addEventListener('change', event => {
 });
 
 document.querySelector('#poke-defeat').addEventListener('change', event => {
-    if (event.target.checked == false) {
+    if (event.target.checked == true) {
         checkWildPokeDefeat = "OFF";
         localStorage.setItem("checkWildPokeDefeat", "OFF");
     } else {
@@ -127,7 +134,7 @@ document.querySelector('#poke-defeat').addEventListener('change', event => {
 });
 
 document.querySelector('#poke-image').addEventListener('change', event => {
-    if (event.target.checked == false) {
+    if (event.target.checked == true) {
         checkWildPokeImg = "OFF";
         localStorage.setItem("checkWildPokeImg", "OFF");
     } else {
@@ -137,7 +144,7 @@ document.querySelector('#poke-image').addEventListener('change', event => {
 });
 
 document.querySelector('#poke-health').addEventListener('change', event => {
-    if (event.target.checked == false) {
+    if (event.target.checked == true) {
         checkWildPokeHealth = "OFF";
         localStorage.setItem("checkWildPokeHealth", "OFF");
     } else {
