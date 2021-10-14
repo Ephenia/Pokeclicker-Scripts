@@ -15,6 +15,8 @@ This script is for a simplistic Auto Farmer which adds 2 new buttons below the P
 
 Auto Farm will plant the berry that you have selected and will harvest all of them as well when they are ready. Auto mulch works in conjunction with Auto Farm, so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the Mulch that you have selected as well. This will also work with the Farm window closed, and these settings will persist upon refresh/browser close.
 
+<b>Note:</b> If you have this script active and haven't unlocked Farm yet, you will need to refresh currently for this to work once you do unlock Farm.
+
 I plan to update this Auto Farmer with some additional features later on.
 
 <hr>
