@@ -26,13 +26,24 @@ The gear icon to the left of the Start Menu that you see there.
 ## **Enhanced Auto Clicker** ([enhancedautoclicker.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautoclicker.js))
 This script was originally created by <b>Ivan Lay</b> and [can be found over here](//github.com/ivanlay/pokeclicker-automator).
 
-This script currently does the same as the old one, but this enhanced version will add in a button to toggle the Auto Clicker on/off without the need of a refresh. This setting will also save and persist through refresh/browser close as well.
+This script currently features quite a lot more over the old one. This enhanced version mainly will add in a button to toggle the Auto Clicker on/off without the need of a refresh. This setting will also save and persist through refresh/browser close as well.
 
 The button can be found under your currencies as shown here:<br>
 
-![](https://i.imgur.com/6AEgGus.png)
+![](https://i.imgur.com/S4hZVlC.png)
 
-You may find it useful, but it will always be a great thing to have nonetheless. I touched this up in preperation of some future goodies that I have planned that I would also like to make.
+What has also been added with my enhanced version are 3 additional things as well, these are as follows:<br>
+
+
+<strong>• Auto Click DPS</strong> - This will tell you the total amount of click damage that you're dealing per second while the Auto Clicker is active.<br>
+<strong>• Req. DPS</strong> - This will tell you the total required amount of click damage (Auto Click DPS) needed for you to 1 shot the route and fully cap out the red (health) bar.<br>
+<strong>• Enemy/s</strong> - How many enemies you are defeating per second through the use of the Auto Clicker and it being currently active (20 is cap).
+
+```diff
+- Note: all these are checked and updated every 1 second while the Auto Clicker is active.
+```
+
+I thought that these were some neat and useful additions to add. I hope that you guys would like them as well. I feel that it's a lot easier to see and gauge your efficiency on a route much easier and where the best place would be to go for you.
 
 <hr>
 
