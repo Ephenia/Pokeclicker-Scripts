@@ -41,16 +41,6 @@ function initAutoClicker() {
     </button></td></tr></tbody>`
     battleView.before(elemAC)
 
-//     document.getElementById('battleContainer').querySelector('tr').outerHTML += `<tbody><tr><td colspan="3">
-//     <button id="auto-click-start" class="btn btn-`+clickColor+` btn-block" style="font-size:9pt;">
-//     Auto Click [`+clickState+`]<br>
-//     <div id="auto-click-info">
-//     <div id="click-DPS">Auto Click DPS: `+ clickDPS.toLocaleString('en-US') +`</div>
-//     <div id="req-DPS">Req. DPS: 0</div>
-//     <div id="enemy-DPS">Enemy/s: 0</div>
-//     </div>
-//     </button></td></tr></tbody>`
-
     $("#auto-click-start").click (toggleAutoClick)
     addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
     addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
