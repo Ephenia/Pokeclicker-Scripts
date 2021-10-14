@@ -6,6 +6,10 @@ These are created and intended for the use of the browser extension known as [Ta
 
 **If you are looking to have something specific created or have any inquiries feel free to contact me (contact info on profile). More scripts and things that I create will be added in due time.**
 
+```diff
+- Note: all scripts here would be 100% compaitable with one another!!!
+```
+
 <hr>
 
 ## **Additional Visual Settings** ([additionalvisualsettings.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/additionalvisualsettings.js))
@@ -33,7 +37,6 @@ The button can be found under your currencies as shown here:<br>
 ![](https://i.imgur.com/S4hZVlC.png)
 
 What has also been added with my enhanced version are 3 additional things as well, these are as follows:<br>
-
 
 <strong>• Auto Click DPS</strong> - This will tell you the total amount of click damage that you're dealing per second while the Auto Clicker is active.<br>
 <strong>• Req. DPS</strong> - This will tell you the total required amount of click damage (Auto Click DPS) needed for you to 1 shot the route and fully cap out the red (health) bar.<br>
