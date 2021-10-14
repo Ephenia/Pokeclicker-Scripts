@@ -26,7 +26,7 @@ The gear icon to the left of the Start Menu that you see there.
 ## **Enhanced Auto Clicker** ([enhancedautoclicker.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautoclicker.js))
 This script was originally created by <b>Ivan Lay</b> and [can be found over here](//github.com/ivanlay/pokeclicker-automator).
 
-This script currently does the same as the old one, but this enhanced version will add in a button to toggle the Auto Clicker on/off without the need of a refresh. This setting will also save and persiss through refresh/browser close as well.
+This script currently does the same as the old one, but this enhanced version will add in a button to toggle the Auto Clicker on/off without the need of a refresh. This setting will also save and persist through refresh/browser close as well.
 
 The button can be found under your currencies as shown here:<br>
 
