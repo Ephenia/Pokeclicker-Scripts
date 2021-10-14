@@ -8,6 +8,34 @@ These are created and intended for the use of the browser extension known as [Ta
 
 <hr>
 
+## **Additional Visual Settings** ([additionalvisualsettings.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/additionalvisualsettings.js))
+This script adds new options in the Visual settings tab. These new options are shown here:<br>
+
+![](https://i.imgur.com/sWlhKlx.png)
+
+Why I made these options is for making a hacky way to help save on some performance, especially when you are idling and leaving the game open for longer periods of time. This ends up removing these HTML elements that are constantly and endlessly getting updated so the DOM is less flooded. After enabling any of these options, you will have to change routes for these settings to take effect. When disabling, you will have to go to something like a Town/Dungeon then back to a route for these to start working again.
+
+This script also includes support for a quick Settings button as shown below:<br>
+
+![](https://i.imgur.com/GHt61hr.png)
+
+The gear icon to the left of the Start Menu that you see there.
+
+<hr>
+
+## **Enhanced Auto Clicker** ([enhancedautoclicker.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautoclicker.js))
+This script was originally created by <b>Ivan Lay</b> and [can be found over here](//github.com/ivanlay/pokeclicker-automator).
+
+This script currently does the same as the old one, but this enhanced version will add in a button to toggle the Auto Clicker on/off without the need of a refresh. This setting will also save and persiss through refresh/browser close as well.
+
+The button can be found under your currencies as shown here:<br>
+
+![](https://i.imgur.com/6AEgGus.png)
+
+You may find it useful, but it will always be a great thing to have nonetheless. I touched this up in preperation of some future goodies that I have planned that I would also like to make.
+
+<hr>
+
 ## **Simple Auto Farmer** ([sinpleautofarmer.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.js))
 This script is for a simplistic Auto Farmer which adds 2 new buttons below the Plant and Harvest all buttons as shown:<br>
 
@@ -21,17 +49,4 @@ I plan to update this Auto Farmer with some additional features later on.
 
 <hr>
 
-## **Additional Visual Settings** ([additionalvisualsettings.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/additionalvisualsettings.js))
-This script adds new options in the Visual settings tab. These new options are shown here:<br>
-
-![](https://i.imgur.com/sWlhKlx.png)
-
-Why I made these options is for making a hacky way to help save on some performance, especially when you are idling and leaving the game open for longer periods of time. This ends up removing these HTML elements that are constantly and endlessly getting updated so the DOM is less flooded. After enabling any of these options, you will have to change routes for these settings to take effect. When disabling, you will have to go to something like a Town/Dungeon then back to a route for these to start working again.
-
-This script also includes support for a quick Settings button as shown below:<br>
-
-![](https://i.imgur.com/GHt61hr.png)
-
-The gear icon to the left of the Start Menu that you see there.
-<hr>
 <b>More to be added soon.</b>
