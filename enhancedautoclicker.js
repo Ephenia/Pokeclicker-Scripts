@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Ephenia (Original/Credit: Ivan Lay)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off.
 // ==/UserScript==
@@ -12,22 +12,39 @@ var clickState;
 var clickColor;
 var awaitAutoClick;
 var autoClickerLoop;
+var autoClickDPS;
+var clickDPS;
+var reqDPS;
+var enemySpeedRaw;
+var enemySpeed;
 var trainerCards = document.querySelectorAll('.trainer-card');
 
 function initAutoClicker() {
     if (clickState == "OFF") {
         clickColor = "danger"
+        clickDPS = 0
     } else {
         clickColor = "success"
+        clickDPS = +localStorage.getItem('storedClickDPS');
     }
 
     document.getElementById('battleContainer').querySelector('tr').outerHTML += `<tr><td colspan="3">
     <button id="auto-click-start" class="btn btn-`+clickColor+` btn-block" style="font-size:9pt;">
-    Auto Click [`+clickState+`]</button></td></tr>`
+    Auto Click [`+clickState+`]<br>
+    <div id="auto-click-info">
+    <div id="click-DPS">Auto Click DPS: `+ clickDPS.toLocaleString('en-US') +`</div>
+    <div id="req-DPS">Req. DPS: 0</div>
+    <div id="enemy-DPS">Enemy/s: 0</div>
+    </div>
+    </button></td></tr>`
+
     $("#auto-click-start").click (toggleAutoClick)
+    addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
+    addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
 
     if (clickState == "ON") {
         autoClicker();
+        calcClickDPS();
     }
 }
 
@@ -37,15 +54,48 @@ function toggleAutoClick() {
         localStorage.setItem("autoClickState", clickState);
         document.getElementById("auto-click-start").classList.remove('btn-danger');
         document.getElementById("auto-click-start").classList.add('btn-success');
+        clickDPS = +localStorage.getItem('storedClickDPS');
         autoClicker();
+        calcClickDPS();
     } else {
         clickState = "OFF"
         localStorage.setItem("autoClickState", clickState);
         document.getElementById("auto-click-start").classList.remove('btn-success');
         document.getElementById("auto-click-start").classList.add('btn-danger');
+        clickDPS = 0;
+        reqDPS = 0;
+        enemySpeedRaw = 0;
         clearInterval(autoClickerLoop)
+        clearInterval(autoClickDPS)
     }
-    document.getElementById('auto-click-start').innerText = `Auto Click [`+clickState+`]`
+    document.getElementById('auto-click-start').innerHTML = `Auto Click [`+clickState+`]<br>
+    <div id="auto-click-info">
+    <div id="click-DPS">Auto Click DPS: `+ clickDPS.toLocaleString('en-US') +`</div>
+    <div id="req-DPS">Req. DPS: 0</div>
+    <div id="enemy-DPS">Enemy/s: 0</div>
+    </div>`
+}
+
+function calcClickDPS() {
+    autoClickDPS = setInterval(function () {
+        if (clickDPS != App.game.party.calculateClickAttack() * 20) {
+            clickDPS = App.game.party.calculateClickAttack() * 20;
+            document.getElementById('click-DPS').innerHTML = `Auto Click DPS: `+ clickDPS.toLocaleString('en-US');
+            localStorage.setItem('storedClickDPS', clickDPS)
+        }
+        if (reqDPS != Battle.enemyPokemon().maxHealth() * 20) {
+            reqDPS = Battle.enemyPokemon().maxHealth() * 20;
+            document.getElementById('req-DPS').innerHTML = `Req. DPS: `+ reqDPS.toLocaleString('en-US');
+        }
+        if (enemySpeedRaw != ((App.game.party.calculateClickAttack() * 20) / Battle.enemyPokemon().maxHealth()).toFixed(1)) {
+            enemySpeed = ((App.game.party.calculateClickAttack() * 20) / Battle.enemyPokemon().maxHealth()).toFixed(1);
+            enemySpeedRaw = enemySpeed
+            if (enemySpeedRaw >= 20) {
+                enemySpeed = 20
+            }
+            document.getElementById('enemy-DPS').innerHTML = `Enemy/s: `+ enemySpeed
+        }
+    }, 1000);
 }
 
 function autoClicker() {
@@ -88,6 +138,9 @@ function autoClicker() {
 if (localStorage.getItem('autoClickState') == null) {
     localStorage.setItem("autoClickState", "OFF");
 }
+if (localStorage.getItem('storedClickDPS') == null) {
+    localStorage.setItem("storedClickDPS", 0);
+}
 clickState = localStorage.getItem('autoClickState');
 
 for (var i = 0; i < trainerCards.length; i++) {
@@ -104,4 +157,14 @@ function checkAutoClick() {
             clearInterval(awaitAutoClick)
         }
     }, 1000);
+}
+
+function addGlobalStyle(css) {
+    var head, style;
+    head = document.getElementsByTagName('head')[0];
+    if (!head) { return; }
+    style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = css;
+    head.appendChild(style);
 }
