@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      Ephenia
 // @description Adds buttons to automatically plant and harvest all of any specific berry. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
 // ==/UserScript==
@@ -13,6 +13,8 @@ var mulchState;
 var farmColor;
 var mulchColor;
 var autoFarmTimer;
+var awaitAutoFarm;
+var trainerCards = document.querySelectorAll('.trainer-card')
 
 function initAutoFarm() {
     if (farmState == "ON") {
@@ -103,4 +105,24 @@ if (localStorage.getItem('autoMulchState') == null) {
 }
 farmState = localStorage.getItem('autoFarmState');
 mulchState = localStorage.getItem('autoMulchState');
-initAutoFarm();
+
+for (var i = 0; i < trainerCards.length; i++) {
+    trainerCards[i].addEventListener('click', checkAutoFarm, false);
+}
+
+function checkAutoFarm() {
+    awaitAutoFarm = setInterval(function () {
+        var farmAccess = App.game.farming.canAccess();
+        if (typeof farmAccess === 'undefined') {
+            console.log("Farm access isn't determined yet.");
+        } else {
+            if (App.game.farming.canAccess() == true) {
+                initAutoFarm();
+                clearInterval(awaitAutoFarm)
+            }
+            if (App.game.farming.canAccess() == false) {
+                clearInterval(awaitAutoFarm)
+            }
+        }
+    }, 1000);
+}
