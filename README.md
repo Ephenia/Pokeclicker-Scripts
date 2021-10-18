@@ -44,7 +44,7 @@ This script currently features quite a lot more over the old one. This enhanced 
 
 The button can be found under your currencies, as shown here:<br>
 
-![](https://i.imgur.com/tw7FniT.png)
+![](https://i.imgur.com/SeHA15f.png)
 
 What has also been added with my enhanced version are 3 additional things as well, these are as follows:<br>
 
