@@ -37,7 +37,7 @@ function initAutoClicker() {
     <div id="auto-click-info">
     <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') +`</div></div>
     <div id="req-DPS">Req. DPS:<br><div style="font-weight:bold;">0</div></div>
-    <div id="enemy-DPS">Enemy/s:<br>0</div>
+    <div id="enemy-DPS">Enemy/s:<br><div style="font-weight:bold;color:black;">0</div></div>
     </div>
     </button></td></tr></tbody>`
     battleView.before(elemAC)
@@ -76,7 +76,7 @@ function toggleAutoClick() {
     <div id="auto-click-info">
     <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') +`</div></div>
     <div id="req-DPS">Req. DPS:<br><div style="font-weight:bold;">0</div></div>
-    <div id="enemy-DPS">Enemy/s:<br>0</div>
+    <div id="enemy-DPS">Enemy/s:<br><div style="font-weight:bold;color:black;">0</div></div>
     </div>`
 }
 
@@ -114,7 +114,7 @@ function calcClickDPS() {
             if (enemySpeedRaw >= 20 && enemySpeedRaw != 'Infinity') {
                 enemySpeed = 20
             }
-            document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br>`+ enemySpeed
+            document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br><div style="font-weight:bold;color:black;">`+ enemySpeed +`</div>`
         }
     }, 1000);
 }
