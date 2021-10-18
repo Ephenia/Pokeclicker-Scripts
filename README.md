@@ -6,6 +6,12 @@ These are created and intended for the use of the browser extension known as [Ta
 
 **If you are looking to have something specific created or have any inquiries, feel free to contact me (contact info on profile). More scripts and things that I create will be added in due time.**
 
+# Table of Contents
+1. [**Additional Visual Settings** ](//github.com/Ephenia/Pokeclicker-Scripts#additional-visual-settings-additionalvisualsettingsjs)
+2. [**Enhanced Auto Clicker** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-clicker-enhancedautoclickerjs)
+3. [**Enhanced Auto Mine** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-mine-enhancedautominejs)
+4. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
+
 ```diff
 - Note: all scripts here would be 100% compatible with one another!!!
 ```
@@ -24,6 +30,10 @@ This script also includes support for a quick Settings button, as shown below:<b
 ![](https://i.imgur.com/GHt61hr.png)
 
 The gear icon to the left of the Start Menu that you see there.
+
+![](https://i.imgur.com/8H1ZeBV.png)
+
+As of 1.3 there is now an option for disabling all notifications, this may be good and helpful especially if you are using Enhanced Auto Mine. This may also cause some popups and other things not to appear (such as trying to manually Skip layers in the Underground). You can still also hear when you get shinies using this, but you won't be able to see what shiny you received. I have not fully tested this, so feel free to experiment with this setting.
 
 <hr>
 
@@ -47,6 +57,30 @@ What has also been added with my enhanced version are 3 additional things as wel
 ```
 
 I thought that these were some neat and useful additions to add. I hope that you guys would like them as well. I feel that it's a lot easier to see and gauge your efficiency on a route much easier and where the best place would be to go for you.
+
+<hr>
+
+## **Enhanced Auto Mine** ([enhancedautomine.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautomine.js))
+This script was originally created by <b>Ivan Lay</b> and [can be found over here](//github.com/ivanlay/pokeclicker-automator).
+
+This I had worked quite a bit on, and I'm quite happy with what it's capable of doing. This is far greater and does a lot more than Ivan Lay's script. However, but since I was using it and was inspired, I decided to make an auto miner that's efficient as possible instead.
+
+What this script adds is a new top row below the mining layer as shown:<br>
+
+![](https://i.imgur.com/0DzjmOM.png)
+
+There's a lot to go over and explained with this Auto Miner, but I'll try my best to explain it all:
+
+<strong>• Auto Mine</strong> - This will turn the Auto Miner On/Off. The Auto Miner uses Bombs to automatically mine..<br>
+<strong>• Auto Small Restore</strong> - This will automatically use Small Restores as well as buy them while it's active (only when Auto Mine is running). It will also only ever buy them when you have 0 Small Restores and when they also cost 30,000 (base price). Knowing that, this would be best used if you are anywhere that you are 1 shotting Pokemon (so the price penalty in the Shop is constantly decreasing).<br>
+<strong>• 1st Input Field</strong> - Here you can enter a money value as to when Small Restores should stop Auto Buying. This will help you not drain your money and help manage it.<br>
+<strong>• 2nd Input Field</strong> - This is basically an Auto Skipper. You can enter a minimum value here as to how many items that you would like to look for in new layers. If there are fewer items in a layer than your desired input then the layer will be skipped (if you have any skips available).
+
+Some other features and things to take note of the Auto Miner is that Small Restores won't be bought while you have a shop open, this is intentional. Also, after you have completed and dug out a layer, every item that's dug up that would give you Diamonds is sold automatically.
+
+```diff
+- Note: the Auto Miner runs every 1 second.
+```
 
 <hr>
 
