@@ -63,7 +63,7 @@ I thought that these were some neat and useful additions to add. I hope that you
 ## **Enhanced Auto Mine** ([enhancedautomine.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautomine.js))
 This script was originally created by <b>Ivan Lay</b> and [can be found over here](//github.com/ivanlay/pokeclicker-automator).
 
-This I had worked quite a bit on, and I'm quite happy with what it's capable of doing. This is far greater and does a lot more than Ivan Lay's script. However, but since I was using it and was inspired, I decided to make an auto miner that's efficient as possible instead.
+This I had worked quite a bit on, and I'm quite happy with what it's capable of doing. This is far greater and does a lot more than Ivan Lay's script. However, since I was using it and was inspired, I decided to make an auto miner that's efficient as possible instead.
 
 What this script adds is a new top row below the mining layer as shown:<br>
 
@@ -76,7 +76,7 @@ There's a lot to go over and explained with this Auto Miner, but I'll try my bes
 <strong>• 1st Input Field</strong> - Here you can enter a money value as to when Small Restores should stop Auto Buying. This will help you not drain your money and help manage it.<br>
 <strong>• 2nd Input Field</strong> - This is basically an Auto Skipper. You can enter a minimum value here as to how many items that you would like to look for in new layers. If there are fewer items in a layer than your desired input then the layer will be skipped (if you have any skips available).
 
-Some other features and things to take note of the Auto Miner is that Small Restores won't be bought while you have a shop open, this is intentional. Also, after you have completed and dug out a layer, every item that's dug up that would give you Diamonds is sold automatically.
+Some other features and things to take note of the Auto Miner is that Small Restores won't be bought while you have a shop open, this is intentional. Also, after you have completed and dug out a layer, every item that's dug up that would give you Diamonds is sold automatically. This will be changed to an option later on.
 
 ```diff
 - Note: the Auto Miner runs every 1 second.
