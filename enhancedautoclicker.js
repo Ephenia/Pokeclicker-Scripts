@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      Ephenia (Original/Credit: Ivan Lay)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off.
 // ==/UserScript==
@@ -17,6 +17,7 @@ var clickDPS;
 var reqDPS;
 var enemySpeedRaw;
 var enemySpeed;
+var colorDPS;
 var trainerCards = document.querySelectorAll('.trainer-card');
 var battleView = document.getElementsByClassName('battle-view')[0];
 
@@ -34,9 +35,9 @@ function initAutoClicker() {
     <button id="auto-click-start" class="btn btn-`+clickColor+` btn-block" style="font-size:9pt;">
     Auto Click [`+clickState+`]<br>
     <div id="auto-click-info">
-    <div id="click-DPS">Auto Click DPS: `+ clickDPS.toLocaleString('en-US') +`</div>
-    <div id="req-DPS">Req. DPS: 0</div>
-    <div id="enemy-DPS">Enemy/s: 0</div>
+    <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') +`</div></div>
+    <div id="req-DPS">Req. DPS:<br><div style="font-weight:bold;">0</div></div>
+    <div id="enemy-DPS">Enemy/s:<br>0</div>
     </div>
     </button></td></tr></tbody>`
     battleView.before(elemAC)
@@ -73,9 +74,9 @@ function toggleAutoClick() {
     }
     document.getElementById('auto-click-start').innerHTML = `Auto Click [`+clickState+`]<br>
     <div id="auto-click-info">
-    <div id="click-DPS">Auto Click DPS: `+ clickDPS.toLocaleString('en-US') +`</div>
-    <div id="req-DPS">Req. DPS: 0</div>
-    <div id="enemy-DPS">Enemy/s: 0</div>
+    <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') +`</div></div>
+    <div id="req-DPS">Req. DPS:<br><div style="font-weight:bold;">0</div></div>
+    <div id="enemy-DPS">Enemy/s:<br>0</div>
     </div>`
 }
 
@@ -91,24 +92,29 @@ function calcClickDPS() {
 
         if (clickDPS != App.game.party.calculateClickAttack() * 20) {
             clickDPS = App.game.party.calculateClickAttack() * 20;
-            document.getElementById('click-DPS').innerHTML = `Auto Click DPS: `+ clickDPS.toLocaleString('en-US');
+            document.getElementById('click-DPS').innerHTML = `Auto Click DPS:<br><div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US'); +`</div>`
             localStorage.setItem('storedClickDPS', clickDPS)
         }
         if (reqDPS != enemyHealth * 20) {
             reqDPS = enemyHealth * 20;
-            document.getElementById('req-DPS').innerHTML = `Req. DPS: `+ reqDPS.toLocaleString('en-US');
+            if (clickDPS >= reqDPS) {
+                colorDPS = "greenyellow"
+            } else {
+                colorDPS = "darkred"
+            }
+            document.getElementById('req-DPS').innerHTML = `Req. DPS:<br><div style="font-weight:bold;color:`+ colorDPS +`">`+ reqDPS.toLocaleString('en-US'); +`</div>`
         }
         if (enemySpeedRaw != ((App.game.party.calculateClickAttack() * 20) / enemyHealth).toFixed(1)) {
             enemySpeed = ((App.game.party.calculateClickAttack() * 20) / enemyHealth).toFixed(1);
             enemySpeedRaw = enemySpeed
-            console.log(enemySpeedRaw)
+            //console.log(enemySpeedRaw)
             if (enemySpeedRaw == 'Infinity') {
                 enemySpeed = 0
             }
             if (enemySpeedRaw >= 20 && enemySpeedRaw != 'Infinity') {
                 enemySpeed = 20
             }
-            document.getElementById('enemy-DPS').innerHTML = `Enemy/s: `+ enemySpeed
+            document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br>`+ enemySpeed
         }
     }, 1000);
 }
