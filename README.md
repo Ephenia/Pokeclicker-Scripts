@@ -14,8 +14,6 @@ These are created and intended for the use of the browser extension known as [Ta
 
 ```diff
 - Note: all scripts here would be 100% compatible with one another!!!
-```
-```diff
 - Note: feel free to open an issue if you find any bugs/issues as these aren't fully tested!!!
 ```
 
