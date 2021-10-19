@@ -15,6 +15,9 @@ These are created and intended for the use of the browser extension known as [Ta
 ```diff
 - Note: all scripts here would be 100% compatible with one another!!!
 ```
+```diff
+- Note: feel free to open an issue if you find any bugs/issues as these aren't fully tested!!!
+```
 
 <hr>
 
@@ -82,6 +85,9 @@ Some other features and things to take note of the Auto Miner is that Small Rest
 
 ```diff
 - Note: the Auto Miner runs every 1 second.
+```
+```diff
+- Note: If you have this script active and haven't unlocked the Underground yet, you will need to refresh currently for this to work once you do unlock the Underground.
 ```
 
 <hr>
