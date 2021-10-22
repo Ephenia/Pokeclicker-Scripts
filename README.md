@@ -81,7 +81,7 @@ There is also this as well:<br>
 
 ![](https://i.imgur.com/J0QvYc2.png)
 
-When you open up the Daycare, you will see another button for automatically placing store bought eggs as well as fossils that you have dug up. This will randomly place what you have inside the daycare, and it will also prioritize placing them if you have any of the two available.
+When you open up the Daycare, you will see another button for automatically placing store bought eggs as well as fossils that you have dug up. This will randomly place what you have inside the Hatchery, and it will also prioritize placing them if you have any of the two available.
 
 ```diff
 - Note: the Auto Hatchery runs every 0.05 seconds.
