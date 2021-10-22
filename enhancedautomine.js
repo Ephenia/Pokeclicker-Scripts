@@ -3,9 +3,9 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
-// @author      Ephenia  (Original/Credit: Ivan Lay)
-// @description Automatically mines the Underground with Bombs. eatures adjustable settings as well.
+// @version     1.1
+// @author      Ephenia
+// @description Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // ==/UserScript==
 
 var mineState;
@@ -19,6 +19,10 @@ var resetInProgress;
 var busyMining;
 var autoMineSkip;
 var layersMined;
+var sellTreasureState;
+var sellTreasureColor;
+var sellPlateState;
+var sellPlateColor;
 var trainerCards = document.querySelectorAll('.trainer-card');
 
 function initAutoMine() {
@@ -37,6 +41,16 @@ function initAutoMine() {
     } else {
         smallRestoreColor = "success"
     }
+    if (sellTreasureState == "OFF") {
+        sellTreasureColor = "danger"
+    } else {
+        sellTreasureColor = "success"
+    }
+    if (sellPlateState == "OFF") {
+        sellPlateColor = "danger"
+    } else {
+        sellPlateColor = "success"
+    }
     setThreshold = +setThreshold
     resetInProgress = "NO"
     localStorage.setItem("undergroundLayersMined", App.game.statistics.undergroundLayersMined());
@@ -49,10 +63,16 @@ function initAutoMine() {
 <input title="Enter in a value where Small Restores will stop being bought at." type="text" id="small-restore"></div>
 <div id="skip-input" class="col-12 col-md-3 btn-secondary">
 <input title="Auto skipping occurs if the max items in a layer is lower than the value put here." type="text" id="auto-skip"></div>`
-    document.querySelectorAll('#mineBody + div')[0].prepend(minerHTML)
+    document.querySelectorAll('#mineBody + div')[0].prepend(minerHTML);
     $("#auto-mine-start").unwrap();
     document.getElementById('small-restore').value = setThreshold.toLocaleString();
     document.getElementById('auto-skip').value = autoMineSkip.toLocaleString();
+    var autoSeller = document.createElement("div");
+    autoSeller.innerHTML = `<div>
+    <button id="auto-sell-treasure" class="col-12 col-md-3 btn btn-`+sellTreasureColor+`">Auto Sell Treasure [`+sellTreasureState+`]</button>
+<button id="auto-sell-plate" class="col-12 col-md-3 btn btn-`+sellPlateColor+`">Auto Sell Plate [`+sellPlateState+`]</button>
+</div>`
+    document.getElementById('treasures').prepend(autoSeller);
     addGlobalStyle('#threshold-input { display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center; }');
     addGlobalStyle('#skip-input { display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center; }');
     addGlobalStyle('#small-restore { width:150px; }');
@@ -60,6 +80,8 @@ function initAutoMine() {
 
     $("#auto-mine-start").click (startAutoMine);
     $("#small-restore-start").click (autoRestore);
+    $("#auto-sell-treasure").click (autoSellTreasure);
+    $("#auto-sell-plate").click (autoSellPlate);
 
     function startAutoMine() {
         if (mineState == "OFF") {
@@ -81,22 +103,17 @@ function initAutoMine() {
         var getMoney = App.game.wallet.currencies[GameConstants.Currency.money]();
         var buriedItems = Mine.itemsBuried();
         var skipsRemain = Mine.skipsRemaining();
-        var getRestores = document.getElementsByClassName('restore-item')[0].previousElementSibling.innerText.replace(/[(]|[)]/g, "")
-        var getCost = document.querySelectorAll('div[data-bind*="ShopHandler.shopObservable().items"')[1].querySelectorAll('div.col-6')[9].querySelector('[data-bind*="$data.reduced"').innerText.replace(/,/g, "");
+        var getRestores = player.itemList["SmallRestore"]();
+        var getCost = ItemList["SmallRestore"].price();
         var shopWindow = document.getElementById('shopModal')
         if (buriedItems >= autoMineSkip || skipsRemain == 0) {
             if (smallRestoreState == "ON") {
-                if ((window.getComputedStyle(shopWindow).display === "none") && (+getCost == 30000) && (+getRestores == 0) && (getMoney >= setThreshold + 30000)) {
-                    ShopHandler.showShop(pokeMartShop);
-                    //console.log(ShopHandler.shopObservable().items)
-                    ShopHandler.setSelected(9)
-                    ShopHandler.buyItem()
-                } else {
-                    //console.log("Not attempting to buy.")
+                if ((getCost == 30000) && (+getRestores == 0) && (getMoney >= setThreshold + 30000)) {
+                    ItemList["SmallRestore"].buy(1);
                 }
             }
             if (getEnergy < 10) {
-                ItemList.SmallRestore.use()
+                ItemList["SmallRestore"].use();
             }
             if (getEnergy >= 10) {
                 Mine.bomb();
@@ -126,11 +143,22 @@ function initAutoMine() {
         }
         if (layersMined != App.game.statistics.undergroundLayersMined()) {
             var treasureLength = player.mineInventory().length;
-            for (var i = 0; i < treasureLength; i++) {
-                var valueType = player.mineInventory()[i].valueType
-                if (valueType == "Diamond") {
-                    var treasureID = player.mineInventory()[i].id;
-                    Underground.sellMineItem(treasureID, Infinity)
+            if (sellTreasureState == "ON") {
+                for (var i = 0; i < treasureLength; i++) {
+                    var valueType = player.mineInventory()[i].valueType
+                    if (valueType == "Diamond") {
+                        var treasureID = player.mineInventory()[i].id;
+                        Underground.sellMineItem(treasureID, Infinity)
+                    }
+                }
+            }
+            if (sellPlateState == "ON") {
+                for (var ii = 0; ii < treasureLength; ii++) {
+                    var getName = player.mineInventory()[ii].name;
+                    if (getName.includes("Plate")) {
+                        var plateID = player.mineInventory()[ii].id;
+                        Underground.sellMineItem(plateID, Infinity)
+                    }
                 }
             }
             localStorage.setItem("undergroundLayersMined", App.game.statistics.undergroundLayersMined());
@@ -153,18 +181,44 @@ function initAutoMine() {
 
     function autoRestore() {
         if (smallRestoreState == "OFF") {
-            localStorage.setItem("autoSmallRestore", "ON");
             smallRestoreState = "ON"
-            document.getElementById('small-restore-start').innerText = `Auto Small Restore [`+smallRestoreState+`]`
             document.getElementById("small-restore-start").classList.remove('btn-danger');
             document.getElementById("small-restore-start").classList.add('btn-success');
         } else {
-            localStorage.setItem("autoSmallRestore", "OFF");
             smallRestoreState = "OFF"
-            document.getElementById('small-restore-start').innerText = `Auto Small Restore [`+smallRestoreState+`]`
             document.getElementById("small-restore-start").classList.remove('btn-success');
             document.getElementById("small-restore-start").classList.add('btn-danger');
         }
+        document.getElementById('small-restore-start').innerText = `Auto Small Restore [`+smallRestoreState+`]`
+        localStorage.setItem("autoSmallRestore", smallRestoreState);
+    }
+
+    function autoSellTreasure() {
+        if (sellTreasureState == "OFF") {
+            sellTreasureState = "ON"
+            document.getElementById("auto-sell-treasure").classList.remove('btn-danger');
+            document.getElementById("auto-sell-treasure").classList.add('btn-success');
+        } else {
+            sellTreasureState = "OFF"
+            document.getElementById("auto-sell-treasure").classList.remove('btn-success');
+            document.getElementById("auto-sell-treasure").classList.add('btn-danger');
+        }
+        document.getElementById('auto-sell-treasure').innerText = `Auto Sell Treasure [`+sellTreasureState+`]`
+        localStorage.setItem("autoSellTreasure", sellTreasureState);
+    }
+
+    function autoSellPlate() {
+        if (sellPlateState == "OFF") {
+            sellPlateState = "ON"
+            document.getElementById("auto-sell-plate").classList.remove('btn-danger');
+            document.getElementById("auto-sell-plate").classList.add('btn-success');
+        } else {
+            sellPlateState = "OFF"
+            document.getElementById("auto-sell-plate").classList.remove('btn-success');
+            document.getElementById("auto-sell-plate").classList.add('btn-danger');
+        }
+        document.getElementById('auto-sell-plate').innerText = `Auto Sell Plate [`+sellPlateState+`]`
+        localStorage.setItem("autoSellPlate", sellPlateState);
     }
 
     function endAutoMine() {
@@ -193,10 +247,18 @@ if (localStorage.getItem('autoBuyThreshold') == null) {
 if (localStorage.getItem('autoMineSkip') == null) {
     localStorage.setItem("autoMineSkip", "0");
 }
+if (localStorage.getItem('autoSellTreasure') == null) {
+    localStorage.setItem("autoSellTreasure", "OFF");
+}
+if (localStorage.getItem('autoSellPlate') == null) {
+    localStorage.setItem("autoSellPlate", "OFF");
+}
 mineState = localStorage.getItem('autoMineState');
 smallRestoreState = localStorage.getItem('autoSmallRestore');
 setThreshold = localStorage.getItem('autoBuyThreshold');
 autoMineSkip = localStorage.getItem('autoMineSkip');
+sellTreasureState = localStorage.getItem('autoSellTreasure');
+sellPlateState = localStorage.getItem('autoSellPlate');
 
 for (var i = 0; i < trainerCards.length; i++) {
     trainerCards[i].addEventListener('click', checkAutoMine, false);
