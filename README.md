@@ -114,7 +114,7 @@ As of 1.1 this also includes 2 more additional features into the Treasures tab o
 <strong>• Auto Sell Plate</strong> - This will automatically sell any and all plates that would give you shards upon successfully mining an Underground layer.
 
 ```diff
-- Note: the Auto Farmer runs once every 1 second.
+- Note: the Auto Miner runs once every 1 second.
 - Note: If you have this script active and haven't unlocked the Underground yet, you will need to refresh currently for this to work once you do unlock the Underground.
 ```
 
