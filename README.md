@@ -47,15 +47,20 @@ This script currently features quite a lot more over the old one. This enhanced 
 
 The button can be found under your currencies, as shown here:<br>
 
-![](https://i.imgur.com/SeHA15f.png)
+![](https://i.imgur.com/YC8K6F4.png)
 
-What has also been added with my enhanced version are 3 additional things as well, these are as follows:<br>
+What has also been added with my enhanced version are 4 additional things as well, these are as follows:<br>
 
 <strong>• Auto Click DPS</strong> - This will tell you the total amount of click damage that you're dealing per second while the Auto Clicker is active.<br>
 <strong>• Req. DPS</strong> - This will tell you the total required amount of click damage (Auto Click DPS) needed for you to 1 shot the route and fully cap out the red (health) bar.<br>
 <strong>• Enemy/s</strong> - How many enemies you are defeating per second through the use of the Auto Clicker and it being currently active (20 is cap).
 
-<strong>Auto Click DPS will always show in Gold. Required DPS will change color depending on if you meet it or not.</strong>
+<strong>Auto Click DPS will always show in Gold. Required DPS will change color depending on if you meet it or not.</strong><br>
+
+> <strong>As of 1.4 the Auto Gym feature has been released as well which can be seen below the Auto Click button. Some notes about how this works would be as follows:</strong><br><br>
+• Auto Gym will only work while the Auto Clicker is active.<br>
+• Auto Gym when activated will automatically fight the current Gym in the town that you're at or automatically fight the Gym in the town that you've last visited (if it has a Gym).<br>
+• There is a dropdown to the right of the Auto Gym button which is meant for Elite Fours. The number that you set this to will be which Elite Four member that you will fight (or at least try to). So for example, if you set this to #5 then you will be fighting the Champion or at least that's what Auto Gym's priority will be. This means Auto Gym will also automatically fight through the Elite Four if you would be fighting an Elite Four for the first time as well.<br>
 
 ```diff
 - Note: the Auto Clicker runs every 0.05 seconds.
