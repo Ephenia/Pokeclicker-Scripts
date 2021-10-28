@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      Ephenia
 // @description Adds buttons to automatically plant and harvest all of any specific berry. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
 // ==/UserScript==
@@ -14,7 +14,8 @@ var farmColor;
 var mulchColor;
 var autoFarmTimer;
 var awaitAutoFarm;
-var trainerCards = document.querySelectorAll('.trainer-card')
+var trainerCards = document.querySelectorAll('.trainer-card');
+var shovelList = document.getElementById('shovelList');
 
 function initAutoFarm() {
     if (farmState == "ON") {
@@ -33,7 +34,8 @@ function initAutoFarm() {
         mulchColor = "success"
     }
 
-    document.getElementById('seeds').innerHTML += `<div class="row justify-content-center py-0">
+    var elemAF = document.createElement("div");
+    elemAF.innerHTML = `<div class="row justify-content-center py-0">
     <div class="col-6 pr-0">
     <button id="auto-farm-start" class="btn btn-`+farmColor+` btn-block" style="font-size:9pt;">
     Auto Farm [`+farmState+`]
@@ -45,6 +47,8 @@ function initAutoFarm() {
     </button>
     </div>
     </div>`
+    shovelList.before(elemAF)
+
     $("#auto-farm-start").click (startAutoFarm);
     $("#auto-mulch-start").click (autoMulch);
 
@@ -116,11 +120,11 @@ function checkAutoFarm() {
         if (typeof farmAccess === 'undefined') {
             console.log("Farm access isn't determined yet.");
         } else {
-            if (App.game.farming.canAccess() == true) {
+            if (farmAccess == true) {
                 initAutoFarm();
                 clearInterval(awaitAutoFarm)
             }
-            if (App.game.farming.canAccess() == false) {
+            if (farmAccess == false) {
                 clearInterval(awaitAutoFarm)
             }
         }
