@@ -47,7 +47,7 @@ This script currently features quite a lot more over the old one. This enhanced 
 
 The button can be found under your currencies, as shown here:<br>
 
-![](https://i.imgur.com/YC8K6F4.png)
+![image](https://user-images.githubusercontent.com/26987203/139553777-6c8fbeb9-6ebf-4884-9b60-04bbc218d148.png)
 
 What has also been added with my enhanced version are 4 additional things as well, these are as follows:<br>
 
@@ -60,14 +60,25 @@ What has also been added with my enhanced version are 4 additional things as wel
 > <strong>As of 1.4 the Auto Gym feature has been released as well which can be seen below the Auto Click button. Some notes about how this works would be as follows:</strong><br><br>
 • Auto Gym will only work while the Auto Clicker is active.<br>
 • Auto Gym when activated will automatically fight the current Gym in the town that you're at or automatically fight the Gym in the town that you've last visited (if it has a Gym).<br>
-• There is a dropdown to the right of the Auto Gym button which is meant for Elite Fours. The number that you set this to will be which Elite Four member that you will fight (or at least try to). So for example, if you set this to #5 then you will be fighting the Champion or at least that's what Auto Gym's priority will be. This means Auto Gym will also automatically fight through the Elite Four if you would be fighting an Elite Four for the first time as well.<br>
+• There is a dropdown to the right of the Auto Gym button which is meant for Elite Fours. The number that you set this to will be which Elite Four member that you will fight (or at least try to). So for example, if you set this to #5 then you will be fighting the Champion or at least that's what Auto Gym's priority will be. This means Auto Gym will also automatically fight through the Elite Four if you would be fighting an Elite Four for the first time as well.
+
+<br>
+
+> <strong>As of 1.5 the Auto Dungeon feature has been released as well which can be seen below the Auto Click button. Some notes about how this works would be as follows:</strong><br><br>
+• Auto Dungeon will only work while the Auto Clicker is active.<br>
+• Auto Dungeon when activated will automatically fight the current dungeon that you're at or will automatically fight the last dungeon that you've visited or dungeon in the town that you've last visited (if the town has a dungeon).<br>
+• There is a dropdown to the right of the Auto Dungeon button which would contain 2 modes:<br><br>
+<strong>"F" for Farm Mode</strong> - this will run through the dungeon in its entirety 100% and fight all the enemies as well as loot all the chests. The boss will be fought and always be saved for last.<br>
+<strong>"B" for Boss Rusher</strong> - this will try to clear the dungeon as fast as possible and rush the Boss. The Boss will always be the top priority.
+
+<br>
 
 ```diff
 - Note: the Auto Clicker runs every 0.05 seconds.
-- Note: everything else is checked and updated every 1 second while the Auto Clicker is active.
+- Note: statistics are checked and updated every 1 second while the Auto Clicker is active.
 ```
 
-I thought that these were some neat and useful additions to add. I hope that you guys would like them as well. I feel that it's a lot easier to see and gauge your efficiency on a route much easier and where the best place would be to go for you.
+I thought that these were some neat and useful additions to add. I hope that you guys would like them as well. I spent a lot of time on these especially with creating Auto Dungeon.
 
 <hr>
 
