@@ -3,9 +3,9 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.4
+// @version     1.5
 // @author      Ephenia (Original/Credit: Ivan Lay)
-// @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler.
+// @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes.
 // ==/UserScript==
 
 var clickState;
@@ -21,6 +21,12 @@ var colorDPS;
 var gymState;
 var gymColor;
 var gymSelect;
+var dungeonState;
+var dungeonColor;
+var dungeonSelect;
+var foundBoss;
+var foundBossX;
+var foundBossY;
 var trainerCards = document.querySelectorAll('.trainer-card');
 var battleView = document.getElementsByClassName('battle-view')[0];
 
@@ -37,9 +43,14 @@ function initAutoClicker() {
     } else {
         gymColor = "success"
     }
+    if (dungeonState == "OFF") {
+        dungeonColor = "danger"
+    } else {
+        dungeonColor = "success"
+    }
 
-    var elemAC = document.createElement("table")
-    elemAC.innerHTML = `<tbody><tr><td colspan="3">
+    var elemAC = document.createElement("table");
+    elemAC.innerHTML = `<tbody><tr><td colspan="4">
     <button id="auto-click-start" class="btn btn-`+clickColor+` btn-block" style="font-size:8pt;">
     Auto Click [`+clickState+`]<br>
     <div id="auto-click-info">
@@ -49,7 +60,17 @@ function initAutoClicker() {
     </div>
     </button></td></tr>
     <tr>
-    <td style="width: 100%;">
+    <td style="width: 42%;">
+    <button id="auto-dungeon-start" class="btn btn-block btn-`+dungeonColor+`" style="font-size: 8pt;">
+    Auto Dungeon [`+dungeonState+`]</button>
+    </td>
+    <td>
+  <select id="dungeon-select">
+    <option value="0">F</option>
+    <option value="1">B</option>
+  </select>
+    </td>
+    <td style="width: 40%;">
     <button id="auto-gym-start" class="btn btn-block btn-`+gymColor+`" style="font-size: 8pt;">
     Auto Gym [`+gymState+`]
     </button>
@@ -67,12 +88,16 @@ function initAutoClicker() {
     </tbody>`
     battleView.before(elemAC)
     document.getElementById('gym-select').value = gymSelect;
+    document.getElementById('dungeon-select').value = dungeonSelect;
 
     $("#auto-click-start").click (toggleAutoClick)
     $("#auto-gym-start").click (toggleAutoGym)
     $("#gym-select").change (changeSelectedGym)
+    $("#auto-dungeon-start").click (toggleAutoDungeon)
+    $("#dungeon-select").change (changeSelectedDungeon)
     addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
     addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
+    addGlobalStyle('#dungeonMap { padding-bottom: 9.513%; }');
 
     if (clickState == "ON") {
         autoClicker();
@@ -121,9 +146,36 @@ function toggleAutoGym() {
     document.getElementById('auto-gym-start').innerHTML = `Auto Gym [`+gymState+`]`
 }
 
+function toggleAutoDungeon() {
+    if (dungeonState == "OFF") {
+        dungeonState = "ON"
+        document.getElementById("auto-dungeon-start").classList.remove('btn-danger');
+        document.getElementById("auto-dungeon-start").classList.add('btn-success');
+    } else {
+        dungeonState = "OFF"
+        document.getElementById("auto-dungeon-start").classList.remove('btn-success');
+        document.getElementById("auto-dungeon-start").classList.add('btn-danger');
+    }
+    localStorage.setItem("autoDungeonState", dungeonState);
+    document.getElementById('auto-dungeon-start').innerHTML = `Auto Dungeon [`+dungeonState+`]`
+}
+
 function changeSelectedGym() {
-    gymSelect = +document.getElementById('gym-select').value
-    localStorage.setItem("selectedGym", gymSelect);
+    if (gymSelect != +document.getElementById('gym-select').value) {
+        gymSelect = +document.getElementById('gym-select').value
+        localStorage.setItem("selectedGym", gymSelect);
+    }
+}
+
+function changeSelectedDungeon() {
+    if (dungeonSelect != +document.getElementById('dungeon-select').value) {
+        dungeonSelect = +document.getElementById('dungeon-select').value
+        localStorage.setItem("selectedDungeon", dungeonSelect);
+    }
+}
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
 }
 
 function calcClickDPS() {
@@ -207,6 +259,125 @@ function autoClicker() {
           }
       }
 
+      //Auto Dungeon checking
+      if ((dungeonState == "ON") && (DungeonRunner.fighting() == false && DungeonBattle.catching() == false) == true) {
+          if (player.town().hasOwnProperty("dungeon") == true && player.town().dungeon !== undefined) {
+              var getTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
+              var dungeonCost = player.town().dungeon.tokenCost;
+              if (MapHelper.calculateTownCssClass(player.town().name) != "currentLocation") {
+                  MapHelper.moveToTown(player.town().name)
+              }
+              if (player.region != player.town().region) {
+                  player.region = player.town().region
+              }
+              if (getTokens >= dungeonCost && App.game.gameState != GameConstants.GameState.dungeon) {
+                  DungeonRunner.initializeDungeon(player.town().dungeon)
+              }
+              if (App.game.gameState === GameConstants.GameState.dungeon) {
+
+                      var dungeonBoard = DungeonRunner.map.board();
+                      var invisTile = document.querySelectorAll('.tile-invisible').length;
+                      var visitTile = document.querySelectorAll('.tile-visited').length;
+                      var lockedTile = 0;
+                      for (var ii = 0; ii < dungeonBoard.length; ii++) {
+                          for (var iii = 0; iii < dungeonBoard[ii].length; iii++) {
+                              var tilePriority = "NO";
+                              if (dungeonBoard[ii][iii].isVisited == false && dungeonBoard[ii][iii].isVisible == true) {
+                                  if (dungeonSelect == 1 && foundBoss == "YES") {
+                                      DungeonRunner.map.moveToCoordinates(foundBossX, foundBossY)
+                                      if (DungeonRunner.map.currentTile().type() != GameConstants.DungeonTile.boss) {
+                                          DungeonRunner.map.moveToCoordinates(iii, ii)
+                                      }
+                                  } else {
+                                      DungeonRunner.map.moveToCoordinates(iii, ii)
+                                  }
+                                  tilePriority = "YES"
+                              }
+                              if (tilePriority == "NO" && dungeonBoard[ii][iii].isVisible == false) {
+                                  lockedTile++;
+                                  tilePriority = "YES"
+                              }
+                              if ((tilePriority == "NO") && (dungeonSelect == 0) && (lockedTile == 0) && (dungeonBoard[ii][iii].isVisible == true) && (dungeonBoard[ii][iii].hasPlayer == false) && (dungeonBoard[ii][iii].cssClass().includes("tile-empty") == false)) {
+                                  DungeonRunner.map.moveToCoordinates(iii, ii)
+                              }
+                              var getChests = document.querySelectorAll('.tile-chest').length;
+                              var getEnemy = document.querySelectorAll('.tile-enemy').length;
+                              if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest) {
+                                  DungeonRunner.openChest();
+                              }
+                              if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
+                                  if (dungeonSelect == 1) {
+                                      foundBoss = null;
+                                      DungeonRunner.startBossFight();
+                                  }
+                                  if ((dungeonSelect == 0) && (getChests == 0) && (getEnemy == 0)) {
+                                      foundBoss = null;
+                                      DungeonRunner.startBossFight();
+                                  }
+                              }
+                              if (dungeonSelect == 1 && dungeonBoard[ii][iii].cssClass().includes("tile-boss") == true) {
+                                  foundBoss = "YES"
+                                  foundBossX = iii
+                                  foundBossY = ii
+                              }
+                              if (lockedTile == invisTile && lockedTile != 0) {
+                                  var playerPos = DungeonRunner.map.playerPosition()
+                                  var moveOrder = ["left", "right", "up", "down"];
+                                  var leftRight = [-1, 1, 0, 0];
+                                  var upDown = [0, 0, -1, 1];
+                                  var posMoves = [];
+                                  var clearMoves = [];
+                                  var posIndex = [];
+                                  var clearIndex = [];
+                                  for (var move = 0; move < 4; move++) {
+                                      try {
+                                          if (dungeonBoard[playerPos.y + upDown[move]][playerPos.x + leftRight[move]].isVisible == false) {
+                                              if (DungeonRunner.map.board()[playerPos.x + leftRight[move]][playerPos.y + upDown[move]] != undefined) {
+                                                  posMoves.push(moveOrder[move])
+                                              }
+                                          } else {
+                                              posMoves.push("null")
+                                          }
+                                          if (dungeonBoard[playerPos.y + upDown[move]][playerPos.x + leftRight[move]].isVisible == true) {
+                                              if (DungeonRunner.map.board()[playerPos.x + leftRight[move]][playerPos.y + upDown[move]] != undefined) {
+                                                  clearMoves.push(moveOrder[move])
+                                              } else {
+                                                  clearMoves.push("null")
+                                              }
+                                          }
+                                      }
+                                      catch(err) {
+                                          posMoves.push("null")
+                                          clearMoves.push("null")
+                                      }
+                                  }
+                                  posMoves.forEach((Moves, Index) => {
+                                      if (Moves != "null") {
+                                          posIndex.push(Index)
+                                      }
+                                  });
+                                  clearMoves.forEach((Moves, Index) => {
+                                      if (Moves != "null") {
+                                          clearIndex.push(Index)
+                                      }
+                                  });
+                                  var selMove;
+                                  if (posIndex.length > 0) {
+                                      selMove = getRandomInt(posIndex.length);
+                                      selMove = posIndex[selMove];
+                                  } else {
+                                      selMove = getRandomInt(clearIndex.length);
+                                      selMove = clearIndex[selMove];
+                                  }
+                                  DungeonRunner.map.moveToCoordinates(playerPos.x + leftRight[selMove], playerPos.y + upDown[selMove])
+                              }
+                          }
+                      }
+
+              }
+          }
+      }
+
     // Click while in a gym battle
     if (App.game.gameState === GameConstants.GameState.gym) {
       GymBattle.clickAttack();
@@ -249,9 +420,17 @@ if (localStorage.getItem('autoGymState') == null) {
 if (localStorage.getItem('selectedGym') == null) {
     localStorage.setItem("selectedGym", 0);
 }
+if (localStorage.getItem('autoDungeonState') == null) {
+    localStorage.setItem("autoDungeonState", "OFF");
+}
+if (localStorage.getItem('selectedDungeon') == null) {
+    localStorage.setItem("selectedDungeon", 0);
+}
 clickState = localStorage.getItem('autoClickState');
 gymState = localStorage.getItem('autoGymState');
 gymSelect = +localStorage.getItem('selectedGym');
+dungeonState = localStorage.getItem('autoDungeonState');
+dungeonSelect = localStorage.getItem('selectedDungeon');
 
 for (var i = 0; i < trainerCards.length; i++) {
     trainerCards[i].addEventListener('click', checkAutoClick, false);
