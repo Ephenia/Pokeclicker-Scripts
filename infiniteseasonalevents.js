@@ -149,7 +149,7 @@ function toggleEvent() {
         localStorage.setItem('specialEvent'+getVal, 0)
         getEvents[getVal].end()
     }
-    console.log(getVal)
+    //console.log(getVal)
 }
 
 function addGlobalStyle(css) {
