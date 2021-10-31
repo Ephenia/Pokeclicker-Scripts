@@ -11,7 +11,8 @@ These are created and intended for the use of the browser extension known as [Ta
 2. [**Enhanced Auto Clicker** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-clicker-enhancedautoclickerjs)
 3. [**Enhanced Auto Hatchery** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-hatchery-enhancedautohatcheryjs)
 4. [**Enhanced Auto Mine** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-mine-enhancedautominejs)
-5. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
+5. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#infinite-seasonal-events-infiniteseasonaleventsjs)
+6. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
 
 ```diff
 - Note: all scripts here would be 100% compatible with one another!!!
@@ -133,6 +134,23 @@ As of 1.1 this also includes 2 more additional features into the Treasures tab o
 - Note: the Auto Miner runs once every 1 second.
 - Note: If you have this script active and haven't unlocked the Underground yet, you will need to refresh currently for this to work once you do unlock the Underground.
 ```
+
+<hr>
+
+## **Infinite Seasonal Events** ([infiniteseasonalevents.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/infiniteseasonalevents.js))
+This script adds in a new settings option to the top of the Start Menu:<br>
+
+![image](https://user-images.githubusercontent.com/26987203/139570136-78e45d86-97ce-4fec-aa31-3459fbf19e04.png)
+
+This will give you access to all of the seasonal events that there are in Pokeclicker:<br>
+
+![image](https://user-images.githubusercontent.com/26987203/139570151-70f47769-40b1-4ec4-aa15-9eac50f33b39.png)
+
+The events also show all the Pokemon that are brought along with them.
+
+You can click on them to start any event that you desire. Also, you are able to activate more than 1 event simultaneously. You are also able to turn them off and end them at any time that you would want to as well. These events will run basically without end, at least not ending at any time that you would really ever have to worry about.
+
+There may be some other cool or neat custom events added in with this as well.
 
 <hr>
 
