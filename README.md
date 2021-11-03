@@ -119,6 +119,8 @@ What this script adds is a new top row below the mining layer, as shown:<br>
 There's a lot to go over and explained with this Auto Miner, but I'll try my best to explain it all:
 
 <strong>• Auto Mine</strong> - This will turn the Auto Miner On/Off. The Auto Miner uses bombs to automatically mine.<br>
+> <strong>As of 1.2 there is now Auto Chisel implemented which will mine out layers when you've cleared out 50%> of the tiles in a layer. Later on, this will be something you will be able to change the threshold of and when it will occur.
+
 <strong>• Auto Small Restore</strong> - This will automatically use Small Restores as well as buy them while it's active (only when Auto Mine is running). It will also only ever buy them when you have 0 Small Restores and when they also cost 30,000 (base price). Knowing that, this would be best used if you are anywhere that you are 1 shotting Pokémon (so the price penalty in the Shop is constantly decreasing).<br>
 <strong>• 1st Input Field</strong> - Here you can enter a money value as to when Small Restores should stop Auto Buying. This will help you not drain your money and help manage it.<br>
 <strong>• 2nd Input Field</strong> - This is basically an Auto Skipper. You can enter a minimum value here as to how many items that you would like to look for in new layers. If there are fewer items in a layer than your desired input, then the layer will be skipped (if you have any skips available).
