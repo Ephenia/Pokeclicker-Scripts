@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      Ephenia
 // @description Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // ==/UserScript==
@@ -99,8 +99,10 @@ function initAutoMine() {
     }
 
     function doAutoMine() {
-        var getEnergy = App.game.underground.energy;
+        var getEnergy = Math.floor(App.game.underground.energy);
         var getMoney = App.game.wallet.currencies[GameConstants.Currency.money]();
+        var totalTiles = document.querySelectorAll('.mineSquare').length;
+        var minedTiles = document.querySelectorAll('.rock0').length;
         var buriedItems = Mine.itemsBuried();
         var skipsRemain = Mine.skipsRemaining();
         var getRestores = player.itemList["SmallRestore"]();
@@ -111,12 +113,59 @@ function initAutoMine() {
                 if ((getCost == 30000) && (+getRestores == 0) && (getMoney >= setThreshold + 30000)) {
                     ItemList["SmallRestore"].buy(1);
                 }
-            }
-            if (getEnergy < 10) {
-                ItemList["SmallRestore"].use();
+                if (getEnergy < 10) {
+                    ItemList["SmallRestore"].use();
+                }
             }
             if (getEnergy >= 10) {
-                Mine.bomb();
+                var minedPercent = ((minedTiles / totalTiles) * 100);
+                if (minedPercent >= 50) {
+                    var toughLayer = document.querySelectorAll('.rock5');
+                    var strongLayer = document.querySelectorAll('.rock3, .rock4');
+                    var weakLayer = document.querySelectorAll('.rock1, .rock2');
+
+                    if (Mine.toolSelected() != 0) {
+                        Mine.toolSelected(Mine.Tool.Chisel);
+                    }
+                    if ((toughLayer.length+strongLayer.length+weakLayer.length) != 0) {
+                        if (toughLayer.length != 0) {
+                            for (var i = 0; i < toughLayer.length; i++) {
+                                if (iii > toughLayer.length || i == 10) {
+                                    iii = toughLayer.length + 1;
+                                } else {
+                                    var ti = toughLayer[i].getAttribute('data-i')
+                                    var tj = toughLayer[i].getAttribute('data-j')
+                                    Mine.click(+ti, +tj);
+                                }
+                            }
+                        }
+                        if ((strongLayer.length != 0) && (toughLayer.length == 0) && (getEnergy >= 10)) {
+                            for (var ii = 0; ii < strongLayer.length; ii++) {
+                                if (ii > strongLayer.length || ii == 10) {
+                                    ii = strongLayer.length + 1;
+                                } else {
+                                    var si = strongLayer[ii].getAttribute('data-i')
+                                    var sj = strongLayer[ii].getAttribute('data-j')
+                                    Mine.click(+si, +sj);
+                                }
+                            }
+                        }
+                        if (weakLayer.length == (totalTiles - minedTiles) && (getEnergy >= 10)) {
+                            for (var iii = 0; iii < weakLayer.length; iii++) {
+                                if (iii > weakLayer.length || iii == 10) {
+                                    iii = weakLayer.length + 1;
+                                } else {
+                                    var wi = weakLayer[iii].getAttribute('data-i')
+                                    var wj = weakLayer[iii].getAttribute('data-j')
+                                    Mine.click(+wi, +wj);
+                                }
+                            }
+                        }
+                    }
+                    //console.log(toughLayer.length+" tough tiles, "+strongLayer.length+ " strong tiles & "+weakLayer.length+" weak tiles remain!")
+                } else {
+                    Mine.bomb();
+                }
             }
         } else {
             if (resetInProgress == "NO") {
@@ -165,7 +214,6 @@ function initAutoMine() {
             layersMined = localStorage.getItem('undergroundLayersMined');
         }
     }
-
 
     document.querySelector('#small-restore').addEventListener('input', event => {
         setThreshold = +event.target.value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
