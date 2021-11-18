@@ -6,13 +6,18 @@ These are created and intended for the use of the browser extension known as [Ta
 
 **If you are looking to have something specific created or have any inquiries, feel free to contact me (contact info on profile). More scripts and things that I create will be added in due time.**
 
-# Table of Contents
+**Vanilla scripts** are purely for automation or other QoL things.<br>
+**Custom scripts** are able to do or change things that aren't within the bounds of the vanilla game.
+
+# Vanilla Scripts
 1. [**Additional Visual Settings** ](//github.com/Ephenia/Pokeclicker-Scripts#additional-visual-settings-additionalvisualsettingsjs)
 2. [**Enhanced Auto Clicker** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-clicker-enhancedautoclickerjs)
 3. [**Enhanced Auto Hatchery** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-hatchery-enhancedautohatcheryjs)
 4. [**Enhanced Auto Mine** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-mine-enhancedautominejs)
-5. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#infinite-seasonal-events-infiniteseasonaleventsjs)
-6. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
+5. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
+# Custom Scripts
+1. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#infinite-seasonal-events-infiniteseasonaleventsjs)
+
 
 ```diff
 - Note: all scripts here would be 100% compatible with one another!!!
@@ -139,7 +144,7 @@ As of 1.1 this also includes 2 more additional features into the Treasures tab o
 
 <hr>
 
-## **Infinite Seasonal Events** ([infiniteseasonalevents.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/infiniteseasonalevents.js))
+## **[Custom] Infinite Seasonal Events** ([infiniteseasonalevents.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/infiniteseasonalevents.js))
 This script adds in a new settings option to the top of the Start Menu:<br>
 
 ![image](https://user-images.githubusercontent.com/26987203/139570136-78e45d86-97ce-4fec-aa31-3459fbf19e04.png)
