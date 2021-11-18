@@ -16,7 +16,7 @@ These are created and intended for the use of the browser extension known as [Ta
 4. [**Enhanced Auto Mine** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-mine-enhancedautominejs)
 5. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
 # Custom Scripts
-1. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#infinite-seasonal-events-infiniteseasonaleventsjs)
+1. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
 
 
 ```diff
