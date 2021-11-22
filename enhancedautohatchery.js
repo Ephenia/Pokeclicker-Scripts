@@ -3,7 +3,7 @@
 // @namespace    Pokeclicker Scripts
 // @match        https://www.pokeclicker.com/
 // @grant        none
-// @version      1.1
+// @version      1.2
 // @author       Ephenia (Original/Credit: Drak + Ivan Lay)
 // @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // ==/UserScript==
@@ -40,6 +40,7 @@ function initAutoHatch() {
 
     $("#auto-hatch-start").click (toggleAutoHatch)
     $("#auto-egg-fossil").click (toggleEggFossil)
+    document.getElementById('breedingModal').querySelector('button[aria-controls="breeding-sort"]').setAttribute("style", "display:none");
 
     if (hatchState == "ON") {
         autoHatcher();
@@ -80,6 +81,18 @@ function toggleEggFossil() {
 
 function autoHatcher() {
     autoHatchLoop = setInterval(function () {
+        //change daycare sorting
+        var pS = Settings.getSetting('partySort');
+        var hS = Settings.getSetting('hatcherySort');
+        if (pS.observableValue() != hS.observableValue()) {
+            hS.observableValue(pS.observableValue())
+        }
+        var pSD = Settings.getSetting('partySortDirection');
+        var hSD = Settings.getSetting('hatcherySortDirection');
+        if (pSD.observableValue() != hSD.observableValue()) {
+            hSD.observableValue(pSD.observableValue())
+        }
+
         // Attempt to hatch each egg. If the egg is at 100% it will succeed
         [0, 1, 2, 3].forEach((index) => App.game.breeding.hatchPokemonEgg(index));
 
@@ -164,42 +177,75 @@ function autoHatcher() {
                 }
             }
 
-
             // Filter the sorted list of Pokemon based on the parameters set in the Hatchery screen
-            try {
-                PartyController.getHatcherySortedList()[0].name;
-            } catch (err) {
-                var filterOpts = document.getElementById('breedingModal').querySelectorAll('select');
-                filterOpts[2].setAttribute("style", "background-color: #f04124;");
-                filterOpts[3].setAttribute("style", "background-color: #f04124;");
-                filterOpts[4].setAttribute("style", "background-color: #f04124;");
-                filterOpts[5].setAttribute("style", "background-color: #f04124;");
-                BreedingController.openBreedingModal();
-                addGlobalStyle('#breedingModal { display: none !important; }');
-                setTimeout(function(){
-                    $('#breedingModal').modal('hide');
-                    document.querySelector('head').querySelectorAll('style:last-child')[0].remove();
-                }, 1000);
-            }
-            var filteredEggList = PartyController.getHatcherySortedList();
-            var fp;
-            for (var fe = 0; fe < filteredEggList.length; fe++) {
-                if (filteredEggList[fe]._level() != 100) {
-                    //console.log(filteredEggList[fe].name)
-                    //console.log(filteredEggList[fe]._level())
-                } else if (filteredEggList[fe]._breeding() == true) {
-                    //console.log(filteredEggList[fe].name)
-                    //console.log(filteredEggList[fe]._level())
-                }
-                else {
-                    fp = fe;
-                }
-                if (fp == fe) {
-                    //console.log("adding"+filteredEggList[fp].name)
-                    App.game.breeding.addPokemonToHatchery(filteredEggList[fp]);
+            let filteredEggList = PartyController.getSortedList().filter(
+                (partyPokemon) => {
+                    // Only breedable Pokemon
+                    if (partyPokemon.breeding || partyPokemon.level < 100) {
+                        return false;
+                    }
+                    // Check based on category
+                    if (BreedingController.filter.category() >= 0) {
+                        if (
+                            partyPokemon.category !== BreedingController.filter.category()
+                        ) {
+                            return false;
+                        }
+                    }
+                    // Check based on shiny status
+                    if (BreedingController.filter.shinyStatus() >= 0) {
+                        if (
+                            +partyPokemon.shiny !== BreedingController.filter.shinyStatus()
+                        ) {
+                            return false;
+                        }
+                    }
+                    // Check based on native region
+                    if (BreedingController.filter.region() > -2) {
+                        if (
+                            PokemonHelper.calcNativeRegion(partyPokemon.name) !==
+                            BreedingController.filter.region()
+                        ) {
+                            return false;
+                        }
+                    }
+                    // Check if either of the types match
+                    const type1 =
+                          BreedingController.filter.type1() > -2
+                    ? BreedingController.filter.type1()
+                    : null;
+                    const type2 =
+                          BreedingController.filter.type2() > -2
+                    ? BreedingController.filter.type2()
+                    : null;
+                    if (type1 !== null || type2 !== null) {
+                        const { type: types } = pokemonMap[partyPokemon.name];
+                        if ([type1, type2].includes(PokemonType.None)) {
+                            const type = type1 == PokemonType.None ? type2 : type1;
+                            if (!BreedingController.isPureType(partyPokemon, type)) {
+                                return false;
+                            }
+                        } else if (
+                            (type1 !== null && !types.includes(type1)) ||
+                            (type2 !== null && !types.includes(type2))
+                        ) {
+                            return false;
+                        }
+                    }
                     return true;
                 }
+            );
+
+            try {
+                //console.log(filteredEggList[0])
+                App.game.breeding.addPokemonToHatchery(filteredEggList[0]);
+            } catch (err) {
+                var canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
+                var randBreed = getRandomInt(canBreed.length);
+                //console.log(canBreed[randBreed])
+                App.game.breeding.addPokemonToHatchery(canBreed[randBreed]);
             }
+            //console.log("Added " + filteredEggList[0].name + " to the Hatchery!");
         }
     }, 50); // Runs every game tick
 }
@@ -235,12 +281,6 @@ function checkAutoHatch() {
     }, 1000);
 }
 
-function addGlobalStyle(css) {
-    var head, style;
-    head = document.getElementsByTagName('head')[0];
-    if (!head) { return; }
-    style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = css;
-    head.appendChild(style);
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
 }
