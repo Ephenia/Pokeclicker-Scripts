@@ -3,7 +3,7 @@
 // @namespace    Pokeclicker Scripts
 // @match        https://www.pokeclicker.com/
 // @grant        none
-// @version      1.2
+// @version      1.3
 // @author       Ephenia (Original/Credit: Drak + Ivan Lay)
 // @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // ==/UserScript==
@@ -15,6 +15,8 @@ var autoHatchLoop;
 var randFossilEgg;
 var eggFossilState;
 var eggFossilColor;
+var hatcherySortVal;
+var hatcherySortDir;
 var trainerCards = document.querySelectorAll('.trainer-card');
 var breedingDisplay = document.getElementById('breedingDisplay');
 
@@ -40,7 +42,7 @@ function initAutoHatch() {
 
     $("#auto-hatch-start").click (toggleAutoHatch)
     $("#auto-egg-fossil").click (toggleEggFossil)
-    document.getElementById('breedingModal').querySelector('button[aria-controls="breeding-sort"]').setAttribute("style", "display:none");
+    //document.getElementById('breedingModal').querySelector('button[aria-controls="breeding-sort"]').setAttribute("style", "display:none");
 
     if (hatchState == "ON") {
         autoHatcher();
@@ -84,13 +86,28 @@ function autoHatcher() {
         //change daycare sorting
         var pS = Settings.getSetting('partySort');
         var hS = Settings.getSetting('hatcherySort');
-        if (pS.observableValue() != hS.observableValue()) {
+        if (pS.observableValue() != hatcherySortVal) {
             hS.observableValue(pS.observableValue())
+            hatcherySortVal = pS.observableValue()
+            localStorage.setItem("hatcherySortVal", hatcherySortVal);
         }
+        if (hS.observableValue() != hatcherySortVal) {
+            hatcherySortVal = hS.observableValue()
+            pS.observableValue(hS.observableValue())
+            localStorage.setItem("hatcherySortVal", hatcherySortVal);
+        }
+
         var pSD = Settings.getSetting('partySortDirection');
         var hSD = Settings.getSetting('hatcherySortDirection');
-        if (pSD.observableValue() != hSD.observableValue()) {
+        if (pSD.observableValue() != hatcherySortDir) {
+            hatcherySortDir = pSD.observableValue()
             hSD.observableValue(pSD.observableValue())
+            localStorage.setItem("hatcherySortDir", hatcherySortDir);
+        }
+        if (hSD.observableValue() != hatcherySortDir) {
+            hatcherySortDir = hSD.observableValue()
+            pSD.observableValue(hSD.observableValue())
+            localStorage.setItem("hatcherySortDir", hatcherySortDir);
         }
 
         // Attempt to hatch each egg. If the egg is at 100% it will succeed
@@ -256,8 +273,16 @@ if (localStorage.getItem('autoHatchState') == null) {
 if (localStorage.getItem('autoEggFossil') == null) {
     localStorage.setItem("autoEggFossil", "OFF");
 }
+if (localStorage.getItem('hatcherySortVal') == null) {
+    localStorage.setItem("hatcherySortVal", 0);
+}
+if (localStorage.getItem('hatcherySortDir') == null) {
+    localStorage.setItem("hatcherySortDir", true);
+}
 hatchState = localStorage.getItem('autoHatchState');
 eggFossilState = localStorage.getItem('autoEggFossil');
+hatcherySortVal = +localStorage.getItem('hatcherySortVal');
+hatcherySortDir = +localStorage.getItem('hatcherySortDir');
 
 for (var i = 0; i < trainerCards.length; i++) {
     trainerCards[i].addEventListener('click', checkAutoHatch, false);
