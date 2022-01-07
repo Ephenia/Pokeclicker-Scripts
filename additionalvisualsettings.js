@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.3
+// @version     1.4
 // @author      Ephenia
 // @description Adds additional settings for hiding some visual things to help out with performance.
 // ==/UserScript==
@@ -14,21 +14,24 @@ var checkWildPokeImg;
 var checkWildPokeHealth;
 var checkAllNotification;
 var awaitVisualSettings;
+var newSave = document.querySelectorAll('label')[0];
 var trainerCards = document.querySelectorAll('.trainer-card');
 
 for (var i = 0; i < trainerCards.length; i++) {
     trainerCards[i].addEventListener('click', checkVisualSettings, false);
 }
+newSave.addEventListener('click', checkVisualSettings, false);
 
 function checkVisualSettings() {
     awaitVisualSettings = setInterval(function () {
-        var gameState = App.game.gameState;
-        if (typeof gameState === 'undefined') {
-            console.log("Visual Settings aren't available yet.");
-        } else {
+        var gameState;
+        try {
+            gameState = App.game.gameState;
+        } catch(err) {}
+        if (typeof gameState != 'undefined') {
             initVisualSettings();
             clearInterval(awaitVisualSettings)
-            console.log("Visual settings should be applied.")
+            //console.log("Visual settings should be applied.")
         }
     }, 1000);
 }
@@ -37,7 +40,7 @@ function initVisualSettings() {
     var getMenu = document.getElementById('startMenu');
     var quickSettings = document.createElement("img");
     quickSettings.id = "quick-settings"
-    quickSettings.src = "//cdn-icons-png.flaticon.com/512/2099/2099058.png"
+    quickSettings.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAQAAABLCVATAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAHdElNRQfmAQcLFCMs4grwAAACzUlEQVRIx63WvWtbVxgG8J+Vkjgp9hKDwbTBcQoOBIINQUsnDe1gGy8h1VDswUMG4+4hYNwhpv4LumQ2d+gWSqnUwdZQUKFZDIUa4RqiYNyPLMEoUezodNDV7ZUsq1Xq507nvM957/t5zksvTCuqC4K6omnviFElQc0LL9QEJaPvpigvqJhz221zKoL82eT3Omz41Id2/eAlruNn34Idn/vIdTDsE5OeK/i9u9JbtgXBiUjOI3uCTQNgwKZgz7qcyIkg2Haru5qyoCJyKDgSNOxbSuRL9jViyaFIRfDTaVWjtgU7sphXVVewaFwmYWSMW1BQVzWPrB3BdmcCFgQV2XiVNWOoq/tDZlKsimChnfBQEPWd10jwsGVwE7veypnvQs644krKxX8wL+etX9s3h0WCamJ2ExNWREpKIl+40SbLqgoiw536c47UzSTrQcsqQuqrWDaYyGfVHcmdNnRdUEhCPGjDsaBs1T33rCoLjm0kqoYUBOvtqc97YE8jlYFlx2rWjCQ7V62pObac7Cxq2PNAvlkC00qx6fvGY8oNFcFaR4gz1gQVE/F63H58smSaYlzPm5aSgyuCsqun3B9RFqwkipdsxjVepK5mjrinmoRIsNq1clYFUcrSAcypqWdc9MozhFS+xuisjxi7GEvlLuCZVy5mnBMy3rjsWptrrx3gZlf+JA68bnPtmsve9Ar2yCk1PYM91SX9E32nf4p0QS4mh5oF+WXKqpF/K8gWerXIZ6kWuRQzmi3y6HQYO5v2Un9N23pFht33vuf+Soh1X/vejI+N4cCPvvNb6sd/+sMH7nvqZdqeu04c9n2xHTpxt0Vr1ccFW550oTfU1DS6SJ7YcsFku6Iq7qSu9dkzL//ZFOtOfDKFc3uOzu2BbKr6H092eoj4RT41RGw58pVMfL0EGTy2gae+cVNV8awhohN9jTW9cG6DFlP/ffT7G1t3ayJm6d3nAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIyLTAxLTA3VDExOjIwOjI2KzAwOjAwMddkKgAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMi0wMS0wN1QxMToyMDoyNiswMDowMECK3JYAAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAAAAElFTkSuQmCC"
     quickSettings.setAttribute("href", "#settingsModal")
     quickSettings.setAttribute("data-toggle", "modal")
     getMenu.prepend(quickSettings)
