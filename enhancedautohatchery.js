@@ -3,7 +3,7 @@
 // @namespace    Pokeclicker Scripts
 // @match        https://www.pokeclicker.com/
 // @grant        none
-// @version      1.3
+// @version      1.4
 // @author       Ephenia (Original/Credit: Drak + Ivan Lay)
 // @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // ==/UserScript==
@@ -17,6 +17,7 @@ var eggFossilState;
 var eggFossilColor;
 var hatcherySortVal;
 var hatcherySortDir;
+var newSave = document.querySelectorAll('label')[0];
 var trainerCards = document.querySelectorAll('.trainer-card');
 var breedingDisplay = document.getElementById('breedingDisplay');
 
@@ -153,9 +154,15 @@ function autoHatcher() {
                     if (valueType == "Mine Egg" && itemAmount > 0) {
                         var fossilName = player.mineInventory()[i].name;
                         var fossilID = player.mineInventory()[i].id;
-                        storedFossilName.push(fossilName)
-                        storedFossilID.push(fossilID)
-                        //console.log(player.mineInventory()[i].name)
+                        var fossilePoke = GameConstants.FossilToPokemon[fossilName];
+                        var pokeRegion = PokemonHelper.calcNativeRegion(fossilePoke)
+                        if (pokeRegion <= player.highestRegion()) {
+                            storedFossilName.push(fossilName)
+                            storedFossilID.push(fossilID)
+                            //console.log(player.mineInventory()[i].name)
+                        } else {
+                            //console.log(fossilePoke+" of region "+pokeRegion+ " will be ignored.")
+                        }
                     }
                 }
                 //console.log(storedFossilID)
@@ -287,20 +294,20 @@ hatcherySortDir = +localStorage.getItem('hatcherySortDir');
 for (var i = 0; i < trainerCards.length; i++) {
     trainerCards[i].addEventListener('click', checkAutoHatch, false);
 }
+newSave.addEventListener('click', checkAutoHatch, false);
 
 function checkAutoHatch() {
     awaitAutoHatch = setInterval(function () {
-        var breedingAccess = App.game.breeding.canAccess();
-        if (typeof breedingAccess === 'undefined') {
-            console.log("Auto hatchery isn't available yet.");
-        } else {
-            clearInterval(awaitAutoHatch)
+        var breedingAccess;
+        try {
+            breedingAccess = App.game.breeding.canAccess();
+        } catch(err) {}
+        if (typeof breedingAccess != 'undefined') {
             if (breedingAccess == true) {
                 initAutoHatch();
                 clearInterval(awaitAutoHatch)
-            }
-            if (breedingAccess == false) {
-                clearInterval(awaitAutoHatch)
+            } else {
+                //console.log("Checking for access...")
             }
         }
     }, 1000);
