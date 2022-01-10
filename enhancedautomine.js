@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      Ephenia
 // @description Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // ==/UserScript==
@@ -23,6 +23,7 @@ var sellTreasureState;
 var sellTreasureColor;
 var sellPlateState;
 var sellPlateColor;
+var newSave = document.querySelectorAll('label')[0];
 var trainerCards = document.querySelectorAll('.trainer-card');
 
 function initAutoMine() {
@@ -311,6 +312,7 @@ sellPlateState = localStorage.getItem('autoSellPlate');
 for (var i = 0; i < trainerCards.length; i++) {
     trainerCards[i].addEventListener('click', checkAutoMine, false);
 }
+newSave.addEventListener('click', checkAutoMine, false);
 
 function checkAutoMine() {
     awaitAutoMine = setInterval(function () {
