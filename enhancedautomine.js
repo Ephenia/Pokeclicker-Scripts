@@ -314,17 +314,16 @@ for (var i = 0; i < trainerCards.length; i++) {
 
 function checkAutoMine() {
     awaitAutoMine = setInterval(function () {
-        var undergroundAccess = App.game.underground.canAccess();
-        if (typeof undergroundAccess === 'undefined') {
-            console.log("Farm access isn't determined yet.");
-        } else {
+        var undergroundAccess;
+        try {
+            undergroundAccess = App.game.underground.canAccess();
+        } catch(err) {}
+        if (typeof undergroundAccess != 'undefined') {
             if (undergroundAccess == true) {
-                ShopHandler.showShop(pokeMartShop);
                 initAutoMine();
                 clearInterval(awaitAutoMine)
-            }
-            if (undergroundAccess == false) {
-                clearInterval(awaitAutoMine)
+            } else {
+                //console.log("Checking for access...")
             }
         }
     }, 1000);
