@@ -2,9 +2,11 @@
 
 Various scripts & enhancements for the game [Pokéclicker](https://www.pokeclicker.com/).
 
-These are created and intended for the use of the browser extension known as [Tampermonkey](https://www.tampermonkey.net/).
+These are originally created and intended for the use of the browser extension known as [Tampermonkey](https://www.tampermonkey.net/).
 
-**If you are looking to have something specific created or have any inquiries, feel free to contact me (contact info on profile). More scripts and things that I create will be added in due time.**
+If you are looking to use these scripts on the client version of Pokeclicker (Pokeclicker Desktop), [please check out the Releases section](https://github.com/Ephenia/Pokeclicker-Scripts/releases).
+
+**If you are looking to have something specific created or have any inquiries, feel free to contact me directly (contact info on profile) OR [open and create an issue](https://github.com/Ephenia/Pokeclicker-Scripts/issues). More scripts and things that I create will be added in due time.**
 
 **Vanilla scripts** are purely for automation or other QoL things.<br>
 **Custom scripts** are able to do or change things that aren't within the bounds of the vanilla game.
@@ -16,7 +18,8 @@ These are created and intended for the use of the browser extension known as [Ta
 4. [**Enhanced Auto Mine** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-mine-enhancedautominejs)
 5. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
 # Custom Scripts
-1. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
+1. [**Catch Speed Adjuster** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-catch-speed-adjuster-catchspeedadjusterjs)
+2. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
 
 
 ```diff
@@ -139,11 +142,34 @@ As of 1.1 this also includes 2 more additional features into the Treasures tab o
 
 ```diff
 - Note: the Auto Miner runs once every 1 second.
-- Note: If you have this script active and haven't unlocked the Underground yet, you will need to refresh currently for this to work once you do unlock the Underground.
 ```
 
 <hr>
+  
+## **Simple Auto Farmer** ([sinpleautofarmer.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.js))
+This script is for a simplistic Auto Farmer which adds 2 new buttons below the Plant and Harvest all buttons as shown:<br>
 
+![](https://i.imgur.com/9Y4ad5B.png)
+
+Auto Farm will plant the berry that you have selected and will harvest all of them as well when they are ready. Auto mulch works in conjunction with Auto Farm, so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the mulch that you have selected as well. This will also work with the Farm window closed, and these settings will persist upon refresh/browser close.
+
+```diff
+- Note: the Auto Farmer runs once every 1 second.
+```
+
+I plan to update this Auto Farmer with some additional features later on.
+
+<hr>
+
+## **[Custom] Catch Speed Adjuster** ([catchspeedadjuster.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/catchspeedadjuster.js))
+This script adds in a new option found below your Pokéballs:<br>
+
+![image](https://i.imgur.com/C6aVzND.png)
+
+This currently will make all of your Pokéballs catch Pokemon at 0 delay (basically catch Pokémon as fast as you can defeat them).
+
+<hr>
+  
 ## **[Custom] Infinite Seasonal Events** ([infiniteseasonalevents.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/infiniteseasonalevents.js))
 This script adds in a new settings option to the top of the Start Menu:<br>
 
@@ -158,22 +184,6 @@ The events also show all the Pokemon that are brought along with them.
 You can click on them to start any event that you desire. Also, you are able to activate more than 1 event simultaneously. You are also able to turn them off and end them at any time that you would want to as well. These events will run basically without end, at least not ending at any time that you would really ever have to worry about.
 
 There may be some other cool or neat custom events added in with this as well.
-
-<hr>
-
-## **Simple Auto Farmer** ([sinpleautofarmer.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.js))
-This script is for a simplistic Auto Farmer which adds 2 new buttons below the Plant and Harvest all buttons as shown:<br>
-
-![](https://i.imgur.com/9Y4ad5B.png)
-
-Auto Farm will plant the berry that you have selected and will harvest all of them as well when they are ready. Auto mulch works in conjunction with Auto Farm, so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the mulch that you have selected as well. This will also work with the Farm window closed, and these settings will persist upon refresh/browser close.
-
-```diff
-- Note: the Auto Farmer runs once every 1 second.
-- Note: If you have this script active and haven't unlocked Farm yet, you will need to refresh currently for this to work once you do unlock Farm.
-```
-
-I plan to update this Auto Farmer with some additional features later on.
 
 <hr>
 
