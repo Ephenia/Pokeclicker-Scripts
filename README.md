@@ -110,7 +110,6 @@ When you open up the Daycare, you will see another button for automatically plac
 
 ```diff
 - Note: the Auto Hatchery runs every 0.05 seconds.
-- Note: If you have this script active and haven't unlocked Hatchery yet, you will need to refresh currently for this to work once you do unlock the Hatchery.
 ```
 
 <hr>
