@@ -3,13 +3,13 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Ephenia (Original/Credit: G1)
 // @description Lets you generate infinite amounts of Discord codes for Pokémon that are exclusive and locked behind Pokeclicker's Discord bot & activities. No linking of a Discord account required + fully works offline.
 // ==/UserScript==
 
 var resCodes;
-var validPoke = ["Unown (D)", "Unown (I)", "Unown (S)", "Unown (C)", "Unown (O)", "Unown (R)", "Surfing Pikachu"];
+var validPoke = [];
 var newSave = document.querySelectorAll('label')[0];
 var trainerCards = document.querySelectorAll('.trainer-card');
 
@@ -17,7 +17,6 @@ function initCodeGen() {
     genCodes();
     var saveTab = document.getElementById('saveTab');
     var fragment = new DocumentFragment();
-
     for (let i = 0; i < validPoke.length; i++) {
         var codeHTML = document.createElement("div");
         codeHTML.innerHTML = `<button id="disc-${i}" class="btn btn-primary btn-block" onclick="submitCode(this.id)">${validPoke[i] + ` - ` + resCodes[i]}</button>`
@@ -26,7 +25,6 @@ function initCodeGen() {
         }
         fragment.appendChild(codeHTML)
     }
-
     saveTab.prepend(fragment)
 }
 
@@ -49,12 +47,9 @@ function genCodes() {
     App.game.discord.codes.forEach(e => e.claimed = false);
     var discordID = randInt();
     App.game.discord.ID(discordID);
-
     for (codeString of validPoke) {
         let codeSeed = codeString.split('').reverse().map(l => l.charCodeAt(0)).reduce((s, b) => s * (b / 10), 1);
-
         SeededRand.seed(discordID + codeSeed);
-
         const arr = [];
         for (let i = 0; i < 14; i++) {
             let int;
@@ -82,10 +77,13 @@ newSave.addEventListener('click', checkCodeGen, false);
 function checkCodeGen() {
     awaitCodeGen = setInterval(function () {
         var gameState;
+        var discState;
         try {
             gameState = App.game.gameState;
+            discState = App.game.discord;
         } catch (err) { }
-        if (typeof gameState != 'undefined') {
+        if (typeof gameState != 'undefined' && typeof discState != 'undefined') {
+            App.game.discord.codes.forEach(e => validPoke.push(e.name));
             initCodeGen();
             clearInterval(awaitCodeGen)
         }
