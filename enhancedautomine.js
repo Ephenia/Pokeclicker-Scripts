@@ -118,55 +118,37 @@ function initAutoMine() {
                     ItemList["SmallRestore"].use();
                 }
             }
-            if (getEnergy >= 10) {
-                var minedPercent = ((minedTiles / totalTiles) * 100);
-                if (minedPercent >= 50) {
-                    var toughLayer = document.querySelectorAll('.rock5');
-                    var strongLayer = document.querySelectorAll('.rock3, .rock4');
-                    var weakLayer = document.querySelectorAll('.rock1, .rock2');
-
-                    if (Mine.toolSelected() != 0) {
-                        Mine.toolSelected(Mine.Tool.Chisel);
-                    }
-                    if ((toughLayer.length+strongLayer.length+weakLayer.length) != 0) {
-                        if (toughLayer.length != 0) {
-                            for (var i = 0; i < toughLayer.length; i++) {
-                                if (iii > toughLayer.length || i == 10) {
-                                    iii = toughLayer.length + 1;
-                                } else {
-                                    var ti = toughLayer[i].getAttribute('data-i')
-                                    var tj = toughLayer[i].getAttribute('data-j')
-                                    Mine.click(+ti, +tj);
-                                }
-                            }
-                        }
-                        if ((strongLayer.length != 0) && (toughLayer.length == 0) && (getEnergy >= 10)) {
-                            for (var ii = 0; ii < strongLayer.length; ii++) {
-                                if (ii > strongLayer.length || ii == 10) {
-                                    ii = strongLayer.length + 1;
-                                } else {
-                                    var si = strongLayer[ii].getAttribute('data-i')
-                                    var sj = strongLayer[ii].getAttribute('data-j')
-                                    Mine.click(+si, +sj);
-                                }
-                            }
-                        }
-                        if (weakLayer.length == (totalTiles - minedTiles) && (getEnergy >= 10)) {
-                            for (var iii = 0; iii < weakLayer.length; iii++) {
-                                if (iii > weakLayer.length || iii == 10) {
-                                    iii = weakLayer.length + 1;
-                                } else {
-                                    var wi = weakLayer[iii].getAttribute('data-i')
-                                    var wj = weakLayer[iii].getAttribute('data-j')
-                                    Mine.click(+wi, +wj);
-                                }
-                            }
-                        }
-                    }
-                    //console.log(toughLayer.length+" tough tiles, "+strongLayer.length+ " strong tiles & "+weakLayer.length+" weak tiles remain!")
-                } else {
-                    Mine.bomb();
+            if (getEnergy >= 1) {
+                if (Mine.toolSelected() != 0) {
+                    Mine.toolSelected(Mine.Tool.Chisel);
                 }
+                var rewards = document.querySelectorAll('.mineReward');
+                for (var ii = 0; ii < rewards.length; ii++) {
+                    var reward = rewards[ii];
+                    var rewardParent = reward.parentNode;
+                    var ri = +reward.parentNode.getAttribute('data-i');
+                    var rj = +reward.parentNode.getAttribute('data-j');
+                    for(var i = -1; i <= 1; i++){
+                        for(var j = -1; j <= 1; j++){
+                            var ti = ri + i;
+                            var tj = rj + j;
+                            var checkTile = document.querySelector('.mineSquare[data-i="' + ti + '"][data-j="' + tj + '"]');
+                            if(checkTile && (
+                                checkTile.classList.contains('rock1') ||
+                                checkTile.classList.contains('rock2') ||
+                                checkTile.classList.contains('rock3') ||
+                                checkTile.classList.contains('rock4') ||
+                                checkTile.classList.contains('rock5')
+                            )){
+                               Mine.click(ti, tj);
+                               getEnergy -= 1;
+                            }
+                        }
+                    }
+                }
+            }
+            if (getEnergy >= 10) {
+                Mine.bomb();
             }
         } else {
             if (resetInProgress == "NO") {
