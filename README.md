@@ -13,19 +13,21 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 
 # Vanilla Scripts
 1. [**Additional Visual Settings** ](//github.com/Ephenia/Pokeclicker-Scripts#additional-visual-settings-additionalvisualsettingsjs)
-2. [**Enhanced Auto Clicker** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-clicker-enhancedautoclickerjs)
-3. [**Enhanced Auto Hatchery** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-hatchery-enhancedautohatcheryjs)
-4. [**Enhanced Auto Mine** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-mine-enhancedautominejs)
-5. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
+2. [**Auto Battle Frontier** ](//github.com/Ephenia/Pokeclicker-Scripts#auto-battle-frontier-autobattlefrontierjs)
+3. [**Enhanced Auto Clicker** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-clicker-enhancedautoclickerjs)
+4. [**Enhanced Auto Hatchery** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-hatchery-enhancedautohatcheryjs)
+5. [**Enhanced Auto Mine** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-mine-enhancedautominejs)
+6. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
 # Custom Scripts
 1. [**Catch Speed Adjuster** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-catch-speed-adjuster-catchspeedadjusterjs)
 2. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
 
 
 ```diff
-- Note: all scripts here would be 100% compatible with one another!!!
-- Note: feel free to open an issue if you find any bugs/issues as these aren't fully tested!!!
-- Note: in case it isn't mention below, all user set settings with these scripts are saved and persist even upon browser close.
+- Note: Please backup your saves before using any and all scripts that would be here!!!
+- Note: All scripts here would be 100% compatible with one another!!!
+- Note: Feel free to open an issue if you find any bugs/issues as these aren't fully tested!!!
+- Note: in case it isn't mention below, all user set settings with these scripts are saved and persist even upon game close!!!
 ```
 
 <hr>
@@ -46,6 +48,17 @@ The gear icon to the left of the Start Menu that you see there.
 ![](https://i.imgur.com/8H1ZeBV.png)
 
 As of 1.3 there is now an option for disabling all notifications, this may be good and helpful especially if you are using Enhanced Auto Mine. This may also cause some popups and other things not to appear (such as trying to manually Skip layers in the Underground). You can still also hear when you get shinies using this, but you won't be able to see what shiny you received. I have not fully tested this, so feel free to experiment with this setting.
+
+<hr>
+
+## **Auto Battle Frontier** ([autobattlefrontier.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/autobattlefrontier.js))
+This script adds in a stage resetter to the Battle Frontier:<br>
+
+![](https://i.imgur.com/Tl6ljbp.png)
+
+When you reach and complete the specified stage that you've set, you will earn the Battle Points and Money you would have earned if you have failed the stage, then your stage is reset back to one afterwards.
+
+This will effectively allow you to infinitely farm and stay inside the Battle Frontier while being fully AFK.
 
 <hr>
 
