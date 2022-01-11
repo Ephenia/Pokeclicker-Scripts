@@ -5,7 +5,7 @@
 // @grant       none
 // @version     1.0
 // @author      Ephenia
-// @description Adds in a floor resetting that allows you to set a target floor and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
+// @description Adds in stage resetting to the Battle Frontier that allows you to set a target stage and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
 // ==/UserScript==
 
 var awaitBattleFrontier;
