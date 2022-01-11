@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Ephenia
 // @description Adjusts catch speed of all Pokeballs. Currently only makes Pokeballs catch as fast as possible.
 // ==/UserScript==
@@ -12,6 +12,7 @@ var ballAdjuster;
 var getBalls;
 var awaitBallAdjust;
 var defaultTime = [];
+var newSave = document.querySelectorAll('label')[0];
 var trainerCards = document.querySelectorAll('.trainer-card');
 
 function initBallAdjust() {
@@ -59,13 +60,15 @@ ballAdjuster = localStorage.getItem('ballAdjuster');
 for (var i = 0; i < trainerCards.length; i++) {
     trainerCards[i].addEventListener('click', checkBallAdjust, false);
 }
+newSave.addEventListener('click', checkBallAdjust, false);
 
 function checkBallAdjust() {
     awaitBallAdjust = setInterval(function () {
-        var gameState = App.game.gameState;
-        if (typeof gameState === 'undefined') {
-            console.log("Ball adjust isn't ready yet.");
-        } else {
+        var gameState;
+        try {
+            gameState = App.game.gameState;
+        } catch(err) {}
+        if (typeof gameState != 'undefined') {
             initBallAdjust();
             clearInterval(awaitBallAdjust)
         }
