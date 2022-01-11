@@ -9,7 +9,7 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 **If you are looking to have something specific created or have any inquiries, feel free to contact me directly (contact info on profile) OR [open and create an issue](https://github.com/Ephenia/Pokeclicker-Scripts/issues). More scripts and things that I create will be added in due time.**
 
 **Vanilla scripts** are purely for automation or other QoL things.<br>
-**Custom scripts** are able to do or change things that aren't within the bounds of the vanilla game.
+**Custom scripts** are able to do or change things that aren't within the bounds of the vanilla game or they may be considered more cheatyy.
 
 # Vanilla Scripts
 1. [**Additional Visual Settings** ](//github.com/Ephenia/Pokeclicker-Scripts#additional-visual-settings-additionalvisualsettingsjs)
@@ -20,7 +20,8 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 6. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
 # Custom Scripts
 1. [**Catch Speed Adjuster** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-catch-speed-adjuster-catchspeedadjusterjs)
-2. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
+2. [**Discord Code Generator** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-discord-code-generator-discordcodegeneratorjs)
+3. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
 
 
 ```diff
@@ -138,12 +139,12 @@ What this script adds is a new top row below the mining layer, as shown:<br>
 
 There's a lot to go over and explained with this Auto Miner, but I'll try my best to explain it all:
 
-<strong>• Auto Mine</strong> - This will turn the Auto Miner On/Off. The Auto Miner uses bombs to automatically mine.<br>
-> <strong>As of 1.2 there is now Auto Chisel implemented which will mine out layers when you've cleared out 50%> of the tiles in a layer. Later on, this will be something you will be able to change the threshold of and when it will occur.
+**• Auto Mine** - This will turn the Auto Miner On/Off. The Auto Miner uses bombs to automatically mine.<br>
+> As of 1.2 there is now Auto Chisel implemented which will mine out layers when you've cleared out 50%> of the tiles in a layer. Later on, this will be something you will be able to change the threshold of and when it will occur.
 
-<strong>• Auto Small Restore</strong> - This will automatically use Small Restores as well as buy them while it's active (only when Auto Mine is running). It will also only ever buy them when you have 0 Small Restores and when they also cost 30,000 (base price). Knowing that, this would be best used if you are anywhere that you are 1 shotting Pokémon (so the price penalty in the Shop is constantly decreasing).<br>
-<strong>• 1st Input Field</strong> - Here you can enter a money value as to when Small Restores should stop Auto Buying. This will help you not drain your money and help manage it.<br>
-<strong>• 2nd Input Field</strong> - This is basically an Auto Skipper. You can enter a minimum value here as to how many items that you would like to look for in new layers. If there are fewer items in a layer than your desired input, then the layer will be skipped (if you have any skips available).
+**• Auto Small Restore** - This will automatically use Small Restores as well as buy them while it's active (only when Auto Mine is running). It will also only ever buy them when you have 0 Small Restores and when they also cost 30,000 (base price). Knowing that, this would be best used if you are anywhere that you are 1 shotting Pokémon (so the price penalty in the Shop is constantly decreasing).<br>
+**• 1st Input Field** - Here you can enter a money value as to when Small Restores should stop Auto Buying. This will help you not drain your money and help manage it.<br>
+**• 2nd Input Field** - This is basically an Auto Skipper. You can enter a minimum value here as to how many items that you would like to look for in new layers. If there are fewer items in a layer than your desired input, then the layer will be skipped (if you have any skips available).
 
 As of 1.1 this also includes 2 more additional features into the Treasures tab of the Underground as shown below:<br>
 
@@ -179,6 +180,19 @@ This script adds in a new option found below your Pokéballs:<br>
 ![image](https://i.imgur.com/C6aVzND.png)
 
 This currently will make all of your Pokéballs catch Pokemon at 0 delay (basically catch Pokémon as fast as you can defeat them).
+
+<hr>
+  
+## **[Custom] Discord Code Generator** ([discordcodegenerator.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/discordcodegenerator.js))
+This script will let you generate infinite amounts of Discord codes for all of the exclusive Pokémon locked behind Pokéclicker's Discord bot:<br>
+
+![image](https://i.imgur.com/5Agit4Q.png)
+
+You can claim as many Pokemon as you want just by clicking buttons, and they are also generated no differently than normal.
+  
+This also would **NOT** require you to link up a Discord account (for those without an account or prefer to not use Discord).
+
+This script also would work and be fully functional while being offline as well.
 
 <hr>
   
