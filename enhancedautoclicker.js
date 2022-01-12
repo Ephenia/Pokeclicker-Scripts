@@ -3,8 +3,8 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.5
-// @author      Ephenia (Original/Credit: Ivan Lay)
+// @version     1.6
+// @author      Ephenia (Original/Credit: Ivan Lay, Novie53)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes.
 // ==/UserScript==
 
@@ -27,6 +27,7 @@ var dungeonSelect;
 var foundBoss;
 var foundBossX;
 var foundBossY;
+var newSave = document.querySelectorAll('label')[0];
 var trainerCards = document.querySelectorAll('.trainer-card');
 var battleView = document.getElementsByClassName('battle-view')[0];
 
@@ -438,13 +439,15 @@ dungeonSelect = localStorage.getItem('selectedDungeon');
 for (var i = 0; i < trainerCards.length; i++) {
     trainerCards[i].addEventListener('click', checkAutoClick, false);
 }
+newSave.addEventListener('click', checkAutoClick, false);
 
 function checkAutoClick() {
     awaitAutoClick = setInterval(function () {
-        var gameState = App.game.gameState;
-        if (typeof gameState === 'undefined') {
-            console.log("Auto clicker isn't available yet.");
-        } else {
+        var gameState;
+        try {
+            gameState = App.game.gameState;
+        } catch(err) {}
+        if (typeof gameState != 'undefined') {
             initAutoClicker();
             clearInterval(awaitAutoClick)
         }
