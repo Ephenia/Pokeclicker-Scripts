@@ -20,8 +20,9 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 6. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
 # Custom Scripts
 1. [**Catch Speed Adjuster** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-catch-speed-adjuster-catchspeedadjusterjs)
-2. [**Discord Code Generator** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-discord-code-generator-discordcodegeneratorjs)
-3. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
+2. [**Challenge Mode Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-challenge-mode-changer-challengemodechangerjs)
+3. [**Discord Code Generator** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-discord-code-generator-discordcodegeneratorjs)
+4. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
 
 
 ```diff
@@ -180,6 +181,19 @@ This script adds in a new option found below your Pokéballs:<br>
 ![image](https://i.imgur.com/C6aVzND.png)
 
 This currently will make all of your Pokéballs catch Pokemon at 0 delay (basically catch Pokémon as fast as you can defeat them).
+
+<hr>
+
+## **[Custom] Challenge Mode Changer** ([challengemodechanger.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/challengemodechanger.js))
+This script would change how Challenges would work:<br>
+
+![image](https://i.imgur.com/zsPsiSg.png)
+
+This makes it so that you can click the actual buttons and makes the buttons be able to enable/disable them.
+
+Most of the Challenges would update and take immediate effect. However, there may be wonky and unexpected side effects with certain Challenges, as this would still need testing and this is new to us all.
+
+Also, yes, changing these will give you the respective Challenge ribbons on your player card or remove them. It's no different from activating Challenges on a completely fresh save.
 
 <hr>
   
