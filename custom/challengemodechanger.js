@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Ephenia
 // @description Lets you enable/disable any of the Challenges at any given point in time. This is compatiable with any save and will work on pre-existing saves. It's best to backup your save before using this.
 // ==/UserScript==
@@ -58,7 +58,7 @@ function checkChallenger() {
         try {
             gameState = App.game.gameState;
         } catch (err) { }
-        if (typeof gameState != 'undefined') {
+        if (gameState >= 2 && App.game.keyItems.hasKeyItem(3)) {
             initChallenger();
             clearInterval(awaitChallenger)
         }
