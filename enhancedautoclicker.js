@@ -387,17 +387,20 @@ function autoClicker() {
     if (App.game.gameState === GameConstants.GameState.dungeon) {
       if (DungeonRunner.fighting() && !DungeonBattle.catching()) {
         DungeonBattle.clickAttack();
-      } else if (
-        DungeonRunner.map.currentTile().type() ===
-        GameConstants.DungeonTile.chest
-      ) {
-        DungeonRunner.openChest();
-      } else if (
-        DungeonRunner.map.currentTile().type() ===
+      }
+      if (dungeonState == "ON") {
+        if (
+          DungeonRunner.map.currentTile().type() ===
+          GameConstants.DungeonTile.chest
+        ) {
+          DungeonRunner.openChest();
+        } else if (
+          DungeonRunner.map.currentTile().type() ===
           GameConstants.DungeonTile.boss &&
-        !DungeonRunner.fightingBoss()
-      ) {
-        DungeonRunner.startBossFight();
+          !DungeonRunner.fightingBoss()
+        ) {
+          DungeonRunner.startBossFight();
+        }
       }
     }
 
