@@ -14,8 +14,8 @@ var farmColor;
 var mulchColor;
 var autoFarmTimer;
 var awaitAutoFarm;
-var newSave = document.querySelectorAll('label')[0];
-var trainerCards = document.querySelectorAll('.trainer-card');
+var newSave;
+var trainerCards;
 var shovelList = document.getElementById('shovelList');
 
 function initAutoFarm() {
@@ -38,20 +38,20 @@ function initAutoFarm() {
     var elemAF = document.createElement("div");
     elemAF.innerHTML = `<div class="row justify-content-center py-0">
     <div class="col-6 pr-0">
-    <button id="auto-farm-start" class="btn btn-`+farmColor+` btn-block" style="font-size:9pt;">
-    Auto Farm [`+farmState+`]
+    <button id="auto-farm-start" class="btn btn-`+ farmColor + ` btn-block" style="font-size:9pt;">
+    Auto Farm [`+ farmState + `]
     </button>
     </div>
     <div class="col-6 pl-0">
-    <button id="auto-mulch-start" class="btn btn-`+mulchColor+` btn-block" style="font-size:9pt;">
-    Auto Mulch [`+mulchState+`]
+    <button id="auto-mulch-start" class="btn btn-`+ mulchColor + ` btn-block" style="font-size:9pt;">
+    Auto Mulch [`+ mulchState + `]
     </button>
     </div>
     </div>`
     shovelList.before(elemAF)
 
-    $("#auto-farm-start").click (startAutoFarm);
-    $("#auto-mulch-start").click (autoMulch);
+    $("#auto-farm-start").click(startAutoFarm);
+    $("#auto-mulch-start").click(autoMulch);
 
     function startAutoFarm() {
         if (farmState == "OFF") {
@@ -60,7 +60,7 @@ function initAutoFarm() {
             autoFarmTimer = setInterval(function () {
                 doPlantHarvest();
             }, 1000); // Happens every 1 second
-            document.getElementById('auto-farm-start').innerText = `Auto Farm [`+farmState+`]`
+            document.getElementById('auto-farm-start').innerText = `Auto Farm [` + farmState + `]`
             document.getElementById("auto-farm-start").classList.remove('btn-danger');
             document.getElementById("auto-farm-start").classList.add('btn-success');
         } else {
@@ -80,13 +80,13 @@ function initAutoFarm() {
         if (mulchState == "OFF") {
             localStorage.setItem("autoMulchState", "ON");
             mulchState = "ON"
-            document.getElementById('auto-mulch-start').innerText = `Auto Mulch [`+mulchState+`]`
+            document.getElementById('auto-mulch-start').innerText = `Auto Mulch [` + mulchState + `]`
             document.getElementById("auto-mulch-start").classList.remove('btn-danger');
             document.getElementById("auto-mulch-start").classList.add('btn-success');
         } else {
             localStorage.setItem("autoMulchState", "OFF");
             mulchState = "OFF"
-            document.getElementById('auto-mulch-start').innerText = `Auto Mulch [`+mulchState+`]`
+            document.getElementById('auto-mulch-start').innerText = `Auto Mulch [` + mulchState + `]`
             document.getElementById("auto-mulch-start").classList.remove('btn-success');
             document.getElementById("auto-mulch-start").classList.add('btn-danger');
         }
@@ -95,7 +95,7 @@ function initAutoFarm() {
     function endAutoFarm() {
         localStorage.setItem("autoFarmState", "OFF");
         farmState = "OFF"
-        document.getElementById('auto-farm-start').innerText = `Auto Farm [`+farmState+`]`
+        document.getElementById('auto-farm-start').innerText = `Auto Farm [` + farmState + `]`
         document.getElementById("auto-farm-start").classList.remove('btn-success');
         document.getElementById("auto-farm-start").classList.add('btn-danger');
         clearInterval(autoFarmTimer)
@@ -111,17 +111,26 @@ if (localStorage.getItem('autoMulchState') == null) {
 farmState = localStorage.getItem('autoFarmState');
 mulchState = localStorage.getItem('autoMulchState');
 
-for (var i = 0; i < trainerCards.length; i++) {
-    trainerCards[i].addEventListener('click', checkAutoFarm, false);
-}
-newSave.addEventListener('click', checkAutoFarm, false);
+var scriptLoad = setInterval(function () {
+    try {
+        newSave = document.querySelectorAll('label')[0];
+        trainerCards = document.querySelectorAll('.trainer-card');
+    } catch (err) { }
+    if (typeof newSave != 'undefined') {
+        for (var i = 0; i < trainerCards.length; i++) {
+            trainerCards[i].addEventListener('click', checkAutoFarm, false);
+        }
+        newSave.addEventListener('click', checkAutoFarm, false);
+        clearInterval(scriptLoad)
+    }
+}, 50);
 
 function checkAutoFarm() {
     awaitAutoFarm = setInterval(function () {
         var farmAccess;
         try {
             farmAccess = App.game.farming.canAccess();
-        } catch(err) {}
+        } catch (err) { }
         if (typeof farmAccess != 'undefined') {
             if (farmAccess == true) {
                 initAutoFarm();

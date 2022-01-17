@@ -14,27 +14,8 @@ var checkWildPokeImg;
 var checkWildPokeHealth;
 var checkAllNotification;
 var awaitVisualSettings;
-var newSave = document.querySelectorAll('label')[0];
-var trainerCards = document.querySelectorAll('.trainer-card');
-
-for (var i = 0; i < trainerCards.length; i++) {
-    trainerCards[i].addEventListener('click', checkVisualSettings, false);
-}
-newSave.addEventListener('click', checkVisualSettings, false);
-
-function checkVisualSettings() {
-    awaitVisualSettings = setInterval(function () {
-        var gameState;
-        try {
-            gameState = App.game.gameState;
-        } catch(err) {}
-        if (typeof gameState != 'undefined') {
-            initVisualSettings();
-            clearInterval(awaitVisualSettings)
-            //console.log("Visual settings should be applied.")
-        }
-    }, 1000);
-}
+var newSave;
+var trainerCards;
 
 function initVisualSettings() {
     var getMenu = document.getElementById('startMenu');
@@ -229,16 +210,6 @@ function initVisualSettings() {
     }
 }
 
-function addGlobalStyle(css) {
-    var head, style;
-    head = document.getElementsByTagName('head')[0];
-    if (!head) { return; }
-    style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = css;
-    head.appendChild(style);
-}
-
 if (localStorage.getItem('checkWildPokeName') == null) {
     localStorage.setItem("checkWildPokeName", "OFF");
 }
@@ -253,4 +224,42 @@ if (localStorage.getItem('checkWildPokeHealth') == null) {
 }
 if (localStorage.getItem('checkAllNotification') == null) {
     localStorage.setItem("checkAllNotification", "OFF");
+}
+
+var scriptLoad = setInterval(function () {
+    try {
+        newSave = document.querySelectorAll('label')[0];
+        trainerCards = document.querySelectorAll('.trainer-card');
+    } catch (err) { }
+    if (typeof newSave != 'undefined') {
+        for (var i = 0; i < trainerCards.length; i++) {
+            trainerCards[i].addEventListener('click', checkVisualSettings, false);
+        }
+        newSave.addEventListener('click', checkVisualSettings, false);
+        clearInterval(scriptLoad)
+    }
+}, 50);
+
+function checkVisualSettings() {
+    awaitVisualSettings = setInterval(function () {
+        var gameState;
+        try {
+            gameState = App.game.gameState;
+        } catch (err) { }
+        if (typeof gameState != 'undefined') {
+            initVisualSettings();
+            clearInterval(awaitVisualSettings)
+            //console.log("Visual settings should be applied.")
+        }
+    }, 1000);
+}
+
+function addGlobalStyle(css) {
+    var head, style;
+    head = document.getElementsByTagName('head')[0];
+    if (!head) { return; }
+    style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = css;
+    head.appendChild(style);
 }

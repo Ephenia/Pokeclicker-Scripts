@@ -23,8 +23,8 @@ var sellTreasureState;
 var sellTreasureColor;
 var sellPlateState;
 var sellPlateColor;
-var newSave = document.querySelectorAll('label')[0];
-var trainerCards = document.querySelectorAll('.trainer-card');
+var newSave;
+var trainerCards;
 
 function initAutoMine() {
     if (mineState == "ON") {
@@ -58,8 +58,8 @@ function initAutoMine() {
     layersMined = localStorage.getItem('undergroundLayersMined');
 
     var minerHTML = document.createElement("div");
-    minerHTML.innerHTML = `<button id="auto-mine-start" class="col-12 col-md-3 btn btn-`+mineColor+`">Auto Mine [`+mineState+`]</button>
-<button id="small-restore-start" class="col-12 col-md-3 btn btn-`+smallRestoreColor+`">Auto Small Restore [`+smallRestoreState+`]</button>
+    minerHTML.innerHTML = `<button id="auto-mine-start" class="col-12 col-md-3 btn btn-` + mineColor + `">Auto Mine [` + mineState + `]</button>
+<button id="small-restore-start" class="col-12 col-md-3 btn btn-`+ smallRestoreColor + `">Auto Small Restore [` + smallRestoreState + `]</button>
 <div id="threshold-input" class="col-12 col-md-3 btn-secondary"><img title="Money" src="assets/images/currency/money.svg" height="25px">
 <input title="Enter in a value where Small Restores will stop being bought at." type="text" id="small-restore"></div>
 <div id="skip-input" class="col-12 col-md-3 btn-secondary">
@@ -70,8 +70,8 @@ function initAutoMine() {
     document.getElementById('auto-skip').value = autoMineSkip.toLocaleString();
     var autoSeller = document.createElement("div");
     autoSeller.innerHTML = `<div>
-    <button id="auto-sell-treasure" class="col-12 col-md-3 btn btn-`+sellTreasureColor+`">Auto Sell Treasure [`+sellTreasureState+`]</button>
-<button id="auto-sell-plate" class="col-12 col-md-3 btn btn-`+sellPlateColor+`">Auto Sell Plate [`+sellPlateState+`]</button>
+    <button id="auto-sell-treasure" class="col-12 col-md-3 btn btn-`+ sellTreasureColor + `">Auto Sell Treasure [` + sellTreasureState + `]</button>
+<button id="auto-sell-plate" class="col-12 col-md-3 btn btn-`+ sellPlateColor + `">Auto Sell Plate [` + sellPlateState + `]</button>
 </div>`
     document.getElementById('treasures').prepend(autoSeller);
     addGlobalStyle('#threshold-input { display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center; }');
@@ -79,10 +79,10 @@ function initAutoMine() {
     addGlobalStyle('#small-restore { width:150px; }');
     addGlobalStyle('#auto-skip { width:150px; }');
 
-    $("#auto-mine-start").click (startAutoMine);
-    $("#small-restore-start").click (autoRestore);
-    $("#auto-sell-treasure").click (autoSellTreasure);
-    $("#auto-sell-plate").click (autoSellPlate);
+    $("#auto-mine-start").click(startAutoMine);
+    $("#small-restore-start").click(autoRestore);
+    $("#auto-sell-treasure").click(autoSellTreasure);
+    $("#auto-sell-plate").click(autoSellPlate);
 
     function startAutoMine() {
         if (mineState == "OFF") {
@@ -91,7 +91,7 @@ function initAutoMine() {
             autoMineTimer = setInterval(function () {
                 doAutoMine();
             }, 1000); // Happens every 1 second
-            document.getElementById('auto-mine-start').innerText = `Auto Mine [`+mineState+`]`
+            document.getElementById('auto-mine-start').innerText = `Auto Mine [` + mineState + `]`
             document.getElementById("auto-mine-start").classList.remove('btn-danger');
             document.getElementById("auto-mine-start").classList.add('btn-success');
         } else {
@@ -128,20 +128,20 @@ function initAutoMine() {
                     var rewardParent = reward.parentNode;
                     var ri = +reward.parentNode.getAttribute('data-i');
                     var rj = +reward.parentNode.getAttribute('data-j');
-                    for(var i = -1; i <= 1; i++){
-                        for(var j = -1; j <= 1; j++){
+                    for (var i = -1; i <= 1; i++) {
+                        for (var j = -1; j <= 1; j++) {
                             var ti = ri + i;
                             var tj = rj + j;
                             var checkTile = document.querySelector('.mineSquare[data-i="' + ti + '"][data-j="' + tj + '"]');
-                            if(checkTile && (
+                            if (checkTile && (
                                 checkTile.classList.contains('rock1') ||
                                 checkTile.classList.contains('rock2') ||
                                 checkTile.classList.contains('rock3') ||
                                 checkTile.classList.contains('rock4') ||
                                 checkTile.classList.contains('rock5')
-                            )){
-                               Mine.click(ti, tj);
-                               getEnergy -= 1;
+                            )) {
+                                Mine.click(ti, tj);
+                                getEnergy -= 1;
                             }
                         }
                     }
@@ -164,9 +164,9 @@ function initAutoMine() {
                         if (Mine.skipsRemaining() != 0) {
                             GameHelper.incrementObservable(Mine.skipsRemaining, -1);
                         }
-                        busyMining = setTimeout(function(){
+                        busyMining = setTimeout(function () {
                             resetInProgress = "NO"
-                        } , 1500);
+                        }, 1500);
                     } else {
                         resetInProgress = "NO"
                     }
@@ -220,7 +220,7 @@ function initAutoMine() {
             document.getElementById("small-restore-start").classList.remove('btn-success');
             document.getElementById("small-restore-start").classList.add('btn-danger');
         }
-        document.getElementById('small-restore-start').innerText = `Auto Small Restore [`+smallRestoreState+`]`
+        document.getElementById('small-restore-start').innerText = `Auto Small Restore [` + smallRestoreState + `]`
         localStorage.setItem("autoSmallRestore", smallRestoreState);
     }
 
@@ -234,7 +234,7 @@ function initAutoMine() {
             document.getElementById("auto-sell-treasure").classList.remove('btn-success');
             document.getElementById("auto-sell-treasure").classList.add('btn-danger');
         }
-        document.getElementById('auto-sell-treasure').innerText = `Auto Sell Treasure [`+sellTreasureState+`]`
+        document.getElementById('auto-sell-treasure').innerText = `Auto Sell Treasure [` + sellTreasureState + `]`
         localStorage.setItem("autoSellTreasure", sellTreasureState);
     }
 
@@ -248,14 +248,14 @@ function initAutoMine() {
             document.getElementById("auto-sell-plate").classList.remove('btn-success');
             document.getElementById("auto-sell-plate").classList.add('btn-danger');
         }
-        document.getElementById('auto-sell-plate').innerText = `Auto Sell Plate [`+sellPlateState+`]`
+        document.getElementById('auto-sell-plate').innerText = `Auto Sell Plate [` + sellPlateState + `]`
         localStorage.setItem("autoSellPlate", sellPlateState);
     }
 
     function endAutoMine() {
         localStorage.setItem("autoMineState", "OFF");
         mineState = "OFF"
-        document.getElementById('auto-mine-start').innerText = `Auto Mine [`+mineState+`]`
+        document.getElementById('auto-mine-start').innerText = `Auto Mine [` + mineState + `]`
         document.getElementById("auto-mine-start").classList.remove('btn-success');
         document.getElementById("auto-mine-start").classList.add('btn-danger');
         clearTimeout(busyMining);
@@ -291,17 +291,26 @@ autoMineSkip = localStorage.getItem('autoMineSkip');
 sellTreasureState = localStorage.getItem('autoSellTreasure');
 sellPlateState = localStorage.getItem('autoSellPlate');
 
-for (var i = 0; i < trainerCards.length; i++) {
-    trainerCards[i].addEventListener('click', checkAutoMine, false);
-}
-newSave.addEventListener('click', checkAutoMine, false);
+var scriptLoad = setInterval(function () {
+    try {
+        newSave = document.querySelectorAll('label')[0];
+        trainerCards = document.querySelectorAll('.trainer-card');
+    } catch (err) { }
+    if (typeof newSave != 'undefined') {
+        for (var i = 0; i < trainerCards.length; i++) {
+            trainerCards[i].addEventListener('click', checkAutoMine, false);
+        }
+        newSave.addEventListener('click', checkAutoMine, false);
+        clearInterval(scriptLoad)
+    }
+}, 50);
 
 function checkAutoMine() {
     awaitAutoMine = setInterval(function () {
         var undergroundAccess;
         try {
             undergroundAccess = App.game.underground.canAccess();
-        } catch(err) {}
+        } catch (err) { }
         if (typeof undergroundAccess != 'undefined') {
             if (undergroundAccess == true) {
                 initAutoMine();

@@ -17,8 +17,8 @@ var eggFossilState;
 var eggFossilColor;
 var hatcherySortVal;
 var hatcherySortDir;
-var newSave = document.querySelectorAll('label')[0];
-var trainerCards = document.querySelectorAll('.trainer-card');
+var newSave;
+var trainerCards;
 var breedingDisplay = document.getElementById('breedingDisplay');
 
 function initAutoHatch() {
@@ -33,16 +33,16 @@ function initAutoHatch() {
         eggFossilColor = "success"
     }
 
-    breedingDisplay.querySelector('.card-header').outerHTML += `<button id= "auto-hatch-start" class="btn btn-sm btn-`+hatchColor+`" style="position: absolute;left: 0px;top: 0px;width: 65px;height: 41px;font-size: 7pt;">
-    Auto Hatch [`+hatchState+`]
+    breedingDisplay.querySelector('.card-header').outerHTML += `<button id= "auto-hatch-start" class="btn btn-sm btn-` + hatchColor + `" style="position: absolute;left: 0px;top: 0px;width: 65px;height: 41px;font-size: 7pt;">
+    Auto Hatch [`+ hatchState + `]
     </button>`
 
-    document.getElementById('breedingModal').querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="auto-egg-fossil" class="btn btn-`+eggFossilColor+`" style="margin-left:25px;">
-    Auto Egg/Fossil [`+eggFossilState+`]
+    document.getElementById('breedingModal').querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="auto-egg-fossil" class="btn btn-` + eggFossilColor + `" style="margin-left:25px;">
+    Auto Egg/Fossil [`+ eggFossilState + `]
     </button>`
 
-    $("#auto-hatch-start").click (toggleAutoHatch)
-    $("#auto-egg-fossil").click (toggleEggFossil)
+    $("#auto-hatch-start").click(toggleAutoHatch)
+    $("#auto-egg-fossil").click(toggleEggFossil)
     //document.getElementById('breedingModal').querySelector('button[aria-controls="breeding-sort"]').setAttribute("style", "display:none");
 
     if (hatchState == "ON") {
@@ -64,7 +64,7 @@ function toggleAutoHatch() {
         document.getElementById("auto-hatch-start").classList.add('btn-danger');
         clearInterval(autoHatchLoop)
     }
-    document.getElementById('auto-hatch-start').innerHTML = `Auto Hatch [`+hatchState+`]<br>`
+    document.getElementById('auto-hatch-start').innerHTML = `Auto Hatch [` + hatchState + `]<br>`
 }
 
 function toggleEggFossil() {
@@ -79,7 +79,7 @@ function toggleEggFossil() {
         document.getElementById("auto-egg-fossil").classList.remove('btn-success');
         document.getElementById("auto-egg-fossil").classList.add('btn-danger');
     }
-    document.getElementById('auto-egg-fossil').innerHTML = `Auto Egg/Fossil [`+eggFossilState+`]`
+    document.getElementById('auto-egg-fossil').innerHTML = `Auto Egg/Fossil [` + eggFossilState + `]`
 }
 
 function autoHatcher() {
@@ -186,12 +186,12 @@ function autoHatcher() {
                         //console.log(storedFossilName[randFossilIndex]+" has been used!")
                         return true;
                     }
-                }else if (hasEgg == true) {
+                } else if (hasEgg == true) {
                     //console.log("user has only egg")
                     ItemList[storedEggName[randEggIndex]].use()
                     //console.log(storedEggName[randEggIndex]+" has been used!")
                     return true;
-                }else if (hasFossil == true) {
+                } else if (hasFossil == true) {
                     //console.log("user has only fossil")
                     Underground.sellMineItem(+storedFossilID[randFossilIndex])
                     //console.log(storedFossilName[randFossilIndex]+" has been used!")
@@ -235,13 +235,13 @@ function autoHatcher() {
                     }
                     // Check if either of the types match
                     const type1 =
-                          BreedingController.filter.type1() > -2
-                    ? BreedingController.filter.type1()
-                    : null;
+                        BreedingController.filter.type1() > -2
+                            ? BreedingController.filter.type1()
+                            : null;
                     const type2 =
-                          BreedingController.filter.type2() > -2
-                    ? BreedingController.filter.type2()
-                    : null;
+                        BreedingController.filter.type2() > -2
+                            ? BreedingController.filter.type2()
+                            : null;
                     if (type1 !== null || type2 !== null) {
                         const { type: types } = pokemonMap[partyPokemon.name];
                         if ([type1, type2].includes(PokemonType.None)) {
@@ -291,17 +291,26 @@ eggFossilState = localStorage.getItem('autoEggFossil');
 hatcherySortVal = +localStorage.getItem('hatcherySortVal');
 hatcherySortDir = +localStorage.getItem('hatcherySortDir');
 
-for (var i = 0; i < trainerCards.length; i++) {
-    trainerCards[i].addEventListener('click', checkAutoHatch, false);
-}
-newSave.addEventListener('click', checkAutoHatch, false);
+var scriptLoad = setInterval(function () {
+    try {
+        newSave = document.querySelectorAll('label')[0];
+        trainerCards = document.querySelectorAll('.trainer-card');
+    } catch (err) { }
+    if (typeof newSave != 'undefined') {
+        for (var i = 0; i < trainerCards.length; i++) {
+            trainerCards[i].addEventListener('click', checkAutoHatch, false);
+        }
+        newSave.addEventListener('click', checkAutoHatch, false);
+        clearInterval(scriptLoad)
+    }
+}, 50);
 
 function checkAutoHatch() {
     awaitAutoHatch = setInterval(function () {
         var breedingAccess;
         try {
             breedingAccess = App.game.breeding.canAccess();
-        } catch(err) {}
+        } catch (err) { }
         if (typeof breedingAccess != 'undefined') {
             if (breedingAccess == true) {
                 initAutoHatch();

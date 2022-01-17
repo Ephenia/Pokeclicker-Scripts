@@ -14,8 +14,8 @@ var existHTML = false;
 var battleFrontFloor;
 var bpImg = `<img src="assets/images/currency/battlePoint.svg" height="25px">`
 var moneyImg = `<img src="assets/images/currency/money.svg" height="25px">`
-var newSave = document.querySelectorAll('label')[0];
-var trainerCards = document.querySelectorAll('.trainer-card');
+var newSave;
+var trainerCards;
 
 function initBattleFrontier() {
     addGlobalStyle('#battle-front-cont { position:absolute;right:5px;top:5px;width:auto;height:41px; }');
@@ -72,7 +72,7 @@ function initBattleFrontier() {
             //notification popup
             Notifier.notify({
                 title: 'Battle Frontier',
-                message: `You managed to beat stage `+stageBeaten+`.<br/>You received `+bpImg + battlePointsEarned.toLocaleString()+` BP<br>You recieved `+ moneyImg +moneyEarned.toLocaleString()+` money.`,
+                message: `You managed to beat stage ` + stageBeaten + `.<br/>You received ` + bpImg + battlePointsEarned.toLocaleString() + ` BP<br>You recieved ` + moneyImg + moneyEarned.toLocaleString() + ` money.`,
                 type: NotificationConstants.NotificationOption.success,
             });
             // Award battle points and money
@@ -88,17 +88,26 @@ if (localStorage.getItem('battleFrontFloor') == null) {
 }
 battleFrontFloor = +localStorage.getItem('battleFrontFloor');
 
-for (var i = 0; i < trainerCards.length; i++) {
-    trainerCards[i].addEventListener('click', checkBattleFrontier, false);
-}
-newSave.addEventListener('click', checkBattleFrontier, false);
+var scriptLoad = setInterval(function () {
+    try {
+        newSave = document.querySelectorAll('label')[0];
+        trainerCards = document.querySelectorAll('.trainer-card');
+    } catch (err) { }
+    if (typeof newSave != 'undefined') {
+        for (var i = 0; i < trainerCards.length; i++) {
+            trainerCards[i].addEventListener('click', checkBattleFrontier, false);
+        }
+        newSave.addEventListener('click', checkBattleFrontier, false);
+        clearInterval(scriptLoad)
+    }
+}, 50);
 
 function checkBattleFrontier() {
     awaitBattleFrontier = setInterval(function () {
         var bfAccess;
         try {
             bfAccess = App.game.battleFrontier.canAccess();
-        } catch(err) {}
+        } catch (err) { }
         if (typeof bfAccess != 'undefined') {
             if (bfAccess == true) {
                 initBattleFrontier();

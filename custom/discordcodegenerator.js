@@ -10,8 +10,8 @@
 
 var resCodes;
 var validPoke = [];
-var newSave = document.querySelectorAll('label')[0];
-var trainerCards = document.querySelectorAll('.trainer-card');
+var newSave;
+var trainerCards;
 
 function initCodeGen() {
     genCodes();
@@ -69,10 +69,19 @@ function randInt() {
     return Math.floor((Math.random() * 65536) + 1);
 }
 
-for (var i = 0; i < trainerCards.length; i++) {
-    trainerCards[i].addEventListener('click', checkCodeGen, false);
-}
-newSave.addEventListener('click', checkCodeGen, false);
+var scriptLoad = setInterval(function () {
+    try {
+        newSave = document.querySelectorAll('label')[0];
+        trainerCards = document.querySelectorAll('.trainer-card');
+    } catch (err) { }
+    if (typeof newSave != 'undefined') {
+        for (var i = 0; i < trainerCards.length; i++) {
+            trainerCards[i].addEventListener('click', checkCodeGen, false);
+        }
+        newSave.addEventListener('click', checkCodeGen, false);
+        clearInterval(scriptLoad)
+    }
+}, 50);
 
 function checkCodeGen() {
     awaitCodeGen = setInterval(function () {

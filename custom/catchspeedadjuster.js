@@ -12,11 +12,11 @@ var ballAdjuster;
 var getBalls;
 var awaitBallAdjust;
 var defaultTime = [];
-var newSave = document.querySelectorAll('label')[0];
-var trainerCards = document.querySelectorAll('.trainer-card');
+var newSave;
+var trainerCards;
 
 function initBallAdjust() {
-    var getBalls =  App.game.pokeballs.pokeballs;
+    var getBalls = App.game.pokeballs.pokeballs;
     for (var i = 0; i < getBalls.length; i++) {
         defaultTime.push(getBalls[i].catchTime)
     }
@@ -57,17 +57,26 @@ if (localStorage.getItem('ballAdjuster') == null) {
 }
 ballAdjuster = localStorage.getItem('ballAdjuster');
 
-for (var i = 0; i < trainerCards.length; i++) {
-    trainerCards[i].addEventListener('click', checkBallAdjust, false);
-}
-newSave.addEventListener('click', checkBallAdjust, false);
+var scriptLoad = setInterval(function () {
+    try {
+        newSave = document.querySelectorAll('label')[0];
+        trainerCards = document.querySelectorAll('.trainer-card');
+    } catch (err) { }
+    if (typeof newSave != 'undefined') {
+        for (var i = 0; i < trainerCards.length; i++) {
+            trainerCards[i].addEventListener('click', checkBallAdjust, false);
+        }
+        newSave.addEventListener('click', checkBallAdjust, false);
+        clearInterval(scriptLoad)
+    }
+}, 50);
 
 function checkBallAdjust() {
     awaitBallAdjust = setInterval(function () {
         var gameState;
         try {
             gameState = App.game.gameState;
-        } catch(err) {}
+        } catch (err) { }
         if (typeof gameState != 'undefined') {
             initBallAdjust();
             clearInterval(awaitBallAdjust)

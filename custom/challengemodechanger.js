@@ -11,8 +11,8 @@
 var awaitChallenger;
 var chalList;
 var chalNames = [];
-var newSave = document.querySelectorAll('label')[0];
-var trainerCards = document.querySelectorAll('.trainer-card');
+var newSave;
+var trainerCards;
 
 function initChallenger() {
     chalList = App.game.challenges.list;
@@ -47,10 +47,19 @@ function initChallenger() {
     }
 }
 
-for (var i = 0; i < trainerCards.length; i++) {
-    trainerCards[i].addEventListener('click', checkChallenger, false);
-}
-newSave.addEventListener('click', checkChallenger, false);
+var scriptLoad = setInterval(function () {
+    try {
+        newSave = document.querySelectorAll('label')[0];
+        trainerCards = document.querySelectorAll('.trainer-card');
+    } catch (err) { }
+    if (typeof newSave != 'undefined') {
+        for (var i = 0; i < trainerCards.length; i++) {
+            trainerCards[i].addEventListener('click', checkChallenger, false);
+        }
+        newSave.addEventListener('click', checkChallenger, false);
+        clearInterval(scriptLoad)
+    }
+}, 50);
 
 function checkChallenger() {
     awaitChallenger = setInterval(function () {
