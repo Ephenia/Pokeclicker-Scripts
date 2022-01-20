@@ -120,8 +120,8 @@ function initAutoMine() {
                 if (Mine.toolSelected() != 0) {
                     Mine.toolSelected(Mine.Tool.Chisel);
                 }
-                var dungeionEl = document.getElementById('mineBody');
-                var rewards = dungeionEl.querySelectorAll('.mineReward');
+                var mineEl = document.getElementById('mineBody');
+                var rewards = mineEl.querySelectorAll('.mineReward');
                 for (var ii = 0; ii < rewards.length; ii++) {
                     var reward = rewards[ii];
                     var rewardParent = reward.parentNode;
@@ -131,7 +131,7 @@ function initAutoMine() {
                         for (var j = -1; j <= 1; j++) {
                             var ti = ri + i;
                             var tj = rj + j;
-                            var checkTile = dungeionEl.querySelector('.mineSquare[data-i="' + ti + '"][data-j="' + tj + '"]');
+                            var checkTile = mineEl.querySelector('.mineSquare[data-i="' + ti + '"][data-j="' + tj + '"]');
                             if (checkTile && (
                                 checkTile.classList.contains('rock1') ||
                                 checkTile.classList.contains('rock2') ||
