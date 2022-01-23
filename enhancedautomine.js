@@ -102,8 +102,6 @@ function initAutoMine() {
     function doAutoMine() {
         var getEnergy = Math.floor(App.game.underground.energy);
         var getMoney = App.game.wallet.currencies[GameConstants.Currency.money]();
-        var totalTiles = document.querySelectorAll('.mineSquare').length;
-        var minedTiles = document.querySelectorAll('.rock0').length;
         var buriedItems = Mine.itemsBuried();
         var skipsRemain = Mine.skipsRemaining();
         var getRestores = player.itemList["SmallRestore"]();
@@ -122,7 +120,8 @@ function initAutoMine() {
                 if (Mine.toolSelected() != 0) {
                     Mine.toolSelected(Mine.Tool.Chisel);
                 }
-                var rewards = document.querySelectorAll('.mineReward');
+                var mineEl = document.getElementById('mineBody');
+                var rewards = mineEl.querySelectorAll('.mineReward');
                 for (var ii = 0; ii < rewards.length; ii++) {
                     var reward = rewards[ii];
                     var rewardParent = reward.parentNode;
@@ -132,7 +131,7 @@ function initAutoMine() {
                         for (var j = -1; j <= 1; j++) {
                             var ti = ri + i;
                             var tj = rj + j;
-                            var checkTile = document.querySelector('.mineSquare[data-i="' + ti + '"][data-j="' + tj + '"]');
+                            var checkTile = mineEl.querySelector('.mineSquare[data-i="' + ti + '"][data-j="' + tj + '"]');
                             if (checkTile && (
                                 checkTile.classList.contains('rock1') ||
                                 checkTile.classList.contains('rock2') ||
