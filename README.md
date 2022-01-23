@@ -9,7 +9,7 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 **If you are looking to have something specific created or have any inquiries, feel free to contact me directly (contact info on profile) OR [open and create an issue](https://github.com/Ephenia/Pokeclicker-Scripts/issues). More scripts and things that I create will be added in due time.**
 
 **Vanilla scripts** are purely for automation or other QoL things.<br>
-**Custom scripts** are able to do or change things that aren't within the bounds of the vanilla game or they may be considered more cheatyy.
+**Custom scripts** are able to do or change things that aren't within the bounds of the vanilla game or they may be considered more cheaty.
 
 # Vanilla Scripts
 1. [**Additional Visual Settings** ](//github.com/Ephenia/Pokeclicker-Scripts#additional-visual-settings-additionalvisualsettingsjs)
@@ -23,6 +23,7 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 2. [**Challenge Mode Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-challenge-mode-changer-challengemodechangerjs)
 3. [**Discord Code Generator** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-discord-code-generator-discordcodegeneratorjs)
 4. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
+5. [**Oak Items Unlimited** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-oak-items-unlimited-oakitemsunlimitedjs)
 
 
 ```diff
@@ -141,8 +142,6 @@ What this script adds is a new top row below the mining layer, as shown:<br>
 There's a lot to go over and explained with this Auto Miner, but I'll try my best to explain it all:
 
 **• Auto Mine** - This will turn the Auto Miner On/Off. The Auto Miner uses bombs to automatically mine.<br>
-> As of 1.2 there is now Auto Chisel implemented which will mine out layers when you've cleared out 50%> of the tiles in a layer. Later on, this will be something you will be able to change the threshold of and when it will occur.
-
 **• Auto Small Restore** - This will automatically use Small Restores as well as buy them while it's active (only when Auto Mine is running). It will also only ever buy them when you have 0 Small Restores and when they also cost 30,000 (base price). Knowing that, this would be best used if you are anywhere that you are 1 shotting Pokémon (so the price penalty in the Shop is constantly decreasing).<br>
 **• 1st Input Field** - Here you can enter a money value as to when Small Restores should stop Auto Buying. This will help you not drain your money and help manage it.<br>
 **• 2nd Input Field** - This is basically an Auto Skipper. You can enter a minimum value here as to how many items that you would like to look for in new layers. If there are fewer items in a layer than your desired input, then the layer will be skipped (if you have any skips available).
@@ -224,6 +223,17 @@ The events also show all the Pokemon that are brought along with them.
 You can click on them to start any event that you desire. Also, you are able to activate more than 1 event simultaneously. You are also able to turn them off and end them at any time that you would want to as well. These events will run basically without end, at least not ending at any time that you would really ever have to worry about.
 
 There may be some other cool or neat custom events added in with this as well.
+
+<hr>
+
+## **[Custom] Oak Iems Unlimited** ([oakitemsunlimited.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/oakitemsunlimited.js))
+This script removes the limit for the amount of Oak Items that you're able to equip:<br>
+
+![image](https://i.imgur.com/0Peh94W.png)
+
+All items are able to work together just fine, including leveling simultaneously with each other. Also, this is fully compaitable and functional with Loadouts.
+
+This also removes any requirements needed to unlock any Oak Item slots, meaning you get the max number of slots given to you on a fresh save.
 
 <hr>
 
