@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      Ephenia (Original/Credit: G1)
 // @description Lets you generate infinite amounts of Discord codes for Pokémon that are exclusive and locked behind Pokeclicker's Discord bot & activities. No linking of a Discord account required + fully works offline.
 // ==/UserScript==
@@ -19,18 +19,21 @@ function initCodeGen() {
     var fragment = new DocumentFragment();
     for (let i = 0; i < validPoke.length; i++) {
         var codeHTML = document.createElement("div");
-        codeHTML.innerHTML = `<button id="disc-${i}" class="btn btn-primary btn-block" onclick="submitCode(this.id)">${validPoke[i] + ` - ` + resCodes[i]}</button>`
+        codeHTML.innerHTML = `<button id="disc-${i}" class="btn btn-primary btn-block">${validPoke[i] + ` - ` + resCodes[i]}</button>`
         if (i == validPoke.length - 1) {
             codeHTML.innerHTML += `<hr>`
         }
         fragment.appendChild(codeHTML)
     }
     saveTab.prepend(fragment)
+    for (let ii = 0; ii < validPoke.length; ii++) {
+       document.getElementById('disc-'+ii).addEventListener('click', submitCode, false);
+    }
 }
 
-function submitCode(element) {
+function submitCode() {
     var codeInput = document.getElementById('redeemable-code-input');
-    codeInput.value = resCodes[+element.replace(/disc-/g, "")];
+    codeInput.value = resCodes[+event.target.id.replace(/disc-/g, "")];
     RedeemableCodeController.enterCode();
     genCodes();
     resetHTML();
