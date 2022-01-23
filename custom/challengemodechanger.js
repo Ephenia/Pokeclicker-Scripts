@@ -12,8 +12,8 @@ var awaitChallenger;
 var chalModal;
 var chalList;
 var chalNames = [];
-var newSave = document.querySelectorAll('label')[0];
-var trainerCards = document.querySelectorAll('.trainer-card');
+var newSave;
+var trainerCards;
 
 function initChallenger() {
     chalList = App.game.challenges.list;
