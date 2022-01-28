@@ -66,8 +66,8 @@ function initAutoMine() {
 <input title="Auto skipping occurs if the max items in a layer is lower than the value put here." type="text" id="auto-skip"></div>`
     document.querySelectorAll('#mineBody + div')[0].prepend(minerHTML);
     $("#auto-mine-start").unwrap();
-    document.getElementById('small-restore').value = setThreshold.toLocaleString();
-    document.getElementById('auto-skip').value = autoMineSkip.toLocaleString();
+    document.getElementById('small-restore').value = setThreshold.toLocaleString('en-US');
+    document.getElementById('auto-skip').value = autoMineSkip.toLocaleString('en-US');
     var autoSeller = document.createElement("div");
     autoSeller.innerHTML = `<div>
     <button id="auto-sell-treasure" class="col-12 col-md-3 btn btn-`+ sellTreasureColor + `">Auto Sell Treasure [` + sellTreasureState + `]</button>
@@ -200,13 +200,13 @@ function initAutoMine() {
     document.querySelector('#small-restore').addEventListener('input', event => {
         setThreshold = +event.target.value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
         localStorage.setItem("autoBuyThreshold", setThreshold);
-        event.target.value = setThreshold.toLocaleString();
+        event.target.value = setThreshold.toLocaleString('en-US');
     });
 
     document.querySelector('#auto-skip').addEventListener('input', event => {
         autoMineSkip = +event.target.value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
         localStorage.setItem("autoMineSkip", autoMineSkip);
-        event.target.value = autoMineSkip.toLocaleString();
+        event.target.value = autoMineSkip.toLocaleString('en-US');
     });
 
     function autoRestore() {
