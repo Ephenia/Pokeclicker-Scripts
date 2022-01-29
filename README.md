@@ -6,7 +6,9 @@ These are originally created and intended for the use of the browser extension k
 
 If you are looking to use these scripts on the client version of Pokeclicker (Pokeclicker Desktop), [please check out the Releases section](https://github.com/Ephenia/Pokeclicker-Scripts/releases).
 
-**If you are looking to have something specific created or have any inquiries, feel free to contact me directly (contact info on profile) OR [open and create an issue](https://github.com/Ephenia/Pokeclicker-Scripts/issues). More scripts and things that I create will be added in due time.**
+**If you are looking to have something specific created or have any inquiries, feel free to contact me directly (contact info on profile) OR [open and create an issue](https://github.com/Ephenia/Pokeclicker-Scripts/issues).**
+
+**More scripts and things that I create will be added in due time, when I am interested and or am motivated enough to work. Remember, that I do this all free of charge and ask for literally nothing in return. I mainly created this project to simply share my passion for this game and show ways that it can be improved and or be more fun.**
 
 **Vanilla scripts** are purely for automation or other QoL things.<br>
 **Custom scripts** are able to do or change things that aren't within the bounds of the vanilla game or they may be considered more cheaty.
@@ -24,6 +26,7 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 3. [**Discord Code Generator** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-discord-code-generator-discordcodegeneratorjs)
 4. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
 5. [**Oak Items Unlimited** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-oak-iems-unlimited-oakitemsunlimitedjs)
+6. [**Omega Protein Gains** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-omega-protein-gains-omegaproteingainsjs)
 
 
 ```diff
@@ -179,7 +182,7 @@ This script adds in a new option found below your Pokéballs:<br>
 
 ![image](https://i.imgur.com/C6aVzND.png)
 
-This currently will make all of your Pokéballs catch Pokemon at 0 delay (basically catch Pokémon as fast as you can defeat them).
+This currently will make all of your Pokéballs catch Pokémon at 0 delay (basically catch Pokémon as fast as you can defeat them).
 
 <hr>
 
@@ -201,7 +204,7 @@ This script will let you generate infinite amounts of Discord codes for all of t
 
 ![image](https://i.imgur.com/5Agit4Q.png)
 
-You can claim as many Pokemon as you want just by clicking buttons, and they are also generated no differently than normal.
+You can claim as many Pokémon as you want just by clicking buttons, and they are also generated no differently than normal.
   
 This also would **NOT** require you to link up a Discord account (for those without an account or prefer to not use Discord).
 
@@ -218,7 +221,7 @@ This will give you access to all of the seasonal events that there are in Pokecl
 
 ![image](https://user-images.githubusercontent.com/26987203/139570151-70f47769-40b1-4ec4-aa15-9eac50f33b39.png)
 
-The events also show all the Pokemon that are brought along with them.
+The events also show all the Pokémon that are brought along with them.
 
 You can click on them to start any event that you desire. Also, you are able to activate more than 1 event simultaneously. You are also able to turn them off and end them at any time that you would want to as well. These events will run basically without end, at least not ending at any time that you would really ever have to worry about.
 
@@ -234,6 +237,15 @@ This script removes the limit for the amount of Oak Items that you're able to eq
 All items are able to work together just fine, including leveling simultaneously with each other. Also, this is fully compaitable and functional with Loadouts.
 
 This also removes any requirements needed to unlock any Oak Item slots, meaning you get the max number of slots given to you on a fresh save.
+
+<hr>
+
+## **[Custom] Omega Protein Gains** ([omegaproteingains.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/omegaproteingains.js))
+This script removes the limit for the amount of Proteins that you're able to use on Pokémon:<br>
+
+![image](https://i.imgur.com/2kXCzUA.png)
+
+I haven't tested the limits of how many Proteins you can give, but it should practically be infinite until at whatever point Pokémon Attack would break.
 
 <hr>
 
