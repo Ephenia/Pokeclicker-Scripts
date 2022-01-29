@@ -22,8 +22,8 @@ function initOmegaProtein() {
             proteinTable = document.getElementById('pokemonSelectorModal').querySelectorAll('tbody')
             if (proteinTable.length != 0) {
                 clearInterval(awaitProteinTable);
-                proteinTable[0].addEventListener('click', logger, true);
-                function logger(event) {
+                proteinTable[0].addEventListener('click', bypassProtein, true);
+                function bypassProtein(event) {
                     var child = event.target.closest('tr').rowIndex - 1;
                     var protein = player.itemList.Protein();
                     var setProtein = VitaminController.getMultiplier()
