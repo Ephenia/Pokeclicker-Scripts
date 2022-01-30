@@ -3,7 +3,7 @@
 // @namespace    Pokeclicker Scripts
 // @match        https://www.pokeclicker.com/
 // @grant        none
-// @version      1.4
+// @version      1.5
 // @author       Ephenia (Original/Credit: Drak + Ivan Lay)
 // @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // ==/UserScript==
@@ -17,6 +17,8 @@ var eggFossilState;
 var eggFossilColor;
 var hatcherySortVal;
 var hatcherySortDir;
+var hatcherySortSync;
+var sortSyncColor;
 var newSave;
 var trainerCards;
 var breedingDisplay = document.getElementById('breedingDisplay');
@@ -32,18 +34,28 @@ function initAutoHatch() {
     } else {
         eggFossilColor = "success"
     }
+    if (hatcherySortSync == "OFF") {
+        sortSyncColor = "danger"
+    } else {
+        sortSyncColor = "success"
+    }
 
     breedingDisplay.querySelector('.card-header').outerHTML += `<button id= "auto-hatch-start" class="btn btn-sm btn-` + hatchColor + `" style="position: absolute;left: 0px;top: 0px;width: 65px;height: 41px;font-size: 7pt;">
     Auto Hatch [`+ hatchState + `]
     </button>`
 
-    document.getElementById('breedingModal').querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="auto-egg-fossil" class="btn btn-` + eggFossilColor + `" style="margin-left:25px;">
+    document.getElementById('breedingModal').querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="sort-sync" class="btn btn-` + sortSyncColor + `" style="margin-left:25px;">
+    Pokemon List Sync [`+ hatcherySortSync + `]
+    </button>
+    <button id="auto-egg-fossil" class="btn btn-`+ eggFossilColor + `" style="margin-left:25px;">
     Auto Egg/Fossil [`+ eggFossilState + `]
     </button>`
 
     $("#auto-hatch-start").click(toggleAutoHatch)
+    $("#sort-sync").click(changesortsync)
     $("#auto-egg-fossil").click(toggleEggFossil)
     //document.getElementById('breedingModal').querySelector('button[aria-controls="breeding-sort"]').setAttribute("style", "display:none");
+    addGlobalStyle('.eggSlot.disabled { pointer-events: unset !important; }');
 
     if (hatchState == "ON") {
         autoHatcher();
@@ -67,6 +79,21 @@ function toggleAutoHatch() {
     document.getElementById('auto-hatch-start').innerHTML = `Auto Hatch [` + hatchState + `]<br>`
 }
 
+function changesortsync() {
+    if (hatcherySortSync == "OFF") {
+        hatcherySortSync = "ON"
+        localStorage.setItem("hatcherySortSync", hatcherySortSync);
+        document.getElementById("sort-sync").classList.remove('btn-danger');
+        document.getElementById("sort-sync").classList.add('btn-success');
+    } else {
+        hatcherySortSync = "OFF"
+        localStorage.setItem("hatcherySortSync", hatcherySortSync);
+        document.getElementById("sort-sync").classList.remove('btn-success');
+        document.getElementById("sort-sync").classList.add('btn-danger');
+    }
+    document.getElementById('sort-sync').innerHTML = `Pokemon List Sync [` + hatcherySortSync + `]`
+}
+
 function toggleEggFossil() {
     if (eggFossilState == "OFF") {
         eggFossilState = "ON"
@@ -85,30 +112,32 @@ function toggleEggFossil() {
 function autoHatcher() {
     autoHatchLoop = setInterval(function () {
         //change daycare sorting
-        var pS = Settings.getSetting('partySort');
-        var hS = Settings.getSetting('hatcherySort');
-        if (pS.observableValue() != hatcherySortVal) {
-            hS.observableValue(pS.observableValue())
-            hatcherySortVal = pS.observableValue()
-            localStorage.setItem("hatcherySortVal", hatcherySortVal);
-        }
-        if (hS.observableValue() != hatcherySortVal) {
-            hatcherySortVal = hS.observableValue()
-            pS.observableValue(hS.observableValue())
-            localStorage.setItem("hatcherySortVal", hatcherySortVal);
-        }
+        if (hatcherySortSync == "ON") {
+            var pS = Settings.getSetting('partySort');
+            var hS = Settings.getSetting('hatcherySort');
+            if (pS.observableValue() != hatcherySortVal) {
+                hS.observableValue(pS.observableValue())
+                hatcherySortVal = pS.observableValue()
+                localStorage.setItem("hatcherySortVal", hatcherySortVal);
+            }
+            if (hS.observableValue() != hatcherySortVal) {
+                hatcherySortVal = hS.observableValue()
+                pS.observableValue(hS.observableValue())
+                localStorage.setItem("hatcherySortVal", hatcherySortVal);
+            }
 
-        var pSD = Settings.getSetting('partySortDirection');
-        var hSD = Settings.getSetting('hatcherySortDirection');
-        if (pSD.observableValue() != hatcherySortDir) {
-            hatcherySortDir = pSD.observableValue()
-            hSD.observableValue(pSD.observableValue())
-            localStorage.setItem("hatcherySortDir", hatcherySortDir);
-        }
-        if (hSD.observableValue() != hatcherySortDir) {
-            hatcherySortDir = hSD.observableValue()
-            pSD.observableValue(hSD.observableValue())
-            localStorage.setItem("hatcherySortDir", hatcherySortDir);
+            var pSD = Settings.getSetting('partySortDirection');
+            var hSD = Settings.getSetting('hatcherySortDirection');
+            if (pSD.observableValue() != hatcherySortDir) {
+                hatcherySortDir = pSD.observableValue()
+                hSD.observableValue(pSD.observableValue())
+                localStorage.setItem("hatcherySortDir", hatcherySortDir);
+            }
+            if (hSD.observableValue() != hatcherySortDir) {
+                hatcherySortDir = hSD.observableValue()
+                pSD.observableValue(hSD.observableValue())
+                localStorage.setItem("hatcherySortDir", hatcherySortDir);
+            }
         }
 
         // Attempt to hatch each egg. If the egg is at 100% it will succeed
@@ -264,10 +293,15 @@ function autoHatcher() {
                 //console.log(filteredEggList[0])
                 App.game.breeding.addPokemonToHatchery(filteredEggList[0]);
             } catch (err) {
-                var canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
-                var randBreed = getRandomInt(canBreed.length);
-                //console.log(canBreed[randBreed])
-                App.game.breeding.addPokemonToHatchery(canBreed[randBreed]);
+                var isFavorite = BreedingController.filter.category();
+                if (isFavorite != 1) {
+                    var canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
+                    var randBreed = getRandomInt(canBreed.length);
+                    //console.log(canBreed[randBreed])
+                    App.game.breeding.addPokemonToHatchery(canBreed[randBreed]);
+                } else {
+                    return true;
+                }
             }
             //console.log("Added " + filteredEggList[0].name + " to the Hatchery!");
         }
@@ -286,10 +320,14 @@ if (localStorage.getItem('hatcherySortVal') == null) {
 if (localStorage.getItem('hatcherySortDir') == null) {
     localStorage.setItem("hatcherySortDir", true);
 }
+if (localStorage.getItem('hatcherySortSync') == null) {
+    localStorage.setItem("hatcherySortSync", "OFF");
+}
 hatchState = localStorage.getItem('autoHatchState');
 eggFossilState = localStorage.getItem('autoEggFossil');
 hatcherySortVal = +localStorage.getItem('hatcherySortVal');
 hatcherySortDir = +localStorage.getItem('hatcherySortDir');
+hatcherySortSync = localStorage.getItem('hatcherySortSync');
 
 var scriptLoad = setInterval(function () {
     try {
@@ -324,4 +362,14 @@ function checkAutoHatch() {
 
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
+}
+
+function addGlobalStyle(css) {
+    var head, style;
+    head = document.getElementsByTagName('head')[0];
+    if (!head) { return; }
+    style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = css;
+    head.appendChild(style);
 }
