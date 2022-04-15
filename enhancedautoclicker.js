@@ -227,158 +227,12 @@ function autoClicker() {
 
         //Auto Gym checking
         if (gymState == "ON") {
-            if (player.town().hasOwnProperty("gym") || player.town().hasOwnProperty("gymList")) {
-                if (player.town().gym != null || player.town().gym !== undefined) {
-                    if (MapHelper.calculateTownCssClass(player.town().name) != "currentLocation") {
-                        MapHelper.moveToTown(player.town().name)
-                    }
-                    if (player.region != player.town().region) {
-                        player.region = player.town().region
-                    }
-
-                    if (App.game.gameState != GameConstants.GameState.gym) {
-                        if (player.town().hasOwnProperty("gymList")) {
-                            var selGym;
-                            for (var i = 0; i <= gymSelect; i++) {
-                                if (Gym.isUnlocked(player.town().gymList[i]) == true) {
-                                    selGym = i;
-                                } else {
-                                    selGym = (i - 1)
-                                    i = gymLength;
-                                }
-                                if (selGym != -1) {
-                                    GymRunner.startGym(player.town().gymList[i])
-                                }
-                            }
-                        } else {
-                            if (Gym.isUnlocked(player.town().gym) == true) {
-                                GymRunner.startGym(player.town().gym)
-                            }
-                        }
-                    }
-                }
-            }
+            autoGym();
         }
-
+        
         //Auto Dungeon checking
         if ((dungeonState == "ON") && (DungeonRunner.fighting() == false && DungeonBattle.catching() == false) == true) {
-            if (player.town().hasOwnProperty("dungeon") == true && player.town().dungeon !== undefined) {
-                var getTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
-                var dungeonCost = player.town().dungeon.tokenCost;
-                if (MapHelper.calculateTownCssClass(player.town().name) != "currentLocation") {
-                    MapHelper.moveToTown(player.town().name)
-                }
-                if (player.region != player.town().region) {
-                    player.region = player.town().region
-                }
-                if (getTokens >= dungeonCost && App.game.gameState != GameConstants.GameState.dungeon) {
-                    DungeonRunner.initializeDungeon(player.town().dungeon)
-                }
-                if (App.game.gameState === GameConstants.GameState.dungeon) {
-
-                    var dungeonBoard = DungeonRunner.map.board();
-                    var invisTile = document.querySelectorAll('.tile-invisible').length;
-                    var visitTile = document.querySelectorAll('.tile-visited').length;
-                    var lockedTile = 0;
-                    for (var ii = 0; ii < dungeonBoard.length; ii++) {
-                        for (var iii = 0; iii < dungeonBoard[ii].length; iii++) {
-                            var tilePriority = "NO";
-                            if (dungeonBoard[ii][iii].isVisited == false && dungeonBoard[ii][iii].isVisible == true) {
-                                if (dungeonSelect == 1 && foundBoss == "YES") {
-                                    DungeonRunner.map.moveToCoordinates(foundBossX, foundBossY)
-                                    if (DungeonRunner.map.currentTile().type() != GameConstants.DungeonTile.boss) {
-                                        DungeonRunner.map.moveToCoordinates(iii, ii)
-                                    }
-                                } else {
-                                    DungeonRunner.map.moveToCoordinates(iii, ii)
-                                }
-                                tilePriority = "YES"
-                            }
-                            if (tilePriority == "NO" && dungeonBoard[ii][iii].isVisible == false) {
-                                lockedTile++;
-                                tilePriority = "YES"
-                            }
-                            if ((tilePriority == "NO") && (dungeonSelect == 0) && (lockedTile == 0) && (dungeonBoard[ii][iii].isVisible == true) && (dungeonBoard[ii][iii].hasPlayer == false) && (dungeonBoard[ii][iii].cssClass().includes("tile-empty") == false)) {
-                                DungeonRunner.map.moveToCoordinates(iii, ii)
-                            }
-                            var getChests = document.querySelectorAll('.tile-chest').length;
-                            var getEnemy = document.querySelectorAll('.tile-enemy').length;
-                            //Checks for any invisible tiles, makes sure you always full clear instead of fighting the boss if you don't have the map
-                            var getMap = document.querySelectorAll('.tile-invisible').length;
-                            if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest) {
-                                DungeonRunner.openChest();
-                            }
-                            if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
-                                if (dungeonSelect == 1) {
-                                    foundBoss = null;
-                                    DungeonRunner.startBossFight();
-                                }
-                                if ((dungeonSelect == 0) && (getChests == 0) && (getEnemy == 0) && (getMap == 0)) {
-                                    foundBoss = null;
-                                    DungeonRunner.startBossFight();
-                                }
-                            }
-                            if (dungeonSelect == 1 && dungeonBoard[ii][iii].cssClass().includes("tile-boss") == true) {
-                                foundBoss = "YES"
-                                foundBossX = iii
-                                foundBossY = ii
-                            }
-                            if (lockedTile == invisTile && lockedTile != 0) {
-                                var playerPos = DungeonRunner.map.playerPosition()
-                                var moveOrder = ["left", "right", "up", "down"];
-                                var leftRight = [-1, 1, 0, 0];
-                                var upDown = [0, 0, -1, 1];
-                                var posMoves = [];
-                                var clearMoves = [];
-                                var posIndex = [];
-                                var clearIndex = [];
-                                for (var move = 0; move < 4; move++) {
-                                    try {
-                                        if (dungeonBoard[playerPos.y + upDown[move]][playerPos.x + leftRight[move]].isVisible == false) {
-                                            if (DungeonRunner.map.board()[playerPos.x + leftRight[move]][playerPos.y + upDown[move]] != undefined) {
-                                                posMoves.push(moveOrder[move])
-                                            }
-                                        } else {
-                                            posMoves.push("null")
-                                        }
-                                        if (dungeonBoard[playerPos.y + upDown[move]][playerPos.x + leftRight[move]].isVisible == true) {
-                                            if (DungeonRunner.map.board()[playerPos.x + leftRight[move]][playerPos.y + upDown[move]] != undefined) {
-                                                clearMoves.push(moveOrder[move])
-                                            } else {
-                                                clearMoves.push("null")
-                                            }
-                                        }
-                                    }
-                                    catch (err) {
-                                        posMoves.push("null")
-                                        clearMoves.push("null")
-                                    }
-                                }
-                                posMoves.forEach((Moves, Index) => {
-                                    if (Moves != "null") {
-                                        posIndex.push(Index)
-                                    }
-                                });
-                                clearMoves.forEach((Moves, Index) => {
-                                    if (Moves != "null") {
-                                        clearIndex.push(Index)
-                                    }
-                                });
-                                var selMove;
-                                if (posIndex.length > 0) {
-                                    selMove = getRandomInt(posIndex.length);
-                                    selMove = posIndex[selMove];
-                                } else {
-                                    selMove = getRandomInt(clearIndex.length);
-                                    selMove = clearIndex[selMove];
-                                }
-                                DungeonRunner.map.moveToCoordinates(playerPos.x + leftRight[selMove], playerPos.y + upDown[selMove])
-                            }
-                        }
-                    }
-
-                }
-            }
+            autoDungeon();
         }
 
         // Click while in a gym battle
@@ -392,12 +246,162 @@ function autoClicker() {
                 DungeonBattle.clickAttack();
             }
         }
-
-        // Click while in Safari battles
-        if (Safari.inBattle()) {
-            BattleFrontierBattle.clickAttack();
-        }
     }, 50); // The app hard-caps click attacks at 50
+}
+
+function autoGym() {
+    if (player.town().hasOwnProperty("gym") || player.town().hasOwnProperty("gymList")) {
+        if (player.town().gym != null || player.town().gym !== undefined) {
+            if (MapHelper.calculateTownCssClass(player.town().name) != "currentLocation") {
+                MapHelper.moveToTown(player.town().name)
+            }
+            if (player.region != player.town().region) {
+                player.region = player.town().region
+            }
+
+            if (App.game.gameState != GameConstants.GameState.gym) {
+                if (player.town().hasOwnProperty("gymList")) {
+                    var selGym;
+                    for (var i = 0; i <= gymSelect; i++) {
+                        if (Gym.isUnlocked(player.town().gymList[i]) == true) {
+                            selGym = i;
+                        } else {
+                            selGym = (i - 1)
+                            i = gymLength;
+                        }
+                        if (selGym != -1) {
+                            GymRunner.startGym(player.town().gymList[i])
+                        }
+                    }
+                } else {
+                    if (Gym.isUnlocked(player.town().gym) == true) {
+                        GymRunner.startGym(player.town().gym)
+                    }
+                }
+            }
+        }
+    }
+}
+
+//Performance for this section is really slow in the later dungeons because of increased tiles, according to profile querySelectorAll is the culprit, look for better way to search tiles
+function autoDungeon() {
+    if (player.town().hasOwnProperty("dungeon") == true && player.town().dungeon !== undefined) {
+        var getTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
+        var dungeonCost = player.town().dungeon.tokenCost;
+        if (MapHelper.calculateTownCssClass(player.town().name) != "currentLocation") {
+            MapHelper.moveToTown(player.town().name)
+        }
+        if (player.region != player.town().region) {
+            player.region = player.town().region
+        }
+        if (getTokens >= dungeonCost && App.game.gameState != GameConstants.GameState.dungeon) {
+            DungeonRunner.initializeDungeon(player.town().dungeon)
+        }
+        if (App.game.gameState === GameConstants.GameState.dungeon) {
+
+            var dungeonBoard = DungeonRunner.map.board();
+            var invisTile = document.getElementById('dungeonMap').querySelectorAll('.tile-invisible').length;
+            //var visitTile = document.querySelectorAll('.tile-visited').length; unused variable
+            var lockedTile = 0;
+            for (var ii = 0; ii < dungeonBoard.length; ii++) {
+                for (var iii = 0; iii < dungeonBoard[ii].length; iii++) {
+                    var tilePriority = "NO";
+                    if (dungeonBoard[ii][iii].isVisited == false && dungeonBoard[ii][iii].isVisible == true) {
+                        if (dungeonSelect == 1 && foundBoss == "YES") {
+                            DungeonRunner.map.moveToCoordinates(foundBossX, foundBossY)
+                            if (DungeonRunner.map.currentTile().type() != GameConstants.DungeonTile.boss) {
+                                DungeonRunner.map.moveToCoordinates(iii, ii)
+                            }
+                        } else {
+                            DungeonRunner.map.moveToCoordinates(iii, ii)
+                        }
+                        tilePriority = "YES"
+                    }
+                    if (tilePriority == "NO" && dungeonBoard[ii][iii].isVisible == false) {
+                        lockedTile++;
+                        tilePriority = "YES"
+                    }
+                    if ((tilePriority == "NO") && (dungeonSelect == 0) && (lockedTile == 0) && (dungeonBoard[ii][iii].isVisible == true) && (dungeonBoard[ii][iii].hasPlayer == false) && (dungeonBoard[ii][iii].cssClass().includes("tile-empty") == false)) {
+                        DungeonRunner.map.moveToCoordinates(iii, ii)
+                    }
+                    var getChests = document.getElementById('dungeonMap').querySelectorAll('.tile-chest').length;
+                    var getEnemy = document.getElementById('dungeonMap').querySelectorAll('.tile-enemy').length;
+                    
+                    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest) {
+                        DungeonRunner.openChest();
+                    }
+                    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
+                        if (dungeonSelect == 1) {
+                            foundBoss = null;
+                            DungeonRunner.startBossFight();
+                        }
+                        //Checks for any invisible tiles, makes sure you always full clear instead of fighting the boss if you don't have the map
+                        if ((dungeonSelect == 0) && (getChests == 0) && (getEnemy == 0) && (invisTile == 0)) {
+                            foundBoss = null;
+                            DungeonRunner.startBossFight();
+                        }
+                    }
+                    if (dungeonSelect == 1 && dungeonBoard[ii][iii].cssClass().includes("tile-boss") == true) {
+                        foundBoss = "YES"
+                        foundBossX = iii
+                        foundBossY = ii
+                    }
+                    if (lockedTile == invisTile && lockedTile != 0) {
+                        var playerPos = DungeonRunner.map.playerPosition()
+                        var moveOrder = ["left", "right", "up", "down"];
+                        var leftRight = [-1, 1, 0, 0];
+                        var upDown = [0, 0, -1, 1];
+                        var posMoves = [];
+                        var clearMoves = [];
+                        var posIndex = [];
+                        var clearIndex = [];
+                        for (var move = 0; move < 4; move++) {
+                            try {
+                                if (dungeonBoard[playerPos.y + upDown[move]][playerPos.x + leftRight[move]].isVisible == false) {
+                                    if (DungeonRunner.map.board()[playerPos.x + leftRight[move]][playerPos.y + upDown[move]] != undefined) {
+                                        posMoves.push(moveOrder[move])
+                                    }
+                                } else {
+                                    posMoves.push("null")
+                                }
+                                if (dungeonBoard[playerPos.y + upDown[move]][playerPos.x + leftRight[move]].isVisible == true) {
+                                    if (DungeonRunner.map.board()[playerPos.x + leftRight[move]][playerPos.y + upDown[move]] != undefined) {
+                                        clearMoves.push(moveOrder[move])
+                                    } else {
+                                        clearMoves.push("null")
+                                    }
+                                }
+                            }
+                            catch (err) {
+                                posMoves.push("null")
+                                clearMoves.push("null")
+                            }
+                        }
+                        posMoves.forEach((Moves, Index) => {
+                            if (Moves != "null") {
+                                posIndex.push(Index)
+                            }
+                        });
+                        clearMoves.forEach((Moves, Index) => {
+                            if (Moves != "null") {
+                                clearIndex.push(Index)
+                            }
+                        });
+                        var selMove;
+                        if (posIndex.length > 0) {
+                            selMove = getRandomInt(posIndex.length);
+                            selMove = posIndex[selMove];
+                        } else {
+                            selMove = getRandomInt(clearIndex.length);
+                            selMove = clearIndex[selMove];
+                        }
+                        DungeonRunner.map.moveToCoordinates(playerPos.x + leftRight[selMove], playerPos.y + upDown[selMove])
+                    }
+                }
+            }
+
+        }
+    }
 }
 
 if (localStorage.getItem('autoClickState') == null) {
