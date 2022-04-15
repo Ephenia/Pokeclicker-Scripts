@@ -57,19 +57,23 @@ if (localStorage.getItem('ballAdjuster') == null) {
 }
 ballAdjuster = localStorage.getItem('ballAdjuster');
 
-var scriptLoad = setInterval(function () {
-    try {
-        newSave = document.querySelectorAll('label')[0];
-        trainerCards = document.querySelectorAll('.trainer-card');
-    } catch (err) { }
-    if (typeof newSave != 'undefined') {
-        for (var i = 0; i < trainerCards.length; i++) {
-            trainerCards[i].addEventListener('click', checkBallAdjust, false);
+function loadScript(){
+    var scriptLoad = setInterval(function () {
+        try {
+            newSave = document.querySelectorAll('label')[0];
+            trainerCards = document.querySelectorAll('.trainer-card');
+        } catch (err) { }
+        if (typeof newSave != 'undefined') {
+            for (var i = 0; i < trainerCards.length; i++) {
+                trainerCards[i].addEventListener('click', checkBallAdjust, false);
+            }
+            newSave.addEventListener('click', checkBallAdjust, false);
+            clearInterval(scriptLoad)
         }
-        newSave.addEventListener('click', checkBallAdjust, false);
-        clearInterval(scriptLoad)
-    }
-}, 50);
+    }, 50);
+}
+
+loadScript();
 
 function checkBallAdjust() {
     awaitBallAdjust = setInterval(function () {

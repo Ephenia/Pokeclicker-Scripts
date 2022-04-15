@@ -48,19 +48,23 @@ function initOmegaProtein() {
     }
 }
 
-var scriptLoad = setInterval(function () {
-    try {
-        newSave = document.querySelectorAll('label')[0];
-        trainerCards = document.querySelectorAll('.trainer-card');
-    } catch (err) { }
-    if (typeof newSave != 'undefined') {
-        for (var i = 0; i < trainerCards.length; i++) {
-            trainerCards[i].addEventListener('click', checkOmegaProtein, false);
+function loadScript(){
+    var scriptLoad = setInterval(function () {
+        try {
+            newSave = document.querySelectorAll('label')[0];
+            trainerCards = document.querySelectorAll('.trainer-card');
+        } catch (err) { }
+        if (typeof newSave != 'undefined') {
+            for (var i = 0; i < trainerCards.length; i++) {
+                trainerCards[i].addEventListener('click', checkOmegaProtein, false);
+            }
+            newSave.addEventListener('click', checkOmegaProtein, false);
+            clearInterval(scriptLoad)
         }
-        newSave.addEventListener('click', checkOmegaProtein, false);
-        clearInterval(scriptLoad)
-    }
-}, 50);
+    }, 50);
+}
+
+loadScript();
 
 function checkOmegaProtein() {
     awaitOmegaProtein = setInterval(function () {

@@ -290,19 +290,23 @@ autoMineSkip = localStorage.getItem('autoMineSkip');
 sellTreasureState = localStorage.getItem('autoSellTreasure');
 sellPlateState = localStorage.getItem('autoSellPlate');
 
-var scriptLoad = setInterval(function () {
-    try {
-        newSave = document.querySelectorAll('label')[0];
-        trainerCards = document.querySelectorAll('.trainer-card');
-    } catch (err) { }
-    if (typeof newSave != 'undefined') {
-        for (var i = 0; i < trainerCards.length; i++) {
-            trainerCards[i].addEventListener('click', checkAutoMine, false);
+function loadScript(){
+    var scriptLoad = setInterval(function () {
+        try {
+            newSave = document.querySelectorAll('label')[0];
+            trainerCards = document.querySelectorAll('.trainer-card');
+        } catch (err) { }
+        if (typeof newSave != 'undefined') {
+            for (var i = 0; i < trainerCards.length; i++) {
+                trainerCards[i].addEventListener('click', checkAutoMine, false);
+            }
+            newSave.addEventListener('click', checkAutoMine, false);
+            clearInterval(scriptLoad)
         }
-        newSave.addEventListener('click', checkAutoMine, false);
-        clearInterval(scriptLoad)
-    }
-}, 50);
+    }, 50);
+}
+
+loadScript();
 
 function checkAutoMine() {
     awaitAutoMine = setInterval(function () {

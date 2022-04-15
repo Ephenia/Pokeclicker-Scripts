@@ -436,19 +436,23 @@ gymSelect = +localStorage.getItem('selectedGym');
 dungeonState = localStorage.getItem('autoDungeonState');
 dungeonSelect = localStorage.getItem('selectedDungeon');
 
-var scriptLoad = setInterval(function () {
-    try {
-        newSave = document.querySelectorAll('label')[0];
-        trainerCards = document.querySelectorAll('.trainer-card');
-    } catch (err) { }
-    if (typeof newSave != 'undefined') {
-        for (var i = 0; i < trainerCards.length; i++) {
-            trainerCards[i].addEventListener('click', checkAutoClick, false);
+function loadScript(){
+    var scriptLoad = setInterval(function () {
+        try {
+            newSave = document.querySelectorAll('label')[0];
+            trainerCards = document.querySelectorAll('.trainer-card');
+        } catch (err) { }
+        if (typeof newSave != 'undefined') {
+            for (var i = 0; i < trainerCards.length; i++) {
+                trainerCards[i].addEventListener('click', checkAutoClick, false);
+            }
+            newSave.addEventListener('click', checkAutoClick, false);
+            clearInterval(scriptLoad)
         }
-        newSave.addEventListener('click', checkAutoClick, false);
-        clearInterval(scriptLoad)
-    }
-}, 50);
+    }, 50);
+}
+
+loadScript();
 
 function checkAutoClick() {
     awaitAutoClick = setInterval(function () {

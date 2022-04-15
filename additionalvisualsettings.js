@@ -13,7 +13,6 @@ var checkWildPokeDefeat;
 var checkWildPokeImg;
 var checkWildPokeHealth;
 var checkAllNotification;
-var awaitVisualSettings;
 var newSave;
 var trainerCards;
 
@@ -63,10 +62,37 @@ function initVisualSettings() {
     notifiyHTML.innerHTML = `<td class="p-2">
         <label class="m-0">Disable all Notifications</label>
     </td>
-    <td class="p-2">
+    <td class="p-2 tight">
         <input id="all-notify" type="checkbox">
     </td>`
-    document.querySelectorAll('tbody[data-bind*="Object.values(NotificationConstants"')[1].prepend(notifiyHTML)
+
+    //Moved to async function because it fails to execute on loading screen so we keep trying until the element exists
+    function findSettings(){
+        var settings = setInterval(function find(){
+            try{
+                //Settings screen changed, this is where the option should go now
+                document.querySelector('[id="settingsNotificationGeneral"] table tbody').prepend(notifiyHTML)
+                //This fails to execute later because the element is added asynchronously so it should be executed with it
+                document.querySelector('#all-notify').addEventListener('change', event => {
+                    if (event.target.checked == false) {
+                        checkAllNotification = "OFF";
+                        localStorage.setItem("checkAllNotification", "OFF");
+                        var getToast = document.getElementById('toaster-disabled');
+                        getToast.setAttribute("id", "toaster");
+                    } else {
+                        checkAllNotification = "ON";
+                        localStorage.setItem("checkAllNotification", "ON");
+                        remNotifications();
+                    }
+                });
+
+                clearInterval(settings)
+            }
+            catch (err) {}
+        },100)
+    }
+
+    findSettings()
 
     checkWildPokeName = localStorage.getItem('checkWildPokeName');
     checkWildPokeDefeat = localStorage.getItem('checkWildPokeDefeat');
@@ -76,34 +102,37 @@ function initVisualSettings() {
     addGlobalStyle('.pageItemTitle { height:38px }');
     addGlobalStyle('#quick-settings { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
     addGlobalStyle('#quick-settings:hover { background-color:#ddd;border: 4px solid #ddd; }');
-
-    if (checkWildPokeName == "OFF") {
-        document.querySelector('#poke-name').checked = true
-    } else {
-        remPokeName();
-    }
-    if (checkWildPokeDefeat == "OFF") {
-        document.querySelector('#poke-defeat').checked = true
-    } else {
-        remPokeDefeat();
-    }
-    if (checkWildPokeImg == "OFF") {
-        document.querySelector('#poke-image').checked = true
-    } else {
-        remPokeImg();
-    }
-    if (checkWildPokeHealth == "OFF") {
-        document.querySelector('#poke-health').checked = true
-    } else {
-        remPokeHealth();
-    }
-    if (checkAllNotification == "ON") {
-        document.querySelector('#all-notify').checked = true
-        remNotifications();
-    }
-
-    document.querySelector('#map').addEventListener('click', event => {
-        if (event.target.matches('[data-bind*="MapHelper.calculateRouteCssClass"')) {
+    
+    //The elements removed by the scripts don't ever get added back after a restart, waiting a second before removing makes them load properly
+    setTimeout(function removeStartup(){
+        if (checkWildPokeName == "OFF") {
+            document.querySelector('#poke-name').checked = true
+        } else {
+            remPokeName();
+        }
+        if (checkWildPokeDefeat == "OFF") {
+            document.querySelector('#poke-defeat').checked = true
+        } else {
+            remPokeDefeat();
+        }
+        if (checkWildPokeImg == "OFF") {
+            document.querySelector('#poke-image').checked = true
+        } else {
+            remPokeImg();
+        }
+        if (checkWildPokeHealth == "OFF") {
+            document.querySelector('#poke-health').checked = true
+        } else {
+            remPokeHealth();
+        }
+        if (checkAllNotification == "ON") {
+            document.querySelector('#all-notify').checked = true
+            remNotifications();
+        }
+    }, 1000)
+    
+    document.getElementById('map').addEventListener('click', event => {
+        if (event.target.matches('[data-route]')) {
             if (checkWildPokeName == "ON") {
                 remPokeName();
             }
@@ -159,19 +188,6 @@ function initVisualSettings() {
         }
     });
 
-    document.querySelector('#all-notify').addEventListener('change', event => {
-        if (event.target.checked == false) {
-            checkAllNotification = "OFF";
-            localStorage.setItem("checkAllNotification", "OFF");
-            var getToast = document.getElementById('toaster-disabled');
-            getToast.setAttribute("id", "toaster");
-        } else {
-            checkAllNotification = "ON";
-            localStorage.setItem("checkAllNotification", "ON");
-            remNotifications();
-        }
-    });
-
     function remPokeName() {
         var enemyName = document.querySelectorAll('knockout[data-bind*="text: Battle.enemyPokemon().name"]');
         if (enemyName.length > 0) {
@@ -206,6 +222,8 @@ function initVisualSettings() {
 
     function remNotifications() {
         var getToast = document.getElementById('toaster');
+        //Clear all notifications before disabling to avoid messing up the page
+        for (var i = 0; i< getToast.childNodes.length; i++){ getToast.removeChild(getToast.childNodes[i]) }
         getToast.setAttribute("id", "toaster-disabled");
     }
 }
@@ -226,28 +244,38 @@ if (localStorage.getItem('checkAllNotification') == null) {
     localStorage.setItem("checkAllNotification", "OFF");
 }
 
-var scriptLoad = setInterval(function () {
-    try {
-        newSave = document.querySelectorAll('label')[0];
-        trainerCards = document.querySelectorAll('.trainer-card');
-    } catch (err) { }
-    if (typeof newSave != 'undefined') {
-        for (var i = 0; i < trainerCards.length; i++) {
-            trainerCards[i].addEventListener('click', checkVisualSettings, false);
+function loadScript(){
+    var scriptLoad = setInterval(function () {
+        try {
+            newSave = document.querySelectorAll('label')[0];
+            trainerCards = document.querySelectorAll('.trainer-card');
+        } catch (err) { }
+        if (typeof newSave != 'undefined') {
+            for (var i = 0; i < trainerCards.length; i++) {
+                trainerCards[i].addEventListener('click', checkVisualSettings, false);
+            }
+            newSave.addEventListener('click', checkVisualSettings, false);
+            clearInterval(scriptLoad)
         }
-        newSave.addEventListener('click', checkVisualSettings, false);
-        clearInterval(scriptLoad)
-    }
-}, 50);
+    }, 50);
+}
+
+loadScript();
 
 function checkVisualSettings() {
-    awaitVisualSettings = setInterval(function () {
+    var awaitVisualSettings = setInterval(function () {
         var gameState;
         try {
             gameState = App.game.gameState;
         } catch (err) { }
-        if (typeof gameState != 'undefined') {
-            initVisualSettings();
+        //gameState is no longer undefined when loaded, it's now a number (2)
+        if (typeof gameState != 'number') {
+            //Try catch is mostly for testing but may be useful in the future, also makes sure that clearInterval runs
+            try{
+                initVisualSettings();
+            }
+            catch (err)
+            { }
             clearInterval(awaitVisualSettings)
             //console.log("Visual settings should be applied.")
         }
