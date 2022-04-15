@@ -303,6 +303,8 @@ function autoClicker() {
                             }
                             var getChests = document.querySelectorAll('.tile-chest').length;
                             var getEnemy = document.querySelectorAll('.tile-enemy').length;
+                            //Checks for any invisible tiles, makes sure you always full clear instead of fighting the boss if you don't have the map
+                            var getMap = document.querySelectorAll('.tile-invisible').length;
                             if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest) {
                                 DungeonRunner.openChest();
                             }
@@ -311,7 +313,7 @@ function autoClicker() {
                                     foundBoss = null;
                                     DungeonRunner.startBossFight();
                                 }
-                                if ((dungeonSelect == 0) && (getChests == 0) && (getEnemy == 0)) {
+                                if ((dungeonSelect == 0) && (getChests == 0) && (getEnemy == 0) && (getMap == 0)) {
                                     foundBoss = null;
                                     DungeonRunner.startBossFight();
                                 }
@@ -388,20 +390,6 @@ function autoClicker() {
         if (App.game.gameState === GameConstants.GameState.dungeon) {
             if (DungeonRunner.fighting() && !DungeonBattle.catching()) {
                 DungeonBattle.clickAttack();
-            }
-            if (dungeonState == "ON") {
-                if (
-                    DungeonRunner.map.currentTile().type() ===
-                    GameConstants.DungeonTile.chest
-                ) {
-                    DungeonRunner.openChest();
-                } else if (
-                    DungeonRunner.map.currentTile().type() ===
-                    GameConstants.DungeonTile.boss &&
-                    !DungeonRunner.fightingBoss()
-                ) {
-                    DungeonRunner.startBossFight();
-                }
             }
         }
 
