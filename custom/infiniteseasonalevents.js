@@ -28,34 +28,6 @@ SpecialEvents.newEvent('Ephenia\'s Gift', 'Encounter Ribombee that roams across 
     }
 );
 
-setTimeout(() => {
-    for (var i = 0; i < getEvents.length; i++) {
-        if (localStorage.getItem('specialEvent'+i) == null) {
-            localStorage.setItem('specialEvent'+i, 0);
-        }
-        storedEvents.push(+localStorage.getItem('specialEvent'+i))
-    }
-
-    for (var ii = 0; ii < getEvents.length; ii++) {
-        getEvents[ii].startTime = startDate
-        getEvents[ii].endTime = endDate
-        if (getEvents[ii].hasStarted() == false && storedEvents[ii] == 1) {
-            getEvents[ii].start()
-        }
-    }
-    //initEvents();
-    if (getEvents.length != 8) {
-        setTimeout(() => {
-            Notifier.notify({
-                title: '[Outdated] Infinite Seasonal Events',
-                message: `Please contact <a href="//github.com/Ephenia/Pokeclicker-Scripts" target="_blank">Ephenia</a> so that this script can be updated!`,
-                type: NotificationConstants.NotificationOption.danger,
-                timeout: 10000
-            });
-        }, 2000);
-    }
-}, 50);
-
 //Made this script load like the others for consistency
 function loadScript(){
     var scriptLoad = setInterval(function () {
@@ -77,10 +49,40 @@ loadScript();
 
 //Removed setTimeout, opted to make it load like the other scrips, also helps with notifications
 function initEvents() {
+    //Testing loading events in init
+    for (var i = 0; i < getEvents.length; i++) {
+        if (localStorage.getItem('specialEvent'+i) == null) {
+            localStorage.setItem('specialEvent'+i, 0);
+        }
+        storedEvents.push(+localStorage.getItem('specialEvent'+i))
+    }
+
+    for (var ii = 0; ii < getEvents.length; ii++) {
+        getEvents[ii].startTime = startDate
+        getEvents[ii].endTime = endDate
+        if (getEvents[ii].hasStarted() == false && storedEvents[ii] == 1) {
+            if (ii != 1){
+                getEvents[ii].start()
+            }
+            
+        }
+    }
+    //initEvents();
+    if (getEvents.length != 8) {
+        setTimeout(() => {
+            Notifier.notify({
+                title: '[Outdated] Infinite Seasonal Events',
+                message: `Please contact <a href="//github.com/Ephenia/Pokeclicker-Scripts" target="_blank">Ephenia</a> so that this script can be updated!`,
+                type: NotificationConstants.NotificationOption.danger,
+                timeout: 10000
+            });
+        }, 2000);
+    }
+
+    
     //Why is clearing notifications so hard
     var cleared = 0;
     var clearNotifs = setInterval(function (){
-        console.log('ran interval event')
         var eventNotify = document.getElementById('toaster');
         for (var i = 0; i< eventNotify.childNodes.length; i++){
             if (eventNotify.childNodes[0].childNodes[1].textContent.includes('EVENT')){ 
@@ -88,7 +90,8 @@ function initEvents() {
                 cleared++
             }
         }
-        if (cleared >= getEvents.length){ clearInterval(clearNotifs) }
+        //For some reason some notifications appear twice even if the script runs once so 15 need to be cleared
+        if (cleared >= 15){ clearInterval(clearNotifs) }
     }, 100)
     
     var eventLi = document.createElement('li');
