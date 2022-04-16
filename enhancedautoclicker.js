@@ -283,7 +283,7 @@ function autoGym() {
     }
 }
 
-//Performance for this section is really slow in the later dungeons because of increased tiles, according to profile querySelectorAll is the culprit, look for better way to search tiles
+
 function autoDungeon() {
     if (player.town().hasOwnProperty("dungeon") == true && player.town().dungeon !== undefined) {
         var getTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
@@ -300,7 +300,12 @@ function autoDungeon() {
         if (App.game.gameState === GameConstants.GameState.dungeon) {
 
             var dungeonBoard = DungeonRunner.map.board();
-            var invisTile = document.getElementById('dungeonMap').querySelectorAll('.tile-invisible').length;
+            //One of these fails exactly once when starting a dungeon, giving an attribute of undefined error, doesn't cause any other issues
+            try{
+                var invisTile = document.getElementById('dungeonMap').querySelectorAll('.tile-invisible').length;
+                var getChests = document.getElementById('dungeonMap').querySelectorAll('.tile-chest').length;
+                var getEnemy = document.getElementById('dungeonMap').querySelectorAll('.tile-enemy').length;
+            } catch (err){}
             //var visitTile = document.querySelectorAll('.tile-visited').length; unused variable
             var lockedTile = 0;
             for (var ii = 0; ii < dungeonBoard.length; ii++) {
@@ -324,8 +329,7 @@ function autoDungeon() {
                     if ((tilePriority == "NO") && (dungeonSelect == 0) && (lockedTile == 0) && (dungeonBoard[ii][iii].isVisible == true) && (dungeonBoard[ii][iii].hasPlayer == false) && (dungeonBoard[ii][iii].cssClass().includes("tile-empty") == false)) {
                         DungeonRunner.map.moveToCoordinates(iii, ii)
                     }
-                    var getChests = document.getElementById('dungeonMap').querySelectorAll('.tile-chest').length;
-                    var getEnemy = document.getElementById('dungeonMap').querySelectorAll('.tile-enemy').length;
+                    
                     
                     if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest) {
                         DungeonRunner.openChest();
