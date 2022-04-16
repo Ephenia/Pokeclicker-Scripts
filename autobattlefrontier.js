@@ -88,19 +88,23 @@ if (localStorage.getItem('battleFrontFloor') == null) {
 }
 battleFrontFloor = +localStorage.getItem('battleFrontFloor');
 
-var scriptLoad = setInterval(function () {
-    try {
-        newSave = document.querySelectorAll('label')[0];
-        trainerCards = document.querySelectorAll('.trainer-card');
-    } catch (err) { }
-    if (typeof newSave != 'undefined') {
-        for (var i = 0; i < trainerCards.length; i++) {
-            trainerCards[i].addEventListener('click', checkBattleFrontier, false);
+function loadScript(){
+    var scriptLoad = setInterval(function () {
+        try {
+            newSave = document.querySelectorAll('label')[0];
+            trainerCards = document.querySelectorAll('.trainer-card');
+        } catch (err) { }
+        if (typeof newSave != 'undefined') {
+            for (var i = 0; i < trainerCards.length; i++) {
+                trainerCards[i].addEventListener('click', checkBattleFrontier, false);
+            }
+            newSave.addEventListener('click', checkBattleFrontier, false);
+            clearInterval(scriptLoad)
         }
-        newSave.addEventListener('click', checkBattleFrontier, false);
-        clearInterval(scriptLoad)
-    }
-}, 50);
+    }, 50);
+}
+
+loadScript();
 
 function checkBattleFrontier() {
     awaitBattleFrontier = setInterval(function () {

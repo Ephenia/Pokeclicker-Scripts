@@ -329,19 +329,23 @@ hatcherySortVal = +localStorage.getItem('hatcherySortVal');
 hatcherySortDir = +localStorage.getItem('hatcherySortDir');
 hatcherySortSync = localStorage.getItem('hatcherySortSync');
 
-var scriptLoad = setInterval(function () {
-    try {
-        newSave = document.querySelectorAll('label')[0];
-        trainerCards = document.querySelectorAll('.trainer-card');
-    } catch (err) { }
-    if (typeof newSave != 'undefined') {
-        for (var i = 0; i < trainerCards.length; i++) {
-            trainerCards[i].addEventListener('click', checkAutoHatch, false);
+function loadScript(){
+    var scriptLoad = setInterval(function () {
+        try {
+            newSave = document.querySelectorAll('label')[0];
+            trainerCards = document.querySelectorAll('.trainer-card');
+        } catch (err) { }
+        if (typeof newSave != 'undefined') {
+            for (var i = 0; i < trainerCards.length; i++) {
+                trainerCards[i].addEventListener('click', checkAutoHatch, false);
+            }
+            newSave.addEventListener('click', checkAutoHatch, false);
+            clearInterval(scriptLoad)
         }
-        newSave.addEventListener('click', checkAutoHatch, false);
-        clearInterval(scriptLoad)
-    }
-}, 50);
+    }, 50);
+}
+
+loadScript();
 
 function checkAutoHatch() {
     awaitAutoHatch = setInterval(function () {

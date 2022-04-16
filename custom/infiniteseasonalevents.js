@@ -28,7 +28,28 @@ SpecialEvents.newEvent('Ephenia\'s Gift', 'Encounter Ribombee that roams across 
     }
 );
 
-setTimeout(() => {
+//Made this script load like the others for consistency
+function loadScript(){
+    var scriptLoad = setInterval(function () {
+        try {
+            newSave = document.querySelectorAll('label')[0];
+            trainerCards = document.querySelectorAll('.trainer-card');
+        } catch (err) { }
+        if (typeof newSave != 'undefined') {
+            for (var i = 0; i < trainerCards.length; i++) {
+                trainerCards[i].addEventListener('click', initEvents, false);
+            }
+            newSave.addEventListener('click', initEvents, false);
+            clearInterval(scriptLoad)
+        }
+    }, 50);
+}
+
+loadScript();
+
+//Removed setTimeout, opted to make it load like the other scrips, also helps with notifications
+function initEvents() {
+    //Testing loading events in init
     for (var i = 0; i < getEvents.length; i++) {
         if (localStorage.getItem('specialEvent'+i) == null) {
             localStorage.setItem('specialEvent'+i, 0);
@@ -40,11 +61,14 @@ setTimeout(() => {
         getEvents[ii].startTime = startDate
         getEvents[ii].endTime = endDate
         if (getEvents[ii].hasStarted() == false && storedEvents[ii] == 1) {
-            getEvents[ii].start()
+            if (ii != 1){
+                getEvents[ii].start()
+            }
+            
         }
     }
-    initEvents();
-    if (getEvents.length != 7) {
+    //initEvents();
+    if (getEvents.length != 8) {
         setTimeout(() => {
             Notifier.notify({
                 title: '[Outdated] Infinite Seasonal Events',
@@ -54,85 +78,92 @@ setTimeout(() => {
             });
         }, 2000);
     }
-}, 50);
 
-
-function initEvents() {
-    setTimeout(() => {
-        for (var iii = 0; iii < getEvents.length; iii++) {
-            var eventNotify = document.querySelectorAll('.ml-2');
-            if (eventNotify.length >= iii + 1) {
-                eventNotify[iii].click()
+    
+    //Why is clearing notifications so hard
+    var cleared = 0;
+    var clearNotifs = setInterval(function (){
+        var eventNotify = document.getElementById('toaster');
+        for (var i = 0; i< eventNotify.childNodes.length; i++){
+            if (eventNotify.childNodes[0].childNodes[1].textContent.includes('EVENT')){ 
+                eventNotify.removeChild(eventNotify.childNodes[0])
+                cleared++
             }
         }
+        //For some reason some notifications appear twice even if the script runs once so 15 need to be cleared
+        if (cleared >= 15){ clearInterval(clearNotifs) }
+    }, 100)
+    
+    var eventLi = document.createElement('li');
+    eventLi.innerHTML = `<a class="dropdown-item" href="#eventModal" data-toggle="modal">Toggle Events</a>`
+    profileDrop.before(eventLi);
 
-        var eventLi = document.createElement('li');
-        eventLi.innerHTML = `<a class="dropdown-item" href="#eventModal" data-toggle="modal">Events</a>`
-        profileDrop.before(eventLi);
-
-        var eventMod = document.createElement('div');
-        eventMod.setAttribute("class", "modal noselect fade show");
-        eventMod.setAttribute("id", "eventModal");
-        eventMod.setAttribute("tabindex", "-1");
-        eventMod.setAttribute("aria-labelledby", "eventModal");
-        eventMod.setAttribute("aria-labelledby", "eventModal");
-        eventMod.setAttribute("aria-modal", "true");
-        eventMod.setAttribute("role", "dialog");
-        eventMod.innerHTML = `<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header" style="justify-content: space-around;">
-                <h5 class="modal-title">Events</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-            <div id="event-1" class="event-select" data-value="0"><b>`+getEvents[0].title+`</b><br>`+getEvents[0].description+`<br>
-            <img src="assets/images/pokemon/666.19.png">
-            </div><hr>
-            <div id="event-2" class="event-select" data-value="1"><b>`+getEvents[1].title+`</b><br>`+getEvents[1].description+`<br>
-            <img src="assets/images/pokemon/-1.png">
-            </div><hr>
-            <div id="event-3" class="event-select" data-value="2"><b>`+getEvents[2].title+`</b><br>`+getEvents[2].description+`<br>
-            <img src="assets/images/pokemon/-3.png">
-            <img src="assets/images/pokemon/-10.png">
-            <img src="assets/images/pokemon/-13.png">
-            <img src="assets/images/pokemon/-16.png">
-            </div><hr>
-            <div id="event-4" class="event-select" data-value="3"><b>`+getEvents[3].title+`</b><br>`+getEvents[3].description+`<br>
-            <img src="assets/images/pokemon/-6.png">
-            <img src="assets/images/pokemon/-5.png">
-            <img src="assets/images/pokemon/-7.png"><br>
-            <img src="assets/images/pokemon/92.png">
-            <img src="assets/images/pokemon/200.png">
-            <img src="assets/images/pokemon/353.png">
-            <img src="assets/images/pokemon/355.png">
-            </div><hr>
-            <div id="event-5" class="event-select" data-value="4"><b>`+getEvents[4].title+`</b><br>`+getEvents[4].description+`<br>
-            <img src="assets/images/pokemon/-9.png">
-            <img src="assets/images/pokemon/-8.png">
-            </div><hr>
-            <div id="event-6" class="event-select" data-value="5"><b>`+getEvents[5].title+`</b><br>`+getEvents[5].description+`<br>
-            <img src="assets/images/pokemon/-4.png">
-            </div><hr>
-            <div id="event-7" class="event-select" data-value="6"><b>`+getEvents[6].title+`</b><br>`+getEvents[6].description+`<br>
-            <img src="assets/images/pokemon/743.png">
-            </div><hr>
-            <div>
+    var eventMod = document.createElement('div');
+    eventMod.setAttribute("class", "modal noselect fade show");
+    eventMod.setAttribute("id", "eventModal");
+    eventMod.setAttribute("tabindex", "-1");
+    eventMod.setAttribute("aria-labelledby", "eventModal");
+    eventMod.setAttribute("aria-labelledby", "eventModal");
+    eventMod.setAttribute("aria-modal", "true");
+    eventMod.setAttribute("role", "dialog");
+    //Added easter event, up to date as of 15/04/22
+    eventMod.innerHTML = `<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header" style="justify-content: space-around;">
+            <h5 class="modal-title">Toggle Events</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
         </div>
-    </div>`
-        profileModal.before(eventMod);
+        <div class="modal-body">
+        <div id="event-1" class="event-select" data-value="0"><b>`+getEvents[0].title+`</b><br>`+getEvents[0].description+`<br>
+        <img src="assets/images/pokemon/666.19.png">
+        </div><hr>
+        <div id="event-2" class="event-select" data-value="1"><b>`+getEvents[1].title+`</b><br>`+getEvents[1].description+`<br>
+        <img src="assets/images/pokemon/175.2.png">
+        </div><hr>
+        <div id="event-3" class="event-select" data-value="2"><b>`+getEvents[2].title+`</b><br>`+getEvents[2].description+`<br>
+        <img src="assets/images/pokemon/-1.png">
+        </div><hr>
+        <div id="event-4" class="event-select" data-value="3"><b>`+getEvents[3].title+`</b><br>`+getEvents[3].description+`<br>
+        <img src="assets/images/pokemon/-3.png">
+        <img src="assets/images/pokemon/-10.png">
+        <img src="assets/images/pokemon/-13.png">
+        <img src="assets/images/pokemon/-16.png">
+        </div><hr>
+        <div id="event-5" class="event-select" data-value="4"><b>`+getEvents[4].title+`</b><br>`+getEvents[4].description+`<br>
+        <img src="assets/images/pokemon/-6.png">
+        <img src="assets/images/pokemon/-5.png">
+        <img src="assets/images/pokemon/-7.png"><br>
+        <img src="assets/images/pokemon/92.png">
+        <img src="assets/images/pokemon/200.png">
+        <img src="assets/images/pokemon/353.png">
+        <img src="assets/images/pokemon/355.png">
+        </div><hr>
+        <div id="event-6" class="event-select" data-value="5"><b>`+getEvents[5].title+`</b><br>`+getEvents[5].description+`<br>
+        <img src="assets/images/pokemon/-9.png">
+        <img src="assets/images/pokemon/-8.png">
+        </div><hr>
+        <div id="event-7" class="event-select" data-value="6"><b>`+getEvents[6].title+`</b><br>`+getEvents[6].description+`<br>
+        <img src="assets/images/pokemon/-4.png">
+        </div><hr>
+        <div id="event-8" class="event-select" data-value="7"><b>`+getEvents[7].title+`</b><br>`+getEvents[7].description+`<br>
+        <img src="assets/images/pokemon/743.png">
+        </div><hr>
+        <div>
+    </div>
+</div>`
+    profileModal.before(eventMod);
 
-        for (var add = 0; add < getEvents.length; add++) {
-            if (storedEvents[add] == 1) {
-                document.getElementById('event-'+(add+1)).style = "background-color: rgba(93, 226, 60, 0.5)"
-            }
-            $("#event-"+(add+1)).click (toggleEvent)
+    for (var add = 0; add < getEvents.length; add++) {
+        if (storedEvents[add] == 1) {
+            document.getElementById('event-'+(add+1)).style = "background-color: rgba(93, 226, 60, 0.5)"
         }
+        $("#event-"+(add+1)).click (toggleEvent)
+    }
 
-        addGlobalStyle('.event-select { cursor: pointer; }');
-        addGlobalStyle('.event-select:hover { background-color: rgba(48, 197, 255, 0.5); }');
-    }, 1450);
+    addGlobalStyle('.event-select { cursor: pointer; }');
+    addGlobalStyle('.event-select:hover { background-color: rgba(48, 197, 255, 0.5); }');
 }
 
 function toggleEvent() {

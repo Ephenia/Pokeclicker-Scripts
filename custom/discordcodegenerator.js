@@ -72,19 +72,23 @@ function randInt() {
     return Math.floor((Math.random() * 65536) + 1);
 }
 
-var scriptLoad = setInterval(function () {
-    try {
-        newSave = document.querySelectorAll('label')[0];
-        trainerCards = document.querySelectorAll('.trainer-card');
-    } catch (err) { }
-    if (typeof newSave != 'undefined') {
-        for (var i = 0; i < trainerCards.length; i++) {
-            trainerCards[i].addEventListener('click', checkCodeGen, false);
+function loadScript(){
+    var scriptLoad = setInterval(function () {
+        try {
+            newSave = document.querySelectorAll('label')[0];
+            trainerCards = document.querySelectorAll('.trainer-card');
+        } catch (err) { }
+        if (typeof newSave != 'undefined') {
+            for (var i = 0; i < trainerCards.length; i++) {
+                trainerCards[i].addEventListener('click', checkCodeGen, false);
+            }
+            newSave.addEventListener('click', checkCodeGen, false);
+            clearInterval(scriptLoad)
         }
-        newSave.addEventListener('click', checkCodeGen, false);
-        clearInterval(scriptLoad)
-    }
-}, 50);
+    }, 50);
+}
+
+loadScript();
 
 function checkCodeGen() {
     awaitCodeGen = setInterval(function () {
