@@ -45,7 +45,26 @@ function loadScript(){
     }, 50);
 }
 
-loadScript();
+var scriptName = 'infiniteseasonalevents'
+
+if (document.getElementById('scriptHandler') != undefined){
+    var scriptElement = document.createElement('div')
+    scriptElement.id = scriptName
+    document.getElementById('scriptHandler').appendChild(scriptElement)
+    if (localStorage.getItem(scriptName) != null){
+        if (localStorage.getItem(scriptName) == 'true'){
+            loadScript()
+        }
+    }
+    else{
+        localStorage.setItem(scriptName, 'true')
+        loadScript()
+    }
+}
+else{
+    loadScript();
+}
+
 
 //Removed setTimeout, opted to make it load like the other scrips, also helps with notifications
 function initEvents() {
