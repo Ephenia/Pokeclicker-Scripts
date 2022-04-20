@@ -163,7 +163,7 @@ As of 1.1 this also includes 2 more additional features into the Treasures tab o
 
 <hr>
   
-## **Simple Auto Farmer** ([sinpleautofarmer.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.js))
+## **Simple Auto Farmer** ([simpleautofarmer.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.js))
 This script is a simple Auto Farmer which adds 2 new buttons below the Plant and Harvest all buttons as shown:<br>
 
 ![](https://i.imgur.com/9Y4ad5B.png)
