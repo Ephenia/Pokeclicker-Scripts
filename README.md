@@ -181,9 +181,9 @@ I plan to update this Auto Farmer with some additional features later on.
 ## **Script manager** ([scriptmanager.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/scriptmanager.js))
 This script manages all other loaded scripts that succsessfully subscribe to it. All the scripts in this repository are automatically managed.
 This is mostly intended to be used in the desktop client as tampermonkey already allows to toggle scripts in a manner similar to this.
-Options are located in the <strong>Other</strong> tab in the settings
+Options are located in the <strong>Scripts</strong> tab in the settings
 
-![image](https://i.imgur.com/9p9IWc2.png)
+![image](https://i.imgur.com/R5zT9RH.png)
 
 If you wish to manage your custom script through this one add something along the lines of:
 
