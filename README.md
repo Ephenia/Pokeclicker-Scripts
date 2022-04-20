@@ -4,7 +4,7 @@ Various scripts & enhancements for the game [Pokéclicker](https://www.pokeclick
 
 These are originally created and intended for the use of the browser extension known as [Tampermonkey](https://www.tampermonkey.net/).
 
-If you are looking to use these scripts on the client version of Pokeclicker (Pokeclicker Desktop), [please check out the Releases section](https://github.com/Ephenia/Pokeclicker-Scripts/releases).
+If you are looking to use these scripts on the client version of Pokeclicker (Pokeclicker Desktop), move the <strong>app.asar</strong> from the desktop folder in the repository to <strong>C:\Users\{your user}\AppData\Local\Programs\pokeclicker-desktop\resources</strong> and replace the existing one.
 
 **If you are looking to have something specific created or have any inquiries, feel free to contact me directly (contact info on profile) OR [open and create an issue](https://github.com/Ephenia/Pokeclicker-Scripts/issues).**
 
@@ -20,7 +20,7 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 4. [**Enhanced Auto Hatchery** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-hatchery-enhancedautohatcheryjs)
 5. [**Enhanced Auto Mine** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-mine-enhancedautominejs)
 6. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
-7. [**Script Handler** ](//github.com/Ephenia/Pokeclicker-Scripts#script-handler-scripthandlerjs)
+7. [**Script Handler** (Included in desktop/app.asar)](//github.com/Ephenia/Pokeclicker-Scripts#script-handler-scripthandlerjs)
 # Custom Scripts
 1. [**Catch Speed Adjuster** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-catch-speed-adjuster-catchspeedadjusterjs)
 2. [**Challenge Mode Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-challenge-mode-changer-challengemodechangerjs)
@@ -178,7 +178,7 @@ I plan to update this Auto Farmer with some additional features later on.
 
 <hr>
 
-## **Script manager** ([scriptmanager.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/scriptmanager.js))
+## **Script manager (Exclusive to the desktop client)** ([app.asar](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/desktop/app.asar))
 This script manages all other loaded scripts that succsessfully subscribe to it. All the scripts in this repository are automatically managed.
 This is mostly intended to be used in the desktop client as tampermonkey already allows to toggle scripts in a manner similar to this.
 Options are located in the <strong>Scripts</strong> tab in the settings
