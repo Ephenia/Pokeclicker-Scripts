@@ -112,19 +112,13 @@ farmState = localStorage.getItem('autoFarmState');
 mulchState = localStorage.getItem('autoMulchState');
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkAutoFarm, false);
-            }
-            newSave.addEventListener('click', checkAutoFarm, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initAutoFarm()
+        return result
+    }
 }
 
 var scriptName = 'simpleautofarmer'
@@ -145,22 +139,4 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkAutoFarm() {
-    awaitAutoFarm = setInterval(function () {
-        var farmAccess;
-        try {
-            farmAccess = App.game.farming.canAccess();
-        } catch (err) { }
-        if (typeof farmAccess != 'undefined') {
-            if (farmAccess == true) {
-                initAutoFarm();
-                clearInterval(awaitAutoFarm)
-            } else {
-                //console.log("Checking for access...")
-            }
-        }
-    }, 1000);
 }

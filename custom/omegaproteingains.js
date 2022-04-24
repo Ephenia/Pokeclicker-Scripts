@@ -18,6 +18,7 @@ function initOmegaProtein() {
     document.getElementById('itemBag').querySelectorAll('div')[2].addEventListener('click', initProtein, true);
     
     function initProtein() {
+        //This setInterval is one of the few required ones because this table does not exist until loaded once
         awaitProteinTable = setInterval(function () {
             proteinTable = document.getElementById('pokemonSelectorModal').querySelectorAll('tbody')
             if (proteinTable.length != 0) {
@@ -49,19 +50,13 @@ function initOmegaProtein() {
 }
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkOmegaProtein, false);
-            }
-            newSave.addEventListener('click', checkOmegaProtein, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initOmegaProtein()
+        return result
+    }
 }
 
 var scriptName = 'omegaproteingains'
@@ -82,18 +77,4 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkOmegaProtein() {
-    awaitOmegaProtein = setInterval(function () {
-        var gameState;
-        try {
-            gameState = App.game.gameState;
-        } catch (err) { }
-        if (typeof gameState != 'undefined') {
-            initOmegaProtein();
-            clearInterval(awaitOmegaProtein)
-        }
-    }, 1000);
 }

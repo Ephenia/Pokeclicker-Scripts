@@ -8,14 +8,11 @@
 // @description Adds in stage resetting to the Battle Frontier that allows you to set a target stage and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
 // ==/UserScript==
 
-var awaitBattleFrontier;
 var awaitFloorReset;
 var existHTML = false;
 var battleFrontFloor;
 var bpImg = `<img src="assets/images/currency/battlePoint.svg" height="25px">`
 var moneyImg = `<img src="assets/images/currency/money.svg" height="25px">`
-var newSave;
-var trainerCards;
 
 function initBattleFrontier() {
     addGlobalStyle('#battle-front-cont { position:absolute;right:5px;top:5px;width:auto;height:41px; }');
@@ -89,19 +86,13 @@ if (localStorage.getItem('battleFrontFloor') == null) {
 battleFrontFloor = +localStorage.getItem('battleFrontFloor');
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkBattleFrontier, false);
-            }
-            newSave.addEventListener('click', checkBattleFrontier, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initBattleFrontier()
+        return result
+    }
 }
 
 var scriptName = 'autobattlefrontier'
@@ -122,24 +113,6 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkBattleFrontier() {
-    awaitBattleFrontier = setInterval(function () {
-        var bfAccess;
-        try {
-            bfAccess = App.game.battleFrontier.canAccess();
-        } catch (err) { }
-        if (typeof bfAccess != 'undefined') {
-            if (bfAccess == true) {
-                initBattleFrontier();
-                clearInterval(awaitBattleFrontier)
-            } else {
-                //console.log("Checking for access...")
-            }
-        }
-    }, 1000);
 }
 
 function addGlobalStyle(css) {

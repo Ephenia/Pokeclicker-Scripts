@@ -8,34 +8,24 @@
 // @description Removes the limit for the amount of Oak Items that you're able to equip so that you're able to equip all of them.
 // ==/UserScript==
 
-var newSave;
-var oakItems;
-var trainerCards;
-var awaitOakItems;
-
 function initOakItems() {
+    var oakItems = App.game.oakItems
     var oakMax = oakItems.itemList.length;
     for (let i = 0; i < oakMax; i++) {
-        App.game.oakItems.unlockRequirements[i] = 0;
+        oakItems.unlockRequirements[i] = 0;
     }
     oakItems.maxActiveCount(oakMax);
     document.getElementById('oakItemsModal').querySelector('h5').innerHTML = "Oak Items Equipped: " + oakItems.activeCount() + '/' + oakMax;
 }
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkOakItems, false);
-            }
-            newSave.addEventListener('click', checkOakItems, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initOakItems()
+        return result
+    }
 }
 
 var scriptName = 'oakitemsunlimited'
@@ -56,17 +46,4 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkOakItems() {
-    awaitOakItems = setInterval(function () {
-        try {
-            oakItems = App.game.oakItems;
-        } catch (err) { }
-        if (typeof oakItems != 'undefined') {
-            initOakItems();
-            clearInterval(awaitOakItems)
-        }
-    }, 50);
 }

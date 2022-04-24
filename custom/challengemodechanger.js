@@ -8,15 +8,11 @@
 // @description Lets you enable/disable any of the Challenges at any given point in time. This is compatiable with any save and will work on pre-existing saves. It's best to backup your save before using this.
 // ==/UserScript==
 
-var awaitChallenger;
-var chalModal;
-var chalList;
 var chalNames = [];
-var newSave;
-var trainerCards;
 
 function initChallenger() {
-    chalList = App.game.challenges.list;
+    var chalModal = document.getElementById('challengeModeModal');
+    var chalList = App.game.challenges.list;
     for (var chal in chalList) {
         chalNames.push(chal)
     }
@@ -49,19 +45,13 @@ function initChallenger() {
 }
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkChallenger, false);
-            }
-            newSave.addEventListener('click', checkChallenger, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initChallenger()
+        return result
+    }
 }
 
 var scriptName = 'challengemodechanger'
@@ -82,19 +72,4 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkChallenger() {
-    awaitChallenger = setInterval(function () {
-        var gameState;
-        try {
-            gameState = App.game.gameState;
-            chalModal = document.getElementById('challengeModeModal');
-        } catch (err) { }
-        if (gameState >= 2 && App.game.keyItems.hasKeyItem(3) && typeof chalModal != 'undefined') {
-            initChallenger();
-            clearInterval(awaitChallenger)
-        }
-    }, 1000);
 }
