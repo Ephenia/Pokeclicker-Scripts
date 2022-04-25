@@ -291,19 +291,13 @@ sellTreasureState = localStorage.getItem('autoSellTreasure');
 sellPlateState = localStorage.getItem('autoSellPlate');
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkAutoMine, false);
-            }
-            newSave.addEventListener('click', checkAutoMine, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initAutoMine()
+        return result
+    }
 }
 
 var scriptName = 'enhancedautomine'
@@ -324,24 +318,6 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkAutoMine() {
-    awaitAutoMine = setInterval(function () {
-        var undergroundAccess;
-        try {
-            undergroundAccess = App.game.underground.canAccess();
-        } catch (err) { }
-        if (typeof undergroundAccess != 'undefined') {
-            if (undergroundAccess == true) {
-                initAutoMine();
-                clearInterval(awaitAutoMine)
-            } else {
-                //console.log("Checking for access...")
-            }
-        }
-    }, 1000);
 }
 
 function addGlobalStyle(css) {

@@ -19,8 +19,8 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 3. [**Enhanced Auto Clicker** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-clicker-enhancedautoclickerjs)
 4. [**Enhanced Auto Hatchery** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-hatchery-enhancedautohatcheryjs)
 5. [**Enhanced Auto Mine** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-mine-enhancedautominejs)
-6. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-sinpleautofarmerjs)
-7. [**Script Handler** (Included in desktop/app.asar)](//github.com/Ephenia/Pokeclicker-Scripts#script-handler-scripthandlerjs)
+6. [**Simple Auto Farmer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-auto-farmer-simpleautofarmerjs)
+7. [**Script Handler** (Included in desktop/app.asar)](//github.com/Ephenia/Pokeclicker-Scripts#script-manager-exclusive-to-the-desktop-client-appasar)
 # Custom Scripts
 1. [**Catch Speed Adjuster** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-catch-speed-adjuster-catchspeedadjusterjs)
 2. [**Challenge Mode Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-challenge-mode-changer-challengemodechangerjs)
@@ -28,6 +28,8 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 4. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
 5. [**Oak Items Unlimited** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-oak-iems-unlimited-oakitemsunlimitedjs)
 6. [**Omega Protein Gains** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-omega-protein-gains-omegaproteingainsjs)
+7. [**Simple Weather Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-weather-changer-simpleweatherchangerjs)
+8. [**Auto Quest Completer** ](//github.com/Ephenia/Pokeclicker-Scripts#auto-quest-completer-autoquestcompleterjs)
 
 
 ```diff
@@ -189,6 +191,10 @@ If you wish to manage your custom script through this one add something along th
 
 ![image](https://i.imgur.com/3PvNQCb.png)
 
+Your load function should look something like this:
+
+![image](https://i.imgur.com/lvdzrBH.png)
+
 ## **[Custom] Catch Speed Adjuster** ([catchspeedadjuster.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/catchspeedadjuster.js))
 This script adds in a new option found below your Pokéballs:<br>
 
@@ -258,6 +264,24 @@ This script removes the limit for the amount of Proteins that you're able to use
 ![image](https://i.imgur.com/2kXCzUA.png)
 
 I haven't tested the limits of how many Proteins you can give, but it should practically be infinite.
+
+<hr>
+
+## **[Custom] Simple Weather Changer** ([simpleweatherchanger.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/simpleweatherchanger.js))
+This script lets you freely edit the weather of the region you are currently in with this button:<br>
+
+![image](https://i.imgur.com/2cBIfyH.png)
+
+In addition it will also prevent the weather from changing and will remember you choice when reloading the game
+
+<hr>
+
+## **[Custom] Auto Quest Completer** ([autoquestcompleter.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autoquestcompleter.js))
+This script automatically completes and starts quests and can be toggled with this button:<br>
+
+![image](https://i.imgur.com/3AYaNes.png)
+
+It also is able to ignore the limit of quests you can enable at once, letting you complete all 10 at the same time.
 
 <hr>
 

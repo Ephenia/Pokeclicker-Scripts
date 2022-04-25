@@ -9,11 +9,7 @@
 // ==/UserScript==
 
 var ballAdjuster;
-var getBalls;
-var awaitBallAdjust;
 var defaultTime = [];
-var newSave;
-var trainerCards;
 
 function initBallAdjust() {
     var getBalls = App.game.pokeballs.pokeballs;
@@ -58,19 +54,13 @@ if (localStorage.getItem('ballAdjuster') == null) {
 ballAdjuster = localStorage.getItem('ballAdjuster');
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkBallAdjust, false);
-            }
-            newSave.addEventListener('click', checkBallAdjust, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initBallAdjust()
+        return result
+    }
 }
 
 var scriptName = 'catchspeedadjuster'
@@ -91,18 +81,4 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkBallAdjust() {
-    awaitBallAdjust = setInterval(function () {
-        var gameState;
-        try {
-            gameState = App.game.gameState;
-        } catch (err) { }
-        if (typeof gameState != 'undefined') {
-            initBallAdjust();
-            clearInterval(awaitBallAdjust)
-        }
-    }, 1000);
 }

@@ -10,8 +10,6 @@
 
 var resCodes;
 var validPoke = [];
-var newSave;
-var trainerCards;
 
 function initCodeGen() {
     genCodes();
@@ -73,19 +71,13 @@ function randInt() {
 }
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkCodeGen, false);
-            }
-            newSave.addEventListener('click', checkCodeGen, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initCodeGen()
+        return result
+    }
 }
 
 var scriptName = 'discordcodegenerator'
@@ -106,21 +98,4 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkCodeGen() {
-    awaitCodeGen = setInterval(function () {
-        var gameState;
-        var discState;
-        try {
-            gameState = App.game.gameState;
-            discState = App.game.discord;
-        } catch (err) { }
-        if (typeof gameState != 'undefined' && typeof discState != 'undefined') {
-            App.game.discord.codes.forEach(e => validPoke.push(e.name));
-            initCodeGen();
-            clearInterval(awaitCodeGen)
-        }
-    }, 1000);
 }

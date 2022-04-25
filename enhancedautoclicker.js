@@ -433,19 +433,13 @@ dungeonState = localStorage.getItem('autoDungeonState');
 dungeonSelect = localStorage.getItem('selectedDungeon');
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkAutoClick, false);
-            }
-            newSave.addEventListener('click', checkAutoClick, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initAutoClicker()
+        return result
+    }
 }
 
 var scriptName = 'enhancedautoclicker'
@@ -466,20 +460,6 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkAutoClick() {
-    awaitAutoClick = setInterval(function () {
-        var gameState;
-        try {
-            gameState = App.game.gameState;
-        } catch (err) { }
-        if (typeof gameState != 'undefined') {
-            initAutoClicker();
-            clearInterval(awaitAutoClick)
-        }
-    }, 1000);
 }
 
 function addGlobalStyle(css) {

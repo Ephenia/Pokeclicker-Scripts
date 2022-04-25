@@ -330,19 +330,13 @@ hatcherySortDir = +localStorage.getItem('hatcherySortDir');
 hatcherySortSync = localStorage.getItem('hatcherySortSync');
 
 function loadScript(){
-    var scriptLoad = setInterval(function () {
-        try {
-            newSave = document.querySelectorAll('label')[0];
-            trainerCards = document.querySelectorAll('.trainer-card');
-        } catch (err) { }
-        if (typeof newSave != 'undefined') {
-            for (var i = 0; i < trainerCards.length; i++) {
-                trainerCards[i].addEventListener('click', checkAutoHatch, false);
-            }
-            newSave.addEventListener('click', checkAutoHatch, false);
-            clearInterval(scriptLoad)
-        }
-    }, 50);
+    var oldInit = Preload.hideSplashScreen
+
+    Preload.hideSplashScreen = function(){
+        var result = oldInit.apply(this, arguments)
+        initAutoHatch()
+        return result
+    }
 }
 
 var scriptName = 'enhancedautohatchery'
@@ -363,24 +357,6 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
-}
-
-
-function checkAutoHatch() {
-    awaitAutoHatch = setInterval(function () {
-        var breedingAccess;
-        try {
-            breedingAccess = App.game.breeding.canAccess();
-        } catch (err) { }
-        if (typeof breedingAccess != 'undefined') {
-            if (breedingAccess == true) {
-                initAutoHatch();
-                clearInterval(awaitAutoHatch)
-            } else {
-                //console.log("Checking for access...")
-            }
-        }
-    }, 1000);
 }
 
 function getRandomInt(max) {
