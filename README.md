@@ -100,7 +100,7 @@ I have also added 4 new values to the auto clicker component:<br>
 • Auto Dungeon when activated will automatically fight the current dungeon, the last dungeon you've visited or the dungeon in the one in the last town you were in (if it has one).<br>
 • There is a dropdown to the right of the Auto Dungeon button which contains 2 modes:<br><br>
 <strong>"F" for Farm Mode</strong> - this will run through the dungeon in its entirety and fight all the enemies as well as loot all the chests. The boss will be saved for last.<br>
-<strong>"B" for Boss Rusher</strong> - this will try to clear the dungeon as fast as possible and rush the Boss. The Boss will always be the top priority. Note that this currently does not include pathfinding, so it will only fight the Boss if it is adjecent to a visited tile.
+<strong>"B" for Boss Rusher</strong> - this will try to clear the dungeon as fast as possible and rush the Boss. The Boss will always be the top priority, chests will not be opened as they increase enemy hp, making clearing slower. Note that this currently does not include pathfinding, so it will only fight the Boss if it is adjecent to a visited tile.
 
 <br>
 
