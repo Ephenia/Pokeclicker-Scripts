@@ -58,6 +58,8 @@ The gear icon to the left of the Start Menu that you see here.
 
 As of 1.3 there is now an option for disabling all notifications, this may be especially helpful if you are using Enhanced Auto Mine. This may also cause some popups and other things to not appear (such as trying to manually Skip layers in the Underground). You can still hear when you get shinies using this, but you won't be able to see what shiny you received. I have not fully tested this, so feel free to experiment with this setting.
 
+Additionally it now features a button above the map to quickly open the dock so you don't have to search for it, especially useful is alola.
+
 <hr>
 
 ## **Auto Battle Frontier** ([autobattlefrontier.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/autobattlefrontier.js))
