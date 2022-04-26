@@ -15,7 +15,7 @@ function initWeatherChange(){
     var weatherBtn = document.createElement('button')
     weatherBtn.textContent = 'Change'
     weatherBtn.className = 'btn btn-block btn-success'
-    weatherBtn.style = 'position: absolute; right: 133px; top: 0px; width: auto; height: 41px; font-size: 11px;'
+    weatherBtn.style = 'position: absolute; right: 133px; top: 0px; width: auto; height: 41px; font-size: 11px; margin: 0px;'
     weatherBtn.id = 'change-weather'
     document.getElementById('townMap').appendChild(weatherBtn)
     document.getElementById('change-weather').addEventListener('click', changeWeather, false)
