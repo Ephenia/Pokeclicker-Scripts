@@ -37,12 +37,12 @@ function initWeatherChange(){
     weatherSelect.style = 'position: absolute; right: 50px; top: 10px; width: auto; height: 20px; font-size: 9px;'
     document.getElementById('townMap').appendChild(weatherSelect)
     //Set weather to last weather option, is broken with new loading
-    if (localStorage.getItem('scriptWeather') != null) Weather.regionalWeather[player.region](localStorage.getItem('scriptWeather'))
+    if (localStorage.getItem('scriptWeather') != null) Weather.regionalWeather[player.region](parseInt(localStorage.getItem('scriptWeather')))
 }
 
 function changeWeather(){
     localStorage.setItem('scriptWeather', document.getElementById('weather-select').value)
-    Weather.regionalWeather[player.region](localStorage.getItem('scriptWeather'))
+    Weather.regionalWeather[player.region](parseInt(localStorage.getItem('scriptWeather')))
 }
 
 function loadScript(){
