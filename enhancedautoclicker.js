@@ -234,6 +234,11 @@ function autoClicker() {
         if (dungeonState == "ON" && DungeonRunner.fighting() == false && DungeonBattle.catching() == false) {
             autoDungeon();
         }
+        //Reset the values for the boss coordinates if we timeout or turn off autoDungeon
+        if ((dungeonState == "OFF" && foundBoss) || (dungeonState == "ON" && DungeonRunner.dungeonFinished() && foundBoss)){
+            foundBoss = false
+            bossCoords.length = 0
+        }
 
         // Click while in a gym battle
         if (App.game.gameState === GameConstants.GameState.gym) {
@@ -373,6 +378,7 @@ function wander(dungeonBoard, bossCoords){
     DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
     if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss){
         foundBoss = false
+        bossCoords.length = 0
         DungeonRunner.startBossFight()
     }
 }
@@ -401,6 +407,7 @@ function fullClear(dungeonBoard, bossCoords){
     if (invisTile == 0 && getChests == 0 && getEnemy == 0 && foundBoss == true){
         DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
         foundBoss = false
+        bossCoords.length = 0
         DungeonRunner.startBossFight()
     }
 }
