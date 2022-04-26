@@ -28,8 +28,8 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 4. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
 5. [**Oak Items Unlimited** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-oak-iems-unlimited-oakitemsunlimitedjs)
 6. [**Omega Protein Gains** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-omega-protein-gains-omegaproteingainsjs)
-7. [**Simple Weather Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-weather-changer-simpleweatherchangerjs)
-8. [**Auto Quest Completer** ](//github.com/Ephenia/Pokeclicker-Scripts#auto-quest-completer-autoquestcompleterjs)
+7. [**Simple Weather Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-simple-weather-changer-simpleweatherchangerjs)
+8. [**Auto Quest Completer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-auto-quest-completer-autoquestcompleterjs)
 
 
 ```diff
