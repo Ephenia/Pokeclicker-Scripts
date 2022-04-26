@@ -81,29 +81,29 @@ function initEvents() {
         <img src="assets/images/pokemon/175.2.png">
         </div><hr>
         <div id="event-2" class="event-select" data-value="1"><b>`+getEvents[1].title+`</b><br>`+getEvents[1].description+`<br>
-        <img src="assets/images/pokemon/-1.png">
+        <img src="assets/images/pokemon/25.08.png">
         </div><hr>
         <div id="event-3" class="event-select" data-value="2"><b>`+getEvents[2].title+`</b><br>`+getEvents[2].description+`<br>
-        <img src="assets/images/pokemon/-3.png">
-        <img src="assets/images/pokemon/-10.png">
-        <img src="assets/images/pokemon/-13.png">
-        <img src="assets/images/pokemon/-16.png">
+        <img src="assets/images/pokemon/150.1.png">
+        <img src="assets/images/pokemon/1.1.png">
+        <img src="assets/images/pokemon/4.1.png">
+        <img src="assets/images/pokemon/7.1.png">
         </div><hr>
         <div id="event-4" class="event-select" data-value="3"><b>`+getEvents[3].title+`</b><br>`+getEvents[3].description+`<br>
-        <img src="assets/images/pokemon/-6.png">
-        <img src="assets/images/pokemon/-5.png">
-        <img src="assets/images/pokemon/-7.png"><br>
+        <img src="assets/images/pokemon/1.2.png">
+        <img src="assets/images/pokemon/175.1.png">
+        <img src="assets/images/pokemon/25.1.png"><br>
         <img src="assets/images/pokemon/92.png">
         <img src="assets/images/pokemon/200.png">
         <img src="assets/images/pokemon/353.png">
         <img src="assets/images/pokemon/355.png">
         </div><hr>
         <div id="event-5" class="event-select" data-value="4"><b>`+getEvents[4].title+`</b><br>`+getEvents[4].description+`<br>
-        <img src="assets/images/pokemon/-9.png">
-        <img src="assets/images/pokemon/-8.png">
+        <img src="assets/images/pokemon/133.1.png">
+        <img src="assets/images/pokemon/25.11.png">
         </div><hr>
         <div id="event-6" class="event-select" data-value="5"><b>`+getEvents[5].title+`</b><br>`+getEvents[5].description+`<br>
-        <img src="assets/images/pokemon/-4.png">
+        <img src="assets/images/pokemon/143.1.png">
         </div><hr>
         <div id="event-7" class="event-select" data-value="6"><b>`+getEvents[6].title+`</b><br>`+getEvents[6].description+`<br>
         <img src="assets/images/pokemon/666.19.png">
