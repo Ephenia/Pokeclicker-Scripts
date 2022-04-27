@@ -343,6 +343,13 @@ function scan(dungeonBoard){
 
 function wander(dungeonBoard, bossCoords){
     var moves = []
+    //Attempt to move to the boss if the coordinates are within movable range
+    DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
+    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss){
+        foundBoss = false
+        bossCoords.length = 0
+        DungeonRunner.startBossFight()
+    }
     //Iterates through the board and compiles all possible moves
     for (var i = 0; i < dungeonBoard.length; i++){
         for (var j = 0; j < dungeonBoard[i].length; j++){
@@ -374,13 +381,6 @@ function wander(dungeonBoard, bossCoords){
     DungeonRunner.map.moveToCoordinates(moveTo[1], moveTo[0])
     //Reset moves array
     moves.length = 0
-    //Attempt to move to the boss if the coordinates are within movable range
-    DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
-    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss){
-        foundBoss = false
-        bossCoords.length = 0
-        DungeonRunner.startBossFight()
-    }
 }
 
 function fullClear(dungeonBoard, bossCoords){
