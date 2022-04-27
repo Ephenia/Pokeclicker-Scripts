@@ -24,7 +24,7 @@ var gymSelect;
 var dungeonState;
 var dungeonColor;
 var dungeonSelect;
-var foundBoss;
+var foundBoss = false;
 var foundBossX;
 var foundBossY;
 var newSave;
@@ -231,8 +231,13 @@ function autoClicker() {
         }
         
         //Auto Dungeon checking
-        if ((dungeonState == "ON") && (DungeonRunner.fighting() == false && DungeonBattle.catching() == false) == true) {
+        if (dungeonState == "ON" && DungeonRunner.fighting() == false && DungeonBattle.catching() == false) {
             autoDungeon();
+        }
+        //Reset the values for the boss coordinates if we timeout or turn off autoDungeon
+        if ((dungeonState == "OFF" && foundBoss) || (dungeonState == "ON" && DungeonRunner.dungeonFinished() && foundBoss)){
+            foundBoss = false
+            bossCoords.length = 0
         }
 
         // Click while in a gym battle
@@ -283,128 +288,127 @@ function autoGym() {
     }
 }
 
+var bossCoords = []
 
 function autoDungeon() {
+    //Rewrite
     if (player.town().hasOwnProperty("dungeon") == true && player.town().dungeon !== undefined) {
         var getTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
         var dungeonCost = player.town().dungeon.tokenCost;
         if (MapHelper.calculateTownCssClass(player.town().name) != "currentLocation") {
             MapHelper.moveToTown(player.town().name)
         }
-        if (player.region != player.town().region) {
+        //Don't think this condition is ever possible
+        /*if (player.region != player.town().region) {
             player.region = player.town().region
-        }
+        }*/
         if (getTokens >= dungeonCost && App.game.gameState != GameConstants.GameState.dungeon) {
             DungeonRunner.initializeDungeon(player.town().dungeon)
         }
-        if (App.game.gameState === GameConstants.GameState.dungeon) {
 
+        if (App.game.gameState === GameConstants.GameState.dungeon) {
             var dungeonBoard = DungeonRunner.map.board();
-            //One of these fails exactly once when starting a dungeon, giving an attribute of undefined error, doesn't cause any other issues
-            try{
-                var invisTile = document.getElementById('dungeonMap').querySelectorAll('.tile-invisible').length;
-                var getChests = document.getElementById('dungeonMap').querySelectorAll('.tile-chest').length;
-                var getEnemy = document.getElementById('dungeonMap').querySelectorAll('.tile-enemy').length;
-            } catch (err){}
-            //var visitTile = document.querySelectorAll('.tile-visited').length; unused variable
-            var lockedTile = 0;
-            for (var ii = 0; ii < dungeonBoard.length; ii++) {
-                for (var iii = 0; iii < dungeonBoard[ii].length; iii++) {
-                    var tilePriority = "NO";
-                    if (dungeonBoard[ii][iii].isVisited == false && dungeonBoard[ii][iii].isVisible == true) {
-                        if (dungeonSelect == 1 && foundBoss == "YES") {
-                            DungeonRunner.map.moveToCoordinates(foundBossX, foundBossY)
-                            if (DungeonRunner.map.currentTile().type() != GameConstants.DungeonTile.boss) {
-                                DungeonRunner.map.moveToCoordinates(iii, ii)
-                            }
-                        } else {
-                            DungeonRunner.map.moveToCoordinates(iii, ii)
-                        }
-                        tilePriority = "YES"
-                    }
-                    if (tilePriority == "NO" && dungeonBoard[ii][iii].isVisible == false) {
-                        lockedTile++;
-                        tilePriority = "YES"
-                    }
-                    if ((tilePriority == "NO") && (dungeonSelect == 0) && (lockedTile == 0) && (dungeonBoard[ii][iii].isVisible == true) && (dungeonBoard[ii][iii].hasPlayer == false) && (dungeonBoard[ii][iii].cssClass().includes("tile-empty") == false)) {
-                        DungeonRunner.map.moveToCoordinates(iii, ii)
-                    }
-                    
-                    
-                    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest) {
-                        DungeonRunner.openChest();
-                    }
-                    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
-                        if (dungeonSelect == 1) {
-                            foundBoss = null;
-                            DungeonRunner.startBossFight();
-                        }
-                        //Checks for any invisible tiles, makes sure you always full clear instead of fighting the boss if you don't have the map
-                        if ((dungeonSelect == 0) && (getChests == 0) && (getEnemy == 0) && (invisTile == 0)) {
-                            foundBoss = null;
-                            DungeonRunner.startBossFight();
-                        }
-                    }
-                    if (dungeonSelect == 1 && dungeonBoard[ii][iii].cssClass().includes("tile-boss") == true) {
-                        foundBoss = "YES"
-                        foundBossX = iii
-                        foundBossY = ii
-                    }
-                    if (lockedTile == invisTile && lockedTile != 0) {
-                        var playerPos = DungeonRunner.map.playerPosition()
-                        var moveOrder = ["left", "right", "up", "down"];
-                        var leftRight = [-1, 1, 0, 0];
-                        var upDown = [0, 0, -1, 1];
-                        var posMoves = [];
-                        var clearMoves = [];
-                        var posIndex = [];
-                        var clearIndex = [];
-                        for (var move = 0; move < 4; move++) {
-                            try {
-                                if (dungeonBoard[playerPos.y + upDown[move]][playerPos.x + leftRight[move]].isVisible == false) {
-                                    if (DungeonRunner.map.board()[playerPos.x + leftRight[move]][playerPos.y + upDown[move]] != undefined) {
-                                        posMoves.push(moveOrder[move])
-                                    }
-                                } else {
-                                    posMoves.push("null")
-                                }
-                                if (dungeonBoard[playerPos.y + upDown[move]][playerPos.x + leftRight[move]].isVisible == true) {
-                                    if (DungeonRunner.map.board()[playerPos.x + leftRight[move]][playerPos.y + upDown[move]] != undefined) {
-                                        clearMoves.push(moveOrder[move])
-                                    } else {
-                                        clearMoves.push("null")
-                                    }
-                                }
-                            }
-                            catch (err) {
-                                posMoves.push("null")
-                                clearMoves.push("null")
-                            }
-                        }
-                        posMoves.forEach((Moves, Index) => {
-                            if (Moves != "null") {
-                                posIndex.push(Index)
-                            }
-                        });
-                        clearMoves.forEach((Moves, Index) => {
-                            if (Moves != "null") {
-                                clearIndex.push(Index)
-                            }
-                        });
-                        var selMove;
-                        if (posIndex.length > 0) {
-                            selMove = getRandomInt(posIndex.length);
-                            selMove = posIndex[selMove];
-                        } else {
-                            selMove = getRandomInt(clearIndex.length);
-                            selMove = clearIndex[selMove];
-                        }
-                        DungeonRunner.map.moveToCoordinates(playerPos.x + leftRight[selMove], playerPos.y + upDown[selMove])
+            //The boss can be found at any time
+            if (foundBoss == false){
+                bossCoords = scan(dungeonBoard)
+            }
+            //Wander around until we can move to the boss tile
+            //Pathfinding should be implemented here, A* looks like the best algorithm
+            else if (foundBoss == true && dungeonSelect == 1){
+                wander(dungeonBoard, bossCoords)
+            }
+            else if (dungeonSelect == 0){
+                fullClear(dungeonBoard, bossCoords)
+            }
+        }
+    }
+}
+
+function scan(dungeonBoard){
+    /*var bossCoords = []
+    var playerCoords = []*/
+    for (var i = 0; i < dungeonBoard.length; i++){
+        for (var j = 0; j<dungeonBoard[i].length; j++){
+            if (dungeonBoard[i][j].type() == GameConstants.DungeonTile.boss){
+                foundBoss = true
+                return [i, j]
+            }
+            //Required for pathfinding, if ever implemented
+            /*if (dungeonBoard[i][j].hasPlayer == true){
+                playerCoords = [i, j]
+            }*/
+        }
+    }
+}
+
+function wander(dungeonBoard, bossCoords){
+    var moves = []
+    //Iterates through the board and compiles all possible moves
+    for (var i = 0; i < dungeonBoard.length; i++){
+        for (var j = 0; j < dungeonBoard[i].length; j++){
+            //The entrance doesn't count as visited on first entering a dungeon so this OR is required
+            if (dungeonBoard[i][j].isVisited == true || dungeonBoard[i][j].type() == GameConstants.DungeonTile.entrance){
+                //This is required because if the column doesn't exist it throws an attribute of undefined error
+                if (dungeonBoard[i+1] != undefined){
+                    if (dungeonBoard[i+1][j] != undefined){
+                        if (dungeonBoard[i+1][j].isVisited == false) moves.push([i+1, j])
                     }
                 }
+                if (dungeonBoard[i-1] != undefined){
+                    if (dungeonBoard[i-1][j] != undefined){
+                        if (dungeonBoard[i-1][j].isVisited == false) moves.push([i-1, j])
+                    }
+                }
+                if (dungeonBoard[i][j+1] != undefined){
+                    if (dungeonBoard[i][j+1].isVisited == false) moves.push([i, j+1])
+                }
+                if (dungeonBoard[i][j-1] != undefined){
+                    if (dungeonBoard[i][j-1].isVisited == false) moves.push([i, j-1])
+                }
+            }
+        }
+    }
+    //Select a random move from compiled list of possible ones
+    var moveTo = moves[getRandomInt(moves.length)]
+    //Coordinates saved in couples of [y, x] so we swap them when we want to move
+    DungeonRunner.map.moveToCoordinates(moveTo[1], moveTo[0])
+    //Reset moves array
+    moves.length = 0
+    //Attempt to move to the boss if the coordinates are within movable range
+    DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
+    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss){
+        foundBoss = false
+        bossCoords.length = 0
+        DungeonRunner.startBossFight()
+    }
+}
+
+function fullClear(dungeonBoard, bossCoords){
+    //Get number of invisible tiles, if 0 we have the map
+    var invisTile = document.getElementById('dungeonMap').querySelectorAll('.tile-invisible').length;
+    //Chests
+    var getChests = document.getElementById('dungeonMap').querySelectorAll('.tile-chest').length;
+    //Enemies
+    var getEnemy = document.getElementById('dungeonMap').querySelectorAll('.tile-enemy').length;
+
+    for (var i = 0; i < dungeonBoard.length; i++){
+        for (var j = 0; j<dungeonBoard[i].length; j++){
+            //Basically just attempts to move to all tiles that aren't cleared
+            if (dungeonBoard[i][j].isVisited == false){
+                DungeonRunner.map.moveToCoordinates(j, i)
             }
 
+            if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest){
+                DungeonRunner.openChest()
+            }
         }
+    }
+    //If we cleared the entire floor, move to the boss room and start the fight
+    if (invisTile == 0 && getChests == 0 && getEnemy == 0 && foundBoss == true){
+        DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
+        foundBoss = false
+        bossCoords.length = 0
+        DungeonRunner.startBossFight()
     }
 }
 

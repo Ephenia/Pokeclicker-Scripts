@@ -70,7 +70,7 @@ function initVisualSettings() {
     
     //Settings screen changed, this is where the option should go now
     document.querySelector('[id="settingsNotificationGeneral"] table tbody').prepend(notifiyHTML)
-    //This fails to execute later because the element is added asynchronously so it should be executed with it
+    //Add 'Disable all notifications' option
     document.querySelector('#all-notify').addEventListener('change', event => {
         if (event.target.checked == false) {
             checkAllNotification = "OFF";
@@ -214,6 +214,15 @@ function initVisualSettings() {
         for (var i = 0; i< getToast.childNodes.length; i++){ getToast.removeChild(getToast.childNodes[i]) }
         getToast.setAttribute("id", "toaster-disabled");
     }
+
+    //Add dock button
+    var dockButton = document.createElement('button')
+    dockButton.style = 'position: absolute; left: 32px; top: 0px; width: auto; height: 41px; font-size: 11px;'
+    dockButton.className = 'btn btn-block btn-success'
+    dockButton.id = 'dock-button'
+    dockButton.textContent = 'Dock'
+    document.getElementById('townMap').appendChild(dockButton)
+    document.getElementById('dock-button').addEventListener('click', MapHelper.openShipModal, false)
 }
 
 if (localStorage.getItem('checkWildPokeName') == null) {

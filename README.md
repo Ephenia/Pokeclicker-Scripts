@@ -28,8 +28,8 @@ If you are looking to use these scripts on the client version of Pokeclicker (Po
 4. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsjs)
 5. [**Oak Items Unlimited** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-oak-iems-unlimited-oakitemsunlimitedjs)
 6. [**Omega Protein Gains** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-omega-protein-gains-omegaproteingainsjs)
-7. [**Simple Weather Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#simple-weather-changer-simpleweatherchangerjs)
-8. [**Auto Quest Completer** ](//github.com/Ephenia/Pokeclicker-Scripts#auto-quest-completer-autoquestcompleterjs)
+7. [**Simple Weather Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-simple-weather-changer-simpleweatherchangerjs)
+8. [**Auto Quest Completer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-auto-quest-completer-autoquestcompleterjs)
 
 
 ```diff
@@ -57,6 +57,8 @@ The gear icon to the left of the Start Menu that you see here.
 ![](https://i.imgur.com/8H1ZeBV.png)
 
 As of 1.3 there is now an option for disabling all notifications, this may be especially helpful if you are using Enhanced Auto Mine. This may also cause some popups and other things to not appear (such as trying to manually Skip layers in the Underground). You can still hear when you get shinies using this, but you won't be able to see what shiny you received. I have not fully tested this, so feel free to experiment with this setting.
+
+Additionally it now features a button above the map to quickly open the dock so you don't have to search for it, especially useful is alola.
 
 <hr>
 
@@ -100,7 +102,7 @@ I have also added 4 new values to the auto clicker component:<br>
 • Auto Dungeon when activated will automatically fight the current dungeon, the last dungeon you've visited or the dungeon in the one in the last town you were in (if it has one).<br>
 • There is a dropdown to the right of the Auto Dungeon button which contains 2 modes:<br><br>
 <strong>"F" for Farm Mode</strong> - this will run through the dungeon in its entirety and fight all the enemies as well as loot all the chests. The boss will be saved for last.<br>
-<strong>"B" for Boss Rusher</strong> - this will try to clear the dungeon as fast as possible and rush the Boss. The Boss will always be the top priority. Note that this currently does not include pathfinding, so it will only fight the Boss if it is adjecent to a visited tile.
+<strong>"B" for Boss Rusher</strong> - this will try to clear the dungeon as fast as possible and rush the Boss. The Boss will always be the top priority, chests will not be opened as they increase enemy hp, making clearing slower. Note that this currently does not include pathfinding, so it will only fight the Boss if it is adjecent to a visited tile.
 
 <br>
 
