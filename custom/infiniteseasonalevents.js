@@ -46,7 +46,7 @@ function initEvents() {
         }
     }
 
-    if (getEvents.length != 8) {
+    if (getEvents.length != 9) {
         Notifier.notify({
             title: '[Outdated] Infinite Seasonal Events',
             message: `Please contact <a href="https://github.com/Ephenia/Pokeclicker-Scripts" target="_blank">Ephenia</a> so that this script can be updated!`,
@@ -67,7 +67,7 @@ function initEvents() {
     eventMod.setAttribute("aria-labelledby", "eventModal");
     eventMod.setAttribute("aria-modal", "true");
     eventMod.setAttribute("role", "dialog");
-    //Event order changed, up to date as of 24/04/22
+    //Event order changed, up to date as of 28/04/22
     eventMod.innerHTML = `<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header" style="justify-content: space-around;">
@@ -81,15 +81,18 @@ function initEvents() {
         <img src="assets/images/pokemon/175.2.png">
         </div><hr>
         <div id="event-2" class="event-select" data-value="1"><b>`+getEvents[1].title+`</b><br>`+getEvents[1].description+`<br>
-        <img src="assets/images/pokemon/25.08.png">
+        <img src="assets/images/pokemon/1.3.png">
         </div><hr>
         <div id="event-3" class="event-select" data-value="2"><b>`+getEvents[2].title+`</b><br>`+getEvents[2].description+`<br>
+        <img src="assets/images/pokemon/25.08.png">
+        </div><hr>
+        <div id="event-4" class="event-select" data-value="3"><b>`+getEvents[3].title+`</b><br>`+getEvents[3].description+`<br>
         <img src="assets/images/pokemon/150.1.png">
         <img src="assets/images/pokemon/1.1.png">
         <img src="assets/images/pokemon/4.1.png">
         <img src="assets/images/pokemon/7.1.png">
         </div><hr>
-        <div id="event-4" class="event-select" data-value="3"><b>`+getEvents[3].title+`</b><br>`+getEvents[3].description+`<br>
+        <div id="event-5" class="event-select" data-value="4"><b>`+getEvents[4].title+`</b><br>`+getEvents[4].description+`<br>
         <img src="assets/images/pokemon/1.2.png">
         <img src="assets/images/pokemon/175.1.png">
         <img src="assets/images/pokemon/25.1.png"><br>
@@ -98,17 +101,17 @@ function initEvents() {
         <img src="assets/images/pokemon/353.png">
         <img src="assets/images/pokemon/355.png">
         </div><hr>
-        <div id="event-5" class="event-select" data-value="4"><b>`+getEvents[4].title+`</b><br>`+getEvents[4].description+`<br>
+        <div id="event-6" class="event-select" data-value="5"><b>`+getEvents[5].title+`</b><br>`+getEvents[5].description+`<br>
         <img src="assets/images/pokemon/133.1.png">
         <img src="assets/images/pokemon/25.11.png">
         </div><hr>
-        <div id="event-6" class="event-select" data-value="5"><b>`+getEvents[5].title+`</b><br>`+getEvents[5].description+`<br>
+        <div id="event-7" class="event-select" data-value="6"><b>`+getEvents[6].title+`</b><br>`+getEvents[6].description+`<br>
         <img src="assets/images/pokemon/143.1.png">
         </div><hr>
-        <div id="event-7" class="event-select" data-value="6"><b>`+getEvents[6].title+`</b><br>`+getEvents[6].description+`<br>
+        <div id="event-8" class="event-select" data-value="7"><b>`+getEvents[7].title+`</b><br>`+getEvents[7].description+`<br>
         <img src="assets/images/pokemon/666.19.png">
         </div><hr>
-        <div id="event-8" class="event-select" data-value="7"><b>`+getEvents[7].title+`</b><br>`+getEvents[7].description+`<br>
+        <div id="event-9" class="event-select" data-value="7"><b>`+getEvents[8].title+`</b><br>`+getEvents[8].description+`<br>
         <img src="assets/images/pokemon/743.png">
         </div><hr>
         <div>
@@ -117,10 +120,13 @@ function initEvents() {
     profileModal.before(eventMod);
 
     for (var add = 0; add < getEvents.length; add++) {
-        if (storedEvents[add] == 1) {
-            document.getElementById('event-'+(add+1)).style = "background-color: rgba(93, 226, 60, 0.5)"
+        //This makes sure the script completes running even if the new event is not in the menu
+        if (document.getElementById('event-'+(add+1)) != null){
+            if (storedEvents[add] == 1) {
+                document.getElementById('event-'+(add+1)).style = "background-color: rgba(93, 226, 60, 0.5)"
+            }
+            document.getElementById('event-'+(add+1)).addEventListener('click', toggleEvent, false)
         }
-        document.getElementById('event-'+(add+1)).addEventListener('click', toggleEvent, false)
     }
 
     addGlobalStyle('.event-select { cursor: pointer; }');

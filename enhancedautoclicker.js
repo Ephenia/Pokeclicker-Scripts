@@ -255,32 +255,29 @@ function autoClicker() {
 }
 
 function autoGym() {
-    if (player.town().hasOwnProperty("gym") || player.town().hasOwnProperty("gymList")) {
-        if (player.town().gym != null || player.town().gym !== undefined) {
+    if (player.town().content.length != 0) {
+        //Might break in some towns, needs more testing
+        if (player.town().content[0] instanceof Gym) {
             if (MapHelper.calculateTownCssClass(player.town().name) != "currentLocation") {
                 MapHelper.moveToTown(player.town().name)
             }
+            /*Don't think this can ever happen
             if (player.region != player.town().region) {
                 player.region = player.town().region
-            }
+            }*/
 
             if (App.game.gameState != GameConstants.GameState.gym) {
-                if (player.town().hasOwnProperty("gymList")) {
-                    var selGym;
-                    for (var i = 0; i <= gymSelect; i++) {
-                        if (Gym.isUnlocked(player.town().gymList[i]) == true) {
-                            selGym = i;
-                        } else {
-                            selGym = (i - 1)
-                            i = gymLength;
+                //If the content is a Gym or league champion and we unlocked it we fight
+                if ((player.town().content[gymSelect] instanceof Gym && player.town().content[gymSelect].isUnlocked()) || (player.town().content[gymSelect] instanceof Champion && player.town().content[gymSelect].isUnlocked())){
+                    GymRunner.startGym(player.town().content[gymSelect])
+                }
+                else {
+                    //Otherwise we try to fight the previous gyms (elite 4)
+                    for (var i = player.town().content.length - 1; i >= 0; i--){
+                        if ((player.town().content[i] instanceof Gym && player.town().content[i].isUnlocked()) || (player.town().content[i] instanceof Champion && player.town().content[i].isUnlocked())){
+                            GymRunner.startGym(player.town().content[i])
+                            break
                         }
-                        if (selGym != -1) {
-                            GymRunner.startGym(player.town().gymList[i])
-                        }
-                    }
-                } else {
-                    if (Gym.isUnlocked(player.town().gym) == true) {
-                        GymRunner.startGym(player.town().gym)
                     }
                 }
             }
