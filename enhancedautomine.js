@@ -3,8 +3,8 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.4
-// @author      Ephenia (Credit: falcon71)
+// @version     1.5
+// @author      Ephenia (Credit: falcon71, KarmaAlex)
 // @description Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // ==/UserScript==
 
@@ -104,16 +104,24 @@ function initAutoMine() {
         var getMoney = App.game.wallet.currencies[GameConstants.Currency.money]();
         var buriedItems = Mine.itemsBuried();
         var skipsRemain = Mine.skipsRemaining();
-        var getRestores = player.itemList["SmallRestore"]();
+        const smallRestore = player.itemList["SmallRestore"]();
+        const mediumRestore = player.itemList["MediumRestore"]();
+        const largeRestore = player.itemList["LargeRestore"]();
         var getCost = ItemList["SmallRestore"].price();
         var shopWindow = document.getElementById('shopModal')
         if (buriedItems >= autoMineSkip || skipsRemain == 0) {
             if (smallRestoreState == "ON") {
-                if ((getCost == 30000) && (+getRestores == 0) && (getMoney >= setThreshold + 30000)) {
+                if ((getCost == 30000) && (+smallRestore == 0) && (getMoney >= setThreshold + 30000)) {
                     ItemList["SmallRestore"].buy(1);
                 }
                 if (getEnergy < 10) {
-                    ItemList["SmallRestore"].use();
+                    if (largeRestore > 0) {
+                        ItemList["LargeRestore"].use();
+                    } else if (mediumRestore > 0) {
+                        ItemList["MediumRestore"].use();
+                    } else {
+                        ItemList["SmallRestore"].use();
+                    }
                 }
             }
             if (getEnergy >= 1) {
