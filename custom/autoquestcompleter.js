@@ -3,8 +3,8 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
-// @author      KarmaAlex
+// @version     1.1
+// @author      KarmaAlex (Credit: Ephenia)
 // @description Removes the limit for the number of quests you can do at once and auto completes/starts new ones.
 // ==/UserScript==
 
@@ -17,6 +17,19 @@ function initAutoQuests(){
     if (localStorage.getItem('autoQuestEnable') == null){
         localStorage.setItem('autoQuestEnable', 'true')
     }
+    //Define quest types
+    let questTypes = [];
+    if (localStorage.getItem('autoQuestTypes') == null){
+        for (const type in QuestHelper.quests) {
+            questTypes.push(type);
+        }
+        localStorage.setItem('autoQuestTypes', JSON.stringify(questTypes))
+    } else {
+        questTypes = JSON.parse(localStorage.getItem('autoQuestTypes'));
+    }
+    resetQuestModify();
+    //Track the last refresh
+    let trackRefresh = App.game.quests.lastRefresh;
     //Add button
     var autoQuestBtn = document.createElement('button')
     autoQuestBtn.id = 'toggle-auto-quest'
@@ -40,23 +53,60 @@ function initAutoQuests(){
 
     //Checks for new quests to add to the list and claims completed ones
     var autoQuest = setInterval(function(){
+        let questsNeed = 0;
+        if (trackRefresh != App.game.quests.lastRefresh) {
+            trackRefresh = App.game.quests.lastRefresh;
+            resetQuestModify();
+        }
         if (localStorage.getItem('autoQuestEnable') == 'true'){
             if (App.game.quests.currentQuests().length > 0){
-                //Claim all completed quest
+                //Claim all completed quest & check if quests should refresh
                 App.game.quests.currentQuests().forEach(quest => {
                     if (quest.notified == true){
                         App.game.quests.claimQuest(quest.index)
                     }
+                    if (questTypes.includes(quest.constructor.name)) {
+                        questsNeed++;
+                    }
                 })
+            } else if (App.game.quests.currentQuests().length == 0) {
+                //Quest refresh handling
+                if (questsNeed == 0 && App.game.quests.canAffordRefresh()) {
+                    App.game.quests.refreshQuests();
+                }
             }
-            //Attempt to start all available quests
+            //Attempt to start all available quests & quit the filtered ones
             App.game.quests.questList().forEach(quest => {
-                if (quest.isCompleted() == false && quest.inProgress() == false){
-                    App.game.quests.beginQuest(quest.index)
+                if (quest.inProgress() == true && !questTypes.includes(quest.constructor.name)) {
+                    App.game.quests.quitQuest(quest.index);
+                } else if (quest.isCompleted() == false && quest.inProgress() == false && questTypes.includes(quest.constructor.name)){
+                    App.game.quests.beginQuest(quest.index);
                 }
             })
         }
     }, 500)
+
+    function resetQuestModify() {
+        //Selecting Quest list in Quest Modal and adding click listeners
+        const questHTML = document.getElementById('QuestModal').querySelector('tbody').children;
+        for (let i = 0; i < questHTML.length; i++) {
+            questHTML[i].querySelector('td:nth-child(1)').setAttribute('data-src', i);
+            questHTML[i].addEventListener('click', () => {retrieveQuestName(event)})
+        }
+    }
+
+    function retrieveQuestName(event) {
+        const index = +event.target.getAttribute('data-src');
+        const questName = App.game.quests.questList()[index].constructor.name;
+        const indexPos = questTypes.indexOf(questName);
+        if (indexPos != -1) {
+            questTypes[indexPos] = null;
+        } else if (indexPos == -1) {
+            const empty = questTypes.indexOf(null);
+            questTypes[empty] = questName;
+        }
+        localStorage.setItem('autoQuestTypes', JSON.stringify(questTypes));
+    }
 }
 
 function loadScript(){
