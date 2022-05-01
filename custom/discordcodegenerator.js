@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      Ephenia (Original/Credit: G1)
 // @description Lets you generate infinite amounts of Discord codes for Pokémon that are exclusive and locked behind Pokeclicker's Discord bot & activities. No linking of a Discord account required + fully works offline.
 // ==/UserScript==
@@ -13,7 +13,7 @@ var validPoke = [];
 
 function initCodeGen() {
     genCodes();
-    var saveTab = document.getElementById('saveTab');
+    const saveTab = document.getElementById('saveTab');
     var fragment = new DocumentFragment();
     for (let i = 0; i < validPoke.length; i++) {
         var codeHTML = document.createElement("div");
@@ -30,7 +30,7 @@ function initCodeGen() {
 }
 
 function submitCode() {
-    var codeInput = document.getElementById('redeemable-code-input');
+    const codeInput = document.getElementById('redeemable-code-input');
     codeInput.value = resCodes[+event.target.id.replace(/disc-/g, "")];
     RedeemableCodeController.enterCode();
     genCodes();
@@ -48,7 +48,7 @@ function genCodes() {
     App.game.discord.codes.forEach(e => e.claimed = false);
     var discordID = randInt();
     App.game.discord.ID(discordID);
-    for (codeString of validPoke) {
+    for (const codeString of validPoke) {
         let codeSeed = codeString.split('').reverse().map(l => l.charCodeAt(0)).reduce((s, b) => s * (b / 10), 1);
         SeededRand.seed(discordID + codeSeed);
         const arr = [];
@@ -75,6 +75,7 @@ function loadScript(){
 
     Preload.hideSplashScreen = function(){
         var result = oldInit.apply(this, arguments)
+        App.game.discord.codes.forEach(e => validPoke.push(e.name));
         initCodeGen()
         return result
     }
