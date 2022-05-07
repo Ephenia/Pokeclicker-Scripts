@@ -18,6 +18,7 @@ var reqDPS;
 var enemySpeedRaw;
 var enemySpeed;
 var colorDPS;
+var allSelectedGym = 0;
 var gymState;
 var gymColor;
 var gymSelect;
@@ -144,7 +145,6 @@ function toggleAutoGym() {
         document.getElementById("auto-gym-start").classList.remove('btn-success');
         document.getElementById("auto-gym-start").classList.add('btn-danger');
     }
-    localStorage.setItem("allSelectedGym", 0);
     localStorage.setItem("autoGymState", gymState);
     document.getElementById('auto-gym-start').innerHTML = `Auto Gym [` + gymState + `]`
 }
@@ -271,13 +271,11 @@ function autoGym() {
             if (App.game.gameState != GameConstants.GameState.gym) {
                 //If "All" is selected, then go through list of league from 0-4
                 if(gymSelect === 5) {
-                    var allSelectedGym = localStorage.getItem('allSelectedGym')
                     GymRunner.startGym(player.town().content[allSelectedGym])
                     allSelectedGym++
                     if(allSelectedGym === 5) {
                         allSelectedGym = 0
                     }
-                    localStorage.setItem("allSelectedGym", allSelectedGym);
                 } else {
                     //If the content is a Gym or league champion and we unlocked it we fight
                     if ((player.town().content[gymSelect] instanceof Gym && player.town().content[gymSelect].isUnlocked()) || (player.town().content[gymSelect] instanceof Champion && player.town().content[gymSelect].isUnlocked())){
