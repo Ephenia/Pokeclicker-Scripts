@@ -11,11 +11,14 @@
 var awaitFloorReset;
 var existHTML = false;
 var battleFrontFloor;
+var bfOneClickState;
+var bfOneClickColor;
 var bpImg = `<img src="assets/images/currency/battlePoint.svg" height="25px">`
 var moneyImg = `<img src="assets/images/currency/money.svg" height="25px">`
 
 function initBattleFrontier() {
     addGlobalStyle('#battle-front-cont { position:absolute;right:5px;top:5px;width:auto;height:41px; }');
+    addGlobalStyle('#bf-one-click-btn { position:absolute;left:5px;top:5px;width:auto;height:41px; }');
 
     document.getElementById('middle-column').addEventListener('click', event => {
         if (BattleFrontierRunner.started() && existHTML) {
@@ -32,9 +35,13 @@ function initBattleFrontier() {
     function floorReset() {
         awaitFloorReset = setInterval(function () {
             if (BattleFrontierRunner.started()) {
-                if (BattleFrontierRunner.stage() > battleFrontFloor) {
-                    battleReset();
-                    BattleFrontierRunner.stage(1);
+                if(bfOneClickState === "ON") {
+                    oneClick();
+                } else {
+                    if (BattleFrontierRunner.stage() > battleFrontFloor) {
+                        battleReset();
+                        BattleFrontierRunner.stage(1);
+                    }
                 }
             } else {
                 existHTML = false;
@@ -45,11 +52,21 @@ function initBattleFrontier() {
     }
 
     function createHTML() {
+        if (bfOneClickState == "OFF") {
+            bfOneClickColor = "danger"
+        } else {
+            bfOneClickColor = "success"
+        }
         var battleFront = document.getElementById('battleFrontierInformation').querySelector('div');
+        var oneClick = document.createElement("div");
+        oneClick.setAttribute("id", "bf-one-click-btn");
+        oneClick.innerHTML = `<button id="bf-one-click-start" class="btn btn-block btn-`+ bfOneClickColor + `" style="font-size: 8pt;">One Click Attack [`+ bfOneClickState + `]</button>`
+        oneClick.addEventListener('click', event => { toggleOneClick() })
         var bfInput = document.createElement("div");
         bfInput.setAttribute("id", "battle-front-cont");
-        bfInput.innerHTML = `<input id="battle-front-input" style="width: 125px;">`
+        bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 125px;">`
         battleFront.before(bfInput)
+        battleFront.before(oneClick)
         document.getElementById('battle-front-input').value = battleFrontFloor.toLocaleString('en-US');
         document.querySelector('#battle-front-input').addEventListener('input', event => {
             battleFrontFloor = +event.target.value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
@@ -77,13 +94,41 @@ function initBattleFrontier() {
             App.game.wallet.gainMoney(moneyEarned);
         }
     }
-}
 
+    function toggleOneClick() {
+        if (bfOneClickState == "OFF") {
+            bfOneClickState = "ON"
+            document.getElementById("bf-one-click-start").classList.remove('btn-danger');
+            document.getElementById("bf-one-click-start").classList.add('btn-success');
+        } else {
+            bfOneClickState = "OFF"
+            document.getElementById("bf-one-click-start").classList.remove('btn-success');
+            document.getElementById("bf-one-click-start").classList.add('btn-danger');
+        }
+        localStorage.setItem("bfOneClickState", bfOneClickState);
+        document.getElementById('bf-one-click-start').innerHTML = `One Click [` + bfOneClickState + `]`
+    }
+    
+    function oneClick() {
+        if(Battle.enemyPokemon().maxHealth() > App.game.party.calculatePokemonAttack(
+            Battle.enemyPokemon().type1, 
+            Battle.enemyPokemon().type2, true,)
+        ) {
+            battleReset();
+            BattleFrontierRunner.stage(1);
+        }
+    }
+
+}
 
 if (localStorage.getItem('battleFrontFloor') == null) {
     localStorage.setItem("battleFrontFloor", 0);
 }
+if (localStorage.getItem('bfOneClickState') == null) {
+    localStorage.setItem("bfOneClickState", "OFF");
+}
 battleFrontFloor = +localStorage.getItem('battleFrontFloor');
+bfOneClickState = localStorage.getItem('bfOneClickState');
 
 function loadScript(){
     var oldInit = Preload.hideSplashScreen
