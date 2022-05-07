@@ -58,15 +58,15 @@ function initBattleFrontier() {
             bfOneClickColor = "success"
         }
         var battleFront = document.getElementById('battleFrontierInformation').querySelector('div');
-        var oneClick = document.createElement("div");
-        oneClick.setAttribute("id", "bf-one-click-btn");
-        oneClick.innerHTML = `<button id="bf-one-click-start" class="btn btn-block btn-`+ bfOneClickColor + `" style="font-size: 8pt;">One Click Attack [`+ bfOneClickState + `]</button>`
-        oneClick.addEventListener('click', event => { toggleOneClick() })
+        var oneClickBtn = document.createElement("div");
+        oneClickBtn.setAttribute("id", "bf-one-click-btn");
+        oneClickBtn.innerHTML = `<button id="bf-one-click-start" class="btn btn-block btn-`+ bfOneClickColor + `" style="font-size: 8pt;">One Click Attack [`+ bfOneClickState + `]</button>`
+        oneClickBtn.addEventListener('click', event => { toggleOneClick() })
         var bfInput = document.createElement("div");
         bfInput.setAttribute("id", "battle-front-cont");
         bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 125px;">`
         battleFront.before(bfInput)
-        battleFront.before(oneClick)
+        battleFront.before(oneClickBtn)
         document.getElementById('battle-front-input').value = battleFrontFloor.toLocaleString('en-US');
         document.querySelector('#battle-front-input').addEventListener('input', event => {
             battleFrontFloor = +event.target.value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
