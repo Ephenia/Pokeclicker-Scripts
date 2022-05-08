@@ -3,8 +3,8 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
-// @author      Ephenia
+// @version     1.1
+// @author      Ephenia (Credit: andrew951)
 // @description Adds in stage resetting to the Battle Frontier that allows you to set a target stage and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
 // ==/UserScript==
 
@@ -46,6 +46,7 @@ function initBattleFrontier() {
             } else {
                 existHTML = false;
                 document.getElementById('battle-front-cont').remove();
+                document.getElementById('bf-one-click-btn').remove();
                 clearInterval(awaitFloorReset);
             }
         }, 50);
@@ -108,10 +109,10 @@ function initBattleFrontier() {
         localStorage.setItem("bfOneClickState", bfOneClickState);
         document.getElementById('bf-one-click-start').innerHTML = `One Click [` + bfOneClickState + `]`
     }
-    
+
     function oneClick() {
         if(Battle.enemyPokemon().maxHealth() > App.game.party.calculatePokemonAttack(
-            Battle.enemyPokemon().type1, 
+            Battle.enemyPokemon().type1,
             Battle.enemyPokemon().type2, true,)
         ) {
             battleReset();
