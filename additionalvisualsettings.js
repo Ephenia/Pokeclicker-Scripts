@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.4
+// @version     1.5
 // @author      Ephenia
 // @description Adds additional settings for hiding some visual things to help out with performance.
 // ==/UserScript==
@@ -67,7 +67,7 @@ function initVisualSettings() {
     </td>`
 
     //Moved to async function because it fails to execute on loading screen so we keep trying until the element exists
-    
+
     //Settings screen changed, this is where the option should go now
     document.querySelector('[id="settingsNotificationGeneral"] table tbody').prepend(notifiyHTML)
     //Add 'Disable all notifications' option
@@ -92,7 +92,8 @@ function initVisualSettings() {
     addGlobalStyle('.pageItemTitle { height:38px }');
     addGlobalStyle('#quick-settings { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
     addGlobalStyle('#quick-settings:hover { background-color:#ddd;border: 4px solid #ddd; }');
-    
+    addGlobalStyle('#shortcutsContainer { display: block !important; }');
+
     //The elements removed by the scripts don't ever get added back after a restart, waiting a second before removing makes them load properly
     if (checkWildPokeName == "OFF") {
         document.querySelector('#poke-name').checked = true
@@ -118,7 +119,7 @@ function initVisualSettings() {
         document.querySelector('#all-notify').checked = true
         remNotifications();
     }
-    
+
     document.getElementById('map').addEventListener('click', event => {
         if (event.target.matches('[data-route]')) {
             if (checkWildPokeName == "ON") {
