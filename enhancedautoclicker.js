@@ -270,7 +270,12 @@ function autoGym() {
 
             if (App.game.gameState != GameConstants.GameState.gym) {
                 //If "All" is selected, then go through list of league from 0-4
-                if(gymSelect === 5) {
+                if(gymSelect === 5 && (((player.town().content[0] instanceof Gym && player.town().content[0].isUnlocked()) &&
+                                       (player.town().content[1] instanceof Gym && player.town().content[1].isUnlocked()) &&
+                                       (player.town().content[2] instanceof Gym && player.town().content[2].isUnlocked()) &&
+                                       (player.town().content[3] instanceof Gym && player.town().content[3].isUnlocked()) &&
+                                       (player.town().content[4] instanceof Gym && player.town().content[4].isUnlocked())) ||
+                                       (player.town().content[4] instanceof Champion && player.town().content[4].isUnlocked()))) {
                     GymRunner.startGym(player.town().content[allSelectedGym])
                     allSelectedGym++
                     if(allSelectedGym === 5) {
