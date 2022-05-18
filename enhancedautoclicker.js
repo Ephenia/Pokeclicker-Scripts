@@ -18,6 +18,7 @@ var reqDPS;
 var enemySpeedRaw;
 var enemySpeed;
 var colorDPS;
+var allSelectedGym = 0;
 var gymState;
 var gymColor;
 var gymSelect;
@@ -83,6 +84,7 @@ function initAutoClicker() {
     <option value="2">#3</option>
     <option value="3">#4</option>
     <option value="4">#5</option>
+    <option value="5">All</option>
   </select>
     </td>
     </tr>
@@ -229,7 +231,7 @@ function autoClicker() {
         if (gymState == "ON") {
             autoGym();
         }
-        
+
         //Auto Dungeon checking
         if (dungeonState == "ON" && DungeonRunner.fighting() == false && DungeonBattle.catching() == false) {
             autoDungeon();
@@ -267,16 +269,27 @@ function autoGym() {
             }*/
 
             if (App.game.gameState != GameConstants.GameState.gym) {
-                //If the content is a Gym or league champion and we unlocked it we fight
-                if ((player.town().content[gymSelect] instanceof Gym && player.town().content[gymSelect].isUnlocked()) || (player.town().content[gymSelect] instanceof Champion && player.town().content[gymSelect].isUnlocked())){
-                    GymRunner.startGym(player.town().content[gymSelect])
-                }
-                else {
-                    //Otherwise we try to fight the previous gyms (elite 4)
-                    for (var i = player.town().content.length - 1; i >= 0; i--){
-                        if ((player.town().content[i] instanceof Gym && player.town().content[i].isUnlocked()) || (player.town().content[i] instanceof Champion && player.town().content[i].isUnlocked())){
-                            GymRunner.startGym(player.town().content[i])
-                            break
+                //If "All" is selected, then go through list of league from 0-4
+                if (gymSelect === 5 && 
+                   (player.town().content[gymSelect] instanceof Gym && player.town().content[gymSelect].isUnlocked()) || 
+                    (player.town().content[gymSelect] instanceof Champion && player.town().content[gymSelect].isUnlocked())) {
+                    GymRunner.startGym(player.town().content[allSelectedGym])
+                    allSelectedGym++
+                    if(allSelectedGym === 5) {
+                        allSelectedGym = 0
+                    }
+                } else {
+                    //If the content is a Gym or league champion and we unlocked it we fight
+                    if ((player.town().content[gymSelect] instanceof Gym && player.town().content[gymSelect].isUnlocked()) || (player.town().content[gymSelect] instanceof Champion && player.town().content[gymSelect].isUnlocked())){
+                        GymRunner.startGym(player.town().content[gymSelect])
+                    }
+                    else {
+                        //Otherwise we try to fight the previous gyms (elite 4)
+                        for (var i = player.town().content.length - 1; i >= 0; i--){
+                            if ((player.town().content[i] instanceof Gym && player.town().content[i].isUnlocked()) || (player.town().content[i] instanceof Champion && player.town().content[i].isUnlocked())){
+                                GymRunner.startGym(player.town().content[i])
+                                break
+                            }
                         }
                     }
                 }
