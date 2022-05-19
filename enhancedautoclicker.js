@@ -3,8 +3,8 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.6
-// @author      Ephenia (Original/Credit: Ivan Lay, Novie53)
+// @version     1.7
+// @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes.
 // ==/UserScript==
 
@@ -269,10 +269,11 @@ function autoGym() {
             }*/
 
             if (App.game.gameState != GameConstants.GameState.gym) {
-                //If "All" is selected, then go through list of league from 0-4
-                if (gymSelect === 5 && 
-                   (player.town().content[gymSelect] instanceof Gym && player.town().content[gymSelect].isUnlocked()) || 
-                    (player.town().content[gymSelect] instanceof Champion && player.town().content[gymSelect].isUnlocked())) {
+                //Checking if Champion exists here and is unlocked
+                let champUnlocked;
+                try {champUnlocked = player.town().content[4].isUnlocked()} catch (err) { champUnlocked = false }
+                //If "All" is selected and the Champion is unlocked, then go through list of league fully from 0-4
+                if (gymSelect === 5 && champUnlocked) {
                     GymRunner.startGym(player.town().content[allSelectedGym])
                     allSelectedGym++
                     if(allSelectedGym === 5) {
@@ -288,7 +289,7 @@ function autoGym() {
                         for (var i = player.town().content.length - 1; i >= 0; i--){
                             if ((player.town().content[i] instanceof Gym && player.town().content[i].isUnlocked()) || (player.town().content[i] instanceof Champion && player.town().content[i].isUnlocked())){
                                 GymRunner.startGym(player.town().content[i])
-                                break
+                                break;
                             }
                         }
                     }
