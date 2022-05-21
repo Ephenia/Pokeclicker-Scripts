@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.7
+// @version     1.8
 // @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes.
 // ==/UserScript==
@@ -29,6 +29,7 @@ var foundBoss = false;
 var foundBossX;
 var foundBossY;
 var newSave;
+var delayAutoClick;
 var trainerCards;
 var battleView = document.getElementsByClassName('battle-view')[0];
 
@@ -60,7 +61,12 @@ function initAutoClicker() {
     <div id="req-DPS">Req. DPS:<br><div style="font-weight:bold;">0</div></div>
     <div id="enemy-DPS">Enemy/s:<br><div style="font-weight:bold;color:black;">0</div></div>
     </div>
-    </button></td></tr>
+    </button>
+    <div id="click-delay-cont">
+    <div id="auto-click-delay-info">Click Attack Delay: ` + (1000 / delayAutoClick).toFixed(2) + `/s</div>
+    <input type="range" min="1" max="50" value="` + delayAutoClick + `" id="auto-click-delay">
+    </div>
+    </td></tr>
     <tr>
     <td style="width: 42%;">
     <button id="auto-dungeon-start" class="btn btn-block btn-`+ dungeonColor + `" style="font-size: 8pt;">
@@ -98,14 +104,17 @@ function initAutoClicker() {
     $("#gym-select").change(changeSelectedGym)
     $("#auto-dungeon-start").click(toggleAutoDungeon)
     $("#dungeon-select").change(changeSelectedDungeon)
+    document.getElementById('auto-click-delay').addEventListener('change', (event) => { changeClickDelay(event) })
     addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
     addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
     addGlobalStyle('#dungeonMap { padding-bottom: 9.513%; }');
+    addGlobalStyle('#click-delay-cont { display: flex; flex-direction: column; align-items: stretch;}')
 
     if (clickState == "ON") {
         autoClicker();
         calcClickDPS();
     }
+    overideClickAttack();
 }
 
 function toggleAutoClick() {
@@ -253,7 +262,45 @@ function autoClicker() {
                 DungeonBattle.clickAttack();
             }
         }
-    }, 50); // The app hard-caps click attacks at 50
+    }, delayAutoClick); // The app hard-caps click attacks at 50
+}
+
+function changeClickDelay(event) {
+    const delay = +event.target.value;
+    delayAutoClick = delay;
+    localStorage.setItem("delayAutoClick", delay);
+    overideClickAttack();
+    if (clickState == "ON") {
+        clearInterval(autoClickerLoop);
+        autoClicker();
+        console.log('happening?')
+    }
+    document.getElementById('auto-click-delay-info').innerText = `Click Attack Delay: ` + (1000 / delayAutoClick).toFixed(2) + `/s`
+}
+
+function overideClickAttack() {
+    // Overiding the game's function for Click Attack
+    Battle.clickAttack = function() {
+        // click attacks disabled and we already beat the starter
+        if (App.game.challenges.list.disableClickAttack.active() && player.starter() != GameConstants.Starter.None) {
+            return;
+        }
+        // TODO: figure out a better way of handling this
+        // Limit click attack speed, Only allow 1 attack per 50ms (20 per second)
+        const now = Date.now();
+        if (this.lastClickAttack > now - delayAutoClick) {
+            return;
+        }
+        this.lastClickAttack = now;
+        if (!this.enemyPokemon()?.isAlive()) {
+            return;
+        }
+        GameHelper.incrementObservable(App.game.statistics.clickAttacks);
+        this.enemyPokemon().damage(App.game.party.calculateClickAttack(true));
+        if (!this.enemyPokemon().isAlive()) {
+            this.defeatPokemon();
+        }
+    }
 }
 
 function autoGym() {
@@ -441,11 +488,15 @@ if (localStorage.getItem('autoDungeonState') == null) {
 if (localStorage.getItem('selectedDungeon') == null) {
     localStorage.setItem("selectedDungeon", 0);
 }
+if (localStorage.getItem('delayAutoClick') == null) {
+    localStorage.setItem("delayAutoClick", 50);
+}
 clickState = localStorage.getItem('autoClickState');
 gymState = localStorage.getItem('autoGymState');
 gymSelect = +localStorage.getItem('selectedGym');
 dungeonState = localStorage.getItem('autoDungeonState');
 dungeonSelect = localStorage.getItem('selectedDungeon');
+delayAutoClick = localStorage.getItem('delayAutoClick');
 
 function loadScript(){
     var oldInit = Preload.hideSplashScreen
