@@ -3,9 +3,9 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.8
+// @version     1.9
 // @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951)
-// @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes.
+// @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
 // ==/UserScript==
 
 var clickState;
@@ -192,7 +192,8 @@ function getRandomInt(max) {
 
 function calcClickDPS() {
     autoClickDPS = setInterval(function () {
-        var enemyHealth;
+        const clickSec = (1000 / delayAutoClick);
+        let enemyHealth;
         try {
             enemyHealth = Battle.enemyPokemon().maxHealth();
         }
@@ -200,29 +201,29 @@ function calcClickDPS() {
             enemyHealth = 0;
         }
 
-        if (clickDPS != App.game.party.calculateClickAttack() * 20) {
-            clickDPS = App.game.party.calculateClickAttack() * 20;
-            document.getElementById('click-DPS').innerHTML = `Auto Click DPS:<br><div style="font-weight:bold;color:gold;">` + clickDPS.toLocaleString('en-US'); +`</div>`
+        if (clickDPS != App.game.party.calculateClickAttack() * clickSec) {
+            clickDPS = App.game.party.calculateClickAttack() * clickSec;
+            document.getElementById('click-DPS').innerHTML = `Auto Click DPS:<br><div style="font-weight:bold;color:gold;">` + Math.floor(clickDPS).toLocaleString('en-US'); +`</div>`
             localStorage.setItem('storedClickDPS', clickDPS)
         }
-        if (reqDPS != enemyHealth * 20) {
-            reqDPS = enemyHealth * 20;
+        if (reqDPS != enemyHealth * clickSec) {
+            reqDPS = enemyHealth * clickSec;
             if (clickDPS >= reqDPS) {
                 colorDPS = "greenyellow"
             } else {
                 colorDPS = "darkred"
             }
-            document.getElementById('req-DPS').innerHTML = `Req. DPS:<br><div style="font-weight:bold;color:` + colorDPS + `">` + reqDPS.toLocaleString('en-US'); +`</div>`
+            document.getElementById('req-DPS').innerHTML = `Req. DPS:<br><div style="font-weight:bold;color:` + colorDPS + `">` + Math.ceil(reqDPS).toLocaleString('en-US'); +`</div>`
         }
-        if (enemySpeedRaw != ((App.game.party.calculateClickAttack() * 20) / enemyHealth).toFixed(1)) {
-            enemySpeed = ((App.game.party.calculateClickAttack() * 20) / enemyHealth).toFixed(1);
+        if (enemySpeedRaw != ((App.game.party.calculateClickAttack() * clickSec) / enemyHealth).toFixed(1)) {
+            enemySpeed = ((App.game.party.calculateClickAttack() * clickSec) / enemyHealth).toFixed(1);
             enemySpeedRaw = enemySpeed
             //console.log(enemySpeedRaw)
             if (enemySpeedRaw == 'Infinity') {
                 enemySpeed = 0
             }
-            if (enemySpeedRaw >= 20 && enemySpeedRaw != 'Infinity') {
-                enemySpeed = 20
+            if (enemySpeedRaw >= clickSec && enemySpeedRaw != 'Infinity') {
+                clickSec === parseInt(clickSec) ? enemySpeed = clickSec : enemySpeed = clickSec.toFixed(2);
             }
             document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br><div style="font-weight:bold;color:black;">` + enemySpeed + `</div>`
         }
@@ -273,7 +274,6 @@ function changeClickDelay(event) {
     if (clickState == "ON") {
         clearInterval(autoClickerLoop);
         autoClicker();
-        console.log('happening?')
     }
     document.getElementById('auto-click-delay-info').innerText = `Click Attack Delay: ` + (1000 / delayAutoClick).toFixed(2) + `/s`
 }
