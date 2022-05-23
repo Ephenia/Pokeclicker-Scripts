@@ -31,6 +31,7 @@ var foundBossY;
 var newSave;
 var delayAutoClick;
 var trainerCards;
+window.testDPS = 0;
 var battleView = document.getElementsByClassName('battle-view')[0];
 
 function initAutoClicker() {
@@ -63,7 +64,7 @@ function initAutoClicker() {
     </div>
     </button>
     <div id="click-delay-cont">
-    <div id="auto-click-delay-info">Click Attack Delay: ` + (1000 / delayAutoClick).toFixed(2) + `/s</div>
+    <div id="auto-click-delay-info">Click Attack Delay: ` + clickDelayFixed(1000 / delayAutoClick) + `/s</div>
     <input type="range" min="1" max="50" value="` + delayAutoClick + `" id="auto-click-delay">
     </div>
     </td></tr>
@@ -192,7 +193,7 @@ function getRandomInt(max) {
 
 function calcClickDPS() {
     autoClickDPS = setInterval(function () {
-        const clickSec = (1000 / delayAutoClick);
+        const clickSec = testDPS;
         let enemyHealth;
         try {
             enemyHealth = Battle.enemyPokemon().maxHealth();
@@ -200,7 +201,6 @@ function calcClickDPS() {
         catch (err) {
             enemyHealth = 0;
         }
-
         if (clickDPS != App.game.party.calculateClickAttack() * clickSec) {
             clickDPS = App.game.party.calculateClickAttack() * clickSec;
             document.getElementById('click-DPS').innerHTML = `Auto Click DPS:<br><div style="font-weight:bold;color:gold;">` + Math.floor(clickDPS).toLocaleString('en-US'); +`</div>`
@@ -216,17 +216,18 @@ function calcClickDPS() {
             document.getElementById('req-DPS').innerHTML = `Req. DPS:<br><div style="font-weight:bold;color:` + colorDPS + `">` + Math.ceil(reqDPS).toLocaleString('en-US'); +`</div>`
         }
         if (enemySpeedRaw != ((App.game.party.calculateClickAttack() * clickSec) / enemyHealth).toFixed(1)) {
-            enemySpeed = ((App.game.party.calculateClickAttack() * clickSec) / enemyHealth).toFixed(1);
-            enemySpeedRaw = enemySpeed
-            //console.log(enemySpeedRaw)
-            if (enemySpeedRaw == 'Infinity') {
-                enemySpeed = 0
+            enemySpeed = ((App.game.party.calculateClickAttack() * clickSec) / enemyHealth);
+            enemySpeedRaw = enemySpeed;
+            if (isNaN(enemySpeedRaw) || enemySpeedRaw == 'Infinity' || Battle.catching()) {
+                enemySpeed = 0;
             }
-            if (enemySpeedRaw >= clickSec && enemySpeedRaw != 'Infinity') {
-                clickSec === parseInt(clickSec) ? enemySpeed = clickSec : enemySpeed = clickSec.toFixed(2);
+            if (enemySpeedRaw >= clickSec && enemySpeedRaw != 'Infinity' && !Battle.catching()) {
+                enemySpeed = testDPS;
             }
+            if (!Number.isInteger(enemySpeed) && enemySpeed != 0) { enemySpeed = enemySpeed.toFixed(1).toString().replace('.0', '') }
             document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br><div style="font-weight:bold;color:black;">` + enemySpeed + `</div>`
         }
+        testDPS = 0;
     }, 1000);
 }
 
@@ -275,7 +276,13 @@ function changeClickDelay(event) {
         clearInterval(autoClickerLoop);
         autoClicker();
     }
-    document.getElementById('auto-click-delay-info').innerText = `Click Attack Delay: ` + (1000 / delayAutoClick).toFixed(2) + `/s`
+    let clickSec = (1000 / delayAutoClick);
+    document.getElementById('auto-click-delay-info').innerText = `Click Attack Delay: ` + clickDelayFixed(clickSec) + `/s`
+}
+
+function clickDelayFixed(int) {
+    if (int != parseInt(int)) { int = int.toFixed(2) }
+    return int;
 }
 
 function overideClickAttack() {
@@ -299,6 +306,7 @@ function overideClickAttack() {
         this.enemyPokemon().damage(App.game.party.calculateClickAttack(true));
         if (!this.enemyPokemon().isAlive()) {
             this.defeatPokemon();
+            testDPS++;
         }
     }
 }
