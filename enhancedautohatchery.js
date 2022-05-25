@@ -13,8 +13,10 @@ var awaitAutoHatch;
 var hatchColor;
 var autoHatchLoop;
 var randFossilEgg;
-var eggFossilState;
-var eggFossilColor;
+var eggState;
+var eggColor;
+var fossilState;
+var fossilColor;
 var hatcherySortVal;
 var hatcherySortDir;
 var hatcherySortSync;
@@ -29,10 +31,15 @@ function initAutoHatch() {
     } else {
         hatchColor = "success"
     }
-    if (eggFossilState == "OFF") {
-        eggFossilColor = "danger"
+    if (eggState == "OFF") {
+        eggColor = "danger"
     } else {
-        eggFossilColor = "success"
+        eggColor = "success"
+    }
+    if (fossilState == "OFF") {
+        fossilColor = "danger"
+    } else {
+        fossilColor = "success"
     }
     if (hatcherySortSync == "OFF") {
         sortSyncColor = "danger"
@@ -44,16 +51,20 @@ function initAutoHatch() {
     Auto Hatch [`+ hatchState + `]
     </button>`
 
-    document.getElementById('breedingModal').querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="sort-sync" class="btn btn-` + sortSyncColor + `" style="margin-left:25px;">
+    document.getElementById('breedingModal').querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="sort-sync" class="btn btn-` + sortSyncColor + `" style="margin-left:20px;">
     Pokemon List Sync [`+ hatcherySortSync + `]
     </button>
-    <button id="auto-egg-fossil" class="btn btn-`+ eggFossilColor + `" style="margin-left:25px;">
-    Auto Egg/Fossil [`+ eggFossilState + `]
+    <button id="auto-egg" class="btn btn-`+ eggColor + `" style="margin-left:20px;">
+    Auto Egg [`+ eggState + `]
+    </button>
+    <button id="auto-fossil" class="btn btn-`+ fossilColor + `" style="margin-left:20px;">
+    Auto Fossil [`+ fossilState + `]
     </button>`
 
     $("#auto-hatch-start").click(toggleAutoHatch)
     $("#sort-sync").click(changesortsync)
-    $("#auto-egg-fossil").click(toggleEggFossil)
+    $("#auto-egg").click(toggleEgg)
+    $("#auto-fossil").click(toggleFossil)
     //document.getElementById('breedingModal').querySelector('button[aria-controls="breeding-sort"]').setAttribute("style", "display:none");
     addGlobalStyle('.eggSlot.disabled { pointer-events: unset !important; }');
 
@@ -94,19 +105,34 @@ function changesortsync() {
     document.getElementById('sort-sync').innerHTML = `Pokemon List Sync [` + hatcherySortSync + `]`
 }
 
-function toggleEggFossil() {
-    if (eggFossilState == "OFF") {
-        eggFossilState = "ON"
-        localStorage.setItem("autoEggFossil", eggFossilState);
-        document.getElementById("auto-egg-fossil").classList.remove('btn-danger');
-        document.getElementById("auto-egg-fossil").classList.add('btn-success');
+function toggleEgg() {
+    if (eggState == "OFF") {
+        eggState = "ON"
+        localStorage.setItem("autoEgg", eggState);
+        document.getElementById("auto-egg").classList.remove('btn-danger');
+        document.getElementById("auto-egg").classList.add('btn-success');
     } else {
-        eggFossilState = "OFF"
-        localStorage.setItem("autoEggFossil", eggFossilState);
-        document.getElementById("auto-egg-fossil").classList.remove('btn-success');
-        document.getElementById("auto-egg-fossil").classList.add('btn-danger');
+        eggState = "OFF"
+        localStorage.setItem("autoEgg", eggState);
+        document.getElementById("auto-egg").classList.remove('btn-success');
+        document.getElementById("auto-egg").classList.add('btn-danger');
     }
-    document.getElementById('auto-egg-fossil').innerHTML = `Auto Egg/Fossil [` + eggFossilState + `]`
+    document.getElementById('auto-egg').innerHTML = `Auto Egg [` + eggState + `]`
+}
+
+function toggleFossil() {
+    if (fossilState == "OFF") {
+        fossilState = "ON"
+        localStorage.setItem("autoFossil", fossilState);
+        document.getElementById("auto-fossil").classList.remove('btn-danger');
+        document.getElementById("auto-fossil").classList.add('btn-success');
+    } else {
+        fossilState = "OFF"
+        localStorage.setItem("autoFossil", fossilState);
+        document.getElementById("auto-fossil").classList.remove('btn-success');
+        document.getElementById("auto-fossil").classList.add('btn-danger');
+    }
+    document.getElementById('auto-fossil').innerHTML = `Auto Fossil [` + fossilState + `]`
 }
 
 function autoHatcher() {
@@ -149,9 +175,9 @@ function autoHatcher() {
             App.game.party.hasMaxLevelPokemon() && // Don't run if you don't have any level 100 Pokemon
             App.game.breeding.hasFreeEggSlot() // Has an open egg slot
         ) {
-
-            if (eggFossilState == "ON") {
-                var hasEgg;
+            var hasEgg;
+            var hasFossil;
+            if (eggState == "ON") {
                 var randEggIndex;
                 var storedEggName = [];
                 var eggTypesLength = GameConstants.EggItemType[0].length;
@@ -171,18 +197,19 @@ function autoHatcher() {
                 } else {
                     hasEgg = false
                 }
+            }
 
-                var hasFossil;
+            if (fossilState == "ON") {
                 var randFossilIndex;
                 var storedFossilName = [];
                 var storedFossilID = [];
                 var treasureLength = player.mineInventory().length;
-                for (var i = 0; i < treasureLength; i++) {
-                    var valueType = player.mineInventory()[i].valueType
-                    var itemAmount = player.mineInventory()[i].amount()
+                for (var e = 0; e < treasureLength; e++) {
+                    var valueType = player.mineInventory()[e].valueType
+                    var itemAmount = player.mineInventory()[e].amount()
                     if (valueType == "Mine Egg" && itemAmount > 0) {
-                        var fossilName = player.mineInventory()[i].name;
-                        var fossilID = player.mineInventory()[i].id;
+                        var fossilName = player.mineInventory()[e].name;
+                        var fossilID = player.mineInventory()[e].id;
                         var fossilePoke = GameConstants.FossilToPokemon[fossilName];
                         var pokeRegion = PokemonHelper.calcNativeRegion(fossilePoke)
                         if (pokeRegion <= player.highestRegion()) {
@@ -202,7 +229,9 @@ function autoHatcher() {
                 } else {
                     hasFossil = false;
                 }
+            }
 
+            if (eggState == "ON" || fossilState == "ON") {
                 if (hasEgg == true && hasFossil == true) {
                     //console.log("user has both egg and fossil")
                     var isEggFossil = (Math.floor(Math.random() * 2) + 1)
@@ -311,8 +340,11 @@ function autoHatcher() {
 if (localStorage.getItem('autoHatchState') == null) {
     localStorage.setItem("autoHatchState", "OFF");
 }
-if (localStorage.getItem('autoEggFossil') == null) {
-    localStorage.setItem("autoEggFossil", "OFF");
+if (localStorage.getItem('autoEgg') == null) {
+    localStorage.setItem("autoEgg", "OFF");
+}
+if (localStorage.getItem('autoFossil') == null) {
+    localStorage.setItem("autoFossil", "OFF");
 }
 if (localStorage.getItem('hatcherySortVal') == null) {
     localStorage.setItem("hatcherySortVal", 0);
@@ -324,7 +356,8 @@ if (localStorage.getItem('hatcherySortSync') == null) {
     localStorage.setItem("hatcherySortSync", "OFF");
 }
 hatchState = localStorage.getItem('autoHatchState');
-eggFossilState = localStorage.getItem('autoEggFossil');
+eggState = localStorage.getItem('autoEgg');
+fossilState = localStorage.getItem('autoFossil');
 hatcherySortVal = +localStorage.getItem('hatcherySortVal');
 hatcherySortDir = +localStorage.getItem('hatcherySortDir');
 hatcherySortSync = localStorage.getItem('hatcherySortSync');
