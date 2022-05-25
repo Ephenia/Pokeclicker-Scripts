@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.5
+// @version     1.6
 // @author      Ephenia
 // @description Adds additional settings for hiding some visual things to help out with performance.
 // ==/UserScript==
@@ -12,6 +12,7 @@ var checkWildPokeName;
 var checkWildPokeDefeat;
 var checkWildPokeImg;
 var checkWildPokeHealth;
+var checkWildPokeCatch;
 var checkAllNotification;
 var newSave;
 var trainerCards;
@@ -56,6 +57,14 @@ function initVisualSettings() {
     <td class="p-2">
         <input id="poke-health" type="checkbox">
     </td>
+</tr>
+<tr>
+    <td class="p-2">
+        <label class="m-0">Show Catch Icon</label>
+    </td>
+    <td class="p-2">
+        <input id="poke-catch" type="checkbox">
+    </td>
 </tr>`
 
     var notifiyHTML = document.createElement("tr");
@@ -88,6 +97,7 @@ function initVisualSettings() {
     checkWildPokeDefeat = localStorage.getItem('checkWildPokeDefeat');
     checkWildPokeImg = localStorage.getItem('checkWildPokeImg');
     checkWildPokeHealth = localStorage.getItem('checkWildPokeHealth');
+    checkWildPokeCatch = localStorage.getItem('checkWildPokeCatch');
     checkAllNotification = localStorage.getItem('checkAllNotification');
     addGlobalStyle('.pageItemTitle { height:38px }');
     addGlobalStyle('#quick-settings { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
@@ -115,6 +125,11 @@ function initVisualSettings() {
     } else {
         remPokeHealth();
     }
+    if (checkWildPokeCatch == "OFF") {
+        document.querySelector('#poke-catch').checked = true
+    } else {
+        remPokeCatch();
+    }
     if (checkAllNotification == "ON") {
         document.querySelector('#all-notify').checked = true
         remNotifications();
@@ -133,6 +148,9 @@ function initVisualSettings() {
             }
             if (checkWildPokeHealth == "ON") {
                 remPokeHealth();
+            }
+            if (checkWildPokeCatch == "ON") {
+                remPokeCatch();
             }
         }
     });
@@ -177,6 +195,16 @@ function initVisualSettings() {
         }
     });
 
+    document.querySelector('#poke-catch').addEventListener('change', event => {
+        if (event.target.checked == true) {
+            checkWildPokeCatch = "OFF";
+            localStorage.setItem("checkWildPokeCatch", "OFF");
+        } else {
+            checkWildPokeCatch = "ON";
+            localStorage.setItem("checkWildPokeCatch", "ON");
+        }
+    });
+
     function remPokeName() {
         var enemyName = document.querySelectorAll('knockout[data-bind*="text: Battle.enemyPokemon().name"]');
         if (enemyName.length > 0) {
@@ -209,6 +237,13 @@ function initVisualSettings() {
         }
     }
 
+    function remPokeCatch() {
+        var catchIcon = document.querySelectorAll('.catchChance');
+        if (catchIcon.length > 0) {
+            catchIcon[0].remove()
+        }
+    }
+
     function remNotifications() {
         var getToast = document.getElementById('toaster');
         //Clear all notifications before disabling to avoid messing up the page
@@ -237,6 +272,9 @@ if (localStorage.getItem('checkWildPokeImg') == null) {
 }
 if (localStorage.getItem('checkWildPokeHealth') == null) {
     localStorage.setItem("checkWildPokeHealth", "OFF");
+}
+if (localStorage.getItem('checkWildPokeCatch') == null) {
+    localStorage.setItem("checkWildPokeCatch", "OFF");
 }
 if (localStorage.getItem('checkAllNotification') == null) {
     localStorage.setItem("checkAllNotification", "OFF");
