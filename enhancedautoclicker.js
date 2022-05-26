@@ -32,6 +32,7 @@ var newSave;
 var delayAutoClick;
 var trainerCards;
 window.testDPS = 0;
+window.defeatDPS = 0;
 var battleView = document.getElementsByClassName('battle-view')[0];
 
 function initAutoClicker() {
@@ -222,12 +223,13 @@ function calcClickDPS() {
                 enemySpeed = 0;
             }
             if (enemySpeedRaw >= clickSec && enemySpeedRaw != 'Infinity' && !Battle.catching()) {
-                enemySpeed = testDPS;
+                enemySpeed = defeatDPS;
             }
             if (!Number.isInteger(enemySpeed) && enemySpeed != 0) { enemySpeed = enemySpeed.toFixed(1).toString().replace('.0', '') }
             document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br><div style="font-weight:bold;color:black;">` + enemySpeed + `</div>`
         }
         testDPS = 0;
+        defeatDPS = 0;
     }, 1000);
 }
 
@@ -304,9 +306,10 @@ function overideClickAttack() {
         }
         GameHelper.incrementObservable(App.game.statistics.clickAttacks);
         this.enemyPokemon().damage(App.game.party.calculateClickAttack(true));
+        testDPS++;
         if (!this.enemyPokemon().isAlive()) {
             this.defeatPokemon();
-            testDPS++;
+            defeatDPS++;
         }
     }
 }
