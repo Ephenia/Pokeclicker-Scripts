@@ -3,140 +3,216 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.4
-// @author      Ephenia
-// @description Adds buttons to automatically plant and harvest all of any specific berry. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
+// @version     1.5
+// @author      Ephenia / Akwawa (update 1.5)
+// @description It Add buttons to automatically plant any specific berry, harvest or mulch all berries. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
 // ==/UserScript==
 
-var farmState;
-var mulchState;
-var farmColor;
-var mulchColor;
-var autoFarmTimer;
-var awaitAutoFarm;
-var newSave;
-var trainerCards;
-var shovelList = document.getElementById('shovelList');
-
 function initAutoFarm() {
-    if (farmState == "ON") {
-        autoFarmTimer = setInterval(function () {
-            doPlantHarvest();
-        }, 1000);
-    }
-    if (farmState == "OFF") {
-        farmColor = "danger"
-    } else {
-        farmColor = "success"
-    }
-    if (mulchState == "OFF") {
-        mulchColor = "danger"
-    } else {
-        mulchColor = "success"
+    var plantState;
+    var plantColor;
+    var autoPlantTimer;
+    var harvestState;
+    var harvestColor;
+    var autoHarvestTimer;
+    var mulchState;
+    var mulchColor;
+    var autoMulchTimer;
+    var shovelList = document.getElementById('shovelList');
+    var colorOn = "success";
+    var colorOff = "danger";
+
+    plantState = localStorage.getItem('autoPlantState');
+    harvestState = localStorage.getItem('autoHarvestState');
+    mulchState = localStorage.getItem('autoMulchState');
+
+    createMenu();
+    autoPlant(document.getElementById('auto-plant-start'), true);
+    autoHarvest(document.getElementById('auto-harvest-start'), true);
+    autoMulch(document.getElementById('auto-mulch-start'), true);
+
+    function createMenu() {
+        plantColor = (plantState === "OFF") ? colorOff : colorOn ;
+        harvestColor = (harvestState === "OFF") ? colorOff : colorOn ;
+        mulchColor = (mulchState === "OFF") ? colorOff : colorOn ;
+
+        var elemAF = document.createElement("div");
+        var divMenu = document.createElement("div");
+        var divBoutonAutoPlant = document.createElement("div");
+        var divBoutonAutoHarvest = document.createElement("div");
+        var divBoutonAutoMulch = document.createElement("div");
+        var buttonAutoPlant = document.createElement("bouton");
+        var buttonAutoHarvest = document.createElement("bouton");
+        var buttonAutoMulch = document.createElement("bouton");
+
+        divMenu.className = "row justify-content-center py-0";
+        divBoutonAutoPlant.className = "col-4 pr-0";
+        divBoutonAutoHarvest.className = "col-4 pr-0 pl-0";
+        divBoutonAutoMulch.className = "col-4 pl-0";
+
+        buttonAutoPlant.style.fontSize = "9pt";
+        buttonAutoPlant.className = "btn btn-block btn-" + plantColor;
+        buttonAutoPlant.setAttribute("id", "auto-plant-start");
+        buttonAutoPlant.textContent = " Auto Plant [" + plantState + "]";
+        buttonAutoPlant.onclick = function() { autoPlant(this); };
+
+        buttonAutoHarvest.style.fontSize = "9pt";
+        buttonAutoHarvest.className = "btn btn-block btn-" + harvestColor;
+        buttonAutoHarvest.setAttribute("id", "auto-harvest-start");
+        buttonAutoHarvest.textContent = " Auto Harvest [" + harvestState + "]";
+        buttonAutoHarvest.onclick = function() { autoHarvest(this); };
+
+        buttonAutoMulch.style.fontSize = "9pt";
+        buttonAutoMulch.className = "btn btn-block btn-" + mulchColor;
+        buttonAutoMulch.setAttribute("id", "auto-mulch-start");
+        buttonAutoMulch.textContent = " Auto Mulch [" + mulchState + "]";
+        buttonAutoMulch.onclick = function() { autoMulch(this); };
+
+        divBoutonAutoPlant.appendChild(buttonAutoPlant);
+        divBoutonAutoHarvest.appendChild(buttonAutoHarvest);
+        divBoutonAutoMulch.appendChild(buttonAutoMulch);
+        divMenu.appendChild(divBoutonAutoPlant);
+        divMenu.appendChild(divBoutonAutoHarvest);
+        divMenu.appendChild(divBoutonAutoMulch);
+        elemAF.appendChild(divMenu);
+
+        shovelList.before(elemAF);
     }
 
-    var elemAF = document.createElement("div");
-    elemAF.innerHTML = `<div class="row justify-content-center py-0">
-    <div class="col-6 pr-0">
-    <button id="auto-farm-start" class="btn btn-`+ farmColor + ` btn-block" style="font-size:9pt;">
-    Auto Farm [`+ farmState + `]
-    </button>
-    </div>
-    <div class="col-6 pl-0">
-    <button id="auto-mulch-start" class="btn btn-`+ mulchColor + ` btn-block" style="font-size:9pt;">
-    Auto Mulch [`+ mulchState + `]
-    </button>
-    </div>
-    </div>`
-    shovelList.before(elemAF)
-
-    $("#auto-farm-start").click(startAutoFarm);
-    $("#auto-mulch-start").click(autoMulch);
-
-    function startAutoFarm() {
-        if (farmState == "OFF") {
-            localStorage.setItem("autoFarmState", "ON");
-            farmState = "ON"
-            autoFarmTimer = setInterval(function () {
-                doPlantHarvest();
-            }, 1000); // Happens every 1 second
-            document.getElementById('auto-farm-start').innerText = `Auto Farm [` + farmState + `]`
-            document.getElementById("auto-farm-start").classList.remove('btn-danger');
-            document.getElementById("auto-farm-start").classList.add('btn-success');
+    // Plant - cmd, start, stop, do
+    function autoPlant(elt, init=false) {
+        if ( (init === true && plantState === "ON" ) || (init === false && plantState === "OFF") ) {
+            startPlant(elt);
         } else {
-            endAutoFarm();
+            stopPlant(elt);
         }
     }
 
-    function doPlantHarvest() {
-        App.game.farming.plantAll(FarmController.selectedBerry())
-        if (mulchState == "ON") {
-            FarmController.mulchAll()
-        }
-        App.game.farming.harvestAll()
+    function startPlant(elt) {
+        localStorage.setItem("autoPlantState", "ON");
+        plantState = "ON";
+        autoPlantTimer = setInterval(function () {
+            doPlant();
+        }, 1000); // Happens every 1 second
+        elt.innerText = "Auto Plant [" + plantState + "]";
+        elt.classList.remove('btn-danger');
+        elt.classList.add('btn-success');
     }
 
-    function autoMulch() {
-        if (mulchState == "OFF") {
-            localStorage.setItem("autoMulchState", "ON");
-            mulchState = "ON"
-            document.getElementById('auto-mulch-start').innerText = `Auto Mulch [` + mulchState + `]`
-            document.getElementById("auto-mulch-start").classList.remove('btn-danger');
-            document.getElementById("auto-mulch-start").classList.add('btn-success');
+    function stopPlant(elt) {
+        localStorage.setItem("autoPlantState", "OFF");
+        plantState = "OFF";
+        elt.innerText = "Auto Plant [" + plantState + "]";
+        elt.classList.remove('btn-success');
+        elt.classList.add('btn-danger');
+        clearInterval(autoPlantTimer);
+    }
+
+    function doPlant() {
+        App.game.farming.plantAll(FarmController.selectedBerry());
+    }
+
+    // Harvest - cmd, start, stop, do
+    function autoHarvest(elt, init=false) {
+        if ( (init === true && harvestState === "ON" ) || (init === false && harvestState == "OFF") ) {
+            startHarvest(elt);
         } else {
-            localStorage.setItem("autoMulchState", "OFF");
-            mulchState = "OFF"
-            document.getElementById('auto-mulch-start').innerText = `Auto Mulch [` + mulchState + `]`
-            document.getElementById("auto-mulch-start").classList.remove('btn-success');
-            document.getElementById("auto-mulch-start").classList.add('btn-danger');
+            stopHarvest(elt);
         }
     }
 
-    function endAutoFarm() {
-        localStorage.setItem("autoFarmState", "OFF");
-        farmState = "OFF"
-        document.getElementById('auto-farm-start').innerText = `Auto Farm [` + farmState + `]`
-        document.getElementById("auto-farm-start").classList.remove('btn-success');
-        document.getElementById("auto-farm-start").classList.add('btn-danger');
-        clearInterval(autoFarmTimer)
+    function startHarvest(elt) {
+        localStorage.setItem("autoHarvestState", "ON");
+        harvestState = "ON";
+        autoHarvestTimer = setInterval(function () {
+            doHarvest();
+        }, 1000); // Happens every 1 second
+        elt.innerText = "Auto Harvest [" + harvestState + "]";
+        elt.classList.remove('btn-danger');
+        elt.classList.add('btn-success');
+    }
+
+    function stopHarvest(elt) {
+        localStorage.setItem("autoHarvestState", "OFF");
+        harvestState = "OFF";
+        elt.innerText = "Auto Harvest [" + harvestState + "]";
+        elt.classList.remove('btn-success');
+        elt.classList.add('btn-danger');
+        clearInterval(autoHarvestTimer);
+    }
+
+    function doHarvest() {
+        App.game.farming.harvestAll();
+    }
+
+    // Mulch - cmd, start, stop, do
+    function autoMulch(elt, init=false) {
+        if ( (init === true && mulchState === "ON" ) || (init === false && mulchState == "OFF") ) {
+            startMulch(elt);
+        } else {
+            stopMulch(elt);
+        }
+    }
+
+    function startMulch(elt) {
+        localStorage.setItem("autoMulchState", "ON");
+        mulchState = "ON";
+        autoMulchTimer = setInterval(function () {
+            doMulch();
+        }, 1000); // Happens every 1 second
+        elt.innerText = "Auto Mulch [" + mulchState + "]";
+        elt.classList.remove('btn-danger');
+        elt.classList.add('btn-success');
+    }
+
+    function stopMulch(elt) {
+        localStorage.setItem("autoMulchState", "OFF");
+        mulchState = "OFF";
+        elt.innerText = "Auto Mulch [" + mulchState + "]";
+        elt.classList.remove('btn-success');
+        elt.classList.add('btn-danger');
+        clearInterval(autoMulchTimer);
+    }
+
+    function doMulch() {
+        FarmController.mulchAll();
     }
 }
 
-if (localStorage.getItem('autoFarmState') == null) {
-    localStorage.setItem("autoFarmState", "OFF");
-}
-if (localStorage.getItem('autoMulchState') == null) {
-    localStorage.setItem("autoMulchState", "OFF");
-}
-farmState = localStorage.getItem('autoFarmState');
-mulchState = localStorage.getItem('autoMulchState');
-
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+function loadScript() {
+    var oldInit = Preload.hideSplashScreen;
 
     Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        initAutoFarm()
-        return result
+        var result = oldInit.apply(this, arguments);
+        initAutoFarm();
+        return result;
     }
 }
 
-var scriptName = 'simpleautofarmer'
+function initLocalStorage(param, value) {
+    if (localStorage.getItem(param) == null) {
+        localStorage.setItem(param, value);
+    }
+}
 
-if (document.getElementById('scriptHandler') != undefined){
-    var scriptElement = document.createElement('div')
-    scriptElement.id = scriptName
-    document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
-            loadScript()
+initLocalStorage("autoPlantState", "OFF");
+initLocalStorage("autoHarvestState", "OFF");
+initLocalStorage("autoMulchState", "OFF");
+
+var scriptName = 'simpleautofarmer';
+
+if ( document.getElementById('scriptHandler') != undefined ) {
+    var scriptElement = document.createElement('div');
+    scriptElement.id = scriptName;
+    document.getElementById('scriptHandler').appendChild(scriptElement);
+    if ( localStorage.getItem(scriptName) != null ) {
+        if ( localStorage.getItem(scriptName) == 'true' ) {
+            loadScript();
         }
+    } else {
+        localStorage.setItem(scriptName, 'true');
+        loadScript();
     }
-    else{
-        localStorage.setItem(scriptName, 'true')
-        loadScript()
-    }
-}
-else{
+} else {
     loadScript();
 }
