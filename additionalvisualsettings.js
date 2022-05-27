@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.6
+// @version     1.7
 // @author      Ephenia
 // @description Adds additional settings for hiding some visual things to help out with performance.
 // ==/UserScript==
@@ -14,6 +14,7 @@ var checkWildPokeImg;
 var checkWildPokeHealth;
 var checkWildPokeCatch;
 var checkAllNotification;
+var notificFunc = Notifier.notify;
 var newSave;
 var trainerCards;
 
@@ -84,8 +85,7 @@ function initVisualSettings() {
         if (event.target.checked == false) {
             checkAllNotification = "OFF";
             localStorage.setItem("checkAllNotification", "OFF");
-            var getToast = document.getElementById('toaster-disabled');
-            getToast.setAttribute("id", "toaster");
+            Notifier.notify = notificFunc;
         } else {
             checkAllNotification = "ON";
             localStorage.setItem("checkAllNotification", "ON");
@@ -245,10 +245,12 @@ function initVisualSettings() {
     }
 
     function remNotifications() {
-        var getToast = document.getElementById('toaster');
-        //Clear all notifications before disabling to avoid messing up the page
-        for (var i = 0; i< getToast.childNodes.length; i++){ getToast.removeChild(getToast.childNodes[i]) }
-        getToast.setAttribute("id", "toaster-disabled");
+        Notifier.notify = function(message) {
+            const sound = message.sound;
+            if (typeof sound != 'undefined') {
+                sound.play();
+            }
+        }
     }
 
     //Add dock button
