@@ -219,7 +219,9 @@ function getRandomInt(max) {
 }
 
 function calcClickDPS() {
+    // Previous cycle money
     var money = App.game.wallet.currencies[GameConstants.Currency.money]();
+    
     autoClickDPS = setInterval(function () {
         const clickSec = testDPS;
         let enemyHealth;
@@ -255,12 +257,15 @@ function calcClickDPS() {
                 enemySpeed = enemySpeed.toFixed(1).toString().replace('.0', '')
             }
             document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br><div style="font-weight:bold;color:black;">` + enemySpeed + `</div>`
-        }
-        const moneyT = App.game.wallet.currencies[GameConstants.Currency.money]();
-        document.getElementById('golds-sec').innerHTML = `Golds/s:<br><div style="font-weight:bold;color:gold;">` + Math.floor(moneyT - money).toLocaleString('en-US') + `$</div>`
-        money = moneyT;
+        }        
         testDPS = 0;
         defeatDPS = 0;
+        
+        // This cycle money
+        const moneyT = App.game.wallet.currencies[GameConstants.Currency.money]();
+        document.getElementById('golds-sec').innerHTML = `Golds/s:<br><div style="font-weight:bold;color:gold;">` + Math.floor(moneyT - money).toLocaleString('en-US') + `$</div>`
+        // Update previous money for next cycle
+        money = moneyT;
     }, 1000);
 }
 
