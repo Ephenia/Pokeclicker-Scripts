@@ -502,13 +502,13 @@ function fullClear(dungeonBoard, bossCoords){
                 DungeonRunner.map.moveToCoordinates(j, i)
             }
 
-            if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest) {
+            if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest){
                 DungeonRunner.openChest()
             }
         }
     }
     //If we cleared the entire floor, move to the boss room and start the fight
-    if (invisTile == 0 && getChests == 0 && getEnemy == 0 && foundBoss == true) {
+    if (invisTile == 0 && getChests == 0 && getEnemy == 0 && foundBoss == true){
         DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
         foundBoss = false
         bossCoords.length = 0
