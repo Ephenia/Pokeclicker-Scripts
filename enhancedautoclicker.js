@@ -256,7 +256,7 @@ function calcClickDPS() {
             }
             if (!Number.isInteger(enemySpeed) && enemySpeed != 0) { enemySpeed = enemySpeed.toFixed(1).toString().replace('.0', '') }
             document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br><div style="font-weight:bold;color:black;">` + enemySpeed + `</div>`
-        }        
+        }
         testDPS = 0;
         defeatDPS = 0;
         
@@ -365,7 +365,6 @@ function autoGym() {
                 //Checking if Champion exists here and is unlocked
                 let champUnlocked;
                 try {champUnlocked = player.town().content[4].isUnlocked()} catch (err) { champUnlocked = false }
-
                 //If "All" is selected and the Champion is unlocked, then go through list of league fully from 0-4
                 if (gymSelect === 5 && champUnlocked) {
                     GymRunner.startGym(player.town().content[allSelectedGym])
@@ -434,14 +433,14 @@ function scan(dungeonBoard){
     var playerCoords = []*/
     for (var i = 0; i < dungeonBoard.length; i++){
         for (var j = 0; j<dungeonBoard[i].length; j++){
-            //Basically just attempts to move to all tiles that aren't cleared
-            if (dungeonBoard[i][j].isVisited == false){
-                DungeonRunner.map.moveToCoordinates(j, i)
+            if (dungeonBoard[i][j].type() == GameConstants.DungeonTile.boss){
+                foundBoss = true
+                return [i, j]
             }
-
-            if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest){
-                DungeonRunner.openChest()
-            }
+            //Required for pathfinding, if ever implemented
+            /*if (dungeonBoard[i][j].hasPlayer == true){
+                playerCoords = [i, j]
+            }*/
         }
     }
 }
