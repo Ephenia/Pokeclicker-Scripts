@@ -295,11 +295,6 @@ function autoClicker() {
         if (App.game.gameState === GameConstants.GameState.dungeon && DungeonRunner.fighting() && !DungeonBattle.catching()) {
             DungeonBattle.clickAttack();
         }
-
-        // Click while in battleFrontier
-        if (App.game.gameState === GameConstants.GameState.battleFrontier) {
-            BattleFrontierBattle.clickAttack();
-        }
     }, delayAutoClick); // The app hard-caps click attacks at 50
 }
 
