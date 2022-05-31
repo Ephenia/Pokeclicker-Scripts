@@ -173,6 +173,7 @@ function initAutoMine() {
             // Level not yet surveyed
             if (getEnergy >= App.game.underground.getSurvey_Cost()) {
                 Mine.survey();
+                $('#mine-survey-result').tooltip('hide');
             }
         } else {
             if (resetInProgress == "NO") {
