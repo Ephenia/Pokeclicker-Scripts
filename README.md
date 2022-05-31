@@ -152,7 +152,8 @@ There's a lot to go over and explained with this Auto Miner, but I'll try my bes
 **• Auto Mine** - This will turn the Auto Miner On/Off. The Auto Miner uses bombs to automatically mine.<br>
 **• Auto Small Restore** - This will automatically use Small Restores as well as buy them while it's active (only when Auto Mine is running). It will also only ever buy them when you have 0 Small Restores and when they cost 30,000 (base price). Knowing that, this is best used anywhere you can one-shot Pokémon (so the price penalty in the Shop is constantly decreasing).<br>
 **• 1st Input Field** - Here you can enter a money value at which Small Restores should stop Auto Buying. This will help you not drain your money.<br>
-**• 2nd Input Field** - This is basically an Auto Skipper. You can enter the minimum value of items you would like to look for in new layers. If there are fewer items in a layer than your desired input, it will be skipped (if you have any skips available).
+**• 2nd Input Field** - This is basically an Auto Skipper. You can enter the minimum number of items you would like to look for in new layers. If there are fewer items in a layer than your desired input, it will be skipped (if you have any skips available).<br>
+**• 3rd Input Field** - Another version of the Auto Skipper for diamonds. You can enter the minimum diamond value you would like to look for in new layers. When you have skips available, the Auto Miner will start each layer with a survey to decide whether to mine it.
 
 As of 1.1 this also includes 2 more additional features into the Treasures tab of the Underground as shown below:<br>
 
