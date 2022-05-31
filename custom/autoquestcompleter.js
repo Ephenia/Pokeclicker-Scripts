@@ -3,10 +3,29 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.1
-// @author      KarmaAlex (Credit: Ephenia)
+// @version     1.2
+// @author      KarmaAlex (Credit: Ephenia, Sorrow)
 // @description Removes the limit for the number of quests you can do at once and auto completes/starts new ones.
 // ==/UserScript==
+
+let questTypes = [];
+let autoQuestCanBeStopped;
+let questLocationInProgress = false;
+let completeQuestLocationLoop;
+let regionSelect;
+let subRegionSelect;
+let routeSelect;
+let townSelect;
+let dungeonStateSelect;
+let gymStateSelect;
+let dungeonQuestEnable;
+let gymStart;
+let dungeonStart;
+
+//On Alola map subregion not available on Town, Route or Dungeon
+const alola_subregion_0 = ["Route 1", "Route 1 Hau'oli Outskirts", "Route 2", "Route 3", "Melemele Sea", "Kala'e Bay", "Iki Town Outskirts", "Iki Town", "Professor Kukui\'s Lab", "Hau'oli City", "Hau'oli City Extension", "Melemele Woods", "Melemele Woods Extension", "Roadside Motel", "Trainers School", "Hau'oli Cemetery", "Seaward Cave", "Ten Carat Hill"]
+const alola_subregion_1 = ["Route 4", "Route 4 Extension", "Route 5", "Route 5 Extension", "Route 6", "Route 6 Extension", "Route 7", "Route 7 Extension", "Route 8", "Route 8 Extension", "Route 9", "Route 9 Extension", "Akala Outskirts", "Akala Outskirts Extension--", "Heahea City", "Heahea City Extension", "Paniola Town", "Royal Avenue", "Royal Avenue Extension", "Konikoni City", "Konikoni City Extension", "Aether Paradise", "Roadside Motel", "Roadside Motel Extension", "Pikachu Valley", "Pikachu Valley Extension", "Paniola Ranch", "Brooklet Hill", "Brooklet Hill Extension", "Wela Volcano Park", "Wela Volcano Park Extension", "Lush Jungle", "Lush Jungle Extension", "Diglett's Tunnel", "Diglett's Tunnel Extension", "Memorial Hill", "Memorial Hill Extension", "Aether Foundation", "Aether Foundation Extension", "Ruins of Life"]
+const alola_subregion_2 = ["Route 10", "Mount Hokulani", "Route 11", "Route 11 Extension", "Route 12", "Route 12 Extension", "Route 13", "Haina Desert", "Route 14", "Route 14 Extension", "Route 15", "Route 15 Extension", "Route 16", "Route 17", "Route 17 Extension", "Poni Wilds", "Poni Wilds Extension", "Ancient Poni Path", "Ancient Poni Path Extension", "Poni Breaker Coast", "Poni Grove", "Poni Plains", "Poni Coast", "Poni Gauntlet", "Poni Gauntlet Extension", "Aether Paradise", "Malie City", "Malie City Extension", "Tapu Village", "Seafolk Village", "Exeggutor Island", "Altar of the Sunne and Moone", "Pokémon League Alola", "Pokémon League Alola Extension", "Vast Poni Canyon Extension", "Lake of the Sunne and Moone"]
 
 function initAutoQuests(){
     //Allows to start infinite  quests
@@ -18,7 +37,6 @@ function initAutoQuests(){
         localStorage.setItem('autoQuestEnable', 'true')
     }
     //Define quest types
-    let questTypes = [];
     if (localStorage.getItem('autoQuestTypes') == null){
         for (const type in QuestHelper.quests) {
             questTypes.push(type);
@@ -26,6 +44,7 @@ function initAutoQuests(){
         localStorage.setItem('autoQuestTypes', JSON.stringify(questTypes))
     } else {
         questTypes = JSON.parse(localStorage.getItem('autoQuestTypes'));
+        dungeonQuestEnable = questTypes.includes("DefeatDungeonQuest");
     }
     resetQuestModify();
     //Track the last refresh
@@ -50,20 +69,38 @@ function initAutoQuests(){
             document.getElementById('toggle-auto-quest').textContent = 'Auto [ON]'
         }
     }, false)
+    //Retrieving autoclicker buttons
+    gymStart = document.getElementById("auto-gym-start");
+    dungeonStart = document.getElementById("auto-dungeon-start");
 
     //Checks for new quests to add to the list and claims completed ones
     var autoQuest = setInterval(function(){
         let questsNeed = 0;
         if (trackRefresh != App.game.quests.lastRefresh) {
             trackRefresh = App.game.quests.lastRefresh;
+            stopCompleteQuestLocation();
+            //Reload quest types from local storage to re-enter the dungeon if they are deleted because there are not enough dungeon tokens left.
+            questTypes = JSON.parse(localStorage.getItem('autoQuestTypes'));
             resetQuestModify();
         }
         if (localStorage.getItem('autoQuestEnable') == 'true'){
+            autoQuestCanBeStopped = true;
             if (App.game.quests.currentQuests().length > 0){
                 //Claim all completed quest & check if quests should refresh
                 App.game.quests.currentQuests().forEach(quest => {
                     if (quest.notified == true){
                         App.game.quests.claimQuest(quest.index)
+                    } else {
+                        //Processes quests with location
+                        if(!questLocationInProgress) {
+                            if(quest instanceof DefeatGymQuest) {
+                                completeDefeatGymQuest(quest)
+                            } else if(quest instanceof DefeatPokemonsQuest) {
+                                completeDefeatPokemonQuest(quest)
+                            } else if(quest instanceof DefeatDungeonQuest) {
+                                completeDefeatDungeonQuest(quest)
+                            }
+                        }
                     }
                     if (questTypes.includes(quest.constructor.name)) {
                         questsNeed++;
@@ -83,6 +120,9 @@ function initAutoQuests(){
                     App.game.quests.beginQuest(quest.index);
                 }
             })
+        } else if (autoQuestCanBeStopped) {
+            autoQuestCanBeStopped = false;
+            stopCompleteQuestLocation();
         }
     }, 500)
 
@@ -106,6 +146,25 @@ function initAutoQuests(){
             questTypes[empty] = questName;
         }
         localStorage.setItem('autoQuestTypes', JSON.stringify(questTypes));
+    }
+
+    function stopCompleteQuestLocation() {
+        if(questLocationInProgress) {
+            //Reset loop when quest is refreshed or auto quest is disabled
+            if(typeof completeQuestLocationLoop !== 'undefined') {
+                clearInterval(completeQuestLocationLoop);
+                completeQuestLocationLoop = null;
+            }
+            stopAutoDungeon();
+            stopAutoGym();
+            let resetPlayerStateLoop = setInterval(function() {
+                if(playerCanMove()) {
+                    playerResetState();
+                    clearInterval(resetPlayerStateLoop);
+                }
+            }, 50);
+            questLocationInProgress = false;
+        }
     }
 }
 
@@ -137,4 +196,203 @@ if (document.getElementById('scriptHandler') != undefined){
 }
 else{
     loadScript();
+}
+
+function startQuest() {
+    playerSaveState();
+    stopAutoDungeonAndGym();
+}
+
+function endQuest() {
+    //Executed when the quest is completed
+    questLocationInProgress = false;
+    clearInterval(completeQuestLocationLoop);
+    completeQuestLocationLoop = null;
+    stopAutoDungeon();
+    stopAutoGym();
+    playerResetState();
+}
+
+function completeDefeatDungeonQuest(dungeonQuest) {
+    //Can't farm the dungeons without the autoclicker
+    if(!dungeonStart) return;
+
+    //Remove dungeon quest for current cycle if total token needed not available
+    const questName = "DefeatDungeonQuest"
+    const indexPos = questTypes.indexOf(questName);
+    if(!playerCanPayDungeonEntrance(dungeonQuest.dungeon, dungeonQuest.progressText())) {
+        if(indexPos !== -1) {
+            questTypes[indexPos] = null;
+        }
+        endQuest();
+        return;
+    }
+
+    playerSaveState();
+    //Move player to quest dungeon
+    if (playerCanMove()) {
+        playerMoveToTown(dungeonQuest.dungeon, dungeonQuest.region);
+    }
+
+    if(player.town().name === dungeonQuest.dungeon) {
+        stopAutoGym();
+        questLocationInProgress = true;
+        completeQuestLocationLoop = setInterval(function() {
+            if(!dungeonQuest.notified) {
+                if(dungeonStart && !dungeonStart.classList.contains("btn-success")) {
+                    dungeonStart.click();
+                }
+            } else if(playerCanMove()) {
+                endQuest();
+            }
+        }, 50);
+    }
+}
+
+function completeDefeatGymQuest(gymQuest) {
+    playerSaveState();
+    //Find town associate to gym
+    const gymListAsArray = Object.entries(GymList);
+    const town = gymListAsArray.filter(([key, value]) => key === gymQuest.gymTown)[0][1];
+
+    //Move player to quest town
+    if (playerCanMove()) {
+        playerMoveToTown(town.parent.name, town.parent.region);
+    }
+
+    if(player.town().name === town.parent.name) {
+        stopAutoDungeon();
+        stopAutoGym();
+        //Find gym in town
+        for(const gym of player.town().content) {
+            if(gym.town === gymQuest.gymTown) {
+                questLocationInProgress = true;
+                completeQuestLocationLoop = setInterval(function() {
+                    if(!gymQuest.notified) {
+                        if(App.game.gameState !== GameConstants.GameState.gym) {
+                            gym.protectedOnclick();
+                        }
+                    } else if(playerCanMove()) {
+                        endQuest();
+                    }
+                }, 50);
+            }
+        }
+    }
+}
+
+function completeDefeatPokemonQuest(pokemonQuest) {
+    playerSaveState();
+    //Move player to quest route
+    if (playerCanMove()) {
+        playerMoveToRoute(pokemonQuest.route, pokemonQuest.region);
+    }
+
+    if(player.route() === pokemonQuest.route && player.region === pokemonQuest.region) {
+        stopAutoDungeon();
+        stopAutoGym();
+        questLocationInProgress = true;
+        completeQuestLocationLoop = setInterval(function() {
+            if(pokemonQuest.notified) {
+                endQuest();
+            }
+        }, 50);
+    }
+}
+
+function playerSaveState() {
+    //Save last location of player in temp variable
+    regionSelect = player.region;
+    subRegionSelect = player.subregion;
+    routeSelect = player.route();
+    townSelect = player.town().name;
+
+    if(dungeonStart && dungeonStart.classList.contains("btn-danger")) {
+        dungeonStateSelect = false;
+    } else if(dungeonStart && dungeonStart.classList.contains("btn-success")) {
+        dungeonStateSelect = true;
+    }
+    if(gymStart && gymStart.classList.contains("btn-danger")) {
+        gymStateSelect = false;
+    } else if(gymStart && gymStart.classList.contains("btn-success")) {
+        gymStateSelect = true;
+    }
+}
+
+function playerResetState() {
+    if(regionSelect && player.region !== regionSelect) {
+        player.region = regionSelect;
+    }
+    if(subRegionSelect && player.subregion !== subRegionSelect) {
+        player.subregion = subRegionSelect;
+    }
+    if(routeSelect && player.route() !== routeSelect) {
+        MapHelper.moveToRoute(routeSelect, regionSelect);
+    }
+    if(townSelect && routeSelect === 0) {
+        MapHelper.moveToTown(townSelect);
+    }
+    if (dungeonStart) {
+        if(dungeonStateSelect && !dungeonStart.classList.contains("btn-success")) {
+            dungeonStart.click();
+        } else if(!dungeonStateSelect && !dungeonStart.classList.contains("btn-danger")) {
+            dungeonStart.click();
+        }
+    }
+    if (gymStart) {
+        if(gymStateSelect && !gymStart.classList.contains("btn-success")) {
+            gymStart.click();
+        } else if(!gymStateSelect && !gymStart.classList.contains("btn-danger")) {
+            gymStart.click();
+        }
+    }
+}
+
+function playerCanMove() {
+    return !DungeonRunner.fighting() && !DungeonRunner.fightingBoss() && !DungeonBattle.catching() && !GymRunner.running()
+}
+
+function playerMoveToTown(town, region) {
+    if(player.region !== region || player.town().name !== town) {
+        player.region = region;
+        if(region === 6) {
+            setAlolaSubRegion(town)
+        } else {
+            player.subregion = 0
+        }
+        MapHelper.moveToTown(town);
+    }
+}
+
+function playerMoveToRoute(route, region) {
+    if(player.region !== region || player.route() !== route) {
+        player.region = region;
+        if(region === 6) {
+            setAlolaSubRegion(route)
+        } else {
+            player.subregion = 0
+        }
+        MapHelper.moveToRoute(route, region);
+    }
+}
+
+function playerCanPayDungeonEntrance(dungeonName, progressText) {
+    const dungeon = Object.entries(TownList).filter(([key, value]) => key === dungeonName)[0][1].dungeon
+    let getTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
+    let dungeonCost = dungeon.tokenCost;
+    let progress = progressText.split('/').map(element => parseInt(element.trim()));
+    let amountRemaining = progress[1] - progress[0];
+    return getTokens >= dungeonCost * amountRemaining;
+}
+
+function stopAutoDungeon() {
+    if(dungeonStart && !dungeonStart.classList.contains("btn-danger")) {
+        dungeonStart.click();
+    }
+}
+
+function stopAutoGym() {
+    if(gymStart && !gymStart.classList.contains("btn-danger")) {
+        gymStart.click();
+    }
 }
