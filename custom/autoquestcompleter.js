@@ -198,11 +198,6 @@ else{
     loadScript();
 }
 
-function startQuest() {
-    playerSaveState();
-    stopAutoDungeonAndGym();
-}
-
 function endQuest() {
     //Executed when the quest is completed
     questLocationInProgress = false;
