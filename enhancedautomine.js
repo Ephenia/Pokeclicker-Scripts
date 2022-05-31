@@ -111,6 +111,7 @@ function initAutoMine() {
         var buriedItems = Mine.itemsBuried();
         var diamondValue =  Mine.surveyResult() ? +Mine.surveyResult().replace(/.*Diamond Value: /, "") : 0;
         var skipsRemain = Mine.skipsRemaining();
+        var minedThisInterval = false;
         const smallRestore = player.itemList["SmallRestore"]();
         const mediumRestore = player.itemList["MediumRestore"]();
         const largeRestore = player.itemList["LargeRestore"]();
@@ -159,12 +160,13 @@ function initAutoMine() {
                             )) {
                                 Mine.click(ti, tj);
                                 getEnergy -= 1;
+                                minedThisInterval = true;
                             }
                         }
                     }
                 }
             }
-            if (getEnergy >= 10) {
+            if (getEnergy >= 10 && !minedThisInterval) {
                 Mine.bomb();
             }
         } else if (buriedItems >= autoMineSkip && minDiamonds > 0 && !Mine.surveyResult()) {
