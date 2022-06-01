@@ -22,11 +22,6 @@ let dungeonQuestEnable;
 let gymStart;
 let dungeonStart;
 
-//On Alola map subregion not available on Town, Route or Dungeon
-const alola_subregion_0 = ["Route 1", "Route 1 Hau'oli Outskirts", "Route 2", "Route 3", "Melemele Sea", "Kala'e Bay", "Iki Town Outskirts", "Iki Town", "Professor Kukui\'s Lab", "Hau'oli City", "Hau'oli City Extension", "Melemele Woods", "Melemele Woods Extension", "Roadside Motel", "Trainers School", "Hau'oli Cemetery", "Seaward Cave", "Ten Carat Hill"]
-const alola_subregion_1 = ["Route 4", "Route 4 Extension", "Route 5", "Route 5 Extension", "Route 6", "Route 6 Extension", "Route 7", "Route 7 Extension", "Route 8", "Route 8 Extension", "Route 9", "Route 9 Extension", "Akala Outskirts", "Akala Outskirts Extension--", "Heahea City", "Heahea City Extension", "Paniola Town", "Royal Avenue", "Royal Avenue Extension", "Konikoni City", "Konikoni City Extension", "Aether Paradise", "Roadside Motel", "Roadside Motel Extension", "Pikachu Valley", "Pikachu Valley Extension", "Paniola Ranch", "Brooklet Hill", "Brooklet Hill Extension", "Wela Volcano Park", "Wela Volcano Park Extension", "Lush Jungle", "Lush Jungle Extension", "Diglett's Tunnel", "Diglett's Tunnel Extension", "Memorial Hill", "Memorial Hill Extension", "Aether Foundation", "Aether Foundation Extension", "Ruins of Life"]
-const alola_subregion_2 = ["Route 10", "Mount Hokulani", "Route 11", "Route 11 Extension", "Route 12", "Route 12 Extension", "Route 13", "Haina Desert", "Route 14", "Route 14 Extension", "Route 15", "Route 15 Extension", "Route 16", "Route 17", "Route 17 Extension", "Poni Wilds", "Poni Wilds Extension", "Ancient Poni Path", "Ancient Poni Path Extension", "Poni Breaker Coast", "Poni Grove", "Poni Plains", "Poni Coast", "Poni Gauntlet", "Poni Gauntlet Extension", "Aether Paradise", "Malie City", "Malie City Extension", "Tapu Village", "Seafolk Village", "Exeggutor Island", "Altar of the Sunne and Moone", "Pokémon League Alola", "Pokémon League Alola Extension", "Vast Poni Canyon Extension", "Lake of the Sunne and Moone"]
-
 function initAutoQuests(){
     //Allows to start infinite  quests
     App.game.quests.canStartNewQuest = function(){
@@ -389,5 +384,20 @@ function stopAutoDungeon() {
 function stopAutoGym() {
     if(gymStart && !gymStart.classList.contains("btn-danger")) {
         gymStart.click();
+    }
+}
+
+function setAlolaSubRegion(locationName) {
+    //On Alola map subregion not available on Town, Route or Dungeon
+    const alola_subregion_0 = ["Route 1", "Route 1 Hau'oli Outskirts", "Route 2", "Route 3", "Melemele Sea", "Kala'e Bay", "Iki Town Outskirts", "Iki Town", "Professor Kukui\'s Lab", "Hau'oli City", "Hau'oli City Extension", "Melemele Woods", "Melemele Woods Extension", "Roadside Motel", "Trainers School", "Hau'oli Cemetery", "Seaward Cave", "Ten Carat Hill"]
+    const alola_subregion_1 = ["Route 4", "Route 4 Extension", "Route 5", "Route 5 Extension", "Route 6", "Route 6 Extension", "Route 7", "Route 7 Extension", "Route 8", "Route 8 Extension", "Route 9", "Route 9 Extension", "Akala Outskirts", "Akala Outskirts Extension--", "Heahea City", "Heahea City Extension", "Paniola Town", "Royal Avenue", "Royal Avenue Extension", "Konikoni City", "Konikoni City Extension", "Aether Paradise", "Roadside Motel", "Roadside Motel Extension", "Pikachu Valley", "Pikachu Valley Extension", "Paniola Ranch", "Brooklet Hill", "Brooklet Hill Extension", "Wela Volcano Park", "Wela Volcano Park Extension", "Lush Jungle", "Lush Jungle Extension", "Diglett's Tunnel", "Diglett's Tunnel Extension", "Memorial Hill", "Memorial Hill Extension", "Aether Foundation", "Aether Foundation Extension", "Ruins of Life"]
+    const alola_subregion_2 = ["Route 10", "Mount Hokulani", "Route 11", "Route 11 Extension", "Route 12", "Route 12 Extension", "Route 13", "Haina Desert", "Route 14", "Route 14 Extension", "Route 15", "Route 15 Extension", "Route 16", "Route 17", "Route 17 Extension", "Poni Wilds", "Poni Wilds Extension", "Ancient Poni Path", "Ancient Poni Path Extension", "Poni Breaker Coast", "Poni Grove", "Poni Plains", "Poni Coast", "Poni Gauntlet", "Poni Gauntlet Extension", "Aether Paradise", "Malie City", "Malie City Extension", "Tapu Village", "Seafolk Village", "Exeggutor Island", "Altar of the Sunne and Moone", "Pokémon League Alola", "Pokémon League Alola Extension", "Vast Poni Canyon Extension", "Lake of the Sunne and Moone"]
+
+    if(alola_subregion_0.includes(locationName)) {
+        player.subregion = 0
+    } else if(alola_subregion_1.includes(locationName)) {
+        player.subregion = 1
+    } else if(alola_subregion_2.includes(locationName)) {
+        player.subregion = 2
     }
 }
