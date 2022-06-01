@@ -10,6 +10,7 @@
 
 let questTypes = [];
 let autoQuestCanBeStopped;
+let questLocationReadyToStart = false;
 let questLocationInProgress = false;
 let completeQuestLocationLoop;
 let regionSelect;
@@ -158,6 +159,7 @@ function initAutoQuests(){
                     clearInterval(resetPlayerStateLoop);
                 }
             }, 50);
+            questLocationReadyToStart = false;
             questLocationInProgress = false;
         }
     }
@@ -195,6 +197,7 @@ else{
 
 function endQuest() {
     //Executed when the quest is completed
+    questLocationReadyToStart = false;
     questLocationInProgress = false;
     clearInterval(completeQuestLocationLoop);
     completeQuestLocationLoop = null;
@@ -208,8 +211,7 @@ function completeDefeatDungeonQuest(dungeonQuest) {
     if(!dungeonStart) return;
 
     //Remove dungeon quest for current cycle if total token needed not available
-    const questName = "DefeatDungeonQuest"
-    const indexPos = questTypes.indexOf(questName);
+    const indexPos = questTypes.indexOf("DefeatDungeonQuest");
     if(!playerCanPayDungeonEntrance(dungeonQuest.dungeon, dungeonQuest.progressText())) {
         if(indexPos !== -1) {
             questTypes[indexPos] = null;
@@ -218,14 +220,18 @@ function completeDefeatDungeonQuest(dungeonQuest) {
         return;
     }
 
-    playerSaveState();
+    if(!questLocationReadyToStart) {
+        playerSaveState();
+        stopAutoGym();
+        questLocationReadyToStart = true;
+    }
+
     //Move player to quest dungeon
     if (playerCanMove()) {
         playerMoveToTown(dungeonQuest.dungeon, dungeonQuest.region);
     }
 
     if(player.town().name === dungeonQuest.dungeon) {
-        stopAutoGym();
         questLocationInProgress = true;
         completeQuestLocationLoop = setInterval(function() {
             if(!dungeonQuest.notified) {
@@ -240,19 +246,22 @@ function completeDefeatDungeonQuest(dungeonQuest) {
 }
 
 function completeDefeatGymQuest(gymQuest) {
-    playerSaveState();
     //Find town associate to gym
     const gymListAsArray = Object.entries(GymList);
     const town = gymListAsArray.filter(([key, value]) => key === gymQuest.gymTown)[0][1];
 
+    if(!questLocationReadyToStart) {
+        playerSaveState();
+        stopAutoDungeon();
+        stopAutoGym();
+        questLocationReadyToStart = true;
+    }
     //Move player to quest town
     if (playerCanMove()) {
         playerMoveToTown(town.parent.name, town.parent.region);
     }
 
     if(player.town().name === town.parent.name) {
-        stopAutoDungeon();
-        stopAutoGym();
         //Find gym in town
         for(const gym of player.town().content) {
             if(gym.town === gymQuest.gymTown) {
@@ -272,15 +281,19 @@ function completeDefeatGymQuest(gymQuest) {
 }
 
 function completeDefeatPokemonQuest(pokemonQuest) {
-    playerSaveState();
+    if(!questLocationReadyToStart) {
+        playerSaveState();
+        stopAutoDungeon();
+        stopAutoGym();
+        questLocationReadyToStart = true;
+    }
+
     //Move player to quest route
     if (playerCanMove()) {
         playerMoveToRoute(pokemonQuest.route, pokemonQuest.region);
     }
 
     if(player.route() === pokemonQuest.route && player.region === pokemonQuest.region) {
-        stopAutoDungeon();
-        stopAutoGym();
         questLocationInProgress = true;
         completeQuestLocationLoop = setInterval(function() {
             if(pokemonQuest.notified) {
