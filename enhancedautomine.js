@@ -117,6 +117,10 @@ function initAutoMine() {
         const largeRestore = player.itemList["LargeRestore"]();
         var getCost = ItemList["SmallRestore"].price();
         var shopWindow = document.getElementById('shopModal')
+        if (Mine.loadingNewLayer == true) {
+            // Don't bother mining while a new layer is loading
+            return;
+        }
         if (smallRestoreState == "ON") {
             if ((getCost == 30000) && (+smallRestore == 0) && (getMoney >= setThreshold + 30000)) {
                 ItemList["SmallRestore"].buy(1);
@@ -134,7 +138,8 @@ function initAutoMine() {
                 getEnergy = Math.floor(App.game.underground.energy);
             }
         }
-        if ((buriedItems >= autoMineSkip && diamondValue >= minDiamonds) || skipsRemain == 0) {
+        if ((buriedItems >= autoMineSkip && diamondValue >= minDiamonds) || skipsRemain <= 0) {
+            // Layer meets any requirements or we can't skip, time to mine
             if (getEnergy >= 1) {
                 if (Mine.toolSelected() != 0) {
                     Mine.toolSelected(Mine.Tool.Chisel);
@@ -170,33 +175,16 @@ function initAutoMine() {
                 Mine.bomb();
             }
         } else if (buriedItems >= autoMineSkip && minDiamonds > 0 && !Mine.surveyResult()) {
-            // Level not yet surveyed
+            // Survey the level for diamond-hunting purposes   
             if (getEnergy >= App.game.underground.getSurvey_Cost()) {
                 Mine.survey();
                 $('#mine-survey-result').tooltip('hide');
             }
         } else {
-            if (resetInProgress == "NO") {
-                if (Mine.itemsBuried() >= Mine.itemsFound()) {
-                    // Don't resolve queued up calls to checkCompleted() until completed() is finished and sets loadingNewLayer to false
-                    if (Mine.loadingNewLayer == true) {
-                        resetInProgress = "YES"
-                    }
-                    if (resetInProgress == "NO") {
-                        Mine.loadingNewLayer = true;
-                        setTimeout(Mine.completed, 1500);
-                        //GameHelper.incrementObservable(App.game.statistics.undergroundLayersMined);
-                        if (Mine.skipsRemaining() != 0) {
-                            GameHelper.incrementObservable(Mine.skipsRemaining, -1);
-                        }
-                        busyMining = setTimeout(function () {
-                            resetInProgress = "NO"
-                        }, 1500);
-                    } else {
-                        resetInProgress = "NO"
-                    }
-                }
-            }
+            // Auto skip this layer
+            Mine.loadingNewLayer = true;
+            setTimeout(Mine.completed, 1500);
+            GameHelper.incrementObservable(Mine.skipsRemaining, -1);
         }
         if (layersMined != App.game.statistics.undergroundLayersMined()) {
             var treasureLength = player.mineInventory().length;
