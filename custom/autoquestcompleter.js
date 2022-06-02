@@ -401,16 +401,18 @@ function stopAutoGym() {
 }
 
 function setAlolaSubRegion(locationName) {
+    //TODO: Find a solution to retrieve locations by sub-region in a programmatic way
     //On Alola map subregion not available on Town, Route or Dungeon
-    const alola_subregion_0 = ["Route 1", "Route 1 Hau'oli Outskirts", "Route 2", "Route 3", "Melemele Sea", "Kala'e Bay", "Iki Town Outskirts", "Iki Town", "Professor Kukui\'s Lab", "Hau'oli City", "Hau'oli City Extension", "Melemele Woods", "Melemele Woods Extension", "Roadside Motel", "Trainers School", "Hau'oli Cemetery", "Seaward Cave", "Ten Carat Hill"];
-    const alola_subregion_1 = ["Route 4", "Route 5", "Route 6", "Route 7", "Route 8", "Route 9", "Akala Outskirts", "Heahea City", "Paniola Town", "Royal Avenue", "Konikoni City", "Aether Paradise", "Roadside Motel", "Pikachu Valley", "Paniola Ranch", "Brooklet Hill", "Wela Volcano Park", "Lush Jungle", "Diglett's Tunnel", "Memorial Hill", "Aether Foundation", "Ruins of Life"];
-    const alola_subregion_2 = ["Route 10", "Mount Hokulani", "Route 11", "Route 12", "Route 13", "Haina Desert", "Route 14", "Route 15", "Route 16", "Route 17", "Poni Wilds", "Ancient Poni Path", "Poni Breaker Coast", "Poni Grove", "Poni Plains", "Poni Coast", "Poni Gauntlet", "Aether Paradise", "Malie City", "Tapu Village", "Seafolk Village", "Exeggutor Island", "Altar of the Sunne and Moone", "Pokémon League Alola", "Vast Poni Canyon", "Lake of the Sunne and Moone"];
+    //Location found from https://github.com/pokeclicker/pokeclicker/blob/ff8b53478cf714c61de8b33d73cd1275ce785688/src/components/AlolaSVG.html
+    const alolaSubregion0 = ["Route 1", "Route 1 Hau'oli Outskirts", "Route 2", "Route 3", "Melemele Sea", "Kala'e Bay", "Iki Town Outskirts", "Iki Town", "Professor Kukui\'s Lab", "Hau'oli City", "Melemele Woods", "Roadside Motel", "Trainers School", "Hau'oli Cemetery", "Seaward Cave", "Ten Carat Hill"];
+    const alolaSubregion1 = ["Route 4", "Route 5", "Route 6", "Route 7", "Route 8", "Route 9", "Akala Outskirts", "Heahea City", "Paniola Town", "Royal Avenue", "Konikoni City", "Aether Paradise", "Roadside Motel", "Pikachu Valley", "Paniola Ranch", "Brooklet Hill", "Wela Volcano Park", "Lush Jungle", "Diglett's Tunnel", "Memorial Hill", "Aether Foundation", "Ruins of Life"];
+    const alolaSubregion2 = ["Route 10", "Mount Hokulani", "Route 11", "Route 12", "Route 13", "Haina Desert", "Route 14", "Route 15", "Route 16", "Route 17", "Poni Wilds", "Ancient Poni Path", "Poni Breaker Coast", "Poni Grove", "Poni Plains", "Poni Coast", "Poni Gauntlet", "Aether Paradise", "Malie City", "Tapu Village", "Seafolk Village", "Exeggutor Island", "Altar of the Sunne and Moone", "Pokémon League Alola", "Vast Poni Canyon", "Lake of the Sunne and Moone"];
 
-    if(alola_subregion_0.includes(locationName)) {
+    if(alolaSubregion0.includes(locationName)) {
         player.subregion = 0
-    } else if(alola_subregion_1.includes(locationName)) {
+    } else if(alolaSubregion1.includes(locationName)) {
         player.subregion = 1
-    } else if(alola_subregion_2.includes(locationName)) {
+    } else if(alolaSubregion2.includes(locationName)) {
         player.subregion = 2
     }
 }
