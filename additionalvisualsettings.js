@@ -6,6 +6,7 @@
 // @version     1.7
 // @author      Ephenia
 // @description Adds additional settings for hiding some visual things to help out with performance.
+// @updateURL   https://raw.githubusercontent.com/Captn138/Pokeclicker-Scripts/master/additionalvisualsettings.js
 // ==/UserScript==
 
 var checkWildPokeName;
