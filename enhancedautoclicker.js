@@ -383,7 +383,7 @@ function autoDungeon() {
         if (App.game.gameState === GameConstants.GameState.dungeon) {
             var dungeonBoard = DungeonRunner.map.board();
             //The boss can be found at any time
-            if (foundBoss == false){
+            if (foundBoss == false) {
                 bossCoords = scan(dungeonBoard)
             }
             //Wander around until we can move to the boss tile
@@ -415,46 +415,83 @@ function scan(dungeonBoard){
     }
 }
 
-function wander(dungeonBoard, bossCoords){
-    var moves = []
-    //Attempt to move to the boss if the coordinates are within movable range
-    DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
-    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss){
-        foundBoss = false
-        bossCoords.length = 0
-        DungeonRunner.startBossFight()
-    }
-    //Iterates through the board and compiles all possible moves
-    for (var i = 0; i < dungeonBoard.length; i++){
-        for (var j = 0; j < dungeonBoard[i].length; j++){
-            //The entrance doesn't count as visited on first entering a dungeon so this OR is required
-            if (dungeonBoard[i][j].isVisited == true || dungeonBoard[i][j].type() == GameConstants.DungeonTile.entrance){
-                //This is required because if the column doesn't exist it throws an attribute of undefined error
-                if (dungeonBoard[i+1] != undefined){
-                    if (dungeonBoard[i+1][j] != undefined){
-                        if (dungeonBoard[i+1][j].isVisited == false) moves.push([i+1, j])
-                    }
-                }
-                if (dungeonBoard[i-1] != undefined){
-                    if (dungeonBoard[i-1][j] != undefined){
-                        if (dungeonBoard[i-1][j].isVisited == false) moves.push([i-1, j])
-                    }
-                }
-                if (dungeonBoard[i][j+1] != undefined){
-                    if (dungeonBoard[i][j+1].isVisited == false) moves.push([i, j+1])
-                }
-                if (dungeonBoard[i][j-1] != undefined){
-                    if (dungeonBoard[i][j-1].isVisited == false) moves.push([i, j-1])
-                }
-            }
+function calculBestPath(dungeonBoard) {
+    // javascript-astar 0.4.1
+    // http://github.com/bgrins/javascript-astar
+    // Freely distributable under the MIT License.
+    // Implements the astar search algorithm in javascript using a Binary Heap.
+    // Includes Binary Heap (with modifications) from Marijn Haverbeke.
+    // http://eloquentjavascript.net/appendix2.html
+    !function(t){if("object"==typeof module&&"object"==typeof module.exports)module.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{var n=t();window.astar=n.astar,window.Graph=n.Graph}}(function(){function t(t){for(var n=t,i=[];n.parent;)i.unshift(n),n=n.parent;return i}var n={search:function(i,e,s,r){i.cleanDirty();var h=(r=r||{}).heuristic||n.heuristics.manhattan,c=r.closest||!1,u=new o(function(t){return t.f}),a=e;for(e.h=h(e,s),i.markDirty(e),u.push(e);u.size()>0;){var f=u.pop();if(f===s)return t(f);f.closed=!0;for(var p=i.neighbors(f),l=0,d=p.length;l<d;++l){var g=p[l];if(!g.closed&&!g.isWall()){var y=f.g+g.getCost(f),v=g.visited;(!v||y<g.g)&&(g.visited=!0,g.parent=f,g.h=g.h||h(g,s),g.g=y,g.f=g.g+g.h,i.markDirty(g),c&&(g.h<a.h||g.h===a.h&&g.g<a.g)&&(a=g),v?u.rescoreElement(g):u.push(g))}}}return c?t(a):[]},heuristics:{manhattan:function(t,n){return Math.abs(n.x-t.x)+Math.abs(n.y-t.y)},diagonal:function(t,n){var i=Math.sqrt(2),e=Math.abs(n.x-t.x),o=Math.abs(n.y-t.y);return 1*(e+o)+(i-2)*Math.min(e,o)}},cleanNode:function(t){t.f=0,t.g=0,t.h=0,t.visited=!1,t.closed=!1,t.parent=null}};function i(t,n){n=n||{},this.nodes=[],this.diagonal=!!n.diagonal,this.grid=[];for(var i=0;i<t.length;i++){this.grid[i]=[];for(var o=0,s=t[i];o<s.length;o++){var r=new e(i,o,s[o]);this.grid[i][o]=r,this.nodes.push(r)}}this.init()}function e(t,n,i){this.x=t,this.y=n,this.weight=i}function o(t){this.content=[],this.scoreFunction=t}return i.prototype.init=function(){this.dirtyNodes=[];for(var t=0;t<this.nodes.length;t++)n.cleanNode(this.nodes[t])},i.prototype.cleanDirty=function(){for(var t=0;t<this.dirtyNodes.length;t++)n.cleanNode(this.dirtyNodes[t]);this.dirtyNodes=[]},i.prototype.markDirty=function(t){this.dirtyNodes.push(t)},i.prototype.neighbors=function(t){var n=[],i=t.x,e=t.y,o=this.grid;return o[i-1]&&o[i-1][e]&&n.push(o[i-1][e]),o[i+1]&&o[i+1][e]&&n.push(o[i+1][e]),o[i]&&o[i][e-1]&&n.push(o[i][e-1]),o[i]&&o[i][e+1]&&n.push(o[i][e+1]),this.diagonal&&(o[i-1]&&o[i-1][e-1]&&n.push(o[i-1][e-1]),o[i+1]&&o[i+1][e-1]&&n.push(o[i+1][e-1]),o[i-1]&&o[i-1][e+1]&&n.push(o[i-1][e+1]),o[i+1]&&o[i+1][e+1]&&n.push(o[i+1][e+1])),n},i.prototype.toString=function(){for(var t=[],n=this.grid,i=0;i<n.length;i++){for(var e=[],o=n[i],s=0;s<o.length;s++)e.push(o[s].weight);t.push(e.join(" "))}return t.join("\n")},e.prototype.toString=function(){return"["+this.x+" "+this.y+"]"},e.prototype.getCost=function(t){return t&&t.x!=this.x&&t.y!=this.y?1.41421*this.weight:this.weight},e.prototype.isWall=function(){return 0===this.weight},o.prototype={push:function(t){this.content.push(t),this.sinkDown(this.content.length-1)},pop:function(){var t=this.content[0],n=this.content.pop();return this.content.length>0&&(this.content[0]=n,this.bubbleUp(0)),t},remove:function(t){var n=this.content.indexOf(t),i=this.content.pop();n!==this.content.length-1&&(this.content[n]=i,this.scoreFunction(i)<this.scoreFunction(t)?this.sinkDown(n):this.bubbleUp(n))},size:function(){return this.content.length},rescoreElement:function(t){this.sinkDown(this.content.indexOf(t))},sinkDown:function(t){for(var n=this.content[t];t>0;){var i=(t+1>>1)-1,e=this.content[i];if(!(this.scoreFunction(n)<this.scoreFunction(e)))break;this.content[i]=n,this.content[t]=e,t=i}},bubbleUp:function(t){for(var n=this.content.length,i=this.content[t],e=this.scoreFunction(i);;){var o,s=t+1<<1,r=s-1,h=null;if(r<n){var c=this.content[r];(o=this.scoreFunction(c))<e&&(h=r)}if(s<n){var u=this.content[s];this.scoreFunction(u)<(null===h?e:o)&&(h=s)}if(null===h)break;this.content[t]=this.content[h],this.content[h]=i,t=h}}},{astar:n,Graph:i}});
+    // End of javascript-astar 0.4.1
+
+    var openList = [];
+    var posPlayer, posBoss;
+
+    for (var i = 0; i < dungeonBoard.length; i++) {
+      openList[i] = [];
+      for (var j = 0; j < dungeonBoard[i].length; j++) {
+        switch ( dungeonBoard[i][j].type() ) {
+          case GameConstants.DungeonTile.empty:
+            openList[i][j] = 3 ;
+            break;
+          case GameConstants.DungeonTile.entrance:
+            openList[i][j] = 1 ;
+            posPlayer = [i, j];
+            break;
+          case GameConstants.DungeonTile.enemy:
+            openList[i][j] = 50;
+            break;
+          case GameConstants.DungeonTile.chest:
+            openList[i][j] = 4 ;
+            break;
+          case GameConstants.DungeonTile.boss:
+            openList[i][j] = 2 ;
+            posBoss = [i, j];
+            break;
         }
+      }
     }
-    //Select a random move from compiled list of possible ones
-    var moveTo = moves[getRandomInt(moves.length)]
-    //Coordinates saved in couples of [y, x] so we swap them when we want to move
-    DungeonRunner.map.moveToCoordinates(moveTo[1], moveTo[0])
-    //Reset moves array
-    moves.length = 0
+
+    // Keep to debug
+    // console.table(openList);
+
+    var graph = new Graph(openList);
+    var start = graph.grid[posPlayer[0]][posPlayer[1]];
+    var end = graph.grid[posBoss[0]][posBoss[1]];
+
+    delete openList;
+    delete posPlayer;
+    delete posBoss;
+    delete graph;
+    delete start;
+    delete end;
+
+    return astar.search(graph, start, end);
+}
+
+function wander(dungeonBoard, bossCoords) {
+    //Attempt to move to the boss if the coordinates are within movable range
+    DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0]);
+    if (DungeonRunner.map.currentTile().type() === GameConstants.DungeonTile.boss) {
+        foundBoss = false;
+        bossCoords.length = 0;
+        DungeonRunner.startBossFight();
+    } else {
+        var moveTo = [];
+        var bestPath = calculBestPath(dungeonBoard);
+        bestPath.forEach(function(tile) {
+            if (moveTo.length === 0 && dungeonBoard[tile.x][tile.y].isVisited === false) {
+                moveTo.push(tile.x, tile.y);
+            }
+        });
+
+        //Coordinates saved in couples of [y, x] so we swap them when we want to move
+        DungeonRunner.map.moveToCoordinates(moveTo[1], moveTo[0]);
+        //Reset moves array
+        delete moveTo;
+        delete bestPath;
+    }
 }
 
 function fullClear(dungeonBoard, bossCoords){
