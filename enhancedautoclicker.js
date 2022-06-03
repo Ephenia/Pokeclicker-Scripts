@@ -260,6 +260,11 @@ function autoClicker() {
             GymBattle.clickAttack();
         }
 
+        // Click while in "Tomporary Battle" (battle ultra wormhole)
+        if (App.game.gameState === GameConstants.GameState.temporaryBattle) {
+          TemporaryBattleBattle.clickAttack();
+        }
+
         // Click while in a dungeon - will also interact with non-battle tiles (e.g. chests)
         if (App.game.gameState === GameConstants.GameState.dungeon) {
             if (DungeonRunner.fighting() && !DungeonBattle.catching()) {
