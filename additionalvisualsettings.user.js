@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.7
+// @version     1.8
 // @author      Ephenia
 // @description Adds additional settings for hiding some visual things to help out with performance.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/additionalvisualsettings.user.js
@@ -27,6 +27,12 @@ function initVisualSettings() {
     quickSettings.setAttribute("href", "#settingsModal")
     quickSettings.setAttribute("data-toggle", "modal")
     getMenu.prepend(quickSettings)
+    var quickPokedex = document.createElement("img");
+    quickPokedex.id = "quick-pokedex"
+    quickPokedex.src = "data:image/png;base64,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"
+    quickPokedex.setAttribute("href", "#pokedexModal")
+    quickPokedex.setAttribute("data-toggle", "modal")
+    getMenu.prepend(quickPokedex)
 
     document.querySelectorAll('tr[data-bind*="currencyMainDisplayReduced"')[0].outerHTML += `<tr>
     <td class="p-2">
@@ -103,6 +109,8 @@ function initVisualSettings() {
     addGlobalStyle('.pageItemTitle { height:38px }');
     addGlobalStyle('#quick-settings { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
     addGlobalStyle('#quick-settings:hover { background-color:#ddd;border: 4px solid #ddd; }');
+    addGlobalStyle('#quick-pokedex { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
+    addGlobalStyle('#quick-pokedex:hover { background-color:#ddd;border: 4px solid #ddd; }');
     addGlobalStyle('#shortcutsContainer { display: block !important; }');
 
     //The elements removed by the scripts don't ever get added back after a restart, waiting a second before removing makes them load properly
