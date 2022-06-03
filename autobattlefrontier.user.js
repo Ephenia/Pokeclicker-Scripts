@@ -6,6 +6,7 @@
 // @version     1.1
 // @author      Ephenia (Credit: andrew951)
 // @description Adds in stage resetting to the Battle Frontier that allows you to set a target stage and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/autobattlefrontier.user.js
 // ==/UserScript==
 
 var awaitFloorReset;

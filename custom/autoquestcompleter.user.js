@@ -6,6 +6,7 @@
 // @version     1.2
 // @author      KarmaAlex (Credit: Ephenia, Sorrow)
 // @description Removes the limit for the number of quests you can do at once and auto completes/starts new ones.
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/autoquestcompleter.user.js
 // ==/UserScript==
 
 let questTypes = [];
@@ -58,17 +59,15 @@ function initAutoQuests(){
     document.getElementById('questDisplayContainer').appendChild(autoQuestBtn)
     //Add function to toggle auto quests
     document.getElementById('toggle-auto-quest').addEventListener('click',() => {
-        if (localStorage.getItem('autoQuestEnable') === 'true') {
-            localStorage.setItem('autoQuestEnable', 'false');
-            document.getElementById('toggle-auto-quest').className = 'btn btn-block btn-danger';
-            document.getElementById('toggle-auto-quest').textContent = 'Auto [OFF]';
-            if (autoQuest) {
-                clearInterval(autoQuest);
-            }
-        } else {
-            localStorage.setItem('autoQuestEnable', 'true');
-            document.getElementById('toggle-auto-quest').className = 'btn btn-block btn-success';
-            document.getElementById('toggle-auto-quest').textContent = 'Auto [ON]';
+        if (localStorage.getItem('autoQuestEnable') == 'true'){
+            localStorage.setItem('autoQuestEnable', 'false')
+            document.getElementById('toggle-auto-quest').className = 'btn btn-block btn-danger'
+            document.getElementById('toggle-auto-quest').textContent = 'Auto [OFF]'
+        }
+        else{
+            localStorage.setItem('autoQuestEnable', 'true')
+            document.getElementById('toggle-auto-quest').className = 'btn btn-block btn-success'
+            document.getElementById('toggle-auto-quest').textContent = 'Auto [ON]'
         }
     }, false)
     //Retrieving autoclicker buttons
