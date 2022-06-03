@@ -6,6 +6,7 @@
 // @version     1.5
 // @author      Ephenia (Credit: falcon71, KarmaAlex)
 // @description Automatically mines the Underground with Bombs. Features adjustable settings as well.
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautomine.user.js
 // ==/UserScript==
 
 var mineState;

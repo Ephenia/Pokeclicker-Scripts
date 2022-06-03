@@ -6,6 +6,7 @@
 // @version     1.2
 // @author      Ephenia
 // @description Lets you enable/disable any of the Challenges at any given point in time. This is compatiable with any save and will work on pre-existing saves. It's best to backup your save before using this.
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/challengemodechanger.user.js
 // ==/UserScript==
 
 var chalNames = [];
