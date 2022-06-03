@@ -3,27 +3,28 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
-// @author      KarmaAlex
+// @version     1.1
+// @author      KarmaAlex (Credit: Ephenia)
 // @description Adds a button to select the weather for the current region, also freezes all weather
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/simpleweatherchanger.user.js
 // ==/UserScript==
 
+let weatherFunc;
+
 function initWeatherChange(){
-    //Freeze weather
-    Weather.generateWeather = function(){ return true }
+    weatherFunc = Weather.generateWeather;
     //Make button
-    var weatherBtn = document.createElement('button')
-    weatherBtn.textContent = 'Change'
-    weatherBtn.className = 'btn btn-block btn-success'
-    weatherBtn.style = 'position: absolute; right: 133px; top: 0px; width: auto; height: 41px; font-size: 11px; margin: 0px;'
-    weatherBtn.id = 'change-weather'
-    document.getElementById('townMap').appendChild(weatherBtn)
-    document.getElementById('change-weather').addEventListener('click', changeWeather, false)
+    const weatherBtn = document.createElement('button');
+    weatherBtn.textContent = 'Change';
+    weatherBtn.className = 'btn btn-block btn-success';
+    weatherBtn.id = 'change-weather';
+    document.getElementById('townMap').appendChild(weatherBtn);
+    document.getElementById('change-weather').addEventListener('click', changeWeather, false);
     //Make selectbox
-    var weatherSelect = document.createElement('select')
+    const weatherSelect = document.createElement('select');
     weatherSelect.innerHTML =
-    `<option value="0">Clear</option>
+    `<option value="-1">Default</option>
+    <option value="0">Clear</option>
     <option value="1">Overcast</option>
     <option value="2">Rain</option>
     <option value="3">Thunderstorm</option>
@@ -35,43 +36,71 @@ function initWeatherChange(){
     <option value="9">Fog</option>
     <option value="10">Windy</option>`
     weatherSelect.id = 'weather-select'
-    weatherSelect.style = 'position: absolute; right: 50px; top: 10px; width: auto; height: 20px; font-size: 9px;'
-    document.getElementById('townMap').appendChild(weatherSelect)
+    document.getElementById('townMap').appendChild(weatherSelect);
+
+    addGlobalStyle('#change-weather { position: absolute; right: 133px; top: 0px; width: auto; height: 41px; font-size: 11px; margin: 0px; }');
+    addGlobalStyle('#weather-select { position: absolute; right: 50px; top: 10px; width: auto; height: 20px; font-size: 9px; }');
     //Set weather to last weather option, is broken with new loading
-    if (localStorage.getItem('scriptWeather') != null) Weather.regionalWeather[player.region](parseInt(localStorage.getItem('scriptWeather')))
+    if (!isNaN(parseInt(localStorage.getItem('scriptWeather')))) {
+        const getWeather = parseInt(localStorage.getItem('scriptWeather'));
+        document.getElementById('weather-select').value = getWeather;
+        Weather.regionalWeather.forEach((Weather) => { Weather(getWeather); });
+    };
 }
 
 function changeWeather(){
-    localStorage.setItem('scriptWeather', document.getElementById('weather-select').value)
-    Weather.regionalWeather[player.region](parseInt(localStorage.getItem('scriptWeather')))
+    const selWeather = +document.getElementById('weather-select').value;
+    if (selWeather != -1) {
+        //Freeze weather
+        Weather.generateWeather = function(){ return true };
+        //Set Weather
+        Weather.regionalWeather.forEach((Weather) => { Weather(selWeather); });
+    } else {
+        //Unfreeze weather
+        Weather.generateWeather = weatherFunc;
+        //Default Weather
+        const now = new Date();
+        Weather.generateWeather(now);
+    }
+    localStorage.setItem('scriptWeather', selWeather >= 0 ? selWeather : false);
 }
 
 function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+    const oldInit = Preload.hideSplashScreen;
 
     Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        initWeatherChange()
-        return result
+        const result = oldInit.apply(this, arguments);
+        initWeatherChange();
+        return result;
     }
 }
 
 var scriptName = 'simpleweatherchanger'
 
 if (document.getElementById('scriptHandler') != undefined){
-    var scriptElement = document.createElement('div')
-    scriptElement.id = scriptName
-    document.getElementById('scriptHandler').appendChild(scriptElement)
+    const scriptElement = document.createElement('div');
+    scriptElement.id = scriptName;
+    document.getElementById('scriptHandler').appendChild(scriptElement);
     if (localStorage.getItem(scriptName) != null){
         if (localStorage.getItem(scriptName) == 'true'){
-            loadScript()
+            loadScript();
         }
     }
     else{
         localStorage.setItem(scriptName, 'true')
-        loadScript()
+        loadScript();
     }
 }
 else{
     loadScript();
+}
+
+function addGlobalStyle(css) {
+    var head, style;
+    head = document.getElementsByTagName('head')[0];
+    if (!head) { return; }
+    style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = css;
+    head.appendChild(style);
 }
