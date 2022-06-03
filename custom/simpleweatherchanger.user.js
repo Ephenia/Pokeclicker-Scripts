@@ -6,6 +6,7 @@
 // @version     1.0
 // @author      KarmaAlex
 // @description Adds a button to select the weather for the current region, also freezes all weather
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/simpleweatherchanger.user.js
 // ==/UserScript==
 
 function initWeatherChange(){

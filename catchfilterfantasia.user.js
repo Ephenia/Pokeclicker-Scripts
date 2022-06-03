@@ -6,6 +6,7 @@
 // @version     1.0
 // @author      Ephenia
 // @description An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
 // ==/UserScript==
 
 const pokeballDisplay = document.getElementById('pokeballSelector');
