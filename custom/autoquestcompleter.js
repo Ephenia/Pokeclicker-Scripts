@@ -16,7 +16,6 @@ let questPokeballReadyToStart = false;
 let questPokeballInProgress = false;
 let completeQuestLocationLoop;
 let completeQuestPokeballLoop;
-let forceCapture = false;
 let regionSelect;
 let subRegionSelect;
 let routeSelect;
@@ -374,7 +373,8 @@ function changePokeballForQuest(quest) {
     let catchShiniesQuest = App.game.quests.currentQuests().filter(x => x instanceof CatchShiniesQuest);
     let capturePokemonTypesQuest = App.game.quests.currentQuests().filter(x => x instanceof CapturePokemonTypesQuest);
 
-    if (App.game.pokeballs.alreadyCaughtSelection < GameConstants.Pokeball.Ultraball) {
+    let forceCapture = false;
+    if (App.game.pokeballs.alreadyCaughtSelection < GameConstants.Pokeball.Ultraball || questPokeballReadyToStart) {
         if (catchShiniesQuest.length > 0) {
             if (Battle.enemyPokemon().shiny || DungeonBattle.enemyPokemon().shiny) {
                 forceCapture = true;
@@ -411,6 +411,7 @@ function changePokeballForQuest(quest) {
             playerSetAlreadyCaughtPokeball(pokeball)
         } else if (questPokeballReadyToStart && !questPokeballInProgress) {
             playerSetAlreadyCaughtPokeball(pokeballAlreadyCaughtSelect)
+            questPokeballReadyToStart = false;
         }
     }
 }
