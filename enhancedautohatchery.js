@@ -17,6 +17,8 @@ var eggState;
 var eggColor;
 var fossilState;
 var fossilColor;
+var shinyFossilState;
+var shinyFossilColor;
 var hatcherySortVal;
 var hatcherySortDir;
 var hatcherySortSync;
@@ -41,6 +43,11 @@ function initAutoHatch() {
     } else {
         fossilColor = "success"
     }
+    if (shinyFossilState == "OFF") {
+        shinyFossilColor = "danger"
+    } else {
+        shinyFossilColor = "success"
+    }
     if (hatcherySortSync == "OFF") {
         sortSyncColor = "danger"
     } else {
@@ -51,20 +58,24 @@ function initAutoHatch() {
     Auto Hatch [`+ hatchState + `]
     </button>`
 
-    document.getElementById('breedingModal').querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="sort-sync" class="btn btn-` + sortSyncColor + `" style="margin-left:20px;">
+    document.getElementById('breedingModal').querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="sort-sync" class="btn btn-` + sortSyncColor + `" style="margin-left:10px;">
     Pokemon List Sync [`+ hatcherySortSync + `]
     </button>
-    <button id="auto-egg" class="btn btn-`+ eggColor + `" style="margin-left:20px;">
+    <button id="auto-egg" class="btn btn-`+ eggColor + `" style="margin-left:10px;">
     Auto Egg [`+ eggState + `]
     </button>
-    <button id="auto-fossil" class="btn btn-`+ fossilColor + `" style="margin-left:20px;">
+    <button id="auto-fossil" class="btn btn-`+ fossilColor + `" style="margin-left:10px;">
     Auto Fossil [`+ fossilState + `]
+    </button>
+    <button id="shiny-fossil" class="btn btn-`+ shinyFossilColor + `" style="margin-left:10px;">
+    Ignore Shiny Fossils [`+ shinyFossilState + `]
     </button>`
 
     $("#auto-hatch-start").click(toggleAutoHatch)
     $("#sort-sync").click(changesortsync)
     $("#auto-egg").click(toggleEgg)
     $("#auto-fossil").click(toggleFossil)
+    $("#shiny-fossil").click(toggleShinyFossil)
     //document.getElementById('breedingModal').querySelector('button[aria-controls="breeding-sort"]').setAttribute("style", "display:none");
     addGlobalStyle('.eggSlot.disabled { pointer-events: unset !important; }');
 
@@ -133,6 +144,21 @@ function toggleFossil() {
         document.getElementById("auto-fossil").classList.add('btn-danger');
     }
     document.getElementById('auto-fossil').innerHTML = `Auto Fossil [` + fossilState + `]`
+}
+
+function toggleShinyFossil() {
+    if (shinyFossilState == "OFF") {
+        shinyFossilState = "ON"
+        localStorage.setItem("shinyFossil", shinyFossilState);
+        document.getElementById("shiny-fossil").classList.remove('btn-danger');
+        document.getElementById("shiny-fossil").classList.add('btn-success');
+    } else {
+        shinyFossilState = "OFF"
+        localStorage.setItem("shinyFossil", shinyFossilState);
+        document.getElementById("shiny-fossil").classList.remove('btn-success');
+        document.getElementById("shiny-fossil").classList.add('btn-danger');
+    }
+    document.getElementById('shiny-fossil').innerHTML = `Ignore Shiny Fossils [` + shinyFossilState + `]`
 }
 
 function autoHatcher() {
@@ -211,8 +237,10 @@ function autoHatcher() {
                         var fossilName = player.mineInventory()[e].name;
                         var fossilID = player.mineInventory()[e].id;
                         var fossilePoke = GameConstants.FossilToPokemon[fossilName];
+                        // 0 = Not caught yet, 1 = Non-Shiny, 2 = Already Shiny
+                        const checkShiny = PartyController.getCaughtStatusByName(fossilePoke);
                         var pokeRegion = PokemonHelper.calcNativeRegion(fossilePoke)
-                        if (pokeRegion <= player.highestRegion()) {
+                        if (pokeRegion <= player.highestRegion() && (shinyFossilState == "ON" || checkShiny != 2)) {
                             storedFossilName.push(fossilName)
                             storedFossilID.push(fossilID)
                             //console.log(player.mineInventory()[i].name)
@@ -346,6 +374,9 @@ if (localStorage.getItem('autoEgg') == null) {
 if (localStorage.getItem('autoFossil') == null) {
     localStorage.setItem("autoFossil", "OFF");
 }
+if (localStorage.getItem('shinyFossil') == null) {
+    localStorage.setItem("shinyFossil", "OFF");
+}
 if (localStorage.getItem('hatcherySortVal') == null) {
     localStorage.setItem("hatcherySortVal", 0);
 }
@@ -358,6 +389,7 @@ if (localStorage.getItem('hatcherySortSync') == null) {
 hatchState = localStorage.getItem('autoHatchState');
 eggState = localStorage.getItem('autoEgg');
 fossilState = localStorage.getItem('autoFossil');
+shinyFossilState = localStorage.getItem('shinyFossil');
 hatcherySortVal = +localStorage.getItem('hatcherySortVal');
 hatcherySortDir = +localStorage.getItem('hatcherySortDir');
 hatcherySortSync = localStorage.getItem('hatcherySortSync');
