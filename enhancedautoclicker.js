@@ -59,9 +59,22 @@ function initAutoClicker() {
     <button id="auto-click-start" class="btn btn-`+ clickColor + ` btn-block" style="font-size:8pt;">
     Auto Click [`+ clickState + `]<br>
     <div id="auto-click-info">
-    <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') + `</div></div>
-    <div id="req-DPS">Req. DPS:<br><div style="font-weight:bold;">0</div></div>
-    <div id="enemy-DPS">Enemy/s:<br><div style="font-weight:bold;color:black;">0</div></div>
+        <div id="click-DPS">
+            Auto Click DPS:<br>
+            <div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') + `</div>
+        </div>
+        <div id="req-DPS">
+            Req. DPS:<br>
+            <div style="font-weight:bold;">0</div>
+        </div>
+        <div id="enemy-DPS">
+            Enemy/s:<br>
+            <div style="font-weight:bold;color:black;">0</div>
+        </div>
+        <div id="golds-sec">
+            Golds/s:<br>
+            <div style="font-weight:bold;color:gold;">0</div>
+        </div>
     </div>
     </button>
     <div id="click-delay-cont">
@@ -140,9 +153,22 @@ function toggleAutoClick() {
     localStorage.setItem("autoClickState", clickState);
     document.getElementById('auto-click-start').innerHTML = `Auto Click [` + clickState + `]<br>
     <div id="auto-click-info">
-    <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') + `</div></div>
-    <div id="req-DPS">Req. DPS:<br><div style="font-weight:bold;">0</div></div>
-    <div id="enemy-DPS">Enemy/s:<br><div style="font-weight:bold;color:black;">0</div></div>
+        <div id="click-DPS">
+            Auto Click DPS:<br>
+            <div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') + `</div>
+        </div>
+        <div id="req-DPS">
+            Req. DPS:<br>
+            <div style="font-weight:bold;">0</div>
+        </div>
+        <div id="enemy-DPS">
+            Enemy/s:<br>
+            <div style="font-weight:bold;color:black;">0</div>
+        </div>
+        <div id="golds-sec">
+            Golds/s:<br>
+            <div style="font-weight:bold;color:gold;">0</div>
+        </div>
     </div>`
 }
 
@@ -193,6 +219,9 @@ function getRandomInt(max) {
 }
 
 function calcClickDPS() {
+    // Previous cycle money
+    var money = App.game.wallet.currencies[GameConstants.Currency.money]();
+    
     autoClickDPS = setInterval(function () {
         const clickSec = testDPS;
         let enemyHealth;
@@ -230,6 +259,12 @@ function calcClickDPS() {
         }
         testDPS = 0;
         defeatDPS = 0;
+        
+        // This cycle money
+        const moneyT = App.game.wallet.currencies[GameConstants.Currency.money]();
+        document.getElementById('golds-sec').innerHTML = `Golds/s:<br><div style="font-weight:bold;color:gold;">` + Math.floor(moneyT - money).toLocaleString('en-US') + `$</div>`
+        // Update previous money for next cycle
+        money = moneyT;
     }, 1000);
 }
 
