@@ -6,6 +6,7 @@
 // @version     1.1
 // @author      KarmaAlex (Credit: Ephenia)
 // @description Removes the limit for the number of quests you can do at once and auto completes/starts new ones.
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/autoquestcompleter.user.js
 // ==/UserScript==
 
 function initAutoQuests(){

@@ -6,6 +6,7 @@
 // @version     1.0
 // @author      Ephenia
 // @description Removes the cap on the amount of Proteins that you can use on Pokémon which effectively makes them infinite use.
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/omegaproteingains.user.js
 // ==/UserScript==
 
 var proteinTable;

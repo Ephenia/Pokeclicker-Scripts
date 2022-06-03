@@ -6,6 +6,7 @@
 // @version     1.0
 // @author      Ephenia
 // @description Adds in toggable options to have seasonal events infinitely run. Events can also run simultaneously with one another. Includes custom events as well.
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/infiniteseasonalevents.user.js
 // ==/UserScript==
 
 var startDate = new Date(new Date().getFullYear(), -1);

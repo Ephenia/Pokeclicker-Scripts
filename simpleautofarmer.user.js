@@ -6,6 +6,7 @@
 // @version     1.5
 // @author      Ephenia / Akwawa (update 1.5)
 // @description It Add buttons to automatically plant any specific berry, harvest or mulch all berries. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
+// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/simpleautofarmer.user.js
 // ==/UserScript==
 
 function initAutoFarm() {
