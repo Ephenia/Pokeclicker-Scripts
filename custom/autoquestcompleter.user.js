@@ -87,10 +87,13 @@ function initAutoQuests(){
             document.getElementById('toggle-auto-quest').textContent = 'Auto [ON]'
         }
     }, false)
-    //Retrieving autoclicker buttons
-    gymStart = document.getElementById("auto-gym-start");
-    dungeonStart = document.getElementById("auto-dungeon-start");
-    hatcheryStart = document.getElementById("auto-hatch-start");
+
+    //Avoids that the buttons of other scripts do not exist yet
+    setTimeout(function() {
+        gymStart = document.getElementById("auto-gym-start");
+        dungeonStart = document.getElementById("auto-dungeon-start");
+        hatcheryStart = document.getElementById("auto-hatch-start");
+    }, 2000);
 
     //Checks for new quests to add to the list and claims completed ones
     var autoQuest = setInterval(function(){
