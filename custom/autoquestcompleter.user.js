@@ -174,6 +174,7 @@ function initAutoQuests(){
         const questHTML = document.getElementById('QuestModal').querySelector('tbody').children;
         for (let i = 0; i < questHTML.length; i++) {
             questHTML[i].querySelector('td:nth-child(1)').setAttribute('data-src', i);
+            questHTML[i].classList.add("clickable");
             questHTML[i].addEventListener('click', () => {retrieveQuestName(event)})
         }
     }
