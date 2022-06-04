@@ -368,7 +368,8 @@ function endLocationQuest() {
 }
 
 function completeUsePokeballQuest(pokeballQuest) {
-    if (!questPokeballInProgress) {
+    //If the script has to change the pokeball for a capture, we wait until it has reset the selected already caught pokeball
+    if (!questPokeballInProgress && !pokeballChangedForCapturePokemonQuest) {
         //Remove use pokeball quest for current cycle if total pokeball needed not available
         if(!playerHasPokeballForPokemonQuest(pokeballQuest.pokeball, pokeballQuest.progressText())) {
             removeQuestTemporarily(pokeballQuest);
