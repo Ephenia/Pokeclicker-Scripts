@@ -166,6 +166,9 @@ function initAutoQuests(){
             endCapturePokemonTypesQuest();
             endPokeballQuest();
             stopCompleteQuestLocation();
+            if (pokeballChangedForCapturePokemonQuest) {
+                playerSetAlreadyCaughtPokeball(previousPokeballAlreadyCaughtSelect);
+            }
         }
     }, 500)
 
@@ -523,25 +526,28 @@ function changePokeballForPokemonQuest() {
             }
         }
 
-        if (forceCapture) {
+        if (forceCapture && !Battle.catching()) {
             //Check if player have pokeball to catch pokemon
             let pokeball = -1;
             for (let i = GameConstants.Pokeball.Ultraball; i >= 0; i--) {
-                if(playerHasPokeballForPokemonQuest(i)) {
+                if (playerHasPokeballForPokemonQuest(i)) {
                     pokeball = i;
                     break;
                 }
             }
             if (pokeball === -1) {
-                removeQuestTemporarily(quest);
+                //Pokeball not available
                 return;
             }
             if (!pokeballChangedForCapturePokemonQuest) {
                 playerSavePreviousPokeballAlreadyCaught();
             }
             playerSetAlreadyCaughtPokeball(pokeball)
+        } else if (forceCapture && Battle.catching() && pokeballChangedForCapturePokemonQuest) {
+            playerSetAlreadyCaughtPokeball(previousPokeballAlreadyCaughtSelect);
+            pokeballChangedForCapturePokemonQuest = false;
         } else if (pokeballChangedForCapturePokemonQuest) {
-            playerSetAlreadyCaughtPokeball(previousPokeballAlreadyCaughtSelect)
+            playerSetAlreadyCaughtPokeball(previousPokeballAlreadyCaughtSelect);
             pokeballChangedForCapturePokemonQuest = false;
         }
     }
