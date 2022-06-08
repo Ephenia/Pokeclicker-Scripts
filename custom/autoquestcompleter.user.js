@@ -11,27 +11,16 @@
 
 let questTypes = [];
 let autoQuestCanBeStopped;
-let questLocationReadyToStart = false;
-let questLocationInProgress = false;
-let completeQuestLocationLoop;
-let questPokeballReadyToStart = false;
-let questPokeballInProgress = false;
-let completeQuestPokeballLoop;
-let questCapturePokemonsReadyToStart = false;
-let questCapturePokemonsInProgress = false;
-let completeQuestCapturePokemonsLoop;
-let questCapturePokemonTypesReadyToStart = false;
-let questCapturePokemonTypesInProgress = false;
-let completeQuestCapturePokemonTypesLoop;
-let pokeballChangedForCapturePokemonQuest = false;
+let locationQuestInProgress = false;
+let usePokeballQuestInProgress = false;
+let capturePokemonsQuestInProgress = false;
+let capturePokemonTypesQuestInProgress = false;
 let regionSelect;
 let subRegionSelect;
 let routeSelect;
 let townSelect;
 let dungeonStateSelect;
 let gymStateSelect;
-let pokeballAlreadyCaughtSelect;
-let previousPokeballAlreadyCaughtSelect;
 let hatcheryCategorySelect;
 let hatcheryShinyStatusSelect;
 let hatcheryRegionSelect;
@@ -40,10 +29,13 @@ let hatcheryType2Select;
 let hatcherySortSelect;
 let hatcherySortDirectionSelect;
 let hatcheryStateSelect;
-let dungeonQuestEnable;
-let gymStart;
-let dungeonStart;
-let hatcheryStart;
+let autoGym;
+let autoDungeon;
+let autoHatchery;
+let playerHasMoved = false;
+let pokeballAlreadyCaughtSelect;
+let pokeballChangedForCapturePokemonQuest;
+let previousPokeballAlreadyCaughtSelect;
 
 function initAutoQuests(){
     //Allows to start infinite  quests
@@ -55,6 +47,7 @@ function initAutoQuests(){
         localStorage.setItem('autoQuestEnable', 'true')
     }
     //Define quest types
+    let questTypes = [];
     if (localStorage.getItem('autoQuestTypes') == null){
         for (const type in QuestHelper.quests) {
             questTypes.push(type);
@@ -62,7 +55,6 @@ function initAutoQuests(){
         localStorage.setItem('autoQuestTypes', JSON.stringify(questTypes))
     } else {
         questTypes = JSON.parse(localStorage.getItem('autoQuestTypes'));
-        dungeonQuestEnable = questTypes.includes("DefeatDungeonQuest");
     }
     resetQuestModify();
     //Track the last refresh
@@ -90,19 +82,19 @@ function initAutoQuests(){
 
     //Avoids that the buttons of other scripts do not exist yet
     setTimeout(function() {
-        gymStart = document.getElementById("auto-gym-start");
-        dungeonStart = document.getElementById("auto-dungeon-start");
-        hatcheryStart = document.getElementById("auto-hatch-start");
-    }, 2000);
+        autoGym = document.getElementById("auto-gym-start");
+        autoDungeon = document.getElementById("auto-dungeon-start");
+        autoHatchery = document.getElementById("auto-hatch-start");
+    }, 1000);
+
 
     //Checks for new quests to add to the list and claims completed ones
     var autoQuest = setInterval(function(){
         let questsNeed = 0;
         if (trackRefresh != App.game.quests.lastRefresh) {
-            trackRefresh = App.game.quests.lastRefresh;
-            stopCompleteQuestLocation();
             //Reload quest types from local storage to re-enter the dungeon if they are deleted because there are not enough dungeon tokens left.
             questTypes = JSON.parse(localStorage.getItem('autoQuestTypes'));
+            trackRefresh = App.game.quests.lastRefresh;
             resetQuestModify();
         }
         if (localStorage.getItem('autoQuestEnable') == 'true'){
@@ -116,43 +108,15 @@ function initAutoQuests(){
                 }
             })
             if (App.game.quests.currentQuests().length > 0){
+                //Claim all completed quest & check if quests should refresh
                 App.game.quests.currentQuests().forEach(quest => {
                     if (quest.notified == true){
-                        //Claim all completed quest
                         App.game.quests.claimQuest(quest.index)
-                    } else {
-                        //Processes quests with location
-                        if(!questLocationInProgress) {
-                            if(quest instanceof DefeatGymQuest) {
-                                completeDefeatGymQuest(quest)
-                            } else if(quest instanceof DefeatPokemonsQuest) {
-                                completeDefeatPokemonQuest(quest)
-                            } else if(quest instanceof DefeatDungeonQuest) {
-                                completeDefeatDungeonQuest(quest)
-                            }
-                        }
-                        if (!questCapturePokemonsInProgress) {
-                            if (quest instanceof CapturePokemonsQuest) {
-                                completeCapturePokemonsQuest(quest)
-                            }
-                        }
-                        if (!questCapturePokemonTypesInProgress) {
-                            if (quest instanceof CapturePokemonTypesQuest) {
-                                completeCapturePokemonTypesQuest(quest)
-                            }
-                        }
-                        if (!questPokeballInProgress) {
-                            if (quest instanceof UsePokeballQuest) {
-                                completeUsePokeballQuest(quest)
-                            }
-                        }
+                        endQuest(quest);
                     }
-                    //Complete quest when you use pokeball to capture pokemon like shiny and type
-                    if (App.game.gameState === GameConstants.GameState.fighting) {
-                        changePokeballForPokemonQuest()
+                    else {
+                        startQuest(quest);
                     }
-
-                    //Check if quests should refresh
                     if (questTypes.includes(quest.constructor.name)) {
                         questsNeed++;
                     }
@@ -165,13 +129,9 @@ function initAutoQuests(){
             }
         } else if (autoQuestCanBeStopped) {
             autoQuestCanBeStopped = false;
-            endCapturePokemonsQuest();
-            endCapturePokemonTypesQuest();
-            endPokeballQuest();
-            stopCompleteQuestLocation();
-            if (pokeballChangedForCapturePokemonQuest) {
-                playerSetAlreadyCaughtPokeball(previousPokeballAlreadyCaughtSelect);
-            }
+            App.game.quests.questList().forEach(quest => {
+                endQuest(quest);
+            })
         }
     }, 500)
 
@@ -180,15 +140,13 @@ function initAutoQuests(){
         const questHTML = document.getElementById('QuestModal').querySelector('tbody').children;
         for (let i = 0; i < questHTML.length; i++) {
             questHTML[i].querySelector('td:nth-child(1)').setAttribute('data-src', i);
-            questHTML[i].classList.add("clickable");
             questHTML[i].addEventListener('click', () => {retrieveQuestName(event)})
         }
     }
 
     function retrieveQuestName(event) {
         const index = +event.target.getAttribute('data-src');
-        const quest = App.game.quests.questList()[index];
-        const questName = quest.constructor.name
+        const questName = App.game.quests.questList()[index].constructor.name;
         const indexPos = questTypes.indexOf(questName);
         if (indexPos != -1) {
             questTypes[indexPos] = null;
@@ -196,38 +154,44 @@ function initAutoQuests(){
             const empty = questTypes.indexOf(null);
             questTypes[empty] = questName;
         }
-
-        //Stop current quests in progress
-        if(questLocationInProgress && (quest instanceof DefeatGymQuest || quest instanceof DefeatPokemonsQuest || quest instanceof DefeatDungeonQuest)) {
-            stopCompleteQuestLocation();
-        } else if (questCapturePokemonsInProgress && quest instanceof CapturePokemonsQuest) {
-            endCapturePokemonsQuest();
-        } else if (questCapturePokemonTypesInProgress && quest instanceof CapturePokemonTypesQuest) {
-            endCapturePokemonTypesQuest();
-        } else if (questPokeballInProgress && quest instanceof UsePokeballQuest) {
-            endPokeballQuest();
-        }
         localStorage.setItem('autoQuestTypes', JSON.stringify(questTypes));
     }
 
-    function stopCompleteQuestLocation() {
-        if(questLocationInProgress) {
-            //Reset loop when quest is refreshed or auto quest is disabled
-            if(typeof completeQuestLocationLoop !== 'undefined') {
-                clearInterval(completeQuestLocationLoop);
-                completeQuestLocationLoop = null;
-            }
-            stopAutoDungeon();
-            stopAutoGym();
-            let resetPlayerStateLoop = setInterval(function() {
-                if(playerCanMove()) {
-                    playerResetState();
-                    clearInterval(resetPlayerStateLoop);
-                }
-            }, 50);
-            questLocationInProgress = false;
+    function startQuest(quest) {
+        if(quest instanceof DefeatGymQuest) {
+            completeDefeatGymQuest(quest);
+        } else if(quest instanceof DefeatPokemonsQuest) {
+            completeDefeatPokemonQuest(quest);
+        } else if(quest instanceof DefeatDungeonQuest) {
+            completeDefeatDungeonQuest(quest);
+        } else if (quest instanceof UsePokeballQuest) {
+            completeUsePokeballQuest(quest);
+        } else if (quest instanceof CatchShiniesQuest) {
+            changePokeballForPokemonQuest(quest);
+        } else if (quest instanceof CapturePokemonsQuest) {
+            completeCapturePokemonsQuest();
+        } else if (quest instanceof CapturePokemonTypesQuest) {
+            changePokeballForPokemonQuest(quest);
+            completeCapturePokemonTypesQuest(quest);
+        } else if (quest instanceof UseOakItemQuest) {
+            changePokeballForPokemonQuest(quest);
         }
-        questLocationReadyToStart = false;
+    }
+
+    function endQuest(quest) {
+        if(quest instanceof DefeatGymQuest) {
+            endLocationQuest(quest);
+        } else if(quest instanceof DefeatPokemonsQuest) {
+            endLocationQuest(quest);
+        } else if(quest instanceof DefeatDungeonQuest) {
+            endLocationQuest(quest);
+        }else if (quest instanceof UsePokeballQuest) {
+            endUsePokeballQuest(quest);
+        } else if (quest instanceof CapturePokemonsQuest) {
+            endCapturePokemonsQuest(quest);
+        } else if (quest instanceof CapturePokemonTypesQuest) {
+            endCapturePokemonTypesQuest(quest);
+        }
     }
 }
 
@@ -268,291 +232,15 @@ function removeQuestTemporarily(quest) {
     }
 }
 
-function completeDefeatDungeonQuest(dungeonQuest) {
-    //Can't farm the dungeons without the autoclicker
-    if(!dungeonStart) return;
-
-    //Remove dungeon quest for current cycle if total token needed not available
-    if(!playerCanPayDungeonEntrance(dungeonQuest.dungeon, dungeonQuest.progressText())) {
-        removeQuestTemporarily(dungeonQuest);
-        endLocationQuest();
-        return;
-    }
-
-    if(!questLocationReadyToStart) {
-        playerSaveState();
-        stopAutoGym();
-        questLocationReadyToStart = true;
-    }
-
-    //Move player to quest dungeon
-    if (playerCanMove()) {
-        playerMoveToTown(dungeonQuest.dungeon, dungeonQuest.region);
-    }
-
-    if(player.town().name === dungeonQuest.dungeon) {
-        questLocationInProgress = true;
-        completeQuestLocationLoop = setInterval(function() {
-            if(!dungeonQuest.notified) {
-                if(dungeonStart && !dungeonStart.classList.contains("btn-success")) {
-                    dungeonStart.click();
-                }
-            } else if(playerCanMove()) {
-                endLocationQuest();
-            }
-        }, 50);
+function stopAutoDungeon() {
+    if(autoDungeon && !autoDungeon.classList.contains("btn-danger")) {
+        autoDungeon.click();
     }
 }
 
-function completeDefeatGymQuest(gymQuest) {
-    //Find town associate to gym
-    const gymListAsArray = Object.entries(GymList);
-    const town = gymListAsArray.filter(([key, value]) => key === gymQuest.gymTown)[0][1];
-
-    if(!questLocationReadyToStart) {
-        playerSaveState();
-        stopAutoDungeon();
-        stopAutoGym();
-        questLocationReadyToStart = true;
-    }
-    //Move player to quest town
-    if (playerCanMove()) {
-        playerMoveToTown(town.parent.name, town.parent.region);
-    }
-
-    if(player.town().name === town.parent.name) {
-        //Find gym in town
-        for(const gym of player.town().content) {
-            if(gym.town === gymQuest.gymTown) {
-                questLocationInProgress = true;
-                completeQuestLocationLoop = setInterval(function() {
-                    if(!gymQuest.notified) {
-                        if(App.game.gameState !== GameConstants.GameState.gym) {
-                            gym.protectedOnclick();
-                        }
-                    } else if(playerCanMove()) {
-                        endLocationQuest();
-                    }
-                }, 50);
-            }
-        }
-    }
-}
-
-function completeDefeatPokemonQuest(pokemonQuest) {
-    if(!questLocationReadyToStart) {
-        playerSaveState();
-        stopAutoDungeon();
-        stopAutoGym();
-        questLocationReadyToStart = true;
-    }
-
-    //Move player to quest route
-    if (playerCanMove()) {
-        playerMoveToRoute(pokemonQuest.route, pokemonQuest.region);
-    }
-
-    if(player.route() === pokemonQuest.route && player.region === pokemonQuest.region) {
-        questLocationInProgress = true;
-        completeQuestLocationLoop = setInterval(function() {
-            if(pokemonQuest.notified) {
-                endLocationQuest();
-            }
-        }, 50);
-    }
-}
-
-function endLocationQuest() {
-    //Executed when the quest is completed
-    questLocationReadyToStart = false;
-    questLocationInProgress = false;
-    clearInterval(completeQuestLocationLoop);
-    completeQuestLocationLoop = null;
-    stopAutoDungeon();
-    stopAutoGym();
-    playerResetState();
-}
-
-function completeUsePokeballQuest(pokeballQuest) {
-    //If the script has to change the pokeball for a capture, we wait until it has reset the selected already caught pokeball
-    if (!questPokeballInProgress && !pokeballChangedForCapturePokemonQuest) {
-        //Remove use pokeball quest for current cycle if total pokeball needed not available
-        if(!playerHasPokeballForPokemonQuest(pokeballQuest.pokeball, pokeballQuest.progressText())) {
-            removeQuestTemporarily(pokeballQuest);
-            endPokeballQuest();
-            return;
-        }
-
-        questPokeballInProgress = true;
-
-        //Save and set pokeball already caught selection
-        if (!questPokeballReadyToStart) {
-            playerSavePokeballAlreadyCaught();
-        }
-        playerSetAlreadyCaughtPokeball(pokeballQuest.pokeball)
-
-        completeQuestPokeballLoop = setInterval(function() {
-            if(pokeballQuest.notified) {
-                endPokeballQuest()
-            }
-        }, 1000);
-    }
-}
-
-function endPokeballQuest() {
-    //Executed when the quest is completed
-    questPokeballInProgress = false;
-    clearInterval(completeQuestPokeballLoop);
-    completeQuestPokeballLoop = null;
-    if (questPokeballReadyToStart) {
-        playerSetAlreadyCaughtPokeball(pokeballAlreadyCaughtSelect);
-        questPokeballReadyToStart = false;
-    }
-}
-
-function completeCapturePokemonsQuest(captureQuest) {
-    //Can't use hatchery without autohatchery
-    if(!hatcheryStart) return;
-
-    //No need to run the code if autohatchery is enabled
-    if(hatcheryStart.classList.contains("btn-success")) {
-        return;
-    }
-
-    if(!questCapturePokemonsReadyToStart) {
-        if (!questCapturePokemonTypesInProgress) {
-            playerSaveHatcheryState();
-        }
-        questCapturePokemonsReadyToStart = true;
-    }
-
-    if (!questCapturePokemonsInProgress) {
-        questCapturePokemonsInProgress = true;
-        if (!questCapturePokemonTypesInProgress) {
-            //Set all filter breeding to default to avoid empty list
-            BreedingController.filter.category(-1)
-            BreedingController.filter.shinyStatus(-2)
-            BreedingController.filter.region(-2)
-            BreedingController.filter.type1(-2)
-            BreedingController.filter.type2(-2)
-            Settings.getSetting('hatcherySort').observableValue(6) // Breeding efficient
-            Settings.getSetting('hatcherySortDirection').observableValue(true)
-        }
-
-        completeQuestCapturePokemonsLoop = setInterval(function() {
-            if(!captureQuest.notified) {
-                if(hatcheryStart.classList.contains("btn-danger")) {
-                    hatcheryStart.click();
-                }
-            } else {
-                endCapturePokemonsQuest()
-            }
-        }, 5000);
-    }
-}
-
-function endCapturePokemonsQuest() {
-    questCapturePokemonsReadyToStart = false;
-    questCapturePokemonsInProgress = false;
-    clearInterval(completeQuestCapturePokemonsLoop)
-    completeQuestCapturePokemonsLoop = null;
-    if (!questCapturePokemonTypesInProgress) {
-        playerResetHatcheryState()
-    }
-}
-
-function completeCapturePokemonTypesQuest(captureQuest) {
-    //Can't use hatchery without autohatchery
-    if(!hatcheryStart) return;
-
-    if(!questCapturePokemonTypesReadyToStart) {
-        if (!questCapturePokemonsReadyToStart) {
-            playerSaveHatcheryState();
-        }
-        questCapturePokemonTypesReadyToStart = true;
-    }
-
-    if (!questCapturePokemonTypesInProgress) {
-        questCapturePokemonTypesInProgress = true;
-        //Set all filter breeding to default to avoid empty list
-        BreedingController.filter.category(-1)
-        BreedingController.filter.shinyStatus(-2)
-        BreedingController.filter.region(-2)
-        BreedingController.filter.type1(captureQuest.type)
-        BreedingController.filter.type2(-2)
-        Settings.getSetting('hatcherySort').observableValue(6) // Breeding efficient
-        Settings.getSetting('hatcherySortDirection').observableValue(true)
-
-        completeQuestCapturePokemonTypesLoop = setInterval(function() {
-            if(!captureQuest.notified) {
-                if(hatcheryStart.classList.contains("btn-danger")) {
-                    hatcheryStart.click();
-                }
-            } else {
-                endCapturePokemonTypesQuest()
-            }
-        }, 5000);
-    }
-}
-
-function endCapturePokemonTypesQuest() {
-    questCapturePokemonTypesReadyToStart = false;
-    questCapturePokemonTypesInProgress = false;
-    clearInterval(completeQuestCapturePokemonTypesLoop)
-    completeQuestCapturePokemonTypesLoop = null;
-    if (!questCapturePokemonsInProgress) {
-        playerResetHatcheryState()
-    } else {
-        //Set type1 to all if pokemon quest capture is in progress
-        BreedingController.filter.type1(-2)
-    }
-}
-
-function changePokeballForPokemonQuest() {
-    let catchShiniesQuest = App.game.quests.currentQuests().filter(x => x instanceof CatchShiniesQuest);
-    let capturePokemonTypesQuest = App.game.quests.currentQuests().filter(x => x instanceof CapturePokemonTypesQuest);
-
-    let forceCapture = false;
-    if (App.game.pokeballs.alreadyCaughtSelection < GameConstants.Pokeball.Ultraball || pokeballChangedForCapturePokemonQuest) {
-        if (catchShiniesQuest.length > 0) {
-            if (Battle.enemyPokemon().shiny || DungeonBattle.enemyPokemon().shiny) {
-                forceCapture = true;
-            }
-        }
-        if (capturePokemonTypesQuest.length > 0) {
-            for(const quest of capturePokemonTypesQuest) {
-                //Check if pokemon type is catchable
-                if(quest.type === Battle.enemyPokemon().type1 || quest.type === Battle.enemyPokemon().type2) {
-                    forceCapture = true;
-                    break;
-                }
-            }
-        }
-
-        if (forceCapture && !Battle.catching()) {
-            //Check if player have pokeball to catch pokemon
-            let pokeball = -1;
-            for (let i = GameConstants.Pokeball.Ultraball; i >= 0; i--) {
-                if (playerHasPokeballForPokemonQuest(i)) {
-                    pokeball = i;
-                    break;
-                }
-            }
-            if (pokeball === -1) {
-                //Pokeball not available
-                return;
-            }
-            if (!pokeballChangedForCapturePokemonQuest) {
-                playerSavePreviousPokeballAlreadyCaught();
-            }
-            playerSetAlreadyCaughtPokeball(pokeball)
-        } else if (forceCapture && Battle.catching() && pokeballChangedForCapturePokemonQuest) {
-            playerSetAlreadyCaughtPokeball(previousPokeballAlreadyCaughtSelect);
-            pokeballChangedForCapturePokemonQuest = false;
-        } else if (pokeballChangedForCapturePokemonQuest) {
-            playerSetAlreadyCaughtPokeball(previousPokeballAlreadyCaughtSelect);
-            pokeballChangedForCapturePokemonQuest = false;
-        }
+function stopAutoGym() {
+    if (autoGym && !autoGym.classList.contains("btn-danger")) {
+        autoGym.click();
     }
 }
 
@@ -563,29 +251,37 @@ function playerSaveState() {
     routeSelect = player.route();
     townSelect = player.town().name;
 
-    if(dungeonStart && dungeonStart.classList.contains("btn-danger")) {
+    if(autoDungeon && autoDungeon.classList.contains("btn-danger")) {
         dungeonStateSelect = false;
-    } else if(dungeonStart && dungeonStart.classList.contains("btn-success")) {
+    } else if(autoDungeon && autoDungeon.classList.contains("btn-success")) {
         dungeonStateSelect = true;
     }
-    if(gymStart && gymStart.classList.contains("btn-danger")) {
+    if(autoGym && autoGym.classList.contains("btn-danger")) {
         gymStateSelect = false;
-    } else if(gymStart && gymStart.classList.contains("btn-success")) {
+    } else if(autoGym && autoGym.classList.contains("btn-success")) {
         gymStateSelect = true;
     }
 }
 
-function playerSavePokeballAlreadyCaught() {
-    pokeballAlreadyCaughtSelect = App.game.pokeballs.alreadyCaughtSelection;
-    questPokeballReadyToStart = true;
+function playerResetState() {
+    playerMoveTo(regionSelect, townSelect, routeSelect)
+    if (autoDungeon) {
+        if(dungeonStateSelect && !autoDungeon.classList.contains("btn-success")) {
+            autoDungeon.click();
+        } else if(!dungeonStateSelect && !autoDungeon.classList.contains("btn-danger")) {
+            autoDungeon.click();
+        }
+    }
+    if (autoGym) {
+        if(gymStateSelect && !autoGym.classList.contains("btn-success")) {
+            autoGym.click();
+        } else if(!gymStateSelect && !autoGym.classList.contains("btn-danger")) {
+            autoGym.click();
+        }
+    }
 }
 
-function playerSavePreviousPokeballAlreadyCaught() {
-    previousPokeballAlreadyCaughtSelect = App.game.pokeballs.alreadyCaughtSelection;
-    pokeballChangedForCapturePokemonQuest = true;
-}
-
-function playerSaveHatcheryState() {
+function playerSaveHatcheryFilters() {
     hatcheryCategorySelect = BreedingController.filter.category()
     hatcheryShinyStatusSelect = BreedingController.filter.shinyStatus()
     hatcheryRegionSelect = BreedingController.filter.region()
@@ -594,85 +290,65 @@ function playerSaveHatcheryState() {
     hatcherySortSelect = Settings.getSetting('hatcherySort').observableValue()
     hatcherySortDirectionSelect = Settings.getSetting('hatcherySortDirection').observableValue()
 
-    if(hatcheryStart && hatcheryStart.classList.contains("btn-danger")) {
+    if(autoHatchery && autoHatchery.classList.contains("btn-danger")) {
         hatcheryStateSelect = false;
-    } else if(hatcheryStart && hatcheryStart.classList.contains("btn-success")) {
+    } else if(autoHatchery && autoHatchery.classList.contains("btn-success")) {
         hatcheryStateSelect = true;
     }
 }
 
-function playerResetHatcheryState() {
-    BreedingController.filter.category(hatcheryCategorySelect)
-    BreedingController.filter.shinyStatus(hatcheryShinyStatusSelect)
-    BreedingController.filter.region(hatcheryRegionSelect)
-    BreedingController.filter.type1(hatcheryType1Select)
-    BreedingController.filter.type2(hatcheryType2Select)
-    Settings.getSetting('hatcherySort').observableValue(hatcherySortSelect)
-    Settings.getSetting('hatcherySortDirection').observableValue(hatcherySortDirectionSelect)
-    if (hatcheryStart) {
-        if(hatcheryStateSelect && !hatcheryStart.classList.contains("btn-success")) {
-            hatcheryStart.click();
-        } else if(!hatcheryStateSelect && !hatcheryStart.classList.contains("btn-danger")) {
-            hatcheryStart.click();
+function playerResetHatcheryFilters() {
+    playerSetHatcheryFilters(hatcheryCategorySelect, hatcheryShinyStatusSelect, hatcheryRegionSelect, hatcheryType1Select, hatcheryType2Select, hatcherySortSelect, hatcherySortDirectionSelect)
+    if (autoHatchery) {
+        if(hatcheryStateSelect && !autoHatchery.classList.contains("btn-success")) {
+            autoHatchery.click();
+        } else if(!hatcheryStateSelect && !autoHatchery.classList.contains("btn-danger")) {
+            autoHatchery.click();
         }
     }
 }
 
-function playerResetState() {
-    if(regionSelect && player.region !== regionSelect) {
-        player.region = regionSelect;
+function playerSetHatcheryFilters(category, shinyStatus, region, type1, type2, hatcherySort, hatcherySortDirection) {
+    if (BreedingController.filter.category() !== category) {
+        BreedingController.filter.category(category)
     }
-    if(subRegionSelect && player.subregion !== subRegionSelect) {
-        player.subregion = subRegionSelect;
+    if (BreedingController.filter.shinyStatus() !== shinyStatus) {
+        BreedingController.filter.shinyStatus(shinyStatus)
     }
-    if(routeSelect && player.route() !== routeSelect) {
-        MapHelper.moveToRoute(routeSelect, regionSelect);
+    if (BreedingController.filter.region() !== region) {
+        BreedingController.filter.region(region)
     }
-    if(townSelect && routeSelect === 0) {
-        MapHelper.moveToTown(townSelect);
+    if (BreedingController.filter.type1() !== type1) {
+        BreedingController.filter.type1(type1)
     }
-    if (dungeonStart) {
-        if(dungeonStateSelect && !dungeonStart.classList.contains("btn-success")) {
-            dungeonStart.click();
-        } else if(!dungeonStateSelect && !dungeonStart.classList.contains("btn-danger")) {
-            dungeonStart.click();
+    if (BreedingController.filter.type2() !== type2) {
+        BreedingController.filter.type2(type2)
+    }
+    if (Settings.getSetting('hatcherySort').observableValue() !== hatcherySort) {
+        Settings.getSetting('hatcherySort').observableValue(hatcherySort) // Breeding efficient
+    }
+    if (Settings.getSetting('hatcherySort').observableValue() !== hatcherySortDirection) {
+        Settings.getSetting('hatcherySortDirection').observableValue(hatcherySortDirection)
+    }
+}
+
+function playerMoveTo(region, town, route) {
+    if (playerCanMove()) {
+        if (region === 6) {
+            player.subregion = getAlolaSubRegionFromLocation(town)
         }
-    }
-    if (gymStart) {
-        if(gymStateSelect && !gymStart.classList.contains("btn-success")) {
-            gymStart.click();
-        } else if(!gymStateSelect && !gymStart.classList.contains("btn-danger")) {
-            gymStart.click();
+        if (route !== 0) {
+            MapHelper.moveToRoute(route, region);
+        } else if (town !== null) {
+            MapHelper.moveToTown(town);
         }
+        playerHasMoved = true;
     }
 }
 
 function playerCanMove() {
-    return !DungeonRunner.fighting() && !DungeonRunner.fightingBoss() && !DungeonBattle.catching() && !GymRunner.running()
-}
-
-function playerMoveToTown(town, region) {
-    if(player.region !== region || player.town().name !== town) {
-        player.region = region;
-        if(region === 6) {
-            setAlolaSubRegion(town)
-        } else {
-            player.subregion = 0
-        }
-        MapHelper.moveToTown(town);
-    }
-}
-
-function playerMoveToRoute(route, region) {
-    if(player.region !== region || player.route() !== route) {
-        player.region = region;
-        if(region === 6) {
-            setAlolaSubRegion(route)
-        } else {
-            player.subregion = 0
-        }
-        MapHelper.moveToRoute(route, region);
-    }
+    return !DungeonRunner.fighting() && !DungeonRunner.fightingBoss()
+        && !DungeonBattle.catching() && !GymRunner.running()
 }
 
 function playerCanPayDungeonEntrance(dungeonName, progressText) {
@@ -684,8 +360,8 @@ function playerCanPayDungeonEntrance(dungeonName, progressText) {
     return getTokens >= dungeonCost * amountRemaining;
 }
 
-function playerHasPokeballForPokemonQuest(pokeball, progressText = null) {
-    let amountRemaining = 0;
+function playerHasPokeballs(pokeball, progressText = null) {
+    let amountRemaining;
     if (progressText) {
         const progress = progressText.split('/').map(element => parseInt(element.trim()));
         amountRemaining = progress[1] - progress[0];
@@ -695,25 +371,218 @@ function playerHasPokeballForPokemonQuest(pokeball, progressText = null) {
     return App.game.pokeballs.pokeballs[pokeball].quantity() >= amountRemaining;
 }
 
+function playerSavePokeballAlreadyCaught() {
+    pokeballAlreadyCaughtSelect = App.game.pokeballs.alreadyCaughtSelection;
+    questPokeballReadyToStart = true;
+}
+
 function playerSetAlreadyCaughtPokeball(pokeball) {
     if (App.game.pokeballs.alreadyCaughtSelection !== pokeball) {
         App.game.pokeballs._alreadyCaughtSelection(pokeball);
     }
 }
 
-function stopAutoDungeon() {
-    if(dungeonStart && !dungeonStart.classList.contains("btn-danger")) {
-        dungeonStart.click();
+function playerBestPokeballAvailable() {
+    //Check if player have pokeball to catch pokemon
+    let pokeball = -1;
+    for (let i = GameConstants.Pokeball.Ultraball; i >= 0; i--) {
+        if (playerHasPokeballs(i)) {
+            pokeball = i;
+            break;
+        }
+    }
+    return pokeball;
+}
+
+function changePokeballForPokemonQuest(quest) {
+    if (!pokeballChangedForCapturePokemonQuest && App.game.pokeballs.alreadyCaughtSelection >= GameConstants.Pokeball.Ultraball) return;
+    if (App.game.gameState !== GameConstants.GameState.fighting) return;
+    if (Battle.catching()) return;
+
+
+    let forceCapture = false;
+    if (quest instanceof CapturePokemonTypesQuest) {
+        if (quest.type === Battle.enemyPokemon().type1 || quest.type === Battle.enemyPokemon().type2) {
+            forceCapture = true;
+        }
+    }
+    if (quest instanceof CatchShiniesQuest) {
+        if (Battle.enemyPokemon().shiny || DungeonBattle.enemyPokemon().shiny) {
+            forceCapture = true;
+        }
+    }
+    if (quest instanceof UseOakItemQuest) {
+        if (quest.item === OakItemType.Magic_Ball) {
+            forceCapture = true;
+        }
+    }
+
+    if (forceCapture) {
+        //Check if player have pokeball to catch pokemon
+        let pokeball = playerBestPokeballAvailable();
+        if (pokeball === -1) return;
+        previousPokeballAlreadyCaughtSelect = App.game.pokeballs.alreadyCaughtSelection;
+        playerSetAlreadyCaughtPokeball(pokeball)
+        pokeballChangedForCapturePokemonQuest = true;
+    } else if (pokeballChangedForCapturePokemonQuest) {
+        playerSetAlreadyCaughtPokeball(previousPokeballAlreadyCaughtSelect)
+        pokeballChangedForCapturePokemonQuest = true;
     }
 }
 
-function stopAutoGym() {
-    if(gymStart && !gymStart.classList.contains("btn-danger")) {
-        gymStart.click();
+function endLocationQuest() {
+    //Executed when the quest is completed
+    if (locationQuestInProgress) {
+        locationQuestInProgress = false;
+        stopAutoDungeon();
+        stopAutoGym();
+        playerResetState();
+        playerHasMoved = false;
     }
 }
 
-function setAlolaSubRegion(locationName) {
+function endUsePokeballQuest() {
+    //Executed when the quest is completed
+    usePokeballQuestInProgress = false;
+    if (pokeballAlreadyCaughtSelect !== undefined) {
+        playerSetAlreadyCaughtPokeball(pokeballAlreadyCaughtSelect);
+    }
+}
+
+function endCapturePokemonsQuest() {
+    capturePokemonsQuestInProgress = false;
+    if (!capturePokemonTypesQuestInProgress) {
+        playerResetHatcheryFilters()
+    }
+}
+
+function endCapturePokemonTypesQuest() {
+    capturePokemonTypesQuestInProgress = false;
+    if (!capturePokemonsQuestInProgress) {
+        playerResetHatcheryFilters()
+    } else {
+        //Set type1 to all if pokemon quest capture is in progress
+        BreedingController.filter.type1(-2)
+    }
+}
+
+function completeDefeatGymQuest(quest) {
+    if(!locationQuestInProgress) {
+        playerSaveState();
+        stopAutoDungeon();
+        stopAutoGym();
+        locationQuestInProgress = true;
+    }
+    //Find town associate to gym
+    const gymListAsArray = Object.entries(GymList);
+    const town = gymListAsArray.filter(([key, value]) => key === quest.gymTown)[0][1];
+
+    //Move player to quest town
+    if (!playerHasMoved) {
+        playerMoveTo(town.parent.region, town.parent.name, 0)
+    }
+
+    //Find gym in town
+    if(player.town().name === town.parent.name) {
+        for(const gym of player.town().content) {
+            if(gym.town === quest.gymTown && App.game.gameState !== GameConstants.GameState.gym) {
+                gym.protectedOnclick();
+            }
+        }
+    }
+}
+
+function completeDefeatPokemonQuest(quest) {
+    if(!locationQuestInProgress) {
+        playerSaveState();
+        stopAutoDungeon();
+        stopAutoGym();
+        locationQuestInProgress = true;
+    }
+
+    //Move player to quest route
+    if (!playerHasMoved) {
+        playerMoveTo(quest.region, null, quest.route)
+    }
+}
+
+function completeDefeatDungeonQuest(dungeonQuest) {
+    //Can't farm the dungeons without the autoclicker
+    if(!autoDungeon) return;
+
+    //Remove dungeon quest for current cycle if total token needed not available
+    if(!playerCanPayDungeonEntrance(dungeonQuest.dungeon, dungeonQuest.progressText())) {
+        removeQuestTemporarily(dungeonQuest);
+        return;
+    }
+
+    if(!locationQuestInProgress) {
+        playerSaveState();
+        stopAutoGym();
+        locationQuestInProgress = true;
+    }
+
+    //Move player to quest dungeon
+    if (!playerHasMoved) {
+        playerMoveTo(dungeonQuest.region, dungeonQuest.dungeon, 0)
+    }
+
+    if(player.town().name === dungeonQuest.dungeon) {
+        if(autoDungeon && !autoDungeon.classList.contains("btn-success")) {
+            autoDungeon.click();
+        }
+    }
+}
+
+function completeUsePokeballQuest(pokeballQuest) {
+    if (!usePokeballQuestInProgress) {
+        //Remove use pokeball quest for current cycle if total pokeball needed not available
+        if(!playerHasPokeballs(pokeballQuest.pokeball, pokeballQuest.progressText())) {
+            removeQuestTemporarily(pokeballQuest);
+            return;
+        }
+
+        playerSavePokeballAlreadyCaught();
+        playerSetAlreadyCaughtPokeball(pokeballQuest.pokeball)
+        usePokeballQuestInProgress = true;
+    }
+}
+
+function completeCapturePokemonsQuest() {
+    //Can't use hatchery without autohatchery
+    if(!autoHatchery) return;
+
+    if (!capturePokemonsQuestInProgress && !capturePokemonTypesQuestInProgress) {
+        if (!capturePokemonTypesQuestInProgress) {
+            playerSaveHatcheryFilters();
+        }
+
+        capturePokemonsQuestInProgress = true;
+        playerSetHatcheryFilters(-1, -2, -2, -2, -2, 6, true)
+
+        if(autoHatchery.classList.contains("btn-danger")) {
+            autoHatchery.click();
+        }
+    }
+}
+
+function completeCapturePokemonTypesQuest(captureQuest) {
+    //Can't use hatchery without autohatchery
+    if(!autoHatchery) return;
+
+    if(!capturePokemonTypesQuestInProgress) {
+        if (!capturePokemonsQuestInProgress) {
+            playerSaveHatcheryFilters();
+        }
+        playerSetHatcheryFilters(-1, -2, -2, captureQuest.type, -2, 6, true)
+        capturePokemonTypesQuestInProgress = true;
+        if(autoHatchery.classList.contains("btn-danger")) {
+            autoHatchery.click();
+        }
+    }
+}
+
+function getAlolaSubRegionFromLocation(locationName) {
     //TODO: Find a solution to retrieve locations by sub-region in a programmatic way
     //On Alola map subregion not available on Town, Route or Dungeon
     //Location found from https://github.com/pokeclicker/pokeclicker/blob/ff8b53478cf714c61de8b33d73cd1275ce785688/src/components/AlolaSVG.html
@@ -722,10 +591,11 @@ function setAlolaSubRegion(locationName) {
     const alolaSubregion2 = ["Route 10", "Mount Hokulani", "Route 11", "Route 12", "Route 13", "Haina Desert", "Route 14", "Route 15", "Route 16", "Route 17", "Poni Wilds", "Ancient Poni Path", "Poni Breaker Coast", "Poni Grove", "Poni Plains", "Poni Coast", "Poni Gauntlet", "Aether Paradise", "Malie City", "Tapu Village", "Seafolk Village", "Exeggutor Island", "Altar of the Sunne and Moone", "Pokémon League Alola", "Vast Poni Canyon", "Lake of the Sunne and Moone"];
 
     if(alolaSubregion0.includes(locationName)) {
-        player.subregion = 0
+        return 0;
     } else if(alolaSubregion1.includes(locationName)) {
-        player.subregion = 1
+        return 1;
     } else if(alolaSubregion2.includes(locationName)) {
-        player.subregion = 2
+        return 2;
     }
+    return 0;
 }
