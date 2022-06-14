@@ -279,11 +279,27 @@ In addition it will also prevent the weather from changing and will remember you
 <hr>
 
 ## **[Custom] Auto Quest Completer** ([autoquestcompleter.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autoquestcompleter.user.js))
-This script automatically completes and starts quests and can be toggled with this button:<br>
+This script automatically claim and starts quests and can be toggled with this button:<br>
 
 ![image](https://i.imgur.com/3AYaNes.png)
 
 It also is able to ignore the limit of quests you can enable at once, letting you complete all 10 at the same time.
+
+You can ignore a quest type by clicking on it in the quest modal.
+
+![image](https://i.imgur.com/cdOXAWU.png)
+
+The script can be able to complete this quests.
+
+| Type                     | Required Script                                                                                                           | Description                                                                                                                                                                                   |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| DefeatGymQuest           | None                                                                                                                      | Move player to the gym and beats him.                                                                                                                                                         |
+| DefeatPokemonsQuest      | None                                                                                                                      | Move player to route and deafeat him.                                                                                                                                                         |
+| DefeatDungeonQuest       | [**Enhanced Auto Clicker** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-clicker-enhancedautoclickeruserjs)    | Checks that the number of tokens is available, moves the player and starts the dungeon. If not, skip the quest.                                                                               |
+| CapturePokemonsQuest     | [**Enhanced Auto Hatchery** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-hatchery-enhancedautohatcheryuserjs) | Start the hatchery and set the filters to all.                                                                                                                                                |
+| CapturePokemonTypesQuest | [**Enhanced Auto Hatchery** ](//github.com/Ephenia/Pokeclicker-Scripts#enhanced-auto-hatchery-enhancedautohatcheryuserjs) | Starts the hatchery and sets the filters to all and changes the filter from type1. It also captures pokemon when it encounters the type.                                                      |
+| UsePokeballQuest         | None                                                                                                                      | If enough pokeballs are available, change the pokeballs for pokemons already caught. Priority will be given to ultraballs and then to a decreasing type of them. Otherwise it skip the quest. |
+| CatchShiniesQuest        | None                                                                                                                      | If enough pokeballs are available, change the pokeballs for pokemons already caught. Priority will be given to ultraballs and then to a decreasing type of them.                              |
 
 <hr>
 
