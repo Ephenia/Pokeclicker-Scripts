@@ -497,7 +497,7 @@ function endCapturePokemonTypesQuest() {
 }
 
 function completeDefeatGymQuest(quest) {
-    if(!locationQuestInProgress) {
+    if(!locationQuestInProgress && !playerHasMoved) {
         playerSaveState();
         stopAutoDungeon();
         stopAutoGym();
@@ -523,7 +523,7 @@ function completeDefeatGymQuest(quest) {
 }
 
 function completeDefeatPokemonQuest(quest) {
-    if(!locationQuestInProgress) {
+    if(!locationQuestInProgress && !playerHasMoved) {
         playerSaveState();
         stopAutoDungeon();
         stopAutoGym();
@@ -546,8 +546,9 @@ function completeDefeatDungeonQuest(quest) {
         return;
     }
 
-    if(!locationQuestInProgress) {
+    if(!locationQuestInProgress && !playerHasMoved) {
         playerSaveState();
+        stopAutoDungeon();
         stopAutoGym();
         locationQuestInProgress = true;
     }
