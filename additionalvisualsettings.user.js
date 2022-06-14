@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.8
+// @version     1.9
 // @author      Ephenia
 // @description Adds additional settings for hiding some visual things to help out with performance.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/additionalvisualsettings.user.js
@@ -112,6 +112,8 @@ function initVisualSettings() {
     addGlobalStyle('#quick-pokedex { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
     addGlobalStyle('#quick-pokedex:hover { background-color:#ddd;border: 4px solid #ddd; }');
     addGlobalStyle('#shortcutsContainer { display: block !important; }');
+    addGlobalStyle('.gyms-leaders { display: flex;pointer-events: none;position: absolute;height: 36px;top: 0;left: 0;image-rendering: pixelated; }');
+    addGlobalStyle('.gyms-badges { position: absolute;height: 36px;display: flex;top: 0;right: 0; }');
 
     //The elements removed by the scripts don't ever get added back after a restart, waiting a second before removing makes them load properly
     if (checkWildPokeName == "OFF") {
@@ -270,6 +272,68 @@ function initVisualSettings() {
     dockButton.textContent = 'Dock'
     document.getElementById('townMap').appendChild(dockButton)
     document.getElementById('dock-button').addEventListener('click', MapHelper.openShipModal, false)
+
+    //Add Gyms button
+    const gymsButton = document.createElement('button');
+    gymsButton.style = 'position: absolute;left: 75px;top: -8px;width: auto;height: 41px;font-size: 11px;';
+    gymsButton.className = 'btn btn-block btn-success';
+    gymsButton.id = 'gyms-button';
+    gymsButton.textContent = 'Gyms';
+    document.getElementById('townMap').appendChild(gymsButton);
+    document.getElementById('gyms-button').addEventListener('click', () => { generateGymsList();$('#GymsModal').modal('show'); }, false);
+    createGymModal();
+
+    function createGymModal() {
+        const gymModal = document.createElement('div');
+        gymModal.setAttribute('id', 'GymsModal');
+        gymModal.setAttribute('class', 'modal noselect fade');
+        gymModal.setAttribute('tabindex', '-1');
+        gymModal.setAttribute('role', 'dialogue');
+        gymModal.setAttribute('aria-labelledby', 'GymsModalLabel');
+        gymModal.innerHTML = `<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="justify-content: space-around;">
+                <h5 id="gyms-title" class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body bg-ocean">
+            <div id="gyms-buttons"></div>
+            </div>
+        </div>
+    </div>`
+        document.getElementById('ShipModal').after(gymModal);
+    }
+
+    function generateGymsList() {
+        const gymBtns = document.getElementById('gyms-buttons');
+        const gymsHead = document.getElementById('gyms-title');
+        gymsHead.textContent = `Gym Select (${GameConstants.camelCaseToString(GameConstants.Region[player.region])})`
+        gymBtns.innerHTML = '';
+        const fragment = new DocumentFragment();
+        for (const gym in GymList) {
+            let region;
+            try { region = GymList[gym].parent.region } catch (err) { region = null };
+            if (player.region == region) {
+                const selGym = GymList[gym];
+                const btn = document.createElement('button');
+                btn.setAttribute('style', 'position: relative;');
+                btn.setAttribute('class', 'btn btn-block btn-success');
+                btn.addEventListener('click', () => { $("#GymsModal").modal("hide");GymRunner.startGym(selGym, false); })
+                selGym.isUnlocked() && MapHelper.calculateTownCssClass(selGym.parent.name) != 'locked' ? btn.disabled = false : btn.disabled = true;
+                btn.innerHTML = `<div class="gyms-leaders">
+                    <img src="assets/images/gymLeaders/${selGym.leaderName}.png" onerror="this.onerror=null;this.style.display='none';">
+                    </div>
+                    <div class="gyms-badges">
+                    <img src="assets/images/badges/${BadgeEnums[selGym.badgeReward]}.png" onerror="this.onerror=null;this.style.display='none';">
+                    </div>
+                    ${selGym.leaderName}`;
+                fragment.appendChild(btn);
+            }
+        }
+        gymBtns.appendChild(fragment);
+    }
 }
 
 if (localStorage.getItem('checkWildPokeName') == null) {
