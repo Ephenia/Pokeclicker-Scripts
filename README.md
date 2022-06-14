@@ -6,9 +6,9 @@
 
 Various scripts & enhancements for the game [Pokéclicker](https://www.pokeclicker.com/).
 
-These are originally created and intended for the use of the browser extension known as [Tampermonkey](https://www.tampermonkey.net/). These should be compatible with any script manager, however. If you have a Script Manager installed, such as Tampermonkey, you can click on the One-Click install to easily install any scripts here.
+These are originally created and intended for the use of the browser extension known as [Tampermonkey](https://www.tampermonkey.net/). These should be compatible with any Script Manager, however. If you have a Script Manager installed, such as Tampermonkey, you can click on the One-Click install to easily install any scripts here.
 
-If you are looking to use these scripts on the client version of Pokeclicker (Pokeclicker Desktop), move the <strong>app.asar</strong> from the [desktop folder in the repository](//github.com/Ephenia/Pokeclicker-Scripts/tree/master/desktop) to <strong>C:\Users\\{your user}\AppData\Local\Programs\pokeclicker-desktop\resources</strong> and replace the existing one.
+If you are looking to use these scripts on the client version of Pokéclicker ([Pokéclicker Desktop](//github.com/RedSparr0w/Pokeclicker-desktop)), move the <strong>app.asar</strong> from the [desktop folder in the repository](//github.com/Ephenia/Pokeclicker-Scripts/tree/master/desktop) to <strong>C:\Users\\{your user}\AppData\Local\Programs\pokeclicker-desktop\resources</strong> and replace the existing one.
 
 **If you are looking to have something specific created or have any inquiries, feel free to contact me directly (contact info on profile) OR [open and create an issue](https://github.com/Ephenia/Pokeclicker-Scripts/issues).**
 
