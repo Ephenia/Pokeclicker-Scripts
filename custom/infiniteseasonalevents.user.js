@@ -95,6 +95,7 @@ function initEvents() {
                 modalBody.innerHTML +=
                 `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/25.08.png">
+                <img src="assets/images/pokemon/21.1.png">
                 </div><hr>`
                 break
             case "Mewtwo strikes back!":
@@ -129,6 +130,8 @@ function initEvents() {
                 modalBody.innerHTML +=
                 `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/143.1.png">
+                <img src="assets/images/pokemon/251.1.png">
+                <img src="assets/images/pokemon/446.1.png">
                 </div><hr>`
                 break
             case "Lunar New Year":
