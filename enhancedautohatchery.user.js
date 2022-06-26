@@ -268,38 +268,38 @@ function autoHatcher() {
                         return false;
                     }
                     // Check based on category
-                    if (BreedingController.filter.category() >= 0) {
+                    if (BreedingFilters.category.value() >= 0) {
                         if (
-                            partyPokemon.category !== BreedingController.filter.category()
+                            partyPokemon.category !== BreedingFilters.category.value()
                         ) {
                             return false;
                         }
                     }
                     // Check based on shiny status
-                    if (BreedingController.filter.shinyStatus() >= 0) {
+                    if (BreedingFilters.shinyStatus.value() >= 0) {
                         if (
-                            +partyPokemon.shiny !== BreedingController.filter.shinyStatus()
+                            +partyPokemon.shiny !== BreedingFilters.shinyStatus.value()
                         ) {
                             return false;
                         }
                     }
                     // Check based on native region
-                    if (BreedingController.filter.region() > -2) {
+                    if (BreedingFilters.region.value() > -2) {
                         if (
                             PokemonHelper.calcNativeRegion(partyPokemon.name) !==
-                            BreedingController.filter.region()
+                            BreedingFilters.region.value()
                         ) {
                             return false;
                         }
                     }
                     // Check if either of the types match
                     const type1 =
-                        BreedingController.filter.type1() > -2
-                            ? BreedingController.filter.type1()
+                        BreedingFilters.type1.value() > -2
+                            ? BreedingFilters.type1.value()
                             : null;
                     const type2 =
-                        BreedingController.filter.type2() > -2
-                            ? BreedingController.filter.type2()
+                        BreedingFilters.type2.value() > -2
+                            ? BreedingFilters.type2.value()
                             : null;
                     if (type1 !== null || type2 !== null) {
                         const { type: types } = pokemonMap[partyPokemon.name];
@@ -323,7 +323,7 @@ function autoHatcher() {
                 //console.log(filteredEggList[0])
                 App.game.breeding.addPokemonToHatchery(filteredEggList[0]);
             } catch (err) {
-                var isFavorite = BreedingController.filter.category();
+                var isFavorite = BreedingFilters.category.value();
                 if (isFavorite != 1) {
                     var canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
                     var randBreed = getRandomInt(canBreed.length);
