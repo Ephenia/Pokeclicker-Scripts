@@ -3,7 +3,7 @@
 // @namespace    Pokeclicker Scripts
 // @match        https://www.pokeclicker.com/
 // @grant        none
-// @version      1.5
+// @version      1.6
 // @author       Ephenia (Original/Credit: Drak + Ivan Lay)
 // @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautohatchery.user.js
