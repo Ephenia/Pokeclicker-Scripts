@@ -275,7 +275,7 @@ function initVisualSettings() {
 
     //Add Gyms button
     const gymsButton = document.createElement('button');
-    gymsButton.style = 'position: absolute;left: 75px;top: -8px;width: auto;height: 41px;font-size: 11px;';
+    gymsButton.style = 'position: absolute;left: 95px;top: -8px;width: auto;height: 41px;font-size: 11px;';
     gymsButton.className = 'btn btn-block btn-success';
     gymsButton.id = 'gyms-button';
     gymsButton.textContent = 'Gyms';
