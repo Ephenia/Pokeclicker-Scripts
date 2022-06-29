@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Ephenia
 // @description An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
@@ -380,17 +380,19 @@ function overideDefeatPokemon() {
 
         const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
         const pokeIndex = pokemonList.indexOf(findPoke);
-        const ballPrefN = window.filterBallPref[pokeIndex].normal;
-        const ballPrefS = window.filterBallPref[pokeIndex].shiny;
+        let ballPrefN = window.filterBallPref[pokeIndex].normal -1;
+        ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
+        let ballPrefS = window.filterBallPref[pokeIndex].shiny - 1;
+        ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
         const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
         const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
 
         const isShiny = enemyPokemon.shiny;
         let pokeBall;
-        if (ballPrefS - 1 != -1 && ballQuantityS > 0 && window.filterState & isShiny) {
-            pokeBall = ballPrefS - 1;
-        } else if (ballPrefN - 1 != -1 && ballQuantityN > 0 && window.filterState) {
-            pokeBall = ballPrefN - 1;
+        if (ballQuantityS > 0 && window.filterState & isShiny) {
+            pokeBall = ballPrefS;
+        } else if (ballQuantityN > 0 && window.filterState) {
+            pokeBall = ballPrefN;
         } else {
             pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
         }
@@ -454,18 +456,20 @@ function overideDefeatPokemon() {
         // Attempting to catch Pokemon
         const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
         const pokeIndex = pokemonList.indexOf(findPoke);
-        const ballPrefN = window.filterBallPref[pokeIndex].normal;
-        const ballPrefS = window.filterBallPref[pokeIndex].shiny;
+        let ballPrefN = window.filterBallPref[pokeIndex].normal -1;
+        ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
+        let ballPrefS = window.filterBallPref[pokeIndex].shiny - 1;
+        ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
         const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
         const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
 
         const isShiny = enemyPokemon.shiny;
 
         let pokeBall;
-        if (ballPrefS - 1 != -1 && ballQuantityS > 0 && window.filterState & isShiny) {
-            pokeBall = ballPrefS - 1;
-        } else if (ballPrefN - 1 != -1 && ballQuantityN > 0 && window.filterState) {
-            pokeBall = ballPrefN - 1;
+        if (ballQuantityS > 0 && window.filterState & isShiny) {
+            pokeBall = ballPrefS;
+        } else if (ballQuantityN > 0 && window.filterState) {
+            pokeBall = ballPrefN;
         } else {
             pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
         }
