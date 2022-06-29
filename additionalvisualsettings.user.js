@@ -3,31 +3,31 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.9
+// @version     2.0
 // @author      Ephenia
-// @description Adds additional settings for hiding some visual things to help out with performance.
+// @description Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/additionalvisualsettings.user.js
 // ==/UserScript==
 
-var checkWildPokeName;
-var checkWildPokeDefeat;
-var checkWildPokeImg;
-var checkWildPokeHealth;
-var checkWildPokeCatch;
-var checkAllNotification;
-var notificFunc = Notifier.notify;
-var newSave;
-var trainerCards;
+let checkWildPokeName;
+let checkWildPokeDefeat;
+let checkWildPokeImg;
+let checkWildPokeHealth;
+let checkWildPokeCatch;
+let checkAllNotification;
+const notificFunc = Notifier.notify;
+let newSave;
+let trainerCards;
 
 function initVisualSettings() {
-    var getMenu = document.getElementById('startMenu');
-    var quickSettings = document.createElement("img");
+    const getMenu = document.getElementById('startMenu');
+    const quickSettings = document.createElement("img");
     quickSettings.id = "quick-settings"
     quickSettings.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAQAAABLCVATAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAHdElNRQfmAQcLFCMs4grwAAACzUlEQVRIx63WvWtbVxgG8J+Vkjgp9hKDwbTBcQoOBIINQUsnDe1gGy8h1VDswUMG4+4hYNwhpv4LumQ2d+gWSqnUwdZQUKFZDIUa4RqiYNyPLMEoUezodNDV7ZUsq1Xq507nvM957/t5zksvTCuqC4K6omnviFElQc0LL9QEJaPvpigvqJhz221zKoL82eT3Omz41Id2/eAlruNn34Idn/vIdTDsE5OeK/i9u9JbtgXBiUjOI3uCTQNgwKZgz7qcyIkg2Haru5qyoCJyKDgSNOxbSuRL9jViyaFIRfDTaVWjtgU7sphXVVewaFwmYWSMW1BQVzWPrB3BdmcCFgQV2XiVNWOoq/tDZlKsimChnfBQEPWd10jwsGVwE7veypnvQs644krKxX8wL+etX9s3h0WCamJ2ExNWREpKIl+40SbLqgoiw536c47UzSTrQcsqQuqrWDaYyGfVHcmdNnRdUEhCPGjDsaBs1T33rCoLjm0kqoYUBOvtqc97YE8jlYFlx2rWjCQ7V62pObac7Cxq2PNAvlkC00qx6fvGY8oNFcFaR4gz1gQVE/F63H58smSaYlzPm5aSgyuCsqun3B9RFqwkipdsxjVepK5mjrinmoRIsNq1clYFUcrSAcypqWdc9MozhFS+xuisjxi7GEvlLuCZVy5mnBMy3rjsWptrrx3gZlf+JA68bnPtmsve9Ar2yCk1PYM91SX9E32nf4p0QS4mh5oF+WXKqpF/K8gWerXIZ6kWuRQzmi3y6HQYO5v2Un9N23pFht33vuf+Soh1X/vejI+N4cCPvvNb6sd/+sMH7nvqZdqeu04c9n2xHTpxt0Vr1ccFW550oTfU1DS6SJ7YcsFku6Iq7qSu9dkzL//ZFOtOfDKFc3uOzu2BbKr6H092eoj4RT41RGw58pVMfL0EGTy2gae+cVNV8awhohN9jTW9cG6DFlP/ffT7G1t3ayJm6d3nAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIyLTAxLTA3VDExOjIwOjI2KzAwOjAwMddkKgAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMi0wMS0wN1QxMToyMDoyNiswMDowMECK3JYAAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAAAAElFTkSuQmCC"
     quickSettings.setAttribute("href", "#settingsModal")
     quickSettings.setAttribute("data-toggle", "modal")
     getMenu.prepend(quickSettings)
-    var quickPokedex = document.createElement("img");
+    const quickPokedex = document.createElement("img");
     quickPokedex.id = "quick-pokedex"
     quickPokedex.src = "data:image/png;base64,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"
     quickPokedex.setAttribute("href", "#pokedexModal")
@@ -75,7 +75,7 @@ function initVisualSettings() {
     </td>
 </tr>`
 
-    var notifiyHTML = document.createElement("tr");
+    const notifiyHTML = document.createElement("tr");
     notifiyHTML.innerHTML = `<td class="p-2">
         <label class="m-0">Disable all Notifications</label>
     </td>
@@ -114,6 +114,7 @@ function initVisualSettings() {
     addGlobalStyle('#shortcutsContainer { display: block !important; }');
     addGlobalStyle('.gyms-leaders { display: flex;pointer-events: none;position: absolute;height: 36px;top: 0;left: 0;image-rendering: pixelated; }');
     addGlobalStyle('.gyms-badges { position: absolute;height: 36px;display: flex;top: 0;right: 0; }');
+    addGlobalStyle('.dungeons-costs { position: relative;margin-right: 12px; }');
 
     //The elements removed by the scripts don't ever get added back after a restart, waiting a second before removing makes them load properly
     if (checkWildPokeName == "OFF") {
@@ -217,39 +218,39 @@ function initVisualSettings() {
     });
 
     function remPokeName() {
-        var enemyName = document.querySelectorAll('knockout[data-bind*="text: Battle.enemyPokemon().name"]');
+        const enemyName = document.querySelectorAll('knockout[data-bind*="text: Battle.enemyPokemon().name"]');
         if (enemyName.length > 0) {
-            enemyName[0].remove()
+            enemyName[0].remove();
         }
         var caughtStatus = document.querySelectorAll('knockout[data-bind*="caughtStatusTemplate"');
         if (caughtStatus.length > 0) {
-            caughtStatus[0].remove()
+            caughtStatus[0].remove();
         }
     }
 
     function remPokeDefeat() {
-        var pokeDefeat = document.querySelectorAll('knockout[data-bind*="App.game.statistics.routeKills"]');
+        const pokeDefeat = document.querySelectorAll('knockout[data-bind*="App.game.statistics.routeKills"]');
         if (pokeDefeat.length > 0) {
             pokeDefeat[0].remove()
         }
     }
 
     function remPokeImg() {
-        var enemyPoke = document.querySelectorAll('img.enemy');
+        const enemyPoke = document.querySelectorAll('img.enemy');
         if (enemyPoke.length > 0) {
             enemyPoke[0].remove()
         }
     }
 
     function remPokeHealth() {
-        var healthBar = document.querySelectorAll('.progress.hitpoints');
+        const healthBar = document.querySelectorAll('.progress.hitpoints');
         if (healthBar.length > 0) {
             healthBar[0].remove()
         }
     }
 
     function remPokeCatch() {
-        var catchIcon = document.querySelectorAll('.catchChance');
+        const catchIcon = document.querySelectorAll('.catchChance');
         if (catchIcon.length > 0) {
             catchIcon[0].remove()
         }
@@ -265,7 +266,7 @@ function initVisualSettings() {
     }
 
     //Add dock button
-    var dockButton = document.createElement('button')
+    const dockButton = document.createElement('button')
     dockButton.style = 'position: absolute; left: 32px; top: 0px; width: auto; height: 41px; font-size: 11px;'
     dockButton.className = 'btn btn-block btn-success'
     dockButton.id = 'dock-button'
@@ -281,35 +282,50 @@ function initVisualSettings() {
     gymsButton.textContent = 'Gyms';
     document.getElementById('townMap').appendChild(gymsButton);
     document.getElementById('gyms-button').addEventListener('click', () => { generateGymsList();$('#GymsModal').modal('show'); }, false);
-    createGymModal();
 
-    function createGymModal() {
-        const gymModal = document.createElement('div');
-        gymModal.setAttribute('id', 'GymsModal');
-        gymModal.setAttribute('class', 'modal noselect fade');
-        gymModal.setAttribute('tabindex', '-1');
-        gymModal.setAttribute('role', 'dialogue');
-        gymModal.setAttribute('aria-labelledby', 'GymsModalLabel');
-        gymModal.innerHTML = `<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm" role="document">
-        <div class="modal-content">
-            <div class="modal-header" style="justify-content: space-around;">
-                <h5 id="gyms-title" class="modal-title"></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body bg-ocean">
-            <div id="gyms-buttons"></div>
-            </div>
-        </div>
-    </div>`
-        document.getElementById('ShipModal').after(gymModal);
+    //Add Dungeons button
+    const dungeonsButton = document.createElement('button');
+    dungeonsButton.style = 'position: absolute;left: 121px;top: -8px;width: auto;height: 41px;font-size: 11px;';
+    dungeonsButton.className = 'btn btn-block btn-success';
+    dungeonsButton.id = 'dungeons-button';
+    dungeonsButton.textContent = 'Dungeons';
+    document.getElementById('townMap').appendChild(dungeonsButton);
+    document.getElementById('dungeons-button').addEventListener('click', () => { generateDungeonssList();$('#DungeonsModal').modal('show'); }, false);
+
+    createGymDungeonModals();
+
+    function createGymDungeonModals() {
+        const modNames = ['Gyms', 'Dungeons'];
+        const fragment = new DocumentFragment();
+        for (let i = 0; i < modNames.length; i++) {
+            const customMods = document.createElement('div');
+            customMods.setAttribute('class', 'modal noselect fade');
+            customMods.setAttribute('tabindex', '-1');
+            customMods.setAttribute('role', 'dialogue');
+            customMods.setAttribute('id', `${modNames[i]}Modal`);
+            customMods.setAttribute('aria-labelledby', `${modNames[i]}ModalLabel`);
+            customMods.innerHTML = `<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="justify-content: space-around;">
+                        <h5 id="${modNames[i]}-title" class="modal-title"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body bg-ocean">
+                    <div id="${modNames[i]}-buttons"></div>
+                    </div>
+                </div>
+            </div>`
+            fragment.appendChild(customMods);
+        }
+        document.getElementById('ShipModal').after(fragment);
     }
 
     function generateGymsList() {
-        const gymBtns = document.getElementById('gyms-buttons');
-        const gymsHead = document.getElementById('gyms-title');
-        gymsHead.textContent = `Gym Select (${GameConstants.camelCaseToString(GameConstants.Region[player.region])})`
+        const gymBtns = document.getElementById('Gyms-buttons');
+        const gymsHead = document.getElementById('Gyms-title');
+        gymsHead.textContent = `Gym Select (${GameConstants.camelCaseToString(GameConstants.Region[player.region])})`;
         gymBtns.innerHTML = '';
         const fragment = new DocumentFragment();
         for (const gym in GymList) {
@@ -320,7 +336,7 @@ function initVisualSettings() {
                 const btn = document.createElement('button');
                 btn.setAttribute('style', 'position: relative;');
                 btn.setAttribute('class', 'btn btn-block btn-success');
-                btn.addEventListener('click', () => { $("#GymsModal").modal("hide");GymRunner.startGym(selGym, false); })
+                btn.addEventListener('click', () => { $("#GymsModal").modal("hide");GymRunner.startGym(selGym, false); });
                 selGym.isUnlocked() && MapHelper.calculateTownCssClass(selGym.parent.name) != 'locked' ? btn.disabled = false : btn.disabled = true;
                 btn.innerHTML = `<div class="gyms-leaders">
                     <img src="assets/images/gymLeaders/${selGym.leaderName}.png" onerror="this.onerror=null;this.style.display='none';">
@@ -333,6 +349,41 @@ function initVisualSettings() {
             }
         }
         gymBtns.appendChild(fragment);
+    }
+
+    function generateDungeonssList() {
+        const dungeonsBtns = document.getElementById('Dungeons-buttons');
+        const dungeonsHead = document.getElementById('Dungeons-title');
+        dungeonsHead.textContent = `Dungeon Select (${GameConstants.camelCaseToString(GameConstants.Region[player.region])})`;
+        dungeonsBtns.innerHTML = '';
+        const fragment = new DocumentFragment();
+        for (const town in TownList) {
+            const townData = TownList[town];
+            if (townData.constructor.name == 'DungeonTown') {
+                const dungeonRegion = townData.region;
+                const dungeonData = townData.dungeon;
+                const dungeonClears = App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(dungeonData.name)]();
+                const dungeonTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
+                const affordEntry = dungeonData.tokenCost <= dungeonTokens ? true : false;
+                if (dungeonRegion == player.region) {
+                    const btn = document.createElement('button');
+                    btn.setAttribute('style', 'position: relative;');
+                    btn.setAttribute('class', 'btn btn-block btn-success');
+                    btn.addEventListener('click', () => { $("#DungeonsModal").modal("hide");DungeonRunner.initializeDungeon(dungeonData); });
+                    townData.isUnlocked() && affordEntry ? btn.disabled = false : btn.disabled = true;
+                    btn.innerHTML = `<div class="dungeons-selects">
+                    </div>
+                    <div class="dungeons-costs">
+                    <img alt="Dungeon Tokens" src="assets/images/currency/dungeonToken.svg" style="height: 24px; width: 24px;">
+                    <span style="font-weight: bold;color: ${affordEntry ? 'greenyellow' : 'darkred'}">${dungeonData.tokenCost.toLocaleString('en-US')}</span>
+                    </div>
+                    <strong>${dungeonData.name}</strong>
+                    <div>${dungeonClears.toLocaleString('en-US')} clears</div>`;
+                    fragment.appendChild(btn);
+                }
+            }
+        }
+        dungeonsBtns.appendChild(fragment);
     }
 }
 
@@ -356,29 +407,29 @@ if (localStorage.getItem('checkAllNotification') == null) {
 }
 
 function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+    const oldInit = Preload.hideSplashScreen;
 
     Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        initVisualSettings()
-        return result
+        const result = oldInit.apply(this, arguments);
+        initVisualSettings();
+        return result;
     }
 }
 
-var scriptName = 'additionalvisualsettings'
+const scriptName = 'additionalvisualsettings'
 
 if (document.getElementById('scriptHandler') != undefined){
-    var scriptElement = document.createElement('div')
-    scriptElement.id = scriptName
+    const scriptElement = document.createElement('div');
+    scriptElement.id = scriptName;
     document.getElementById('scriptHandler').appendChild(scriptElement)
     if (localStorage.getItem(scriptName) != null){
         if (localStorage.getItem(scriptName) == 'true'){
-            loadScript()
+            loadScript();
         }
     }
     else{
-        localStorage.setItem(scriptName, 'true')
-        loadScript()
+        localStorage.setItem(scriptName, 'true');
+        loadScript();
     }
 }
 else{
