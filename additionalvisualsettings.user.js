@@ -3,21 +3,21 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     2.0
+// @version     2.1
 // @author      Ephenia
 // @description Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/additionalvisualsettings.user.js
 // ==/UserScript==
 
-let checkWildPokeName;
-let checkWildPokeDefeat;
-let checkWildPokeImg;
-let checkWildPokeHealth;
-let checkWildPokeCatch;
-let checkAllNotification;
+var checkWildPokeName;
+var checkWildPokeDefeat;
+var checkWildPokeImg;
+var checkWildPokeHealth;
+var checkWildPokeCatch;
+var checkAllNotification;
 const notificFunc = Notifier.notify;
-let newSave;
-let trainerCards;
+var newSave;
+var trainerCards;
 
 function initVisualSettings() {
     const getMenu = document.getElementById('startMenu');
@@ -114,7 +114,11 @@ function initVisualSettings() {
     addGlobalStyle('#shortcutsContainer { display: block !important; }');
     addGlobalStyle('.gyms-leaders { display: flex;pointer-events: none;position: absolute;height: 36px;top: 0;left: 0;image-rendering: pixelated; }');
     addGlobalStyle('.gyms-badges { position: absolute;height: 36px;display: flex;top: 0;right: 0; }');
-    addGlobalStyle('.dungeons-costs { position: relative;margin-right: 12px; }');
+    addGlobalStyle('.dungeons-costs { position: relative;margin-right: 12px;filter: none !important }');
+    addGlobalStyle('#Dungeons-buttons > button:hover { -webkit-animation: bounceBackground 60s linear infinite alternate;animation: bounceBackground 60s linear infinite alternate; }');
+    addGlobalStyle('#Dungeons-buttons > button * { z-index: 2 }');
+    addGlobalStyle('.dungeons-overlay { width: 100%;height: 100%;position: absolute;background-color: rgba(0,0,0,0.45);margin-top: -6px;margin-left: -8px;z-index: 1 !important }');
+    addGlobalStyle('.dungeons-info { position: relative;font-weight: bold }');
 
     //The elements removed by the scripts don't ever get added back after a restart, waiting a second before removing makes them load properly
     if (checkWildPokeName == "OFF") {
@@ -365,20 +369,22 @@ function initVisualSettings() {
                 const dungeonClears = App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(dungeonData.name)]();
                 const dungeonTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
                 const affordEntry = dungeonData.tokenCost <= dungeonTokens ? true : false;
+                const canAccess = townData.isUnlocked() && affordEntry;
                 if (dungeonRegion == player.region) {
                     const btn = document.createElement('button');
-                    btn.setAttribute('style', 'position: relative;');
+                    btn.setAttribute('style', `position: relative;background-image: url("assets/images/towns/${dungeonData.name}.png");background-position: center;opacity: ${canAccess ? 1 : 0.70};filter: brightness(${canAccess ? 1 : 0.70});`);
                     btn.setAttribute('class', 'btn btn-block btn-success');
                     btn.addEventListener('click', () => { $("#DungeonsModal").modal("hide");DungeonRunner.initializeDungeon(dungeonData); });
-                    townData.isUnlocked() && affordEntry ? btn.disabled = false : btn.disabled = true;
-                    btn.innerHTML = `<div class="dungeons-selects">
-                    </div>
+                    canAccess ? btn.disabled = false : btn.disabled = true;
+                    btn.innerHTML = `<div class="dungeons-overlay"></div>
                     <div class="dungeons-costs">
-                    <img alt="Dungeon Tokens" src="assets/images/currency/dungeonToken.svg" style="height: 24px; width: 24px;">
-                    <span style="font-weight: bold;color: ${affordEntry ? 'greenyellow' : 'darkred'}">${dungeonData.tokenCost.toLocaleString('en-US')}</span>
+                    <img src="assets/images/currency/dungeonToken.svg" style="height: 24px; width: 24px;">
+                    <span style="font-weight: bold;color: ${affordEntry ? 'greenyellow' : '#f04124'}">${dungeonData.tokenCost.toLocaleString('en-US')}</span>
                     </div>
-                    <strong>${dungeonData.name}</strong>
-                    <div>${dungeonClears.toLocaleString('en-US')} clears</div>`;
+                    <div class="dungeons-info">
+                    <span>${dungeonData.name}</span>
+                    <div>${dungeonClears.toLocaleString('en-US')} clears</div>
+                    </div>`;
                     fragment.appendChild(btn);
                 }
             }
@@ -407,29 +413,29 @@ if (localStorage.getItem('checkAllNotification') == null) {
 }
 
 function loadScript(){
-    const oldInit = Preload.hideSplashScreen;
+    var oldInit = Preload.hideSplashScreen
 
     Preload.hideSplashScreen = function(){
-        const result = oldInit.apply(this, arguments);
-        initVisualSettings();
-        return result;
+        var result = oldInit.apply(this, arguments)
+        initVisualSettings()
+        return result
     }
 }
 
-const scriptName = 'additionalvisualsettings'
+var scriptName = 'additionalvisualsettings'
 
 if (document.getElementById('scriptHandler') != undefined){
-    const scriptElement = document.createElement('div');
-    scriptElement.id = scriptName;
+    var scriptElement = document.createElement('div')
+    scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
     if (localStorage.getItem(scriptName) != null){
         if (localStorage.getItem(scriptName) == 'true'){
-            loadScript();
+            loadScript()
         }
     }
     else{
-        localStorage.setItem(scriptName, 'true');
-        loadScript();
+        localStorage.setItem(scriptName, 'true')
+        loadScript()
     }
 }
 else{
