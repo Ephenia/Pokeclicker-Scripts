@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      KarmaAlex (Credit: Ephenia)
 // @description Adds a button to select the weather for the current region, also freezes all weather
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/simpleweatherchanger.user.js
@@ -66,29 +66,29 @@ function changeWeather(){
 }
 
 function loadScript(){
-    const oldInit = Preload.hideSplashScreen;
+    var oldInit = Preload.hideSplashScreen
 
     Preload.hideSplashScreen = function(){
-        const result = oldInit.apply(this, arguments);
-        initWeatherChange();
-        return result;
+        var result = oldInit.apply(this, arguments)
+        initWeatherChange()
+        return result
     }
 }
 
 var scriptName = 'simpleweatherchanger'
 
 if (document.getElementById('scriptHandler') != undefined){
-    const scriptElement = document.createElement('div');
-    scriptElement.id = scriptName;
-    document.getElementById('scriptHandler').appendChild(scriptElement);
+    var scriptElement = document.createElement('div')
+    scriptElement.id = scriptName
+    document.getElementById('scriptHandler').appendChild(scriptElement)
     if (localStorage.getItem(scriptName) != null){
         if (localStorage.getItem(scriptName) == 'true'){
-            loadScript();
+            loadScript()
         }
     }
     else{
         localStorage.setItem(scriptName, 'true')
-        loadScript();
+        loadScript()
     }
 }
 else{
