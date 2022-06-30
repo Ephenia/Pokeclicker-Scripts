@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      Ephenia
 // @description An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
@@ -16,7 +16,7 @@ window.filterState;
 window.filterTypes;
 window.filterBallPref;
 window.catchFilter;
-let filterColor;
+var filterColor;
 
 function initCatchFilter() {
     window.filterState ? filterColor = true : filterColor = false;
@@ -522,29 +522,29 @@ window.catchFilter = JSON.parse(localStorage.getItem('catchFilter'));
 window.filterBallPref = JSON.parse(localStorage.getItem('filterBallPref'));
 
 function loadScript(){
-    const oldInit = Preload.hideSplashScreen;
+    var oldInit = Preload.hideSplashScreen
 
     Preload.hideSplashScreen = function(){
-        const result = oldInit.apply(this, arguments);
-        initCatchFilter();
-        return result;
+        var result = oldInit.apply(this, arguments)
+        initCatchFilter()
+        return result
     }
 }
 
-const scriptName = 'catchfilterfantasia'
+var scriptName = 'catchfilterfantasia'
 
 if (document.getElementById('scriptHandler') != undefined){
-    const scriptElement = document.createElement('div');
-    scriptElement.id = scriptName;
-    document.getElementById('scriptHandler').appendChild(scriptElement);
+    var scriptElement = document.createElement('div')
+    scriptElement.id = scriptName
+    document.getElementById('scriptHandler').appendChild(scriptElement)
     if (localStorage.getItem(scriptName) != null){
         if (localStorage.getItem(scriptName) == 'true'){
-            loadScript();
+            loadScript()
         }
     }
     else{
         localStorage.setItem(scriptName, 'true')
-        loadScript();
+        loadScript()
     }
 }
 else{
