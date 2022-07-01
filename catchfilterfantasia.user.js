@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      Ephenia
 // @description An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
@@ -12,14 +12,14 @@
 const pokeballDisplay = document.getElementById('pokeballSelector');
 const profileModal = document.getElementById('profileModal');
 const ballNames = ['None', 'Pokeball', 'Greatball', 'Ultraball', 'Masterball', 'Fastball', 'Quickball', 'Timerball', 'Duskball', 'Luxuryball', 'Diveball', 'Lureball', 'Nestball', 'Repeatball'];
-window.filterState;
-window.filterTypes;
-window.filterBallPref;
-window.catchFilter;
+var filterState;
+var filterTypes;
+var filterBallPref;
+var catchFilter;
 var filterColor;
 
 function initCatchFilter() {
-    window.filterState ? filterColor = true : filterColor = false;
+    filterState ? filterColor = true : filterColor = false;
 
     // Setting custon CSS styles
     addGlobalStyle('#catch-filter-btn { position: absolute; left: 0px; top: 0px; width: auto; height: 41px; }');
@@ -67,7 +67,7 @@ function initCatchFilter() {
     profileModal.before(filterMod);
 
     const modalBody = document.querySelector('[id=filterModal] div div [class=modal-body]');
-    modalBody.innerHTML = `<button id="catch-filter" class="btn btn-${filterColor ? 'success' : 'danger'}" style="margin-left:20px;">Catch Filter ${window.filterState ? '[ON]' : '[OFF]'}</button>
+    modalBody.innerHTML = `<button id="catch-filter" class="btn btn-${filterColor ? 'success' : 'danger'}" style="margin-left:20px;">Catch Filter ${filterState ? '[ON]' : '[OFF]'}</button>
     <hr>
     <div id="filter-btn-cont"></div>
     <hr>
@@ -87,7 +87,7 @@ function initCatchFilter() {
     </div>`
     // Re-assigning the previous document fragment
     frag = new DocumentFragment();
-    window.filterTypes.forEach((Type, Index) => {
+    filterTypes.forEach((Type, Index) => {
         const typeName = PokemonType[Index];
         const btn = document.createElement('button');
         btn.innerText = `${typeName} ${Type ? '[ON]' : '[OFF]'}`;
@@ -114,32 +114,28 @@ function toggleTypeFilter(event) {
     const elem = event.target;
     const index = +elem.getAttribute('data-src');
     const typeName = PokemonType[index];
-    if (window.filterTypes[index]) {
-        window.filterTypes[index] = false;
-    } else {
-        window.filterTypes[index] = true;
-    }
-    elem.setAttribute('class', `btn btn-${window.filterTypes[index] ? 'success' : 'danger'}`);
-    elem.innerText = `${typeName} ${window.filterTypes[index] ? '[ON]' : '[OFF]'}`;
-    localStorage.setItem('filterTypes', JSON.stringify(window.filterTypes));
+    filterTypes[index] ? filterTypes[index] = false : filterTypes[index] = true;
+    elem.setAttribute('class', `btn btn-${filterTypes[index] ? 'success' : 'danger'}`);
+    elem.innerText = `${typeName} ${filterTypes[index] ? '[ON]' : '[OFF]'}`;
+    localStorage.setItem('filterTypes', JSON.stringify(filterTypes));
 }
 
 function loadFilteredList() {
-    if (window.catchFilter.length != 0) {
+    if (catchFilter.length != 0) {
         document.getElementById('filter-results').innerHTML = '';
         const frag = new DocumentFragment();
-        for (const id of window.catchFilter) {
+        for (const id of catchFilter) {
             const findPoke = pokemonList.find(p => p.id == id);
             const pokeIndex = pokemonList.indexOf(findPoke);
-            const ballPrefN = window.filterBallPref[pokeIndex].normal;
-            const ballPrefS = window.filterBallPref[pokeIndex].shiny;
+            const ballPrefN = filterBallPref[pokeIndex].normal;
+            const ballPrefS = filterBallPref[pokeIndex].shiny;
             const div = document.createElement('div');
             div.innerHTML = `${findPoke.name}
             <img src="assets/images/pokeball/${ballNames[ballPrefN]}.svg" class="filter-pokeball-n pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="normal">
             <img src="assets/images/pokeball/${ballNames[ballPrefS]}.svg" class="filter-pokeball-s pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="shiny">
             <div class="filter-shiny">✨</div>`;
             div.setAttribute('data-src', findPoke.id);
-            if (window.catchFilter.includes(findPoke.id)) {
+            if (catchFilter.includes(findPoke.id)) {
                 div.setAttribute('style', 'background-color: yellowgreen;');
             }
             div.addEventListener('click', (event) => { toggleFilteredPoke(event);loadFilteredList(); });
@@ -165,15 +161,15 @@ function filterPokemonRoute(event) {
                  for (const poke of thisArea) {
                      const findPoke = pokemonList.find(p => p.name == poke);
                      const pokeIndex = pokemonList.indexOf(findPoke);
-                     const ballPrefN = window.filterBallPref[pokeIndex].normal;
-                     const ballPrefS = window.filterBallPref[pokeIndex].shiny;
+                     const ballPrefN = filterBallPref[pokeIndex].normal;
+                     const ballPrefS = filterBallPref[pokeIndex].shiny;
                      const div = document.createElement('div');
                      div.innerHTML = `${findPoke.name}
                      <img src="assets/images/pokeball/${ballNames[ballPrefN]}.svg" class="filter-pokeball-n pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="normal">
                      <img src="assets/images/pokeball/${ballNames[ballPrefS]}.svg" class="filter-pokeball-s pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="shiny">
                      <div class="filter-shiny">✨</div>`;
                      div.setAttribute('data-src', findPoke.id);
-                     if (window.catchFilter.includes(findPoke.id)) {
+                     if (catchFilter.includes(findPoke.id)) {
                          div.setAttribute('style', 'background-color: yellowgreen;');
                      }
                      div.addEventListener('click', (event) => { toggleFilteredPoke(event); });
@@ -207,15 +203,15 @@ function filterPokemonDungeon(event) {
              if (typeof pokeStr != 'undefined') {
                  const findPoke = pokemonList.find(p => p.name == pokeStr);
                  const pokeIndex = pokemonList.indexOf(findPoke);
-                 const ballPrefN = window.filterBallPref[pokeIndex].normal;
-                 const ballPrefS = window.filterBallPref[pokeIndex].shiny;
+                 const ballPrefN = filterBallPref[pokeIndex].normal;
+                 const ballPrefS = filterBallPref[pokeIndex].shiny;
                  const div = document.createElement('div');
                  div.innerHTML = `${findPoke.name}
                  <img src="assets/images/pokeball/${ballNames[ballPrefN]}.svg" class="filter-pokeball-n pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="normal">
                  <img src="assets/images/pokeball/${ballNames[ballPrefS]}.svg" class="filter-pokeball-s pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="shiny">
                  <div class="filter-shiny">✨</div>`;
                  div.setAttribute('data-src', findPoke.id);
-                 if (window.catchFilter.includes(findPoke.id)) {
+                 if (catchFilter.includes(findPoke.id)) {
                      div.setAttribute('style', 'background-color: yellowgreen;');
                  }
                  div.addEventListener('click', (event) => { toggleFilteredPoke(event); });
@@ -232,15 +228,15 @@ function filterPokemonDungeon(event) {
              if (typeof pokeStr != 'undefined') {
                  const findPoke = pokemonList.find(p => p.name == pokeStr);
                  const pokeIndex = pokemonList.indexOf(findPoke);
-                 const ballPrefN = window.filterBallPref[pokeIndex].normal;
-                 const ballPrefS = window.filterBallPref[pokeIndex].shiny;
+                 const ballPrefN = filterBallPref[pokeIndex].normal;
+                 const ballPrefS = filterBallPref[pokeIndex].shiny;
                  const div = document.createElement('div');
                  div.innerHTML = `${findPoke.name}
                  <img src="assets/images/pokeball/${ballNames[ballPrefN]}.svg" class="filter-pokeball-n pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="normal">
                  <img src="assets/images/pokeball/${ballNames[ballPrefS]}.svg" class="filter-pokeball-s pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="shiny">
                  <div class="filter-shiny">✨</div>`;
                  div.setAttribute('data-src', findPoke.id);
-                 if (window.catchFilter.includes(findPoke.id)) {
+                 if (catchFilter.includes(findPoke.id)) {
                      div.setAttribute('style', 'background-color: yellowgreen;');
                  }
                  div.addEventListener('click', (event) => { toggleFilteredPoke(event); });
@@ -251,64 +247,58 @@ function filterPokemonDungeon(event) {
          setRightClick();
 
         } catch (err) {
-            console.log(err)
             document.getElementById('filter-results').innerHTML = '<b style="color: red">You are not in a dungeon or dungeon info cannot be found.</b>';
         };
 }
 
 function filterAllPoke() {
-    window.catchFilter = [];
+    catchFilter = [];
     for (const poke of pokemonList) {
-        window.catchFilter.push(poke.id);
+        catchFilter.push(poke.id);
     }
-    localStorage.setItem('catchFilter', JSON.stringify(window.catchFilter));
+    localStorage.setItem('catchFilter', JSON.stringify(catchFilter));
     filterPokeSearch(true);
 }
 
 function unfilterAllPoke() {
-    window.catchFilter = [];
-    localStorage.setItem('catchFilter', JSON.stringify(window.catchFilter));
+    catchFilter = [];
+    localStorage.setItem('catchFilter', JSON.stringify(catchFilter));
     filterPokeSearch(true);
 }
 
 function resetBallFilterAll() {
-    window.filterBallPref = new Array(pokemonList.length).fill({normal: 0, shiny: 0}, 0, pokemonList.length);
-    localStorage.setItem('filterBallPref', JSON.stringify(window.filterBallPref));
+    filterBallPref = new Array(pokemonList.length).fill({normal: 0, shiny: 0}, 0, pokemonList.length);
+    localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
     filterPokeSearch(true);
 }
 
 function toggleCatchFilter(event) {
     const elem = event.target;
-    if (window.filterState) {
-        window.filterState = filterColor = false;
-    } else {
-        window.filterState = filterColor = true;
-    }
+    filterState ? filterColor = false : filterColor = true;
+    filterState = filterColor;
     elem.setAttribute('class', `btn btn-${filterColor ? 'success' : 'danger'}`);
-    elem.innerText = `Catch Filter ${window.filterState ? "[ON]" : "[OFF]"}`;
-    localStorage.setItem('filterState', window.filterState);
+    elem.innerText = `Catch Filter ${filterState ? "[ON]" : "[OFF]"}`;
+    localStorage.setItem('filterState', filterState);
 }
 
 function filterPokeSearch(event) {
     document.getElementById('filter-results').innerHTML = '';
     let pokeStr;
     try { pokeStr = event.target.value.toLowerCase(); } catch (err) { pokeStr = document.getElementById('filter-search').value; };
-    console.log(pokeStr)
     const filterList = pokemonList.filter(p => p.name.toLowerCase().includes(pokeStr));
-    console.log(filterList)
     const frag = new DocumentFragment();
     for (const poke of filterList) {
         const findPoke = pokemonList.find(p => p.name == poke.name);
         const pokeIndex = pokemonList.indexOf(findPoke);
-        const ballPrefN = window.filterBallPref[pokeIndex].normal;
-        const ballPrefS = window.filterBallPref[pokeIndex].shiny;
+        const ballPrefN = filterBallPref[pokeIndex].normal;
+        const ballPrefS = filterBallPref[pokeIndex].shiny;
         const div = document.createElement('div');
         div.innerHTML = `${findPoke.name}
         <img src="assets/images/pokeball/${ballNames[ballPrefN]}.svg" class="filter-pokeball-n pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="normal">
         <img src="assets/images/pokeball/${ballNames[ballPrefS]}.svg" class="filter-pokeball-s pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="shiny">
         <div class="filter-shiny">✨</div>`;
         div.setAttribute('data-src', poke.id);
-        if (window.catchFilter.includes(poke.id)) {
+        if (catchFilter.includes(poke.id)) {
             div.setAttribute('style', 'background-color: yellowgreen;');
         }
         div.addEventListener('click', (event) => { toggleFilteredPoke(event); });
@@ -324,25 +314,20 @@ function toggleFilteredPoke(event) {
     if (elem.hasAttribute('ball-pref')) {
         const ballPref = +elem.getAttribute('ball-pref');
         const prefType = elem.getAttribute('pref-type');
-        if (window.filterBallPref[ballPref][prefType] < ballNames.length - 1) {
-            window.filterBallPref[ballPref][prefType]++;
-        } else {
-            window.filterBallPref[ballPref][prefType] = 0;
-        }
-        elem.src = `assets/images/pokeball/${ballNames[window.filterBallPref[ballPref][prefType]]}.svg`
-        localStorage.setItem('filterBallPref', JSON.stringify(window.filterBallPref));
+        filterBallPref[ballPref][prefType] < ballNames.length - 1 ? filterBallPref[ballPref][prefType]++ : filterBallPref[ballPref][prefType] = 0;
+        elem.src = `assets/images/pokeball/${ballNames[filterBallPref[ballPref][prefType]]}.svg`
+        localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
         return;
     }
-    console.log('still working')
-    const idExists = window.catchFilter.indexOf(id);
+    const idExists = catchFilter.indexOf(id);
     if (idExists == -1) {
-        window.catchFilter.push(id);
+        catchFilter.push(id);
         elem.setAttribute('style', 'background-color: yellowgreen;');
     } else {
-        window.catchFilter.splice(idExists, 1);
+        catchFilter.splice(idExists, 1);
         elem.removeAttribute('style');
     }
-    localStorage.setItem('catchFilter', JSON.stringify(window.catchFilter));
+    localStorage.setItem('catchFilter', JSON.stringify(catchFilter));
 }
 
 function setRightClick() {
@@ -360,9 +345,9 @@ function resetBallFilter(event) {
     const elem = event.target;
     const ballPref = +elem.getAttribute('ball-pref');
     const prefType = elem.getAttribute('pref-type');
-    window.filterBallPref[ballPref][prefType] = 0;
-    elem.src = `assets/images/pokeball/${ballNames[window.filterBallPref[ballPref][prefType]]}.svg`
-    localStorage.setItem('filterBallPref', JSON.stringify(window.filterBallPref));
+    filterBallPref[ballPref][prefType] = 0;
+    elem.src = `assets/images/pokeball/${ballNames[filterBallPref[ballPref][prefType]]}.svg`
+    localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
 }
 
 function overideDefeatPokemon() {
@@ -380,24 +365,24 @@ function overideDefeatPokemon() {
 
         const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
         const pokeIndex = pokemonList.indexOf(findPoke);
-        let ballPrefN = window.filterBallPref[pokeIndex].normal -1;
+        let ballPrefN = filterBallPref[pokeIndex].normal -1;
         ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
-        let ballPrefS = window.filterBallPref[pokeIndex].shiny - 1;
+        let ballPrefS = filterBallPref[pokeIndex].shiny - 1;
         ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
         const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
         const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
 
         const isShiny = enemyPokemon.shiny;
         let pokeBall;
-        if (ballQuantityS > 0 && window.filterState & isShiny) {
+        if (ballQuantityS > 0 && filterState & isShiny) {
             pokeBall = ballPrefS;
-        } else if (ballQuantityN > 0 && window.filterState) {
+        } else if (ballQuantityN > 0 && filterState) {
             pokeBall = ballPrefN;
         } else {
             pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
         }
 
-        if (pokeBall !== GameConstants.Pokeball.None && window.filterState && (window.catchFilter.includes(enemyPokemon.id) || (window.filterTypes[type1] || window.filterTypes[type2]))) {
+        if (pokeBall !== GameConstants.Pokeball.None && filterState && (catchFilter.includes(enemyPokemon.id) || (filterTypes[type1] || filterTypes[type2]))) {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
@@ -409,7 +394,7 @@ function overideDefeatPokemon() {
                 App.game.pokeballs.calculateCatchTime(pokeBall)
             )
             ;
-        } else if (pokeBall !== GameConstants.Pokeball.None && !window.filterState) {
+        } else if (pokeBall !== GameConstants.Pokeball.None && !filterState) {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
@@ -456,9 +441,9 @@ function overideDefeatPokemon() {
         // Attempting to catch Pokemon
         const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
         const pokeIndex = pokemonList.indexOf(findPoke);
-        let ballPrefN = window.filterBallPref[pokeIndex].normal -1;
+        let ballPrefN = filterBallPref[pokeIndex].normal -1;
         ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
-        let ballPrefS = window.filterBallPref[pokeIndex].shiny - 1;
+        let ballPrefS = filterBallPref[pokeIndex].shiny - 1;
         ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
         const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
         const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
@@ -466,15 +451,15 @@ function overideDefeatPokemon() {
         const isShiny = enemyPokemon.shiny;
 
         let pokeBall;
-        if (ballQuantityS > 0 && window.filterState & isShiny) {
+        if (ballQuantityS > 0 && filterState & isShiny) {
             pokeBall = ballPrefS;
-        } else if (ballQuantityN > 0 && window.filterState) {
+        } else if (ballQuantityN > 0 && filterState) {
             pokeBall = ballPrefN;
         } else {
             pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
         }
 
-        if (pokeBall !== GameConstants.Pokeball.None && window.filterState && (window.catchFilter.includes(enemyPokemon.id) || (window.filterTypes[type1] || window.filterTypes[type2]))) {
+        if (pokeBall !== GameConstants.Pokeball.None && filterState && (catchFilter.includes(enemyPokemon.id) || (filterTypes[type1] || filterTypes[type2]))) {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
@@ -485,7 +470,7 @@ function overideDefeatPokemon() {
                 },
                 App.game.pokeballs.calculateCatchTime(pokeBall)
             );
-        } else if (pokeBall !== GameConstants.Pokeball.None && !window.filterState) {
+        } else if (pokeBall !== GameConstants.Pokeball.None && !filterState) {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
@@ -516,10 +501,17 @@ if (!localStorage.getItem('filterBallPref')) {
 if (!localStorage.getItem('catchFilter')) {
     localStorage.setItem('catchFilter', JSON.stringify([]));
 }
-window.filterState = JSON.parse(localStorage.getItem('filterState'));
-window.filterTypes = JSON.parse(localStorage.getItem('filterTypes'));
-window.catchFilter = JSON.parse(localStorage.getItem('catchFilter'));
-window.filterBallPref = JSON.parse(localStorage.getItem('filterBallPref'));
+filterState = JSON.parse(localStorage.getItem('filterState'));
+filterTypes = JSON.parse(localStorage.getItem('filterTypes'));
+catchFilter = JSON.parse(localStorage.getItem('catchFilter'));
+filterBallPref = JSON.parse(localStorage.getItem('filterBallPref'));
+
+if (filterBallPref.length != pokemonList.length) {
+    const diff = pokemonList.length - filterBallPref.length;
+    const newPoke = new Array(diff).fill({normal: 0, shiny: 0}, 0, diff);
+    filterBallPref = filterBallPref.concat(diff);
+    localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
+}
 
 function loadScript(){
     var oldInit = Preload.hideSplashScreen
