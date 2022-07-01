@@ -3,14 +3,12 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.3
+// @version     1.4
 // @author      Ephenia
 // @description An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
 // ==/UserScript==
 
-const pokeballDisplay = document.getElementById('pokeballSelector');
-const profileModal = document.getElementById('profileModal');
 const ballNames = ['None', 'Pokeball', 'Greatball', 'Ultraball', 'Masterball', 'Fastball', 'Quickball', 'Timerball', 'Duskball', 'Luxuryball', 'Diveball', 'Lureball', 'Nestball', 'Repeatball'];
 var filterState;
 var filterTypes;
@@ -19,6 +17,8 @@ var catchFilter;
 var filterColor;
 
 function initCatchFilter() {
+    const pokeballDisplay = document.getElementById('pokeballSelector');
+    const profileModal = document.getElementById('profileModal');
     filterState ? filterColor = true : filterColor = false;
 
     // Setting custon CSS styles
