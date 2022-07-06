@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      Ephenia
 // @description This script makes it so that Pokérus will spread from any Pokémon (egg) that has it to all of the others inside of the Hatchery, instead of just your starter needing to be in the Hatchery for this to be done.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/perkypokeruspandemic.user.js
@@ -26,10 +26,15 @@ function initPokerusPandemic() {
                 partyPokemon.pokerus = calculatePokerus();
                 function calculatePokerus() {
                     return App.game.breeding.eggList.some(e => {
-                        const eggPkrs = App.game.party.caughtPokemon.find(p => p.name == e().pokemon).pokerus;
-                        if (!e().canHatch() && !e().isNone() && eggPkrs) {
-                            const pokemon = App.game.party.getPokemon(PokemonHelper.getPokemonByName(e().pokemon).id);
-                            return pokemon.pokerus;
+                        let eggPkrs;
+                        try {
+                            eggPkrs = App.game.party.caughtPokemon.find(p => p.name == e().pokemon).pokerus;
+                            if (!e().canHatch() && !e().isNone() && eggPkrs) {
+                                const pokemon = App.game.party.getPokemon(PokemonHelper.getPokemonByName(e().pokemon).id);
+                                return pokemon.pokerus;
+                            }
+                        } catch (err) {
+                            return true;
                         }
                     });
                 }
