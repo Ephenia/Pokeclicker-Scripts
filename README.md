@@ -36,7 +36,8 @@ If you are looking to use these scripts on the client version of Pokéclicker ([
 5. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsuserjs-one-click-install)
 6. [**Oak Items Unlimited** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-oak-iems-unlimited-oakitemsunlimiteduserjs-one-click-install)
 7. [**Omega Protein Gains** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-omega-protein-gains-omegaproteingainsuserjs-one-click-install)
-8. [**Simple Weather Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-simple-weather-changer-simpleweatherchangeruserjs-one-click-install)
+8. [**Perky Pokerus Pandemic** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-perky-pokerus-pandemic-perkypokeruspandemic-one-click-install)
+9. [**Simple Weather Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-simple-weather-changer-simpleweatherchangeruserjs-one-click-install)
 
 
 ```diff
@@ -349,6 +350,13 @@ This script removes the limit for the amount of Proteins that you're able to use
 ![image](https://i.imgur.com/2kXCzUA.png)
 
 I haven't tested the limits of how many Proteins you can give, but it should practically be infinite.
+
+<hr>
+
+## **[Custom] Perky Pokerus Pandemic** ([perkypokeruspandemic.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/perkypokeruspandemic.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/perkypokeruspandemic.user.js))
+This script makes Pokérus spread inside the Hatchery without needing your Starter Pokémon inside for this to be accomplished.
+
+This script will run and work automatically without needing to do anything else.
 
 <hr>
 
