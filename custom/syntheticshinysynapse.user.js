@@ -3,9 +3,9 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Ephenia
-// @description Allows you to adjust and modify the shiny rates of everything specifically, as well as set a global shiny rate. Features a bypass for the Shiny Charm as well, which forces the use of the Shiny Charm where it isn't used normally.
+// @description Allows you to adjust and modify the shiny rates of everything specifically, as well as set a global shiny rate.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/syntheticshinysynapse.user.js
 // ==/UserScript==
 
@@ -30,7 +30,6 @@ var shinyRates = [];
 var prefShinyRates;
 var globalShinyState;
 var globalShinyRate;
-var shinyCharmBypass;
 
 function initShinySynapse() {
     getShinyRates();
@@ -73,14 +72,10 @@ function initShinySynapse() {
     <button id="shiny-rate-global" class="btn btn-${globalShinyState ? 'success' : 'danger'}" style="margin-left:20px;">
     Global Override [${globalShinyState ? 'ON' : 'OFF'}]
     </button>
-    <button id="shiny-charm-bypass" class="btn btn-${shinyCharmBypass ? 'success' : 'danger'}" style="margin-left:20px;">
-    Shiny Charm Bypass [${shinyCharmBypass ? 'ON' : 'OFF'}]
-    </button>
     <button id="shiny-rates-reset" class="btn btn-primary" style="margin-left:20px;">
     Reset Rates
     </button>`
     document.getElementById('shiny-rate-global').addEventListener('click', event => { globalToggle(event); });
-    document.getElementById('shiny-charm-bypass').addEventListener('click', event => { bypassToggle(event); });
     document.getElementById('shiny-rates-reset').addEventListener('click', () => { resetRates(); });
 
     const modalBody = document.querySelector('[id=shinyModal] div div [class=modal-body]');
@@ -89,7 +84,7 @@ function initShinySynapse() {
 
     const head = document.createElement('div');
     head.setAttribute('id', 'shiny-modifier-head');
-    head.innerHTML = `<div>Category</div><div>✨Odds</div><div>✨Shiny Charm Odds</div><div></div>`;
+    head.innerHTML = `<div>Category</div><div>✨Odds</div><div>✨Shiny Bonus</div><div></div>`;
     fragment.appendChild(head);
 
     const global = document.createElement('div');
@@ -155,9 +150,6 @@ function initShinySynapse() {
     modalBody.appendChild(fragment);
 
     PokemonFactory.generateShiny = function(chance, skipBonus = false) {
-        if (shinyCharmBypass) {
-            skipBonus = false;
-        }
         const genType =(new Error()).stack.split("\n")[2].trim().split(" ")[1].replace(/^(.*?)[.]/, '');
         const index = genSource.indexOf(genType);
 
@@ -192,14 +184,6 @@ function initShinySynapse() {
         element.setAttribute('class', `btn btn-${globalShinyState ? 'success' : 'danger'}`);
         element.textContent = `Global Override [${globalShinyState ? 'ON' : 'OFF'}`;
         localStorage.setItem("globalShinyState", JSON.stringify(globalShinyState));
-    }
-
-    function bypassToggle(event) {
-        const element = event.target;
-        shinyCharmBypass = !shinyCharmBypass;
-        element.setAttribute('class', `btn btn-${shinyCharmBypass ? 'success' : 'danger'}`);
-        element.textContent = `Shiny Charm Bypass [${shinyCharmBypass ? 'ON' : 'OFF'}`;
-        localStorage.setItem("shinyCharmBypass", JSON.stringify(shinyCharmBypass));
     }
 
     function resetRates() {
@@ -260,9 +244,6 @@ shinyTypes = getShinyTypes();
 if (!localStorage.getItem('globalShinyState')) {
     localStorage.setItem("globalShinyState", false);
 }
-if (!localStorage.getItem('shinyCharmBypass')) {
-    localStorage.setItem("shinyCharmBypass", false);
-}
 if (!localStorage.getItem('globalShinyRate')) {
     localStorage.setItem("globalShinyRate", 8192);
 }
@@ -271,7 +252,6 @@ if (!localStorage.getItem('shinySetRates')) {
     localStorage.setItem("shinySetRates", JSON.stringify(prefArray));
 }
 globalShinyState = JSON.parse(localStorage.getItem('globalShinyState'));
-shinyCharmBypass = JSON.parse(localStorage.getItem('shinyCharmBypass'));
 globalShinyRate = JSON.parse(localStorage.getItem('globalShinyRate'));
 prefShinyRates = JSON.parse(localStorage.getItem('shinySetRates'));
 
