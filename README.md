@@ -85,11 +85,13 @@ This will effectively allow you to infinitely farm and stay inside the Battle Fr
 ## **Auto Battle Items** ([autobattleitems.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/autobattleitems.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/autobattleitems.user.js))
 This script adds in automation for Battle Items:<br>
 
-![image](https://user-images.githubusercontent.com/26987203/178150690-950fbff8-f901-458a-be2b-5a7d92d9a576.png)
+![image](https://user-images.githubusercontent.com/26987203/178172097-3f733731-a15d-4ed9-b82a-f8476a39a4ff.png)
 
 It's quite simple how it works, and this also aims to be efficient as possible.
 
-Battle Items will be bought as long as you've unlocked the earliest Town Shop's that sell said Battle Items, also if you currently possess an exact quantity of 0 of them as well. Battle items will also only be bought when there is no price penalty involved with them. This means you would need to be battling Pokémon to keep the base price of them down.
+You can click the area of the specific Battle Item's quantity to toggle its automation. By default, they are all red, but when toggled on they will turn green.
+
+When active, Battle Items will be bought as long as you've unlocked the earliest Town Shop that sells said Battle Items, also if you currently possess an exact quantity of 0 of them as well. Battle items will also only be bought when there is no price penalty involved with them. This means you would need to be battling Pokémon to keep the base price of them down.
 
 Battle Items will automatically be used when you have at least 1 available, as you would expect.
 
