@@ -262,8 +262,8 @@ function autoHatcher() {
     }, 50); // Runs every game tick
 }
 
-const updateCheck = JSON.parse(localStorage.getItem('autoHatchUpdate'));
-if (!updateCheck || updateCheck != 1.7) {
+const updateCheckHatch = JSON.parse(localStorage.getItem('autoHatchUpdate'));
+if (!updateCheckHatch || updateCheckHatch != 1.7) {
     localStorage.setItem("autoHatchState", false);
     localStorage.setItem("autoEgg", false);
     localStorage.setItem("autoFossil", false);

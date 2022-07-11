@@ -445,8 +445,8 @@ function fullClear(dungeonBoard, bossCoords){
     }
 }
 
-const updateCheck = JSON.parse(localStorage.getItem('autoClickUpdate'));
-if (!updateCheck || updateCheck != 2.0) {
+const updateCheckClick = JSON.parse(localStorage.getItem('autoClickUpdate'));
+if (!updateCheckClick || updateCheckClick != 2.0) {
     localStorage.setItem("autoClickState", false);
     localStorage.setItem("autoGymState", false);
     localStorage.setItem("autoDungeonState", false);
