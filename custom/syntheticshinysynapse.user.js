@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.1
+// @version     1.2
 // @author      Ephenia
 // @description Allows you to adjust and modify the shiny rates of everything specifically, as well as set a global shiny rate.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/syntheticshinysynapse.user.js
@@ -12,7 +12,7 @@
 const genSource = ['generateWildPokemon', //Wild Pokemon
                    'generateDungeonPokemon', //Dungeon Pokemon
                    'evolve', //Evolution Pokemon
-                   'new', //Safari Pokemon
+                   'SafariPokemon', //Safari Pokemon
                    'claimFunction', //Shop/Claim/Gift Pokemon
                    'hatch', //Breeding/Eggs
                    'generateWanderPokemon', //Wandering/Farm Pokemon
@@ -150,7 +150,13 @@ function initShinySynapse() {
     modalBody.appendChild(fragment);
 
     PokemonFactory.generateShiny = function(chance, skipBonus = false) {
-        const genType =(new Error()).stack.split("\n")[2].trim().split(" ")[1].replace(/^(.*?)[.]/, '');
+        let genType;
+        try {
+            const split = (new Error()).stack.split("\n")[2].trim().split(" ");
+            genType = split[split.length - 2].replace(/^(.*?)[.]/, '');
+        } catch (err) {
+            genType = (new Error()).stack.split("\n")[1].trim().split(" ")[0].replace(/@(.*?)$/, '');
+        }
         const index = genSource.indexOf(genType);
 
         let trueChance;
