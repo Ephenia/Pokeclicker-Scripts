@@ -3,14 +3,13 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.9
+// @version     2.0
 // @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautoclicker.user.js
 // ==/UserScript==
 
 var clickState;
-var clickColor;
 var awaitAutoClick;
 var autoClickerLoop;
 var autoClickDPS;
@@ -18,62 +17,40 @@ var clickDPS;
 var reqDPS;
 var enemySpeedRaw;
 var enemySpeed;
-var colorDPS;
 var allSelectedGym = 0;
 var gymState;
-var gymColor;
 var gymSelect;
 var dungeonState;
-var dungeonColor;
 var dungeonSelect;
 var foundBoss = false;
 var foundBossX;
 var foundBossY;
-var newSave;
 var delayAutoClick;
-var trainerCards;
 window.testDPS = 0;
 window.defeatDPS = 0;
-var battleView = document.getElementsByClassName('battle-view')[0];
 
 function initAutoClicker() {
-    if (clickState == "OFF") {
-        clickColor = "danger"
-        clickDPS = 0
-    } else {
-        clickColor = "success"
-        clickDPS = +localStorage.getItem('storedClickDPS');
-    }
-    if (gymState == "OFF") {
-        gymColor = "danger"
-    } else {
-        gymColor = "success"
-    }
-    if (dungeonState == "OFF") {
-        dungeonColor = "danger"
-    } else {
-        dungeonColor = "success"
-    }
+    const battleView = document.getElementsByClassName('battle-view')[0];
 
     var elemAC = document.createElement("table");
     elemAC.innerHTML = `<tbody><tr><td colspan="4">
-    <button id="auto-click-start" class="btn btn-`+ clickColor + ` btn-block" style="font-size:8pt;">
-    Auto Click [`+ clickState + `]<br>
+    <button id="auto-click-start" class="btn btn-${clickState ? 'success' : 'danger'} btn-block" style="font-size:8pt;">
+    Auto Click [${clickState ? 'ON' : 'OFF'}]<br>
     <div id="auto-click-info">
-    <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') + `</div></div>
+    <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">${clickDPS.toLocaleString('en-US')}</div></div>
     <div id="req-DPS">Req. DPS:<br><div style="font-weight:bold;">0</div></div>
     <div id="enemy-DPS">Enemy/s:<br><div style="font-weight:bold;color:black;">0</div></div>
     </div>
     </button>
     <div id="click-delay-cont">
-    <div id="auto-click-delay-info">Click Attack Delay: ` + clickDelayFixed(1000 / delayAutoClick) + `/s</div>
-    <input type="range" min="1" max="50" value="` + delayAutoClick + `" id="auto-click-delay">
+    <div id="auto-click-delay-info">Click Attack Delay: ${clickDelayFixed(1000 / delayAutoClick)}/s</div>
+    <input type="range" min="1" max="50" value="${delayAutoClick}" id="auto-click-delay">
     </div>
     </td></tr>
     <tr>
     <td style="width: 42%;">
-    <button id="auto-dungeon-start" class="btn btn-block btn-`+ dungeonColor + `" style="font-size: 8pt;">
-    Auto Dungeon [`+ dungeonState + `]</button>
+    <button id="auto-dungeon-start" class="btn btn-block btn-${dungeonState ? 'success' : 'danger'}" style="font-size: 8pt;">
+    Auto Dungeon [${dungeonState ? 'ON' : 'OFF'}]</button>
     </td>
     <td>
   <select id="dungeon-select">
@@ -82,8 +59,8 @@ function initAutoClicker() {
   </select>
     </td>
     <td style="width: 40%;">
-    <button id="auto-gym-start" class="btn btn-block btn-`+ gymColor + `" style="font-size: 8pt;">
-    Auto Gym [`+ gymState + `]
+    <button id="auto-gym-start" class="btn btn-block btn-${gymState ? 'success' : 'danger'}" style="font-size: 8pt;">
+    Auto Gym [${gymState ? 'ON' : 'OFF'}]
     </button>
     </td>
     <td>
@@ -102,18 +79,19 @@ function initAutoClicker() {
     document.getElementById('gym-select').value = gymSelect;
     document.getElementById('dungeon-select').value = dungeonSelect;
 
-    $("#auto-click-start").click(toggleAutoClick)
-    $("#auto-gym-start").click(toggleAutoGym)
-    $("#gym-select").change(changeSelectedGym)
-    $("#auto-dungeon-start").click(toggleAutoDungeon)
-    $("#dungeon-select").change(changeSelectedDungeon)
-    document.getElementById('auto-click-delay').addEventListener('change', (event) => { changeClickDelay(event) })
+    document.getElementById('auto-click-start').addEventListener('click', () => { toggleAutoClick(); });
+    document.getElementById('auto-gym-start').addEventListener('click', event => { toggleAutoGym(event); });
+    document.getElementById('auto-dungeon-start').addEventListener('click', event => { toggleAutoDungeon(event); });
+    document.getElementById('gym-select').addEventListener('change', event => { changeSelectedGym(event); });
+    document.getElementById('dungeon-select').addEventListener('change', event => { changeSelectedDungeon(event); });
+    document.getElementById('auto-click-delay').addEventListener('change', event => { changeClickDelay(event); });
+
     addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
     addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
     addGlobalStyle('#dungeonMap { padding-bottom: 9.513%; }');
     addGlobalStyle('#click-delay-cont { display: flex; flex-direction: column; align-items: stretch;}')
 
-    if (clickState == "ON") {
+    if (clickState) {
         autoClicker();
         calcClickDPS();
     }
@@ -121,70 +99,55 @@ function initAutoClicker() {
 }
 
 function toggleAutoClick() {
-    if (clickState == "OFF") {
-        clickState = "ON"
-        document.getElementById("auto-click-start").classList.remove('btn-danger');
-        document.getElementById("auto-click-start").classList.add('btn-success');
-        clickDPS = +localStorage.getItem('storedClickDPS');
-        autoClicker();
-        calcClickDPS();
+    const element = document.getElementById('auto-click-start');
+    clickState = !clickState;
+    clickState ? autoClicker() : clearInterval(autoClickerLoop);
+    clickState ? calcClickDPS() : clearInterval(autoClickDPS);
+    if (clickState) {
+        clickDPS = JSON.parse(localStorage.getItem('storedClickDPS'));
     } else {
-        clickState = "OFF"
-        document.getElementById("auto-click-start").classList.remove('btn-success');
-        document.getElementById("auto-click-start").classList.add('btn-danger');
         clickDPS = 0;
         reqDPS = 0;
         enemySpeedRaw = 0;
-        clearInterval(autoClickerLoop)
-        clearInterval(autoClickDPS)
     }
-    localStorage.setItem("autoClickState", clickState);
-    document.getElementById('auto-click-start').innerHTML = `Auto Click [` + clickState + `]<br>
+    clickState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.innerHTML = `Auto Click [${clickState ? 'ON' : 'OFF'}]<br>
     <div id="auto-click-info">
-    <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">`+ clickDPS.toLocaleString('en-US') + `</div></div>
+    <div id="click-DPS">Auto Click DPS:<br><div style="font-weight:bold;color:gold;">${clickDPS.toLocaleString('en-US')}</div></div>
     <div id="req-DPS">Req. DPS:<br><div style="font-weight:bold;">0</div></div>
     <div id="enemy-DPS">Enemy/s:<br><div style="font-weight:bold;color:black;">0</div></div>
     </div>`
+    localStorage.setItem('autoClickState', clickState);
 }
 
-function toggleAutoGym() {
-    if (gymState == "OFF") {
-        gymState = "ON"
-        document.getElementById("auto-gym-start").classList.remove('btn-danger');
-        document.getElementById("auto-gym-start").classList.add('btn-success');
-    } else {
-        gymState = "OFF"
-        document.getElementById("auto-gym-start").classList.remove('btn-success');
-        document.getElementById("auto-gym-start").classList.add('btn-danger');
-    }
-    localStorage.setItem("autoGymState", gymState);
-    document.getElementById('auto-gym-start').innerHTML = `Auto Gym [` + gymState + `]`
+function toggleAutoGym(event) {
+    const element = event.target;
+    gymState = !gymState;
+    gymState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.textContent = `Auto Gym [${gymState ? 'ON' : 'OFF'}]`;
+    localStorage.setItem('autoGymState', gymState);
 }
 
-function toggleAutoDungeon() {
-    if (dungeonState == "OFF") {
-        dungeonState = "ON"
-        document.getElementById("auto-dungeon-start").classList.remove('btn-danger');
-        document.getElementById("auto-dungeon-start").classList.add('btn-success');
-    } else {
-        dungeonState = "OFF"
-        document.getElementById("auto-dungeon-start").classList.remove('btn-success');
-        document.getElementById("auto-dungeon-start").classList.add('btn-danger');
-    }
-    localStorage.setItem("autoDungeonState", dungeonState);
-    document.getElementById('auto-dungeon-start').innerHTML = `Auto Dungeon [` + dungeonState + `]`
+function toggleAutoDungeon(event) {
+    const element = event.target;
+    dungeonState = !dungeonState;
+    dungeonState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.textContent = `Auto Dungeon [${dungeonState ? 'ON' : 'OFF'}]`;
+    localStorage.setItem('autoDungeonState', dungeonState);
 }
 
-function changeSelectedGym() {
-    if (gymSelect != +document.getElementById('gym-select').value) {
-        gymSelect = +document.getElementById('gym-select').value
+function changeSelectedGym(event) {
+    const element = event.target;
+    if (gymSelect != +element.value) {
+        gymSelect = +element.value;
         localStorage.setItem("selectedGym", gymSelect);
     }
 }
 
-function changeSelectedDungeon() {
-    if (dungeonSelect != +document.getElementById('dungeon-select').value) {
-        dungeonSelect = +document.getElementById('dungeon-select').value
+function changeSelectedDungeon(event) {
+        const element = event.target;
+    if (dungeonSelect != +element.value) {
+        dungeonSelect = +element.value;
         localStorage.setItem("selectedDungeon", dungeonSelect);
     }
 }
@@ -195,7 +158,7 @@ function getRandomInt(max) {
 
 function calcClickDPS() {
     autoClickDPS = setInterval(function () {
-        const clickSec = testDPS;
+        const clickSec = window.testDPS;
         let enemyHealth;
         try {
             enemyHealth = Battle.enemyPokemon().maxHealth();
@@ -205,17 +168,12 @@ function calcClickDPS() {
         }
         if (clickDPS != App.game.party.calculateClickAttack() * clickSec) {
             clickDPS = App.game.party.calculateClickAttack() * clickSec;
-            document.getElementById('click-DPS').innerHTML = `Auto Click DPS:<br><div style="font-weight:bold;color:gold;">` + Math.floor(clickDPS).toLocaleString('en-US'); +`</div>`
+            document.getElementById('click-DPS').innerHTML = `Auto Click DPS:<br><div style="font-weight:bold;color:gold;">${Math.floor(clickDPS).toLocaleString('en-US')}</div>`
             localStorage.setItem('storedClickDPS', clickDPS)
         }
         if (reqDPS != enemyHealth * clickSec) {
             reqDPS = enemyHealth * clickSec;
-            if (clickDPS >= reqDPS) {
-                colorDPS = "greenyellow"
-            } else {
-                colorDPS = "darkred"
-            }
-            document.getElementById('req-DPS').innerHTML = `Req. DPS:<br><div style="font-weight:bold;color:` + colorDPS + `">` + Math.ceil(reqDPS).toLocaleString('en-US'); +`</div>`
+            document.getElementById('req-DPS').innerHTML = `Req. DPS:<br><div style="font-weight:bold;color: ${clickDPS >= reqDPS ? 'greenyellow' : 'darkred'}">${Math.ceil(reqDPS).toLocaleString('en-US')}</div>`
         }
         if (enemySpeedRaw != ((App.game.party.calculateClickAttack() * clickSec) / enemyHealth).toFixed(1)) {
             enemySpeed = ((App.game.party.calculateClickAttack() * clickSec) / enemyHealth);
@@ -224,13 +182,13 @@ function calcClickDPS() {
                 enemySpeed = 0;
             }
             if (enemySpeedRaw >= clickSec && enemySpeedRaw != 'Infinity' && !Battle.catching()) {
-                enemySpeed = defeatDPS;
+                enemySpeed = window.defeatDPS;
             }
             if (!Number.isInteger(enemySpeed) && enemySpeed != 0) { enemySpeed = enemySpeed.toFixed(1).toString().replace('.0', '') }
-            document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br><div style="font-weight:bold;color:black;">` + enemySpeed + `</div>`
+            document.getElementById('enemy-DPS').innerHTML = `Enemy/s:<br><div style="font-weight:bold;color:black;">${enemySpeed}</div>`
         }
-        testDPS = 0;
-        defeatDPS = 0;
+        window.testDPS = 0;
+        window.defeatDPS = 0;
     }, 1000);
 }
 
@@ -242,16 +200,16 @@ function autoClicker() {
         }
 
         //Auto Gym checking
-        if (gymState == "ON") {
+        if (gymState) {
             autoGym();
         }
 
         //Auto Dungeon checking
-        if (dungeonState == "ON" && DungeonRunner.fighting() == false && DungeonBattle.catching() == false) {
+        if (dungeonState && DungeonRunner.fighting() == false && DungeonBattle.catching() == false) {
             autoDungeon();
         }
         //Reset the values for the boss coordinates if we timeout or turn off autoDungeon
-        if ((dungeonState == "OFF" && foundBoss) || (dungeonState == "ON" && DungeonRunner.dungeonFinished() && foundBoss)){
+        if ((!dungeonState && foundBoss) || (dungeonState && DungeonRunner.dungeonFinished() && foundBoss)){
             foundBoss = false
             bossCoords.length = 0
         }
@@ -263,7 +221,7 @@ function autoClicker() {
 
         // Click while in "Tomporary Battle" (battle ultra wormhole)
         if (App.game.gameState === GameConstants.GameState.temporaryBattle) {
-          TemporaryBattleBattle.clickAttack();
+            TemporaryBattleBattle.clickAttack();
         }
 
         // Click while in a dungeon - will also interact with non-battle tiles (e.g. chests)
@@ -280,12 +238,12 @@ function changeClickDelay(event) {
     delayAutoClick = delay;
     localStorage.setItem("delayAutoClick", delay);
     overideClickAttack();
-    if (clickState == "ON") {
+    if (clickState) {
         clearInterval(autoClickerLoop);
         autoClicker();
     }
     let clickSec = (1000 / delayAutoClick);
-    document.getElementById('auto-click-delay-info').innerText = `Click Attack Delay: ` + clickDelayFixed(clickSec) + `/s`
+    document.getElementById('auto-click-delay-info').innerText = `Click Attack Delay: ${clickDelayFixed(clickSec)}/s`;
 }
 
 function clickDelayFixed(int) {
@@ -312,10 +270,10 @@ function overideClickAttack() {
         }
         GameHelper.incrementObservable(App.game.statistics.clickAttacks);
         this.enemyPokemon().damage(App.game.party.calculateClickAttack(true));
-        testDPS++;
+        window.testDPS++;
         if (!this.enemyPokemon().isAlive()) {
             this.defeatPokemon();
-            defeatDPS++;
+            window.defeatDPS++;
         }
     }
 }
@@ -460,60 +418,68 @@ function wander(dungeonBoard, bossCoords){
 
 function fullClear(dungeonBoard, bossCoords){
     //Get number of invisible tiles, if 0 we have the map
-    var invisTile = document.getElementById('dungeonMap').querySelectorAll('.tile-invisible').length;
+    const invisTile = document.getElementById('dungeonMap').querySelectorAll('.tile-invisible').length;
     //Chests
-    var getChests = document.getElementById('dungeonMap').querySelectorAll('.tile-chest').length;
+    const getChests = document.getElementById('dungeonMap').querySelectorAll('.tile-chest').length;
     //Enemies
-    var getEnemy = document.getElementById('dungeonMap').querySelectorAll('.tile-enemy').length;
+    const getEnemy = document.getElementById('dungeonMap').querySelectorAll('.tile-enemy').length;
 
     for (var i = 0; i < dungeonBoard.length; i++){
         for (var j = 0; j<dungeonBoard[i].length; j++){
             //Basically just attempts to move to all tiles that aren't cleared
             if (dungeonBoard[i][j].isVisited == false){
-                DungeonRunner.map.moveToCoordinates(j, i)
+                DungeonRunner.map.moveToCoordinates(j, i);
             }
 
             if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest){
-                DungeonRunner.openChest()
+                DungeonRunner.openChest();
             }
         }
     }
     //If we cleared the entire floor, move to the boss room and start the fight
     if (invisTile == 0 && getChests == 0 && getEnemy == 0 && foundBoss == true){
-        DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
-        foundBoss = false
-        bossCoords.length = 0
-        DungeonRunner.startBossFight()
+        DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0]);
+        foundBoss = false;
+        bossCoords.length = 0;
+        DungeonRunner.startBossFight();
     }
 }
 
-if (localStorage.getItem('autoClickState') == null) {
-    localStorage.setItem("autoClickState", "OFF");
+const updateCheck = JSON.parse(localStorage.getItem('autoClickUpdate'));
+if (!updateCheck || updateCheck != 2.0) {
+    localStorage.setItem("autoClickState", false);
+    localStorage.setItem("autoGymState", false);
+    localStorage.setItem("autoDungeonState", false);
+    localStorage.setItem("autoClickUpdate", 2.0);
 }
-if (localStorage.getItem('storedClickDPS') == null) {
+if (!localStorage.getItem('autoClickState')) {
+    localStorage.setItem("autoClickState", false);
+}
+if (!localStorage.getItem('storedClickDPS')) {
     localStorage.setItem("storedClickDPS", 0);
 }
-if (localStorage.getItem('autoGymState') == null) {
-    localStorage.setItem("autoGymState", "OFF");
+if (!localStorage.getItem('autoGymState')) {
+    localStorage.setItem("autoGymState", false);
 }
-if (localStorage.getItem('selectedGym') == null) {
+if (!localStorage.getItem('selectedGym')) {
     localStorage.setItem("selectedGym", 0);
 }
-if (localStorage.getItem('autoDungeonState') == null) {
-    localStorage.setItem("autoDungeonState", "OFF");
+if (!localStorage.getItem('autoDungeonState')) {
+    localStorage.setItem("autoDungeonState", false);
 }
-if (localStorage.getItem('selectedDungeon') == null) {
+if (!localStorage.getItem('selectedDungeon')) {
     localStorage.setItem("selectedDungeon", 0);
 }
-if (localStorage.getItem('delayAutoClick') == null) {
+if (!localStorage.getItem('delayAutoClick')) {
     localStorage.setItem("delayAutoClick", 50);
 }
-clickState = localStorage.getItem('autoClickState');
-gymState = localStorage.getItem('autoGymState');
-gymSelect = +localStorage.getItem('selectedGym');
-dungeonState = localStorage.getItem('autoDungeonState');
-dungeonSelect = localStorage.getItem('selectedDungeon');
-delayAutoClick = localStorage.getItem('delayAutoClick');
+clickState = JSON.parse(localStorage.getItem('autoClickState'));
+gymState = JSON.parse(localStorage.getItem('autoGymState'));
+gymSelect = JSON.parse(localStorage.getItem('selectedGym'));
+dungeonState = JSON.parse(localStorage.getItem('autoDungeonState'));
+dungeonSelect = JSON.parse(localStorage.getItem('selectedDungeon'));
+delayAutoClick = JSON.parse(localStorage.getItem('delayAutoClick'));
+clickDPS = clickState ? JSON.parse(localStorage.getItem('storedClickDPS')) : 0;
 
 function loadScript(){
     var oldInit = Preload.hideSplashScreen
