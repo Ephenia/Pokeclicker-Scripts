@@ -3,7 +3,7 @@
 // @namespace    Pokeclicker Scripts
 // @match        https://www.pokeclicker.com/
 // @grant        none
-// @version      1.7
+// @version      1.8
 // @author       Ephenia (Original/Credit: Drak + Ivan Lay)
 // @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautohatchery.user.js
@@ -18,6 +18,8 @@ var fossilState;
 var hatcherySortVal;
 var hatcherySortDir;
 var hatcherySortSync;
+var pkrsState;
+var pkrsStrict;
 
 function initAutoHatch() {
     const breedingDisplay = document.getElementById('breedingDisplay');
@@ -35,12 +37,20 @@ function initAutoHatch() {
     </button>
     <button id="auto-fossil" class="btn btn-${fossilState ? 'success' : 'danger'}" style="margin-left:20px;">
     Auto Fossil [${fossilState ? 'ON' : 'OFF'}]
+    </button>
+    <button id="pkrs-mode" class="btn btn-${pkrsState ? 'success' : 'danger'}" style="margin-left:20px;">
+    PKRS Mode [${pkrsState ? 'ON' : 'OFF'}]
+    </button>
+    <button id="pkrs-strict" class="btn btn-${pkrsStrict ? 'success' : 'danger'}" style="margin-left:20px;">
+    PKRS Strict [${pkrsStrict ? 'ON' : 'OFF'}]
     </button>`
 
     document.getElementById('auto-hatch-start').addEventListener('click', event => { toggleAutoHatch(event); });
     document.getElementById('sort-sync').addEventListener('click', event => { changesortsync(event); });
     document.getElementById('auto-egg').addEventListener('click', event => { toggleEgg(event); });
     document.getElementById('auto-fossil').addEventListener('click', event => { toggleFossil(event); });
+    document.getElementById('pkrs-mode').addEventListener('click', event => { togglePKRS(event); });
+    document.getElementById('pkrs-strict').addEventListener('click', event => { togglePKRSStrict(event); });
 
     addGlobalStyle('.eggSlot.disabled { pointer-events: unset !important; }');
 
@@ -77,7 +87,23 @@ function toggleFossil(event) {
     fossilState = !fossilState;
     fossilState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
     element.textContent = `Auto Fossil [${fossilState ? 'ON' : 'OFF'}]`;
-    localStorage.setItem('auto-fossil', fossilState);
+    localStorage.setItem('autoFossil', fossilState);
+}
+
+function togglePKRS(event) {
+    const element = event.target;
+    pkrsState = !pkrsState;
+    pkrsState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.textContent = `PKRS Mode [${pkrsState ? 'ON' : 'OFF'}]`;
+    localStorage.setItem('pokerusModeState', pkrsState);
+}
+
+function togglePKRSStrict(event) {
+    const element = event.target;
+    pkrsStrict = !pkrsStrict;
+    pkrsStrict ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.textContent = `PKRS Strict [${pkrsStrict ? 'ON' : 'OFF'}]`;
+    localStorage.setItem('pokerusModeStrict', pkrsStrict);
 }
 
 function autoHatcher() {
@@ -221,13 +247,13 @@ function autoHatcher() {
                     }
                     // Check if either of the types match
                     const type1 =
-                          BreedingFilters.type1.value() > -2
-                    ? BreedingFilters.type1.value()
-                    : null;
+                        BreedingFilters.type1.value() > -2
+                            ? BreedingFilters.type1.value()
+                            : null;
                     const type2 =
-                          BreedingFilters.type2.value() > -2
-                    ? BreedingFilters.type2.value()
-                    : null;
+                        BreedingFilters.type2.value() > -2
+                            ? BreedingFilters.type2.value()
+                            : null;
                     if (type1 !== null || type2 !== null) {
                         const { type: types } = pokemonMap[partyPokemon.name];
                         if ([type1, type2].includes(PokemonType.None)) {
@@ -246,18 +272,42 @@ function autoHatcher() {
                 }
             );
 
-            try {
-                App.game.breeding.addPokemonToHatchery(filteredEggList[0]);
-            } catch (err) {
-                const isFavorite = BreedingFilters.category.value();
-                if (isFavorite != 1) {
-                    const canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
-                    const randBreed = getRandomInt(canBreed.length);
-                    App.game.breeding.addPokemonToHatchery(canBreed[randBreed]);
-                } else {
+            const hasPKRS = App.game.keyItems.hasKeyItem(KeyItemType.Pokerus_virus);
+            const starterName = GameConstants.Starter[player.starter()];
+            const starterPKMN = PartyController.getSortedList().filter(p => p.name == starterName)[0];
+            const virusReady = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false && e.pokerus == false);
+            if (pkrsState && hasPKRS && virusReady.length != 0) {
+                if (starterPKMN._level() == 100 && !starterPKMN.breeding) {
+                    App.game.breeding.addPokemonToHatchery(starterPKMN);
+                    return true;
+                } else if (starterPKMN._level() == 100 && starterPKMN.breeding) {
+                    App.game.breeding.addPokemonToHatchery(virusReady[0]);
                     return true;
                 }
+                if (pkrsStrict) {
+                    return true;
+                } else {
+                    basicHatchery();
+                }
+            } else {
+                basicHatchery();
             }
+
+            function basicHatchery() {
+                try {
+                    App.game.breeding.addPokemonToHatchery(filteredEggList[0]);
+                } catch (err) {
+                    const isFavorite = BreedingFilters.category.value();
+                    if (isFavorite != 1) {
+                        const canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
+                        const randBreed = getRandomInt(canBreed.length);
+                        App.game.breeding.addPokemonToHatchery(canBreed[randBreed]);
+                    } else {
+                        return true;
+                    }
+                }
+            }
+
         }
     }, 50); // Runs every game tick
 }
@@ -288,17 +338,25 @@ if (!localStorage.getItem('hatcherySortDir') == null) {
 if (!localStorage.getItem('hatcherySortSync') == null) {
     localStorage.setItem("hatcherySortSync", false);
 }
+if (!localStorage.getItem('pokerusModeState') == null) {
+    localStorage.setItem("pokerusModeState", false);
+}
+if (!localStorage.getItem('pokerusModeStrict') == null) {
+    localStorage.setItem("pokerusModeStrict", false);
+}
 hatchState = JSON.parse(localStorage.getItem('autoHatchState'));
 eggState = JSON.parse(localStorage.getItem('autoEgg'));
 fossilState = JSON.parse(localStorage.getItem('autoFossil'));
 hatcherySortVal = JSON.parse(localStorage.getItem('hatcherySortVal'));
 hatcherySortDir = JSON.parse(localStorage.getItem('hatcherySortDir'));
 hatcherySortSync = JSON.parse(localStorage.getItem('hatcherySortSync'));
+pkrsState = JSON.parse(localStorage.getItem('pokerusModeState'));
+pkrsStrict = JSON.parse(localStorage.getItem('pokerusModeStrict'));
 
-function loadScript(){
+function loadScript() {
     var oldInit = Preload.hideSplashScreen
 
-    Preload.hideSplashScreen = function(){
+    Preload.hideSplashScreen = function () {
         var result = oldInit.apply(this, arguments)
         initAutoHatch()
         return result
@@ -307,21 +365,21 @@ function loadScript(){
 
 var scriptName = 'enhancedautohatchery'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') != undefined) {
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) != null) {
+        if (localStorage.getItem(scriptName) == 'true') {
             loadScript()
         }
     }
-    else{
+    else {
         localStorage.setItem(scriptName, 'true')
         loadScript()
     }
 }
-else{
+else {
     loadScript();
 }
 
