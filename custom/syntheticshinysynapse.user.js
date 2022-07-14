@@ -3,33 +3,35 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      Ephenia
 // @description Allows you to adjust and modify the shiny rates of everything specifically, as well as set a global shiny rate.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/syntheticshinysynapse.user.js
 // ==/UserScript==
 
 const genSource = ['generateWildPokemon', //Wild Pokemon
-                   'generateDungeonPokemon', //Dungeon Pokemon
-                   'evolve', //Evolution Pokemon
-                   'SafariPokemon', //Safari Pokemon
-                   'claimFunction', //Shop/Claim/Gift Pokemon
-                   'hatch', //Breeding/Eggs
-                   'generateWanderPokemon', //Wandering/Farm Pokemon
-                  ];
+    'generateDungeonPokemon', //Dungeon Pokemon
+    'evolve', //Evolution Pokemon
+    'new', //Safari Pokemon
+    'claimFunction', //Shop/Claim/Gift Pokemon
+    'hatch', //Breeding/Eggs
+    'generateWanderPokemon', //Wandering/Farm Pokemon
+];
 const genDesc = ['Wild Pokémon shiny odds:',
-                 'Dungeon Pokémon shiny odds:',
-                 'Evolution Stone Pokémon shiny odds:',
-                 'Safari Pokémon shiny odds:',
-                 'Gift/Claimed Pokémon shiny odds:',
-                 'Breeding/Hatchery Pokémon shiny odds:',
-                 'Wandering/Farm Pokémon shiny odds:'
-                ];
+    'Dungeon Pokémon shiny odds:',
+    'Evolution Stone Pokémon shiny odds:',
+    'Safari Pokémon shiny odds:',
+    'Gift/Claimed Pokémon shiny odds:',
+    'Breeding/Hatchery Pokémon shiny odds:',
+    'Wandering/Farm Pokémon shiny odds:'
+];
 var shinyTypes;
 var shinyRates = [];
 var prefShinyRates;
 var globalShinyState;
 var globalShinyRate;
+var karmaMode;
+var karmaRates;
 
 function initShinySynapse() {
     getShinyRates();
@@ -42,7 +44,7 @@ function initShinySynapse() {
     a.setAttribute('href', '#shinyModal');
     a.setAttribute('data-toggle', 'modal');
     a.textContent = 'Shiny Modifier';
-    a.addEventListener('click', () => { updateShinyCharm(); });
+    a.addEventListener('click', () => { updateShinyModal(); });
     shinyLi.appendChild(a);
     profileDrop.before(shinyLi);
     const shinyMod = document.createElement('div');
@@ -72,10 +74,14 @@ function initShinySynapse() {
     <button id="shiny-rate-global" class="btn btn-${globalShinyState ? 'success' : 'danger'}" style="margin-left:20px;">
     Global Override [${globalShinyState ? 'ON' : 'OFF'}]
     </button>
+    <button id="shiny-karma-mode" class="btn btn-${karmaMode ? 'success' : 'danger'}" style="margin-left:20px;">
+    Karma Mode [${karmaMode ? 'ON' : 'OFF'}]
+    </button>
     <button id="shiny-rates-reset" class="btn btn-primary" style="margin-left:20px;">
     Reset Rates
     </button>`
     document.getElementById('shiny-rate-global').addEventListener('click', event => { globalToggle(event); });
+    document.getElementById('shiny-karma-mode').addEventListener('click', event => { toggleKarma(event); });
     document.getElementById('shiny-rates-reset').addEventListener('click', () => { resetRates(); });
 
     const modalBody = document.querySelector('[id=shinyModal] div div [class=modal-body]');
@@ -149,7 +155,7 @@ function initShinySynapse() {
     }
     modalBody.appendChild(fragment);
 
-    PokemonFactory.generateShiny = function(chance, skipBonus = false) {
+    PokemonFactory.generateShiny = function (chance, skipBonus = false) {
         let genType;
         try {
             const split = (new Error()).stack.split("\n")[2].trim().split(" ");
@@ -160,7 +166,12 @@ function initShinySynapse() {
         const index = genSource.indexOf(genType);
 
         let trueChance;
-        if (globalShinyState) {
+        if (karmaMode) {
+            trueChance = karmaRates[index];
+            karmaRates[index] = karmaRates[index] - 1;
+            localStorage.setItem('shinyKarmaRates', JSON.stringify(karmaRates));
+        }
+        else if (globalShinyState) {
             trueChance = globalShinyRate;
         } else if (prefShinyRates[index]) {
             trueChance = prefShinyRates[index];
@@ -171,6 +182,10 @@ function initShinySynapse() {
         const bonus = skipBonus ? 1 : App.game.multiplier.getBonus('shiny');
 
         if (Rand.chance(trueChance / bonus)) {
+            if (karmaMode) {
+                karmaRates[index] = GameConstants[shinyTypes[index]]
+                localStorage.setItem('shinyKarmaRates', JSON.stringify(karmaRates));
+            }
             App.game.oakItems.use(OakItemType.Shiny_Charm);
             return true;
         }
@@ -190,6 +205,15 @@ function initShinySynapse() {
         element.setAttribute('class', `btn btn-${globalShinyState ? 'success' : 'danger'}`);
         element.textContent = `Global Override [${globalShinyState ? 'ON' : 'OFF'}`;
         localStorage.setItem("globalShinyState", JSON.stringify(globalShinyState));
+    }
+
+    function toggleKarma(event) {
+        const element = event.target;
+        karmaMode = !karmaMode;
+        element.setAttribute('class', `btn btn-${karmaMode ? 'success' : 'danger'}`);
+        element.textContent = `Karma Mode [${karmaMode ? 'ON' : 'OFF'}`;
+        localStorage.setItem("shinyKarmaMode", JSON.stringify(karmaMode));
+        $('#shinyModal').modal('hide');
     }
 
     function resetRates() {
@@ -223,10 +247,19 @@ function initShinySynapse() {
         event.target.value = value.toLocaleString('en-US');
     }
 
-    function updateShinyCharm() {
-        const shinyMulti = App.game.multiplier.getBonus('shiny');
+    function updateShinyModal() {
+        const modifyBtns = document.getElementsByClassName('shiny-modifier-view');
+        document.getElementById('shiny-modifier-global').disabled = karmaMode ? true : false;
+        document.getElementById('shiny-rates-reset').disabled = karmaMode ? true : false;
+        modifyBtns[0].querySelector('button').disabled = karmaMode ? true : false;
         for (let i = 0; i < shinyRates.length; i++) {
-            document.getElementById(`shiny-charm-rate-${i}`).textContent = (shinyRates[i] / shinyMulti);
+            document.getElementById(`shiny-modifier-${i}`).disabled = karmaMode ? true : false;
+            document.getElementById(`shiny-modifier-${i}`).setAttribute('placeholder', `${karmaMode ? karmaRates[i].toLocaleString('en-US') : shinyRates[i].toLocaleString('en-US')}`);
+            modifyBtns[i + 1].querySelector('button').disabled = karmaMode ? true : false;
+        }
+        const shinyMulti = App.game.multiplier.getBonus('shiny');
+        for (let ii = 0; ii < shinyRates.length; ii++) {
+            document.getElementById(`shiny-charm-rate-${ii}`).textContent = karmaMode ? (karmaRates[ii] / shinyMulti) : (shinyRates[ii] / shinyMulti);
         }
     }
 }
@@ -248,23 +281,33 @@ function getShinyRates() {
 
 shinyTypes = getShinyTypes();
 if (!localStorage.getItem('globalShinyState')) {
-    localStorage.setItem("globalShinyState", false);
+    localStorage.setItem('globalShinyState', false);
 }
 if (!localStorage.getItem('globalShinyRate')) {
-    localStorage.setItem("globalShinyRate", 8192);
+    localStorage.setItem('globalShinyRate', 8192);
 }
 if (!localStorage.getItem('shinySetRates')) {
     const prefArray = new Array(shinyTypes.length).fill(null, 0, shinyTypes.length);
-    localStorage.setItem("shinySetRates", JSON.stringify(prefArray));
+    localStorage.setItem('shinySetRates', JSON.stringify(prefArray));
+}
+if (!localStorage.getItem('shinyKarmaMode')) {
+    localStorage.setItem('shinyKarmaMode', false);
+}
+if (!localStorage.getItem('shinyKarmaRates')) {
+    const karmaRates = [];
+    shinyTypes.forEach(item => { karmaRates.push(GameConstants[item]) });
+    localStorage.setItem('shinyKarmaRates', JSON.stringify(karmaRates));
 }
 globalShinyState = JSON.parse(localStorage.getItem('globalShinyState'));
 globalShinyRate = JSON.parse(localStorage.getItem('globalShinyRate'));
 prefShinyRates = JSON.parse(localStorage.getItem('shinySetRates'));
+karmaMode = JSON.parse(localStorage.getItem('shinyKarmaMode'));
+karmaRates = JSON.parse(localStorage.getItem('shinyKarmaRates'));
 
-function loadScript(){
+function loadScript() {
     var oldInit = Preload.hideSplashScreen
 
-    Preload.hideSplashScreen = function(){
+    Preload.hideSplashScreen = function () {
         var result = oldInit.apply(this, arguments)
         initShinySynapse()
         return result
@@ -273,21 +316,21 @@ function loadScript(){
 
 var scriptName = 'syntheticshinysynapse'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') != undefined) {
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) != null) {
+        if (localStorage.getItem(scriptName) == 'true') {
             loadScript()
         }
     }
-    else{
+    else {
         localStorage.setItem(scriptName, 'true')
         loadScript()
     }
 }
-else{
+else {
     loadScript();
 }
 
