@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.3
+// @version     1.4
 // @author      Ephenia
 // @description Allows you to adjust and modify the shiny rates of everything specifically, as well as set a global shiny rate.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/syntheticshinysynapse.user.js
@@ -32,6 +32,7 @@ var globalShinyState;
 var globalShinyRate;
 var karmaMode;
 var karmaRates;
+var shinyDOMUpdate;
 
 function initShinySynapse() {
     getShinyRates();
@@ -77,11 +78,15 @@ function initShinySynapse() {
     <button id="shiny-karma-mode" class="btn btn-${karmaMode ? 'success' : 'danger'}" style="margin-left:20px;">
     Karma Mode [${karmaMode ? 'ON' : 'OFF'}]
     </button>
+    <button id="shiny-dom-update" class="btn btn-${shinyDOMUpdate ? 'success' : 'danger'}" style="margin-left:20px;">
+    DOM Updates [${shinyDOMUpdate ? 'ON' : 'OFF'}]
+    </button>
     <button id="shiny-rates-reset" class="btn btn-primary" style="margin-left:20px;">
     Reset Rates
     </button>`
     document.getElementById('shiny-rate-global').addEventListener('click', event => { globalToggle(event); });
     document.getElementById('shiny-karma-mode').addEventListener('click', event => { toggleKarma(event); });
+    document.getElementById('shiny-dom-update').addEventListener('click', event => { toggleDOM(event); });
     document.getElementById('shiny-rates-reset').addEventListener('click', () => { resetRates(); });
 
     const modalBody = document.querySelector('[id=shinyModal] div div [class=modal-body]');
@@ -189,6 +194,9 @@ function initShinySynapse() {
             App.game.oakItems.use(OakItemType.Shiny_Charm);
             return true;
         }
+        if (shinyDOMUpdate && $('#shinyModal').is(':visible')) {
+            updateShinyModal();
+        }
         return false;
     }
 
@@ -203,7 +211,7 @@ function initShinySynapse() {
         const element = event.target;
         globalShinyState = !globalShinyState;
         element.setAttribute('class', `btn btn-${globalShinyState ? 'success' : 'danger'}`);
-        element.textContent = `Global Override [${globalShinyState ? 'ON' : 'OFF'}`;
+        element.textContent = `Global Override [${globalShinyState ? 'ON' : 'OFF'}]`;
         localStorage.setItem("globalShinyState", JSON.stringify(globalShinyState));
     }
 
@@ -211,9 +219,17 @@ function initShinySynapse() {
         const element = event.target;
         karmaMode = !karmaMode;
         element.setAttribute('class', `btn btn-${karmaMode ? 'success' : 'danger'}`);
-        element.textContent = `Karma Mode [${karmaMode ? 'ON' : 'OFF'}`;
+        element.textContent = `Karma Mode [${karmaMode ? 'ON' : 'OFF'}]`;
         localStorage.setItem("shinyKarmaMode", JSON.stringify(karmaMode));
-        $('#shinyModal').modal('hide');
+        updateShinyModal();
+    }
+
+    function toggleDOM(event) {
+        const element = event.target;
+        shinyDOMUpdate = !shinyDOMUpdate;
+        element.setAttribute('class', `btn btn-${shinyDOMUpdate ? 'success' : 'danger'}`);
+        element.textContent = `DOM Updates [${shinyDOMUpdate ? 'ON' : 'OFF'}]`;
+        localStorage.setItem("shinyDOMUpdate", JSON.stringify(shinyDOMUpdate));
     }
 
     function resetRates() {
@@ -298,11 +314,15 @@ if (!localStorage.getItem('shinyKarmaRates')) {
     shinyTypes.forEach(item => { karmaRates.push(GameConstants[item]) });
     localStorage.setItem('shinyKarmaRates', JSON.stringify(karmaRates));
 }
+if (!localStorage.getItem('shinyDOMUpdate')) {
+    localStorage.setItem('shinyDOMUpdate', false);
+}
 globalShinyState = JSON.parse(localStorage.getItem('globalShinyState'));
 globalShinyRate = JSON.parse(localStorage.getItem('globalShinyRate'));
 prefShinyRates = JSON.parse(localStorage.getItem('shinySetRates'));
 karmaMode = JSON.parse(localStorage.getItem('shinyKarmaMode'));
 karmaRates = JSON.parse(localStorage.getItem('shinyKarmaRates'));
+shinyDOMUpdate = JSON.parse(localStorage.getItem('shinyDOMUpdate'));
 
 function loadScript() {
     var oldInit = Preload.hideSplashScreen
