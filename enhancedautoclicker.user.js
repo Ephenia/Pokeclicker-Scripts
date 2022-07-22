@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     2.0
+// @version     2.1
 // @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautoclicker.user.js
@@ -145,7 +145,7 @@ function changeSelectedGym(event) {
 }
 
 function changeSelectedDungeon(event) {
-        const element = event.target;
+    const element = event.target;
     if (dungeonSelect != +element.value) {
         dungeonSelect = +element.value;
         localStorage.setItem("selectedDungeon", dungeonSelect);
@@ -209,7 +209,7 @@ function autoClicker() {
             autoDungeon();
         }
         //Reset the values for the boss coordinates if we timeout or turn off autoDungeon
-        if ((!dungeonState && foundBoss) || (dungeonState && DungeonRunner.dungeonFinished() && foundBoss)){
+        if ((!dungeonState && foundBoss) || (dungeonState && DungeonRunner.dungeonFinished() && foundBoss)) {
             foundBoss = false
             bossCoords.length = 0
         }
@@ -253,7 +253,7 @@ function clickDelayFixed(int) {
 
 function overideClickAttack() {
     // Overiding the game's function for Click Attack
-    Battle.clickAttack = function() {
+    Battle.clickAttack = function () {
         // click attacks disabled and we already beat the starter
         if (App.game.challenges.list.disableClickAttack.active() && player.starter() != GameConstants.Starter.None) {
             return;
@@ -282,8 +282,9 @@ function autoGym() {
     if (player.town().content.length != 0) {
         //Might break in some towns, needs more testing
         if (player.town().content[0] instanceof Gym) {
-            if (MapHelper.calculateTownCssClass(player.town().name) != "currentLocation") {
-                MapHelper.moveToTown(player.town().name)
+            const townName = player.town().name;
+            if (!MapHelper.isTownCurrentLocation(townName)) {
+                MapHelper.moveToTown(townName)
             }
             /*Don't think this can ever happen
             if (player.region != player.town().region) {
@@ -293,23 +294,23 @@ function autoGym() {
             if (App.game.gameState != GameConstants.GameState.gym) {
                 //Checking if Champion exists here and is unlocked
                 let champUnlocked;
-                try {champUnlocked = player.town().content[4].isUnlocked()} catch (err) { champUnlocked = false }
+                try { champUnlocked = player.town().content[4].isUnlocked() } catch (err) { champUnlocked = false }
                 //If "All" is selected and the Champion is unlocked, then go through list of league fully from 0-4
                 if (gymSelect === 5 && champUnlocked) {
                     GymRunner.startGym(player.town().content[allSelectedGym])
                     allSelectedGym++
-                    if(allSelectedGym === 5) {
+                    if (allSelectedGym === 5) {
                         allSelectedGym = 0
                     }
                 } else {
                     //If the content is a Gym or league champion and we unlocked it we fight
-                    if ((player.town().content[gymSelect] instanceof Gym && player.town().content[gymSelect].isUnlocked()) || (player.town().content[gymSelect] instanceof Champion && player.town().content[gymSelect].isUnlocked())){
+                    if ((player.town().content[gymSelect] instanceof Gym && player.town().content[gymSelect].isUnlocked()) || (player.town().content[gymSelect] instanceof Champion && player.town().content[gymSelect].isUnlocked())) {
                         GymRunner.startGym(player.town().content[gymSelect])
                     }
                     else {
                         //Otherwise we try to fight the previous gyms (elite 4)
-                        for (var i = player.town().content.length - 1; i >= 0; i--){
-                            if ((player.town().content[i] instanceof Gym && player.town().content[i].isUnlocked()) || (player.town().content[i] instanceof Champion && player.town().content[i].isUnlocked())){
+                        for (var i = player.town().content.length - 1; i >= 0; i--) {
+                            if ((player.town().content[i] instanceof Gym && player.town().content[i].isUnlocked()) || (player.town().content[i] instanceof Champion && player.town().content[i].isUnlocked())) {
                                 GymRunner.startGym(player.town().content[i])
                                 break;
                             }
@@ -328,8 +329,9 @@ function autoDungeon() {
     if (player.town().hasOwnProperty("dungeon") == true && player.town().dungeon !== undefined) {
         var getTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
         var dungeonCost = player.town().dungeon.tokenCost;
-        if (MapHelper.calculateTownCssClass(player.town().name) != "currentLocation") {
-            MapHelper.moveToTown(player.town().name)
+        const townName = player.town().name;
+        if (!MapHelper.isTownCurrentLocation(townName)) {
+            MapHelper.moveToTown(townName)
         }
         //Don't think this condition is ever possible
         /*if (player.region != player.town().region) {
@@ -342,27 +344,27 @@ function autoDungeon() {
         if (App.game.gameState === GameConstants.GameState.dungeon) {
             var dungeonBoard = DungeonRunner.map.board();
             //The boss can be found at any time
-            if (foundBoss == false){
+            if (foundBoss == false) {
                 bossCoords = scan(dungeonBoard)
             }
             //Wander around until we can move to the boss tile
             //Pathfinding should be implemented here, A* looks like the best algorithm
-            else if (foundBoss == true && dungeonSelect == 1){
+            else if (foundBoss == true && dungeonSelect == 1) {
                 wander(dungeonBoard, bossCoords)
             }
-            else if (dungeonSelect == 0){
+            else if (dungeonSelect == 0) {
                 fullClear(dungeonBoard, bossCoords)
             }
         }
     }
 }
 
-function scan(dungeonBoard){
+function scan(dungeonBoard) {
     /*var bossCoords = []
     var playerCoords = []*/
-    for (var i = 0; i < dungeonBoard.length; i++){
-        for (var j = 0; j<dungeonBoard[i].length; j++){
-            if (dungeonBoard[i][j].type() == GameConstants.DungeonTile.boss){
+    for (var i = 0; i < dungeonBoard.length; i++) {
+        for (var j = 0; j < dungeonBoard[i].length; j++) {
+            if (dungeonBoard[i][j].type() == GameConstants.DungeonTile.boss) {
                 foundBoss = true
                 return [i, j]
             }
@@ -374,36 +376,36 @@ function scan(dungeonBoard){
     }
 }
 
-function wander(dungeonBoard, bossCoords){
+function wander(dungeonBoard, bossCoords) {
     var moves = []
     //Attempt to move to the boss if the coordinates are within movable range
     DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0])
-    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss){
+    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
         foundBoss = false
         bossCoords.length = 0
         DungeonRunner.startBossFight()
     }
     //Iterates through the board and compiles all possible moves
-    for (var i = 0; i < dungeonBoard.length; i++){
-        for (var j = 0; j < dungeonBoard[i].length; j++){
+    for (var i = 0; i < dungeonBoard.length; i++) {
+        for (var j = 0; j < dungeonBoard[i].length; j++) {
             //The entrance doesn't count as visited on first entering a dungeon so this OR is required
-            if (dungeonBoard[i][j].isVisited == true || dungeonBoard[i][j].type() == GameConstants.DungeonTile.entrance){
+            if (dungeonBoard[i][j].isVisited == true || dungeonBoard[i][j].type() == GameConstants.DungeonTile.entrance) {
                 //This is required because if the column doesn't exist it throws an attribute of undefined error
-                if (dungeonBoard[i+1] != undefined){
-                    if (dungeonBoard[i+1][j] != undefined){
-                        if (dungeonBoard[i+1][j].isVisited == false) moves.push([i+1, j])
+                if (dungeonBoard[i + 1] != undefined) {
+                    if (dungeonBoard[i + 1][j] != undefined) {
+                        if (dungeonBoard[i + 1][j].isVisited == false) moves.push([i + 1, j])
                     }
                 }
-                if (dungeonBoard[i-1] != undefined){
-                    if (dungeonBoard[i-1][j] != undefined){
-                        if (dungeonBoard[i-1][j].isVisited == false) moves.push([i-1, j])
+                if (dungeonBoard[i - 1] != undefined) {
+                    if (dungeonBoard[i - 1][j] != undefined) {
+                        if (dungeonBoard[i - 1][j].isVisited == false) moves.push([i - 1, j])
                     }
                 }
-                if (dungeonBoard[i][j+1] != undefined){
-                    if (dungeonBoard[i][j+1].isVisited == false) moves.push([i, j+1])
+                if (dungeonBoard[i][j + 1] != undefined) {
+                    if (dungeonBoard[i][j + 1].isVisited == false) moves.push([i, j + 1])
                 }
-                if (dungeonBoard[i][j-1] != undefined){
-                    if (dungeonBoard[i][j-1].isVisited == false) moves.push([i, j-1])
+                if (dungeonBoard[i][j - 1] != undefined) {
+                    if (dungeonBoard[i][j - 1].isVisited == false) moves.push([i, j - 1])
                 }
             }
         }
@@ -416,7 +418,7 @@ function wander(dungeonBoard, bossCoords){
     moves.length = 0
 }
 
-function fullClear(dungeonBoard, bossCoords){
+function fullClear(dungeonBoard, bossCoords) {
     //Get number of invisible tiles, if 0 we have the map
     const invisTile = document.getElementById('dungeonMap').querySelectorAll('.tile-invisible').length;
     //Chests
@@ -424,20 +426,20 @@ function fullClear(dungeonBoard, bossCoords){
     //Enemies
     const getEnemy = document.getElementById('dungeonMap').querySelectorAll('.tile-enemy').length;
 
-    for (var i = 0; i < dungeonBoard.length; i++){
-        for (var j = 0; j<dungeonBoard[i].length; j++){
+    for (var i = 0; i < dungeonBoard.length; i++) {
+        for (var j = 0; j < dungeonBoard[i].length; j++) {
             //Basically just attempts to move to all tiles that aren't cleared
-            if (dungeonBoard[i][j].isVisited == false){
+            if (dungeonBoard[i][j].isVisited == false) {
                 DungeonRunner.map.moveToCoordinates(j, i);
             }
 
-            if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest){
+            if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.chest) {
                 DungeonRunner.openChest();
             }
         }
     }
     //If we cleared the entire floor, move to the boss room and start the fight
-    if (invisTile == 0 && getChests == 0 && getEnemy == 0 && foundBoss == true){
+    if (invisTile == 0 && getChests == 0 && getEnemy == 0 && foundBoss == true) {
         DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0]);
         foundBoss = false;
         bossCoords.length = 0;
@@ -445,8 +447,8 @@ function fullClear(dungeonBoard, bossCoords){
     }
 }
 
-const updateCheckClick = JSON.parse(localStorage.getItem('autoClickUpdate'));
-if (!updateCheckClick || updateCheckClick != 2.0) {
+const updateCheck = JSON.parse(localStorage.getItem('autoClickUpdate'));
+if (!updateCheck || updateCheck != 2.0) {
     localStorage.setItem("autoClickState", false);
     localStorage.setItem("autoGymState", false);
     localStorage.setItem("autoDungeonState", false);
@@ -481,10 +483,10 @@ dungeonSelect = JSON.parse(localStorage.getItem('selectedDungeon'));
 delayAutoClick = JSON.parse(localStorage.getItem('delayAutoClick'));
 clickDPS = clickState ? JSON.parse(localStorage.getItem('storedClickDPS')) : 0;
 
-function loadScript(){
+function loadScript() {
     var oldInit = Preload.hideSplashScreen
 
-    Preload.hideSplashScreen = function(){
+    Preload.hideSplashScreen = function () {
         var result = oldInit.apply(this, arguments)
         initAutoClicker()
         return result
@@ -493,21 +495,21 @@ function loadScript(){
 
 var scriptName = 'enhancedautoclicker'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') != undefined) {
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) != null) {
+        if (localStorage.getItem(scriptName) == 'true') {
             loadScript()
         }
     }
-    else{
+    else {
         localStorage.setItem(scriptName, 'true')
         loadScript()
     }
 }
-else{
+else {
     loadScript();
 }
 
