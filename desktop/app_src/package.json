@@ -1,0 +1,20 @@
+{
+  "name": "pokeclicker-desktop",
+  "version": "1.1.0",
+  "description": "PokeClicker Desktop",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RedSparr0w/Pokeclicker-desktop.git"
+  },
+  "main": "src/main.js",
+  "author": {
+    "name": "RedSparr0w",
+    "email": "desktop@pokeclicker.com"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.5.5",
+    "discord-rpc": "^4.0.1",
+    "electron-updater": "^4.3.9"
+  }
+}

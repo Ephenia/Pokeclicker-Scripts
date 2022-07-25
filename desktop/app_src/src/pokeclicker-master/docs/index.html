@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pokéclicker Setup</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="utf-8"/>
+    <link href="assets/images/favicon.ico" rel="icon" type="image/x-icon"/>
+    <!--Bootstrap-->
+    <link href="libs/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Analytics-->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-171657234-1"></script>
+    <script>
+        if (true) {
+            window.dataLayer = window.dataLayer || [];
+
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+
+            gtag('js', new Date());
+
+            gtag('config', 'UA-171657234-1');
+        }
+    </script>
+
+    <style>
+    .loader {
+        position: fixed;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        background-color: #79c9fa;
+        background-size: cover;
+        z-index: 9999;
+    }
+
+    .loader-wrapper {
+        height: 100%;
+        width: 100%;
+        position: relative;
+    }
+
+    .loader-pokeball {
+        animation-name: loader;
+        animation-duration: 1000ms;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in-out;
+    }
+
+    @keyframes loader {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+    </style>
+
+</head>
+<body class="no-select">
+<link href="https://bootswatch.com/4/yeti/bootstrap.min.css">
+
+<div class="loader" id="loader">
+    <br>
+    <div class="loader-wrapper">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-8 offset-sm-2 text-center text-light">
+                    <img style="width:100%" src="assets/images/pokeclickerlogo.png">
+                    <img src="assets/images/pokeball/Pokeball.png" class="loader-pokeball"/>
+                    <br/>
+                    <strong id="status">Downloading Files...</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+const setStatus = status => document.getElementById('status').innerHTML = status;
+</script>
+</body>
+</html>
