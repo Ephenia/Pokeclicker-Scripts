@@ -3,28 +3,28 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.4
+// @version     1.5
 // @author      Ephenia
 // @description Allows you to adjust and modify the shiny rates of everything specifically, as well as set a global shiny rate.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/syntheticshinysynapse.user.js
 // ==/UserScript==
 
 const genSource = ['generateWildPokemon', //Wild Pokemon
-    'generateDungeonPokemon', //Dungeon Pokemon
-    'evolve', //Evolution Pokemon
-    'new', //Safari Pokemon
-    'claimFunction', //Shop/Claim/Gift Pokemon
-    'hatch', //Breeding/Eggs
-    'generateWanderPokemon', //Wandering/Farm Pokemon
-];
+                   'generateDungeonPokemon', //Dungeon Pokemon
+                   'evolve', //Evolution Pokemon
+                   'new', //Safari Pokemon
+                   'claimFunction', //Shop/Claim/Gift Pokemon
+                   'hatch', //Breeding/Eggs
+                   'generateWanderPokemon', //Wandering/Farm Pokemon
+                  ];
 const genDesc = ['Wild Pokémon shiny odds:',
-    'Dungeon Pokémon shiny odds:',
-    'Evolution Stone Pokémon shiny odds:',
-    'Safari Pokémon shiny odds:',
-    'Gift/Claimed Pokémon shiny odds:',
-    'Breeding/Hatchery Pokémon shiny odds:',
-    'Wandering/Farm Pokémon shiny odds:'
-];
+                 'Dungeon Pokémon shiny odds:',
+                 'Evolution Stone Pokémon shiny odds:',
+                 'Safari Pokémon shiny odds:',
+                 'Gift/Claimed Pokémon shiny odds:',
+                 'Breeding/Hatchery Pokémon shiny odds:',
+                 'Wandering/Farm Pokémon shiny odds:'
+                ];
 var shinyTypes;
 var shinyRates = [];
 var prefShinyRates;
@@ -168,7 +168,7 @@ function initShinySynapse() {
         } catch (err) {
             genType = (new Error()).stack.split("\n")[1].trim().split(" ")[0].replace(/@(.*?)$/, '');
         }
-        const index = genSource.indexOf(genType);
+        const index = genType == 'generateDungeonBoss' ? 1 : genSource.indexOf(genType);
 
         let trueChance;
         if (karmaMode) {
