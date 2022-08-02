@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     2.1
+// @version     2.2
 // @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautoclicker.user.js
@@ -293,10 +293,17 @@ function autoGym() {
 
             if (App.game.gameState != GameConstants.GameState.gym) {
                 //Checking if Champion exists here and is unlocked
+                let champCheck;
+                try {
+                    champCheck = player.town().content[4];
+                    champCheck = champCheck.constructor.name == 'Champion'
+                } catch (err) {
+                    champCheck = false;
+                };
                 let champUnlocked;
-                try { champUnlocked = player.town().content[4].isUnlocked() } catch (err) { champUnlocked = false }
+                try { champUnlocked = player.town().content[4].isUnlocked() } catch (err) { champUnlocked = false };
                 //If "All" is selected and the Champion is unlocked, then go through list of league fully from 0-4
-                if (gymSelect === 5 && champUnlocked) {
+                if (gymSelect === 5 && champCheck && champUnlocked) {
                     GymRunner.startGym(player.town().content[allSelectedGym])
                     allSelectedGym++
                     if (allSelectedGym === 5) {
@@ -447,8 +454,8 @@ function fullClear(dungeonBoard, bossCoords) {
     }
 }
 
-const updateCheck = JSON.parse(localStorage.getItem('autoClickUpdate'));
-if (!updateCheck || updateCheck != 2.0) {
+const updateCheckClick = JSON.parse(localStorage.getItem('autoClickUpdate'));
+if (!updateCheckClick || updateCheckClick != 2.0) {
     localStorage.setItem("autoClickState", false);
     localStorage.setItem("autoGymState", false);
     localStorage.setItem("autoDungeonState", false);
