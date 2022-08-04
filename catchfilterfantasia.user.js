@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.4
+// @version     1.5
 // @author      Ephenia
 // @description An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
@@ -386,7 +386,7 @@ function overideDefeatPokemon() {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
-                    this.attemptCatch(enemyPokemon);
+                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
                     if (Battle.route != 0) {
                         this.generateNewEnemy();
                     }
@@ -398,7 +398,7 @@ function overideDefeatPokemon() {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
-                    this.attemptCatch(enemyPokemon);
+                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
                     if (Battle.route != 0) {
                         this.generateNewEnemy();
                     }
@@ -463,7 +463,7 @@ function overideDefeatPokemon() {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
-                    this.attemptCatch(enemyPokemon);
+                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
                     if (DungeonRunner.defeatedBoss()) {
                         DungeonRunner.dungeonWon();
                     }
@@ -474,7 +474,7 @@ function overideDefeatPokemon() {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
-                    this.attemptCatch(enemyPokemon);
+                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
                     if (DungeonRunner.defeatedBoss()) {
                         DungeonRunner.dungeonWon();
                     }
