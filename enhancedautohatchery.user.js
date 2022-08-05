@@ -3,7 +3,7 @@
 // @namespace    Pokeclicker Scripts
 // @match        https://www.pokeclicker.com/
 // @grant        none
-// @version      1.8
+// @version      1.9
 // @author       Ephenia (Original/Credit: Drak + Ivan Lay)
 // @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautohatchery.user.js
@@ -167,15 +167,16 @@ function autoHatcher() {
                 }
             }
 
+            let randFossilIndex;
+            const storedFossilID = [];
             if (fossilState) {
-                var randFossilIndex;
-                var storedFossilName = [];
-                var storedFossilID = [];
+                const storedFossilName = [];
                 const treasureLength = player.mineInventory().length;
                 for (var e = 0; e < treasureLength; e++) {
-                    const valueType = player.mineInventory()[e].valueType
+                    const valueType = player.mineInventory()[e].valueType;
+                    //valueType 3 equals fossil or old "Mine Egg" type
                     const itemAmount = player.mineInventory()[e].amount()
-                    if (valueType == "Mine Egg" && itemAmount > 0) {
+                    if (valueType == 3 && itemAmount > 0) {
                         const fossilName = player.mineInventory()[e].name;
                         const fossilID = player.mineInventory()[e].id;
                         const fossilePoke = GameConstants.FossilToPokemon[fossilName];
@@ -312,8 +313,8 @@ function autoHatcher() {
     }, 50); // Runs every game tick
 }
 
-const updateCheckHatch = JSON.parse(localStorage.getItem('autoHatchUpdate'));
-if (!updateCheckHatch || updateCheckHatch != 1.7) {
+const updateCheck = JSON.parse(localStorage.getItem('autoHatchUpdate'));
+if (!updateCheck || updateCheck != 1.7) {
     localStorage.setItem("autoHatchState", false);
     localStorage.setItem("autoEgg", false);
     localStorage.setItem("autoFossil", false);
