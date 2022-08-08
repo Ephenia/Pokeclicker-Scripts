@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     2.2
+// @version     2.3
 // @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautoclicker.user.js
@@ -485,7 +485,14 @@ if (!localStorage.getItem('delayAutoClick')) {
 clickState = JSON.parse(localStorage.getItem('autoClickState'));
 gymState = JSON.parse(localStorage.getItem('autoGymState'));
 gymSelect = JSON.parse(localStorage.getItem('selectedGym'));
-dungeonState = JSON.parse(localStorage.getItem('autoDungeonState'));
+
+try {
+    dungeonState = localStorage.getItem('autoDungeonState');
+} catch (error) {
+    dungeonState = false
+    localStorage.setItem("autoDungeonState", false);
+}
+
 dungeonSelect = JSON.parse(localStorage.getItem('selectedDungeon'));
 delayAutoClick = JSON.parse(localStorage.getItem('delayAutoClick'));
 clickDPS = clickState ? JSON.parse(localStorage.getItem('storedClickDPS')) : 0;
