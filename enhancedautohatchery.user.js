@@ -3,7 +3,7 @@
 // @namespace    Pokeclicker Scripts
 // @match        https://www.pokeclicker.com/
 // @grant        none
-// @version      1.9
+// @version      1.10
 // @author       Ephenia (Original/Credit: Drak + Ivan Lay)
 // @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautohatchery.user.js
@@ -274,17 +274,79 @@ function autoHatcher() {
             );
 
             const hasPKRS = App.game.keyItems.hasKeyItem(KeyItemType.Pokerus_virus);
-            const starterName = GameConstants.Starter[player.starter()];
-            const starterPKMN = PartyController.getSortedList().filter(p => p.name == starterName)[0];
-            const virusReady = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false && e.pokerus == false);
-            if (pkrsState && hasPKRS && virusReady.length != 0) {
-                if (starterPKMN._level() == 100 && !starterPKMN.breeding) {
-                    App.game.breeding.addPokemonToHatchery(starterPKMN);
-                    return true;
-                } else if (starterPKMN._level() == 100 && starterPKMN.breeding) {
-                    App.game.breeding.addPokemonToHatchery(virusReady[0]);
-                    return true;
+
+            // Returns true if PartyPokemon's have a type in common
+            function matchingType(p1, p2) {
+                if (p1.type.includes(PokemonType.None)) {
+                    return p2.type.includes(p1.type[0] == PokemonType.None ? p1.type[1] : p1.type[0]);
                 }
+                if (p2.type.includes(PokemonType.None)) {
+                    return p1.type.includes(p2.type[0] == PokemonType.None ? p2.type[1] : p2.type[0]);
+                }
+                return p1.type.includes(p2.type[0]) || p1.type.includes(p2.type[1]);
+            }
+
+            if (pkrsState && hasPKRS) {
+                const virusReady = PartyController.getSortedList().filter(
+                    p => p.level == 100 && !p.breeding && !p.pokerus);
+                if (virusReady.length == 0) {
+                    if (pkrsStrict) {
+                        return true;
+                    } else {
+                        basicHatchery();
+                    }
+                }
+
+                const pkrsPKMNS = PartyController.getSortedList().filter(
+                    p => p.level == 100 && !p.breeding && p.pokerus);
+
+                for (let i = 0; i < App.game.breeding.eggSlots; i++) {
+                    const breeding = App.game.breeding.eggList[i]().partyPokemon
+                    if (!breeding) {
+                        break;
+                    }
+                    if (breeding.pokerus) {
+                        // Can it contaminate other?
+                        for (let toBreed of virusReady.filter(
+                                p => matchingType(pokemonMap[p.name], pokemonMap[breeding.name]))) {
+                            App.game.breeding.addPokemonToHatchery(toBreed);
+                            return true;
+                        }
+                    } else {
+                        // Is it respecting social distancing?
+                        var needContamination = true;
+                        // Check starting from next one as previous ones were already checked
+                        for (let j = i + 1; j < App.game.breeding.eggSlots; j++) {
+                            const breedingNext = App.game.breeding.eggList[j]().partyPokemon
+                            if (!breedingNext) {
+                                break;
+                            }
+                            if (!breedingNext.pokerus) {
+                                continue;
+                            }
+                            if (matchingType(pokemonMap[breeding.name], pokemonMap[breedingNext.name])) {
+                                needContamination = false;
+                                break;
+                            }
+                        }
+                        if (needContamination) {
+                            for (let pkrsToBreed of pkrsPKMNS.filter(
+                                    p => matchingType(pokemonMap[breeding.name], pokemonMap[p.name]))) {
+                                App.game.breeding.addPokemonToHatchery(pkrsToBreed);
+                                return true;
+                            }
+                        }
+                    }
+                }
+                // Nothing to do with current queue. Add a contagious for next tick
+                for (let toBreed of virusReady) {
+                    for (let pkrsToBreed of pkrsPKMNS.filter(
+                            p => matchingType(pokemonMap[toBreed.name], pokemonMap[p.name]))) {
+                        App.game.breeding.addPokemonToHatchery(pkrsToBreed);
+                        return true;
+                    }
+                }
+                // No "healthy" pokemon to breed
                 if (pkrsStrict) {
                     return true;
                 } else {
