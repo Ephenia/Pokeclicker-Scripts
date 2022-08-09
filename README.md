@@ -12,6 +12,10 @@ If you are looking to use these scripts on the client version of Pokéclicker ([
 
 **If you are looking to have something specific created or have any inquiries, feel free to contact me directly (contact info on profile) OR [open and create an issue](https://github.com/Ephenia/Pokeclicker-Scripts/issues).**
 
+<img src="https://discordapp.com/api/guilds/950947559474618440/widget.png?style=banner2" alt="Discord Banner 2"/>
+
+You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also click the banner above), be sure to grab the `PokeClicker` role from the `#pick-your-roles` channel to gain access to the Pokéclicker section.
+
 **Please do make sure that you read the [Issues and PR Guidelines found here](//github.com/Ephenia/Pokeclicker-Scripts/issues/119) if you are wanting to open an issue, or if you wish to contribute to the project.**
 
 **More scripts and things that I create will be added in due time, when I am interested and or am motivated enough to work. Remember, that I do this all free of charge and ask for literally nothing in return. I mainly created this project to simply share my passion for this game and show ways that it can be improved and or be more fun.**
