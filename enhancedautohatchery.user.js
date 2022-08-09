@@ -3,7 +3,7 @@
 // @namespace    Pokeclicker Scripts
 // @match        https://www.pokeclicker.com/
 // @grant        none
-// @version      1.9
+// @version      1.10
 // @author       Ephenia (Original/Credit: Drak + Ivan Lay)
 // @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautohatchery.user.js
@@ -15,6 +15,7 @@ var autoHatchLoop;
 var randFossilEgg;
 var eggState;
 var fossilState;
+var shinyFossilsState;
 var hatcherySortVal;
 var hatcherySortDir;
 var hatcherySortSync;
@@ -38,6 +39,9 @@ function initAutoHatch() {
     <button id="auto-fossil" class="btn btn-${fossilState ? 'success' : 'danger'}" style="margin-left:20px;">
     Auto Fossil [${fossilState ? 'ON' : 'OFF'}]
     </button>
+    <button id="shiny-fossils" class="btn btn-${shinyFossilsState ? 'success' : 'danger'}" style="margin-left:20px;">
+    Shiny Fossils [${shinyFossilsState ? 'ON' : 'OFF'}]
+    </button>
     <button id="pkrs-mode" class="btn btn-${pkrsState ? 'success' : 'danger'}" style="margin-left:20px;">
     PKRS Mode [${pkrsState ? 'ON' : 'OFF'}]
     </button>
@@ -49,6 +53,7 @@ function initAutoHatch() {
     document.getElementById('sort-sync').addEventListener('click', event => { changesortsync(event); });
     document.getElementById('auto-egg').addEventListener('click', event => { toggleEgg(event); });
     document.getElementById('auto-fossil').addEventListener('click', event => { toggleFossil(event); });
+    document.getElementById('shiny-fossils').addEventListener('click', event => { toggleShinyFossils(event); });
     document.getElementById('pkrs-mode').addEventListener('click', event => { togglePKRS(event); });
     document.getElementById('pkrs-strict').addEventListener('click', event => { togglePKRSStrict(event); });
 
@@ -88,6 +93,14 @@ function toggleFossil(event) {
     fossilState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
     element.textContent = `Auto Fossil [${fossilState ? 'ON' : 'OFF'}]`;
     localStorage.setItem('autoFossil', fossilState);
+}
+
+function toggleShinyFossils(event) {
+    const element = event.target;
+    shinyFossilsState = !shinyFossilsState;
+    shinyFossilsState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.textContent = `Shiny Fossils [${shinyFossilsState ? 'ON' : 'OFF'}]`;
+    localStorage.setItem('shinyFossils', shinyFossilsState);
 }
 
 function togglePKRS(event) {
@@ -180,8 +193,10 @@ function autoHatcher() {
                         const fossilName = player.mineInventory()[e].name;
                         const fossilID = player.mineInventory()[e].id;
                         const fossilePoke = GameConstants.FossilToPokemon[fossilName];
+                        const isShiny = PartyController.getCaughtStatusByName(fossilePoke) == CaughtStatus.CaughtShiny;
                         const pokeRegion = PokemonHelper.calcNativeRegion(fossilePoke)
-                        if (pokeRegion <= player.highestRegion()) {
+                        if (pokeRegion <= player.highestRegion() &&
+                                (shinyFossilsState || !isShiny)) {
                             storedFossilName.push(fossilName)
                             storedFossilID.push(fossilID)
                         }
@@ -330,6 +345,9 @@ if (!localStorage.getItem('autoEgg') == null) {
 if (!localStorage.getItem('autoFossil') == null) {
     localStorage.setItem("autoFossil", false);
 }
+if (!localStorage.getItem('shinyFossils') == null) {
+    localStorage.setItem("shinyFossils", true);
+}
 if (!localStorage.getItem('hatcherySortVal') == null) {
     localStorage.setItem("hatcherySortVal", 0);
 }
@@ -348,6 +366,7 @@ if (!localStorage.getItem('pokerusModeStrict') == null) {
 hatchState = JSON.parse(localStorage.getItem('autoHatchState'));
 eggState = JSON.parse(localStorage.getItem('autoEgg'));
 fossilState = JSON.parse(localStorage.getItem('autoFossil'));
+shinyFossilsState = JSON.parse(localStorage.getItem('shinyFossils'));
 hatcherySortVal = JSON.parse(localStorage.getItem('hatcherySortVal'));
 hatcherySortDir = JSON.parse(localStorage.getItem('hatcherySortDir'));
 hatcherySortSync = JSON.parse(localStorage.getItem('hatcherySortSync'));
