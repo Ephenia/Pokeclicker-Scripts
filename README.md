@@ -245,8 +245,8 @@ There's a lot to go over and explained with this Auto Miner, but I'll try my bes
 **• Auto Mine** - This will turn the Auto Miner On/Off. The Auto Miner uses bombs to automatically mine.<br>
 **• Auto Small Restore** - This will automatically buy and use Small Restores when low on energy (only while Auto Mine is running). It will only buy them when there are no Restores in your inventory and when they cost 30,000 (base price). Knowing that, this is best used anywhere you can one-shot Pokémon, so the price penalty in the Shop is constantly decreasing.<br>
 **• 1st Input Field** - The money amount below which the script will stop auto-buying Small Restores, so it won't drain all your money.<br>
-**• Dropdown Menu - This menu lets you choose a type of item for the Treasure Hunter mode. While you have skips available, the Treasure Hunter will survey layers and skip them if they contain too few of your desired item type. The Treasure Hunter's default setting skips layers with too few total items.
-**• 2nd Input Field** - The minimum number of your desired item type (or total items) for the Treasure Hunter. If the layer has fewer of the set item type the Treasure Hunter will skip it. Set this field to 0 to not skip any layers.
+**• Dropdown Menu** - This menu lets you choose a type of item for the Treasure Hunter mode. While you have skips available, the Treasure Hunter will survey layers and skip them if they contain too few of your desired item type. The Treasure Hunter's default setting skips layers with too few total items.<br>
+**• 2nd Input Field** - The minimum number of your desired item type (or total items) for the Treasure Hunter. If the layer has fewer of the set item type the Treasure Hunter will skip it. Set this field to 0 to not skip any layers.<br>
 
 As of 1.1 this also includes 2 more additional features into the Treasures tab of the Underground as shown below:<br>
 
