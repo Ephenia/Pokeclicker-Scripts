@@ -223,11 +223,13 @@ function doAutoMine() {
     }
 
     function resetLayer() {
-        Mine.loadingNewLayer = true;
-        setTimeout(Mine.completed, 1500);
-        //GameHelper.incrementObservable(App.game.statistics.undergroundLayersMined);
-        if (Mine.skipsRemaining() > 0) {
-            GameHelper.incrementObservable(Mine.skipsRemaining, -1);
+        if (!Mine.loadingNewLayer) {
+            Mine.loadingNewLayer = true;
+            setTimeout(Mine.completed, 1500);
+            //GameHelper.incrementObservable(App.game.statistics.undergroundLayersMined);
+            if (Mine.skipsRemaining() > 0) {
+                GameHelper.incrementObservable(Mine.skipsRemaining, -1);
+            }
         }
     }
 }
