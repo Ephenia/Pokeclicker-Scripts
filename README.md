@@ -238,14 +238,15 @@ This I had worked quite a bit on, and I'm quite happy with what it's capable of 
 
 What this script adds is a new top row below the mining layer, as shown:<br>
 
-![](https://i.imgur.com/0DzjmOM.png)
+![](https://user-images.githubusercontent.com/12092270/184208280-9ef59caf-5b0f-402a-be12-049cdad8beb3.png)
 
 There's a lot to go over and explained with this Auto Miner, but I'll try my best to explain it all:
 
 **• Auto Mine** - This will turn the Auto Miner On/Off. The Auto Miner uses bombs to automatically mine.<br>
-**• Auto Small Restore** - This will automatically use Small Restores as well as buy them while it's active (only when Auto Mine is running). It will also only ever buy them when you have 0 Small Restores and when they cost 30,000 (base price). Knowing that, this is best used anywhere you can one-shot Pokémon (so the price penalty in the Shop is constantly decreasing).<br>
-**• 1st Input Field** - Here you can enter a money value at which Small Restores should stop Auto Buying. This will help you not drain your money.<br>
-**• 2nd Input Field** - This is basically an Auto Skipper. You can enter the minimum value of items you would like to look for in new layers. If there are fewer items in a layer than your desired input, it will be skipped (if you have any skips available).
+**• Auto Small Restore** - This will automatically buy and use Small Restores when low on energy (only while Auto Mine is running). It will only buy them when there are no Restores in your inventory and when they cost 30,000 (base price). Knowing that, this is best used anywhere you can one-shot Pokémon, so the price penalty in the Shop is constantly decreasing.<br>
+**• 1st Input Field** - The money amount below which the script will stop auto-buying Small Restores, so it won't drain all your money.<br>
+**• Dropdown Menu - This menu lets you choose a type of item for the Treasure Hunter mode. While you have skips available, the Treasure Hunter will survey layers and skip them if they contain too few of your desired item type. The Treasure Hunter's default setting skips layers with too few total items.
+**• 2nd Input Field** - The minimum number of your desired item type (or total items) for the Treasure Hunter. If the layer has fewer of the set item type the Treasure Hunter will skip it. Set this field to 0 to not skip any layers.
 
 As of 1.1 this also includes 2 more additional features into the Treasures tab of the Underground as shown below:<br>
 
