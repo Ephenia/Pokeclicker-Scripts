@@ -313,14 +313,6 @@ function autoHatcher() {
     }, 50); // Runs every game tick
 }
 
-const updateCheck = JSON.parse(localStorage.getItem('autoHatchUpdate'));
-if (!updateCheck || updateCheck != 1.7) {
-    localStorage.setItem("autoHatchState", false);
-    localStorage.setItem("autoEgg", false);
-    localStorage.setItem("autoFossil", false);
-    localStorage.setItem("hatcherySortSync", false);
-    localStorage.setItem("autoHatchUpdate", 1.7);
-}
 if (!localStorage.getItem('autoHatchState')) {
     localStorage.setItem("autoHatchState", false);
 }

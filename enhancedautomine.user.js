@@ -193,15 +193,6 @@ function autoSellTreasure(event) {
     localStorage.setItem('autoSellTreasure', sellTreasureState);
 }
 
-const updateCheckMine = JSON.parse(localStorage.getItem('autoMineUpdate'));
-if (!updateCheckMine || updateCheckMine != 1.6) {
-    localStorage.setItem("autoMineState", false);
-    localStorage.setItem("autoSmallRestore", false);
-    localStorage.setItem("autoBuyThreshold", 0);
-    localStorage.setItem("autoMineSkip", 0);
-    localStorage.setItem("autoSellTreasure", false);
-    localStorage.setItem("autoMineUpdate", 1.6);
-}
 if (localStorage.getItem('autoMineState') == null) {
     localStorage.setItem("autoMineState", false);
 }
