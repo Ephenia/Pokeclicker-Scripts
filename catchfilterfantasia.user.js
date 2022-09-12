@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.6
+// @version     1.7
 // @author      Ephenia
 // @description An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
@@ -509,7 +509,17 @@ filterBallPref = JSON.parse(localStorage.getItem('filterBallPref'));
 if (filterBallPref.length != pokemonList.length) {
     const diff = pokemonList.length - filterBallPref.length;
     const newPoke = new Array(diff).fill({normal: 0, shiny: 0}, 0, diff);
-    filterBallPref = filterBallPref.concat(diff);
+    filterBallPref = filterBallPref.concat(newPoke);
+    localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
+}
+
+const fixIt = filterBallPref.filter(e => typeof e == 'number');
+if (fixIt.length != 0) {
+    for (const index in filterBallPref) {
+        if (typeof filterBallPref[index] == 'number') {
+            filterBallPref[index] = {normal: 0, shiny: 0};
+        }
+    }
     localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
 }
 
