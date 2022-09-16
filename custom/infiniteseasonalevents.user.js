@@ -3,7 +3,7 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Ephenia
 // @description Adds in toggable options to have seasonal events infinitely run. Events can also run simultaneously with one another. Includes custom events as well.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/infiniteseasonalevents.user.js
@@ -19,17 +19,17 @@ var profileModal = document.getElementById('profileModal');
 //Removed setTimeout, opted to make it load like the other scrips, also helps with notifications
 function initEvents() {
     SpecialEvents.newEvent('Ephenia\'s Gift', 'Encounter Ribombee that roams across all regions.<br/>A special thanks for using my scripts!',
-        startDate, () => {
-            GameHelper.enumNumbers(GameConstants.Region).filter(i => i != GameConstants.Region.none).forEach(region => {
-                RoamingPokemonList.add(region, new RoamingPokemon('Ribombee'));
-            });
-        },
-        endDate, () => {
-            GameHelper.enumNumbers(GameConstants.Region).filter(i => i != GameConstants.Region.none).forEach(region => {
-                RoamingPokemonList.remove(region, 'Ribombee');
-            });
-        }
-    );
+                           startDate, () => {
+        GameHelper.enumNumbers(GameConstants.Region).filter(i => i != GameConstants.Region.none).forEach(region => {
+            RoamingPokemonList.add(region, new RoamingPokemon('Ribombee'));
+        });
+    },
+                           endDate, () => {
+        GameHelper.enumNumbers(GameConstants.Region).filter(i => i != GameConstants.Region.none).forEach(region => {
+            RoamingPokemonList.remove(region, 'Ribombee');
+        });
+    }
+                          );
 
     //Testing loading events in init
     for (var i = 0; i < getEvents.length; i++) {
@@ -51,7 +51,7 @@ function initEvents() {
         }
     }
 
-    if (getEvents.length != 9) {
+    if (getEvents.length != 10) {
         Notifier.notify({
             title: '[Outdated] Infinite Seasonal Events',
             message: `Please contact <a href="https://github.com/Ephenia/Pokeclicker-Scripts" target="_blank">Ephenia</a> so that this script can be updated!`,
@@ -59,7 +59,7 @@ function initEvents() {
             timeout: 10000
         });
     }
-    
+
     var eventLi = document.createElement('li');
     eventLi.innerHTML = `<a class="dropdown-item" href="#eventModal" data-toggle="modal">Toggle Events</a>`
     profileDrop.before(eventLi);
@@ -93,14 +93,14 @@ function initEvents() {
         switch(getEvents[i].title){
             case "Flying Pikachu":
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/25.08.png">
                 <img src="assets/images/pokemon/21.1.png">
                 </div><hr>`
                 break
             case "Mewtwo strikes back!":
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/150.1.png">
                 <img src="assets/images/pokemon/1.1.png">
                 <img src="assets/images/pokemon/4.1.png">
@@ -109,7 +109,7 @@ function initEvents() {
                 break
             case "Halloween!":
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/1.2.png">
                 <img src="assets/images/pokemon/175.1.png">
                 <img src="assets/images/pokemon/25.1.png"><br>
@@ -121,50 +121,56 @@ function initEvents() {
                 break
             case "Let's GO!":
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/133.1.png">
                 <img src="assets/images/pokemon/25.11.png">
                 </div><hr>`
                 break
             case "Merry Christmas!":
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/143.1.png">
                 <img src="assets/images/pokemon/251.1.png">
                 <img src="assets/images/pokemon/446.1.png">
                 </div><hr>`
                 break
+            case "Hoopa Day":
+                modalBody.innerHTML +=
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                <img src="assets/images/pokemon/720.png">
+                </div><hr>`
+                break
             case "Lunar New Year":
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/666.19.png">
                 </div><hr>`
                 break
             case "Easter":
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/175.2.png">
                 </div><hr>`
                 break
             case "Golden Week":
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/1.3.png">
                 </div><hr>`
                 break
             case "Ephenia's Gift":
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
                 <img src="assets/images/pokemon/743.png">
                 </div><hr>`
                 break
             default:
                 modalBody.innerHTML +=
-                `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br><br>New event, Pokemon images coming soon, if not open an issue on github
+                    `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br><br>New event, Pokemon images coming soon, if not open an issue on github
                 </div><hr>`
         }
     }
-    
+
     for (var add = 0; add < getEvents.length; add++) {
         if (storedEvents[add].active == 1) {
             document.getElementById('event-'+(add)).style = "background-color: rgba(93, 226, 60, 0.5)"
