@@ -267,7 +267,7 @@ This script is an Auto Farmer which adds 4 new buttons below the Plant and Harve
 
 Auto Farm will plant the berry that you have selected and harvest all berries when they are ready. Auto mulch works in conjunction with Auto Farm, so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the mulch that you have selected on the entire field. This will also work with the Farm window closed, and these settings will persist upon refresh/browser close.
 
-Auto Replant will wait for planted berries to be close to withering then harvest and plant them again in the same spot. This can be expecially useful when trying to mutate berries.
+Auto Replant will wait for planted berries to be close to withering then harvest and plant them again in the same spot. This can be expecially useful when trying to mutate berries. <strong>Please note that the Auto Replant button probably won't work as intended if used together with Auto Plant / Auto Harvest and Auto Mulch.</strong>
 
 ```diff
 - Note: the Auto Farmer runs once every 1 second.
