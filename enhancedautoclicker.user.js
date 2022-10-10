@@ -371,7 +371,7 @@ function scan(dungeonBoard) {
     var playerCoords = []*/
     for (var i = 0; i < dungeonBoard.length; i++) {
         for (var j = 0; j < dungeonBoard[i].length; j++) {
-            if (dungeonBoard[i][j].type() == GameConstants.DungeonTile.boss) {
+            if (dungeonBoard[0][i][j].type() == GameConstants.DungeonTile.boss) {
                 foundBoss = true
                 return [i, j]
             }
