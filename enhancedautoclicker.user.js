@@ -349,7 +349,7 @@ function autoDungeon() {
         }
 
         if (App.game.gameState === GameConstants.GameState.dungeon) {
-            var dungeonBoard = DungeonRunner.map.board();
+            var dungeonBoard = DungeonRunner.map.board()[DungeonRunner.map.playerPosition().floor];
             //The boss can be found at any time
             if (foundBoss == false) {
                 bossCoords = scan(dungeonBoard)
