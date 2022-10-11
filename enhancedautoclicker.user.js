@@ -371,7 +371,7 @@ function scan(dungeonBoard) {
     var playerCoords = []*/
     for (var i = 0; i < dungeonBoard.length; i++) {
         for (var j = 0; j < dungeonBoard[i].length; j++) {
-            if (dungeonBoard[i][j].type() == GameConstants.DungeonTile.boss) {
+            if (dungeonBoard[i][j].type() == GameConstants.DungeonTile.boss || dungeonBoard[i][j].type() == GameConstants.DungeonTile.ladder) {
                 foundBoss = true
                 return [i, j]
             }
@@ -391,6 +391,11 @@ function wander(dungeonBoard, bossCoords) {
         foundBoss = false
         bossCoords.length = 0
         DungeonRunner.startBossFight()
+    }
+    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.ladder) {
+        foundBoss = false
+        bossCoords.length = 0
+        DungeonRunner.nextFloor()
     }
     //Iterates through the board and compiles all possible moves
     for (var i = 0; i < dungeonBoard.length; i++) {
@@ -450,7 +455,12 @@ function fullClear(dungeonBoard, bossCoords) {
         DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0]);
         foundBoss = false;
         bossCoords.length = 0;
-        DungeonRunner.startBossFight();
+
+        if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
+            DungeonRunner.startBossFight();
+        } else if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.ladder) {
+            DungeonRunner.nextFloor();
+        }
     }
 }
 
