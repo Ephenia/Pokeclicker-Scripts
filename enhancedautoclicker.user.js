@@ -3,8 +3,8 @@
 // @namespace   Pokeclicker Scripts
 // @match       https://www.pokeclicker.com/
 // @grant       none
-// @version     2.3
-// @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951)
+// @version     2.4
+// @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951, Kaias26)
 // @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautoclicker.user.js
 // ==/UserScript==
