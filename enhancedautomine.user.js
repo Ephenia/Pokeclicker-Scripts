@@ -266,17 +266,6 @@ function setTreasureImage() {
     document.getElementById('treasure-image').title = imageTitles[1+treasureHunter];
 }
 
-const updateCheckMine = JSON.parse(localStorage.getItem('autoMineUpdate'));
-if (!updateCheckMine || updateCheckMine != SCRIPT_VERSION) {
-    localStorage.setItem("autoMineState", false);
-    localStorage.setItem("autoSmallRestore", false);
-    localStorage.setItem("autoBuyThreshold", 0);
-    localStorage.setItem("autoSellTreasure", false);
-    localStorage.setItem("treasureHunter", -1);
-    localStorage.setItem("itemThreshold", 0);
-    localStorage.setItem("autoMineUpdate", SCRIPT_VERSION);
-    //localStorage.setItem("autoMineSkip", 0);
-}
 if (!localStorage.getItem('autoMineState')) {
     localStorage.setItem("autoMineState", false);
 }
