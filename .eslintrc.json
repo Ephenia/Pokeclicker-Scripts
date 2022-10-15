@@ -1,0 +1,71 @@
+{
+	"env": {
+		"browser": true,
+		"es6": true,
+		"greasemonkey": true,
+		"jquery": true
+	},
+	"extends": "eslint:recommended",
+	// https://eslint.org/docs/latest/user-guide/configuring/language-options#specifying-globals
+	"globals": {
+		"App": true,
+		"BadgeEnums": true,
+		"Battle": true,
+		"BattleFrontierRunner": true,
+		"BreedingController": true,
+		"BreedingFilters": true,
+		"Champion": true,
+		"DungeonBattle": true,
+		"DungeonRunner": true,
+		"GameConstants": true,
+		"GameHelper": true,
+		"Gym": true,
+		"GymBattle": true,
+		"GymList": true,
+		"GymRunner": true,
+		"ItemHandler": true,
+		"ItemList": true,
+		"KeyItemType": true,
+		"MapHelper": true,
+		"Mine": true,
+		"MultiplierDecreaser": true,
+		"NotificationConstants": true,
+		"Notifier": true,
+		"OakItemType": true,
+		"PartyController": true,
+		"player": true,
+		"PokemonFactory": true,
+		"PokemonHelper": true,
+		"pokemonList": true,
+		"pokemonMap":true,
+		"PokemonType": true,
+		"Preload": true,
+		"QuestHelper": true,
+		"Rand": true,
+		"RedeemableCodeController": true,
+		"RoamingPokemon": true,
+		"RoamingPokemonList": true,
+		"Routes": true,
+		"SeededRand": true,
+		"Settings": true,
+		"SpecialEvents": true,
+		"TemporaryBattleBattle": true,
+		"TownList": true,
+		"Underground": true,
+		"VitaminController": true,
+		"Weather": true
+	},
+	"ignorePatterns": ["desktop/"],
+	"parserOptions": {
+		"ecmaVersion": 11,
+		"sourceType": "script",
+		"ecmaFeatures": {
+			"globalReturn ": true,
+			"impliedStrict": true
+		}
+	},
+	"rules": {
+		"eqeqeq": "warn",
+		"linebreak-style": ["warn","unix"]
+	}
+}
