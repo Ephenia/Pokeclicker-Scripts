@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Perky Pokerus Pandemic
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     1.2
-// @author      Ephenia
-// @description This script makes it so that Pokérus will spread from any Pokémon (egg) that has it to all of the others inside of the Hatchery, instead of just your starter needing to be in the Hatchery for this to be done.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/perkypokeruspandemic.user.js
+// @name          [Pokeclicker] Perky Pokerus Pandemic
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia
+// @description   This script makes it so that Pokérus will spread from any Pokémon (egg) that has it to all of the others inside of the Hatchery, instead of just your starter needing to be in the Hatchery for this to be done.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       1.2
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/perkypokeruspandemic.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/perkypokeruspandemic.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 function initPokerusPandemic() {

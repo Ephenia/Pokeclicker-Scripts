@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Discord Code Generator
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     1.3
-// @author      Ephenia (Original/Credit: G1)
-// @description Lets you generate infinite amounts of Discord codes for Pokémon that are exclusive and locked behind Pokeclicker's Discord bot & activities. No linking of a Discord account required + fully works offline.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/discordcodegenerator.user.js
+// @name          [Pokeclicker] Discord Code Generator
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia (Original/Credit: G1)
+// @description   Lets you generate infinite amounts of Discord codes for Pokémon that are exclusive and locked behind Pokeclicker's Discord bot & activities. No linking of a Discord account required + fully works offline.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       1.3
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/discordcodegenerator.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/discordcodegenerator.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 var resCodes;
