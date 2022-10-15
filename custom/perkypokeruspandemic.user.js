@@ -9,6 +9,21 @@
 // @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/perkypokeruspandemic.user.js
 // ==/UserScript==
 
+function calculatePokerus() {
+    return App.game.breeding.eggList.some(e => {
+        let eggPkrs;
+        try {
+            eggPkrs = App.game.party.caughtPokemon.find(p => p.name === e().pokemon).pokerus;
+            if (!e().canHatch() && !e().isNone() && eggPkrs) {
+                const pokemon = App.game.party.getPokemon(PokemonHelper.getPokemonByName(e().pokemon).id);
+                return pokemon.pokerus;
+            }
+        } catch (err) {
+            return true;
+        }
+    });
+}
+
 function initPokerusPandemic() {
     App.game.breeding.progressEggs = function(amount) {
         amount *= this.getStepMultiplier();
@@ -24,20 +39,6 @@ function initPokerusPandemic() {
             const partyPokemon = App.game.party.caughtPokemon.find(p => p.name === egg.pokemon);
             if (!egg.isNone() && partyPokemon && partyPokemon.canCatchPokerus() && !partyPokemon.pokerus) {
                 partyPokemon.pokerus = calculatePokerus();
-                function calculatePokerus() {
-                    return App.game.breeding.eggList.some(e => {
-                        let eggPkrs;
-                        try {
-                            eggPkrs = App.game.party.caughtPokemon.find(p => p.name === e().pokemon).pokerus;
-                            if (!e().canHatch() && !e().isNone() && eggPkrs) {
-                                const pokemon = App.game.party.getPokemon(PokemonHelper.getPokemonByName(e().pokemon).id);
-                                return pokemon.pokerus;
-                            }
-                        } catch (err) {
-                            return true;
-                        }
-                    });
-                }
             }
             egg.addSteps(amount, this.multiplier);
             if (this.queueList().length && egg.progress() >= 100) {

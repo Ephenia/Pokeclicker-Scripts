@@ -10,9 +10,9 @@
 // ==/UserScript==
 
 var hatchState;
-var awaitAutoHatch;
+// var awaitAutoHatch;
 var autoHatchLoop;
-var randFossilEgg;
+// var randFossilEgg;
 var eggState;
 var fossilState;
 var shinyFossilState;
@@ -311,6 +311,8 @@ function autoHatcher() {
                 basicHatchery();
             }
 
+            // Need to edit the filteredEggList[0] thing
+            // eslint-disable-next-line no-inner-declarations
             function basicHatchery() {
                 try {
                     App.game.breeding.addPokemonToHatchery(filteredEggList[0]);

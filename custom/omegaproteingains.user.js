@@ -11,9 +11,32 @@
 
 var proteinTable;
 var awaitProteinTable;
-var awaitOmegaProtein;
-var newSave;
-var trainerCards;
+// var awaitOmegaProtein;
+// eslint-disable-next-line no-unused-vars
+var newSave; // Used in desktop/app_src/src/scripthandler.js
+// eslint-disable-next-line no-unused-vars
+var trainerCards; // Used in desktop/app_src/src/scripthandler.js
+
+function bypassProtein(event) {
+    var child = event.target.closest('tr').rowIndex - 1;
+    var protein = player.itemList.Protein();
+    var setProtein = VitaminController.getMultiplier()
+    var usedProtein = protein - setProtein;
+    var pokeProtein = PartyController.getProteinSortedList()[child].proteinsUsed()
+    if (setProtein === Infinity && protein > 0) {
+        PartyController.getProteinSortedList()[child].proteinsUsed(pokeProtein + protein)
+        player.itemList.Protein(0)
+    } else if (usedProtein >= 0) {
+        PartyController.getProteinSortedList()[child].proteinsUsed(pokeProtein + setProtein)
+        player.itemList.Protein(usedProtein)
+    } else {
+        Notifier.notify({
+            message: `You don't have any Proteins left...`,
+            type: NotificationConstants.NotificationOption.danger,
+        });
+    }
+    event.stopImmediatePropagation();
+}
 
 function initOmegaProtein() {
     document.getElementById('itemBag').querySelectorAll('div')[2].addEventListener('click', initProtein, true);
@@ -25,26 +48,6 @@ function initOmegaProtein() {
             if (proteinTable.length !== 0) {
                 clearInterval(awaitProteinTable);
                 proteinTable[0].addEventListener('click', bypassProtein, true);
-                function bypassProtein(event) {
-                    var child = event.target.closest('tr').rowIndex - 1;
-                    var protein = player.itemList.Protein();
-                    var setProtein = VitaminController.getMultiplier()
-                    var usedProtein = protein - setProtein;
-                    var pokeProtein = PartyController.getProteinSortedList()[child].proteinsUsed()
-                    if (setProtein === Infinity && protein > 0) {
-                        PartyController.getProteinSortedList()[child].proteinsUsed(pokeProtein + protein)
-                        player.itemList.Protein(0)
-                    } else if (usedProtein >= 0) {
-                        PartyController.getProteinSortedList()[child].proteinsUsed(pokeProtein + setProtein)
-                        player.itemList.Protein(usedProtein)
-                    } else {
-                        Notifier.notify({
-                            message: `You don't have any Proteins left...`,
-                            type: NotificationConstants.NotificationOption.danger,
-                        });
-                    }
-                    event.stopImmediatePropagation();
-                }
             }
         }, 50);
     }

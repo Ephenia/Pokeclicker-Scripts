@@ -11,7 +11,7 @@
 
 var mineState;
 var smallRestoreState;
-var awaitAutoMine;
+// var awaitAutoMine;
 var setThreshold;
 var autoMineTimer;
 var resetInProgress;
@@ -161,7 +161,7 @@ function doAutoMine() {
                 var rewards = mineEl.querySelectorAll('.mineReward');
                 for (var ii = 0; ii < rewards.length; ii++) {
                     var reward = rewards[ii];
-                    var rewardParent = reward.parentNode;
+                    // var rewardParent = reward.parentNode;
                     var ri = +reward.parentNode.getAttribute('data-i');
                     var rj = +reward.parentNode.getAttribute('data-j');
                     for (var i = -1; i <= 1; i++) {

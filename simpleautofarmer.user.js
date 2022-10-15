@@ -115,7 +115,7 @@ function initAutoFarm() {
 
     // Harvest - cmd, start, stop, do
     function autoHarvest(elt, init=false) {
-        if ( (init === true && harvestState === "ON" ) || (init === false && harvestState == "OFF") ) {
+        if ( (init === true && harvestState === "ON" ) || (init === false && harvestState === "OFF") ) {
             startHarvest(elt);
         } else {
             stopHarvest(elt);
@@ -148,7 +148,7 @@ function initAutoFarm() {
 
     // Mulch - cmd, start, stop, do
     function autoMulch(elt, init=false) {
-        if ( (init === true && mulchState === "ON" ) || (init === false && mulchState == "OFF") ) {
+        if ( (init === true && mulchState === "ON" ) || (init === false && mulchState === "OFF") ) {
             startMulch(elt);
         } else {
             stopMulch(elt);
@@ -191,7 +191,7 @@ function loadScript() {
 }
 
 function initLocalStorage(param, value) {
-    if (localStorage.getItem(param) == null) {
+    if (localStorage.getItem(param) === null) {
         localStorage.setItem(param, value);
     }
 }
@@ -202,12 +202,12 @@ initLocalStorage("autoMulchState", "OFF");
 
 var scriptName = 'simpleautofarmer';
 
-if ( document.getElementById('scriptHandler') != undefined ) {
+if ( document.getElementById('scriptHandler') !== undefined ) {
     var scriptElement = document.createElement('div');
     scriptElement.id = scriptName;
     document.getElementById('scriptHandler').appendChild(scriptElement);
-    if ( localStorage.getItem(scriptName) != null ) {
-        if ( localStorage.getItem(scriptName) == 'true' ) {
+    if ( localStorage.getItem(scriptName) !== null ) {
+        if ( localStorage.getItem(scriptName) === 'true' ) {
             loadScript();
         }
     } else {

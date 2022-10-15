@@ -17,6 +17,7 @@
 		"Champion": true,
 		"DungeonBattle": true,
 		"DungeonRunner": true,
+		"FarmController": true,
 		"GameConstants": true,
 		"GameHelper": true,
 		"Gym": true,

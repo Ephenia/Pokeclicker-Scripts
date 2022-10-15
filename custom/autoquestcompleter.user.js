@@ -53,7 +53,7 @@ function initAutoQuests(){
     }, false)
 
     //Checks for new quests to add to the list and claims completed ones
-    var autoQuest = setInterval(function(){
+    /*var autoQuest = */setInterval(function(){
         let questsNeed = 0;
         if (trackRefresh !== App.game.quests.lastRefresh) {
             trackRefresh = App.game.quests.lastRefresh;

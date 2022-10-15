@@ -258,7 +258,7 @@ function initShinySynapse() {
         localStorage.setItem("shinySetRates", JSON.stringify(prefShinyRates));
     }
 
-    function checkInput(input) {
+    function checkInput() {
         const value = +event.target.value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
         event.target.value = value.toLocaleString('en-US');
     }
@@ -336,7 +336,7 @@ function loadScript() {
 
 var scriptName = 'syntheticshinysynapse'
 
-if (document.getElementById('scriptHandler') != undefined) {
+if (document.getElementById('scriptHandler') !== undefined) {
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)

@@ -10,7 +10,7 @@
 // ==/UserScript==
 
 var clickState;
-var awaitAutoClick;
+// var awaitAutoClick;
 var autoClickerLoop;
 var autoClickDPS;
 var clickDPS;
@@ -23,8 +23,8 @@ var gymSelect;
 var dungeonState;
 var dungeonSelect;
 var foundBoss = false;
-var foundBossX;
-var foundBossY;
+// var foundBossX;
+// var foundBossY;
 var delayAutoClick;
 window.testDPS = 0;
 window.defeatDPS = 0;
@@ -333,6 +333,7 @@ var bossCoords = []
 
 function autoDungeon() {
     //Rewrite
+    // eslint-disable-next-line no-prototype-builtins
     if (player.town().hasOwnProperty("dungeon") === true && player.town().dungeon !== undefined) {
         var getTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
         var dungeonCost = player.town().dungeon.tokenCost;

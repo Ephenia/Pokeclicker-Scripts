@@ -148,8 +148,7 @@ function loadFilteredList() {
     }
 }
 
-function filterPokemonRoute(event) {
-    const elem = event.target;
+function filterPokemonRoute() {
     document.getElementById('filter-results').innerHTML = '';
     let routePoke;
     try {routePoke = Routes.getRoute(player.region, player.route()).pokemon
@@ -184,8 +183,7 @@ function filterPokemonRoute(event) {
         }
 }
 
-function filterPokemonDungeon(event) {
-    const elem = event.target;
+function filterPokemonDungeon() {
     document.getElementById('filter-results').innerHTML = '';
     let validDungeon;
     try {validDungeon = DungeonRunner.dungeon;
@@ -248,7 +246,7 @@ function filterPokemonDungeon(event) {
 
         } catch (err) {
             document.getElementById('filter-results').innerHTML = '<b style="color: red">You are not in a dungeon or dungeon info cannot be found.</b>';
-        };
+        }
 }
 
 function filterAllPoke() {

@@ -16,8 +16,10 @@ var checkWildPokeHealth;
 var checkWildPokeCatch;
 var checkAllNotification;
 const notificFunc = Notifier.notify;
-var newSave;
-var trainerCards;
+// eslint-disable-next-line no-unused-vars
+var newSave; // Used in desktop/app_src/src/scripthandler.js
+// eslint-disable-next-line no-unused-vars
+var trainerCards; // Used in desktop/app_src/src/scripthandler.js
 
 function initVisualSettings() {
     const getMenu = document.getElementById('startMenu');
