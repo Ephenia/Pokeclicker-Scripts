@@ -121,11 +121,11 @@ function toggleTypeFilter(event) {
 }
 
 function loadFilteredList() {
-    if (catchFilter.length != 0) {
+    if (catchFilter.length !== 0) {
         document.getElementById('filter-results').innerHTML = '';
         const frag = new DocumentFragment();
         for (const id of catchFilter) {
-            const findPoke = pokemonList.find(p => p.id == id);
+            const findPoke = pokemonList.find(p => p.id === id);
             const pokeIndex = pokemonList.indexOf(findPoke);
             const ballPrefN = filterBallPref[pokeIndex].normal;
             const ballPrefS = filterBallPref[pokeIndex].shiny;
@@ -159,7 +159,7 @@ function filterPokemonRoute(event) {
              if (routeArea.length > 0) {
                  const thisArea = routePoke[area];
                  for (const poke of thisArea) {
-                     const findPoke = pokemonList.find(p => p.name == poke);
+                     const findPoke = pokemonList.find(p => p.name === poke);
                      const pokeIndex = pokemonList.indexOf(findPoke);
                      const ballPrefN = filterBallPref[pokeIndex].normal;
                      const ballPrefS = filterBallPref[pokeIndex].shiny;
@@ -181,7 +181,7 @@ function filterPokemonRoute(event) {
          }
         } catch (err) {
             document.getElementById('filter-results').innerHTML = '<b style="color: red">You are not on a route.</b>';
-        };
+        }
 }
 
 function filterPokemonDungeon(event) {
@@ -195,13 +195,13 @@ function filterPokemonDungeon(event) {
 
          for (const enemy of dungeonPoke) {
              let pokeStr;
-             if (typeof enemy == 'string') {
+             if (typeof enemy === 'string') {
                  pokeStr = enemy;
-             } else if (typeof enemy.pokemon == 'string') {
+             } else if (typeof enemy.pokemon === 'string') {
                  pokeStr = enemy.pokemon;
              }
-             if (typeof pokeStr != 'undefined') {
-                 const findPoke = pokemonList.find(p => p.name == pokeStr);
+             if (typeof pokeStr !== 'undefined') {
+                 const findPoke = pokemonList.find(p => p.name === pokeStr);
                  const pokeIndex = pokemonList.indexOf(findPoke);
                  const ballPrefN = filterBallPref[pokeIndex].normal;
                  const ballPrefS = filterBallPref[pokeIndex].shiny;
@@ -222,11 +222,11 @@ function filterPokemonDungeon(event) {
          for (const enemy of dungeonBoss) {
              let pokeStr;
              const construct = enemy.constructor.name;
-             if (construct == 'DungeonBossPokemon') {
+             if (construct === 'DungeonBossPokemon') {
                  pokeStr = enemy.name;
              }
-             if (typeof pokeStr != 'undefined') {
-                 const findPoke = pokemonList.find(p => p.name == pokeStr);
+             if (typeof pokeStr !== 'undefined') {
+                 const findPoke = pokemonList.find(p => p.name === pokeStr);
                  const pokeIndex = pokemonList.indexOf(findPoke);
                  const ballPrefN = filterBallPref[pokeIndex].normal;
                  const ballPrefS = filterBallPref[pokeIndex].shiny;
@@ -284,11 +284,11 @@ function toggleCatchFilter(event) {
 function filterPokeSearch(event) {
     document.getElementById('filter-results').innerHTML = '';
     let pokeStr;
-    try { pokeStr = event.target.value.toLowerCase(); } catch (err) { pokeStr = document.getElementById('filter-search').value; };
+    try { pokeStr = event.target.value.toLowerCase(); } catch (err) { pokeStr = document.getElementById('filter-search').value; }
     const filterList = pokemonList.filter(p => p.name.toLowerCase().includes(pokeStr));
     const frag = new DocumentFragment();
     for (const poke of filterList) {
-        const findPoke = pokemonList.find(p => p.name == poke.name);
+        const findPoke = pokemonList.find(p => p.name === poke.name);
         const pokeIndex = pokemonList.indexOf(findPoke);
         const ballPrefN = filterBallPref[pokeIndex].normal;
         const ballPrefS = filterBallPref[pokeIndex].shiny;
@@ -320,7 +320,7 @@ function toggleFilteredPoke(event) {
         return;
     }
     const idExists = catchFilter.indexOf(id);
-    if (idExists == -1) {
+    if (idExists === -1) {
         catchFilter.push(id);
         elem.setAttribute('style', 'background-color: yellowgreen;');
     } else {
@@ -363,12 +363,12 @@ function overideDefeatPokemon() {
 
         App.game.breeding.progressEggsBattle(Battle.route, player.region);
 
-        const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
+        const findPoke = pokemonList.find(p => p.id === enemyPokemon.id);
         const pokeIndex = pokemonList.indexOf(findPoke);
         let ballPrefN = filterBallPref[pokeIndex].normal -1;
-        ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
+        ballPrefN = Math.sign(ballPrefN) === -1 ? 0 : ballPrefN;
         let ballPrefS = filterBallPref[pokeIndex].shiny - 1;
-        ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
+        ballPrefS = Math.sign(ballPrefS) === -1 ? 0 : ballPrefS;
         const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
         const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
 
@@ -387,7 +387,7 @@ function overideDefeatPokemon() {
             setTimeout(
                 () => {
                     this.attemptCatch(enemyPokemon, Battle.route, player.region);
-                    if (Battle.route != 0) {
+                    if (Battle.route !== 0) {
                         this.generateNewEnemy();
                     }
                 },
@@ -399,7 +399,7 @@ function overideDefeatPokemon() {
             setTimeout(
                 () => {
                     this.attemptCatch(enemyPokemon, Battle.route, player.region);
-                    if (Battle.route != 0) {
+                    if (Battle.route !== 0) {
                         this.generateNewEnemy();
                     }
                 },
@@ -439,12 +439,12 @@ function overideDefeatPokemon() {
         DungeonRunner.map.currentTile().calculateCssClass();
 
         // Attempting to catch Pokemon
-        const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
+        const findPoke = pokemonList.find(p => p.id === enemyPokemon.id);
         const pokeIndex = pokemonList.indexOf(findPoke);
         let ballPrefN = filterBallPref[pokeIndex].normal -1;
-        ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
+        ballPrefN = Math.sign(ballPrefN) === -1 ? 0 : ballPrefN;
         let ballPrefS = filterBallPref[pokeIndex].shiny - 1;
-        ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
+        ballPrefS = Math.sign(ballPrefS) === -1 ? 0 : ballPrefS;
         const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
         const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
 
@@ -506,17 +506,17 @@ filterTypes = JSON.parse(localStorage.getItem('filterTypes'));
 catchFilter = JSON.parse(localStorage.getItem('catchFilter'));
 filterBallPref = JSON.parse(localStorage.getItem('filterBallPref'));
 
-if (filterBallPref.length != pokemonList.length) {
+if (filterBallPref.length !== pokemonList.length) {
     const diff = pokemonList.length - filterBallPref.length;
     const newPoke = new Array(diff).fill({normal: 0, shiny: 0}, 0, diff);
     filterBallPref = filterBallPref.concat(newPoke);
     localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
 }
 
-const fixIt = filterBallPref.filter(e => typeof e == 'number');
-if (fixIt.length != 0) {
+const fixIt = filterBallPref.filter(e => typeof e === 'number');
+if (fixIt.length !== 0) {
     for (const index in filterBallPref) {
-        if (typeof filterBallPref[index] == 'number') {
+        if (typeof filterBallPref[index] === 'number') {
             filterBallPref[index] = {normal: 0, shiny: 0};
         }
     }
@@ -535,12 +535,12 @@ function loadScript(){
 
 var scriptName = 'catchfilterfantasia'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

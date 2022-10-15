@@ -20,12 +20,12 @@ var profileModal = document.getElementById('profileModal');
 function initEvents() {
     SpecialEvents.newEvent('Ephenia\'s Gift', 'Encounter Ribombee that roams across all regions.<br/>A special thanks for using my scripts!',
                            startDate, () => {
-        GameHelper.enumNumbers(GameConstants.Region).filter(i => i != GameConstants.Region.none).forEach(region => {
+        GameHelper.enumNumbers(GameConstants.Region).filter(i => i !== GameConstants.Region.none).forEach(region => {
             RoamingPokemonList.add(region, new RoamingPokemon('Ribombee'));
         });
     },
                            endDate, () => {
-        GameHelper.enumNumbers(GameConstants.Region).filter(i => i != GameConstants.Region.none).forEach(region => {
+        GameHelper.enumNumbers(GameConstants.Region).filter(i => i !== GameConstants.Region.none).forEach(region => {
             RoamingPokemonList.remove(region, 'Ribombee');
         });
     }
@@ -33,7 +33,7 @@ function initEvents() {
 
     //Testing loading events in init
     for (var i = 0; i < getEvents.length; i++) {
-        if (localStorage.getItem(getEvents[i].title) == null) {
+        if (localStorage.getItem(getEvents[i].title) === null) {
             localStorage.setItem(getEvents[i].title, 0);
         }
         /*
@@ -46,12 +46,12 @@ function initEvents() {
     for (var ii = 0; ii < getEvents.length; ii++) {
         getEvents[ii].startTime = startDate
         getEvents[ii].endTime = endDate
-        if (getEvents[ii].hasStarted() == false && storedEvents[ii].active == 1) {
+        if (getEvents[ii].hasStarted() === false && storedEvents[ii].active === 1) {
             getEvents[ii].start()
         }
     }
 
-    if (getEvents.length != 10) {
+    if (getEvents.length !== 10) {
         Notifier.notify({
             title: '[Outdated] Infinite Seasonal Events',
             message: `Please contact <a href="https://github.com/Ephenia/Pokeclicker-Scripts" target="_blank">Ephenia</a> so that this script can be updated!`,
@@ -172,7 +172,7 @@ function initEvents() {
     }
 
     for (var add = 0; add < getEvents.length; add++) {
-        if (storedEvents[add].active == 1) {
+        if (storedEvents[add].active === 1) {
             document.getElementById('event-'+(add)).style = "background-color: rgba(93, 226, 60, 0.5)"
         }
         document.getElementById('event-'+(add)).addEventListener('click', toggleEvent, false)
@@ -185,7 +185,7 @@ function initEvents() {
 function toggleEvent() {
     var getVal = this.getAttribute('data-value');
     var getEvent = +localStorage.getItem(storedEvents[getVal].name)
-    if (getEvent == 0) {
+    if (getEvent === 0) {
         this.style = "background-color: rgba(93, 226, 60, 0.5)"
         storedEvents[getVal].value = 1
         localStorage.setItem(storedEvents[getVal].name, 1)
@@ -212,12 +212,12 @@ function loadScript(){
 
 var scriptName = 'infiniteseasonalevents'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

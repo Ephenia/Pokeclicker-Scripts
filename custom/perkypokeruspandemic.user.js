@@ -21,14 +21,14 @@ function initPokerusPandemic() {
                 continue;
             }
             const egg = this.eggList[index]();
-            const partyPokemon = App.game.party.caughtPokemon.find(p => p.name == egg.pokemon);
+            const partyPokemon = App.game.party.caughtPokemon.find(p => p.name === egg.pokemon);
             if (!egg.isNone() && partyPokemon && partyPokemon.canCatchPokerus() && !partyPokemon.pokerus) {
                 partyPokemon.pokerus = calculatePokerus();
                 function calculatePokerus() {
                     return App.game.breeding.eggList.some(e => {
                         let eggPkrs;
                         try {
-                            eggPkrs = App.game.party.caughtPokemon.find(p => p.name == e().pokemon).pokerus;
+                            eggPkrs = App.game.party.caughtPokemon.find(p => p.name === e().pokemon).pokerus;
                             if (!e().canHatch() && !e().isNone() && eggPkrs) {
                                 const pokemon = App.game.party.getPokemon(PokemonHelper.getPokemonByName(e().pokemon).id);
                                 return pokemon.pokerus;
@@ -60,12 +60,12 @@ function loadScript(){
 
 var scriptName = 'perkypokeruspandemic'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

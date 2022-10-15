@@ -19,7 +19,7 @@ function initCodeGen() {
     for (let i = 0; i < validPoke.length; i++) {
         var codeHTML = document.createElement("div");
         codeHTML.innerHTML = `<button id="disc-${i}" class="btn btn-primary btn-block">${validPoke[i] + ` - ` + resCodes[i]}</button>`
-        if (i == validPoke.length - 1) {
+        if (i === validPoke.length - 1) {
             codeHTML.innerHTML += `<hr>`
         }
         fragment.appendChild(codeHTML)
@@ -55,7 +55,7 @@ function genCodes() {
         const arr = [];
         for (let i = 0; i < 14; i++) {
             let int;
-            while (int == undefined || int.length != 1) {
+            while (int === undefined || int.length !== 1) {
                 int = SeededRand.intBetween(0, 35).toString(36);
             }
             arr.push(int);
@@ -84,12 +84,12 @@ function loadScript(){
 
 var scriptName = 'discordcodegenerator'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

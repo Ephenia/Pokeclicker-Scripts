@@ -45,12 +45,12 @@ function initWeatherChange(){
         const getWeather = parseInt(localStorage.getItem('scriptWeather'));
         document.getElementById('weather-select').value = getWeather;
         Weather.regionalWeather.forEach((Weather) => { Weather(getWeather); });
-    };
+    }
 }
 
 function changeWeather(){
     const selWeather = +document.getElementById('weather-select').value;
-    if (selWeather != -1) {
+    if (selWeather !== -1) {
         //Freeze weather
         Weather.generateWeather = function(){ return true };
         //Set Weather
@@ -77,12 +77,12 @@ function loadScript(){
 
 var scriptName = 'simpleweatherchanger'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

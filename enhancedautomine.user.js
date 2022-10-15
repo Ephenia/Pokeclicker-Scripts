@@ -115,16 +115,16 @@ function doAutoMine() {
         try { validTreasure = surveyResult.includes(treasureItems[treasureHunter]) }
         catch (err) { validTreasure = null }
     }
-    if (treasureHunting && validTreasure == false && skipsRemain != 0) {
+    if (treasureHunting && validTreasure === false && skipsRemain !== 0) {
         resetLayer();
-    } else if (validTreasure || (treasureHunting && validTreasure == null)) {
+    } else if (validTreasure || (treasureHunting && validTreasure === null)) {
         mineMain();
-    } else if (buriedItems >= autoMineSkip || skipsRemain == 0) {
+    } else if (buriedItems >= autoMineSkip || skipsRemain === 0) {
         mineMain();
     } else {
         resetLayer();
     }
-    if (layersMined != App.game.statistics.undergroundLayersMined()) {
+    if (layersMined !== App.game.statistics.undergroundLayersMined()) {
         if (sellTreasureState) {
             Underground.sellAllMineItems();
         }
@@ -134,7 +134,7 @@ function doAutoMine() {
 
     function mineMain() {
         if (smallRestoreState) {
-            if ((getCost == 30000) && (smallRestore == 0) && (getMoney >= setThreshold + 30000)) {
+            if ((getCost === 30000) && (smallRestore === 0) && (getMoney >= setThreshold + 30000)) {
                 ItemList["SmallRestore"].buy(1);
             }
             if (getEnergy < 15) {
@@ -154,7 +154,7 @@ function doAutoMine() {
             return true;
         } else {
             if (getEnergy >= 1) {
-                if (Mine.toolSelected() != 0) {
+                if (Mine.toolSelected() !== 0) {
                     Mine.toolSelected(Mine.Tool.Chisel);
                 }
                 var mineEl = document.getElementById('mineBody');
@@ -193,14 +193,14 @@ function doAutoMine() {
         if (!resetInProgress) {
             if (Mine.itemsBuried() >= Mine.itemsFound()) {
                 // Don't resolve queued up calls to checkCompleted() until completed() is finished and sets loadingNewLayer to false
-                if (Mine.loadingNewLayer == true) {
+                if (Mine.loadingNewLayer === true) {
                     resetInProgress = true;
                 }
                 if (!resetInProgress) {
                     Mine.loadingNewLayer = true;
                     setTimeout(Mine.completed, 1500);
                     //GameHelper.incrementObservable(App.game.statistics.undergroundLayersMined);
-                    if (Mine.skipsRemaining() != 0) {
+                    if (Mine.skipsRemaining() !== 0) {
                         GameHelper.incrementObservable(Mine.skipsRemaining, -1);
                     }
                     busyMining = setTimeout(function () {
@@ -274,12 +274,12 @@ function loadScript() {
 
 var scriptName = 'enhancedautomine'
 
-if (document.getElementById('scriptHandler') != undefined) {
+if (document.getElementById('scriptHandler') !== undefined) {
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null) {
-        if (localStorage.getItem(scriptName) == 'true') {
+    if (localStorage.getItem(scriptName) !== null) {
+        if (localStorage.getItem(scriptName) === 'true') {
             loadScript()
         }
     }

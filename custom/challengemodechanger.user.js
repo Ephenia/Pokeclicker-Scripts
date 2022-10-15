@@ -22,7 +22,7 @@ function initChallenger() {
     function remDisable() {
         var buttons = chalModal.querySelectorAll('button.btn');
         buttons.forEach((element, index) => {
-            if (element.innerText == "ACTIVE" || element.innerText == "DISABLED") {
+            if (element.innerText === "ACTIVE" || element.innerText === "DISABLED") {
                 element.setAttribute("data-index", index);
                 element.classList.remove("disabled");
                 element.addEventListener("click", toggleChallenge, false);
@@ -57,12 +57,12 @@ function loadScript(){
 
 var scriptName = 'challengemodechanger'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

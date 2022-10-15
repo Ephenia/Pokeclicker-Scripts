@@ -21,7 +21,7 @@ function initBattleFrontier() {
     addGlobalStyle('#battle-front-cont { position:absolute;right:5px;top:5px;width:auto;height:41px; }');
     addGlobalStyle('#bf-one-click-btn { position:absolute;left:5px;top:5px;width:auto;height:41px; }');
 
-    document.getElementById('middle-column').addEventListener('click', event => {
+    document.getElementById('middle-column').addEventListener('click', () => {
         if (BattleFrontierRunner.started() && existHTML) {
             //console.log("already started")
         }
@@ -54,7 +54,7 @@ function initBattleFrontier() {
     }
 
     function createHTML() {
-        if (bfOneClickState == "OFF") {
+        if (bfOneClickState === "OFF") {
             bfOneClickColor = "danger"
         } else {
             bfOneClickColor = "success"
@@ -63,7 +63,7 @@ function initBattleFrontier() {
         var oneClickBtn = document.createElement("div");
         oneClickBtn.setAttribute("id", "bf-one-click-btn");
         oneClickBtn.innerHTML = `<button id="bf-one-click-start" class="btn btn-block btn-`+ bfOneClickColor + `" style="font-size: 8pt;">One Click Attack [`+ bfOneClickState + `]</button>`
-        oneClickBtn.addEventListener('click', event => { toggleOneClick() })
+        oneClickBtn.addEventListener('click', () => { toggleOneClick() })
         var bfInput = document.createElement("div");
         bfInput.setAttribute("id", "battle-front-cont");
         bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 125px;">`
@@ -98,7 +98,7 @@ function initBattleFrontier() {
     }
 
     function toggleOneClick() {
-        if (bfOneClickState == "OFF") {
+        if (bfOneClickState === "OFF") {
             bfOneClickState = "ON"
             document.getElementById("bf-one-click-start").classList.remove('btn-danger');
             document.getElementById("bf-one-click-start").classList.add('btn-success');
@@ -123,10 +123,10 @@ function initBattleFrontier() {
 
 }
 
-if (localStorage.getItem('battleFrontFloor') == null) {
+if (localStorage.getItem('battleFrontFloor') === null) {
     localStorage.setItem("battleFrontFloor", 0);
 }
-if (localStorage.getItem('bfOneClickState') == null) {
+if (localStorage.getItem('bfOneClickState') === null) {
     localStorage.setItem("bfOneClickState", "OFF");
 }
 battleFrontFloor = +localStorage.getItem('battleFrontFloor');
@@ -144,12 +144,12 @@ function loadScript(){
 
 var scriptName = 'autobattlefrontier'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

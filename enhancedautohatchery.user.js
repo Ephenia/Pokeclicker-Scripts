@@ -125,12 +125,12 @@ function autoHatcher() {
         if (hatcherySortSync) {
             const pS = Settings.getSetting('partySort');
             const hS = Settings.getSetting('hatcherySort');
-            if (pS.observableValue() != hatcherySortVal) {
+            if (pS.observableValue() !== hatcherySortVal) {
                 hS.observableValue(pS.observableValue())
                 hatcherySortVal = pS.observableValue()
                 localStorage.setItem("hatcherySortVal", hatcherySortVal);
             }
-            if (hS.observableValue() != hatcherySortVal) {
+            if (hS.observableValue() !== hatcherySortVal) {
                 hatcherySortVal = hS.observableValue()
                 pS.observableValue(hS.observableValue())
                 localStorage.setItem("hatcherySortVal", hatcherySortVal);
@@ -138,12 +138,12 @@ function autoHatcher() {
 
             const pSD = Settings.getSetting('partySortDirection');
             const hSD = Settings.getSetting('hatcherySortDirection');
-            if (pSD.observableValue() != hatcherySortDir) {
+            if (pSD.observableValue() !== hatcherySortDir) {
                 hatcherySortDir = pSD.observableValue()
                 hSD.observableValue(pSD.observableValue())
                 localStorage.setItem("hatcherySortDir", hatcherySortDir);
             }
-            if (hSD.observableValue() != hatcherySortDir) {
+            if (hSD.observableValue() !== hatcherySortDir) {
                 hatcherySortDir = hSD.observableValue()
                 pSD.observableValue(hSD.observableValue())
                 localStorage.setItem("hatcherySortDir", hatcherySortDir);
@@ -155,7 +155,7 @@ function autoHatcher() {
 
         // Now add eggs to empty slots if we can
         while (
-            App.game.breeding.canAccess() == true && // Can access the Hatchery
+            App.game.breeding.canAccess() === true && // Can access the Hatchery
             App.game.party.hasMaxLevelPokemon() && // Don't run if you don't have any level 100 Pokemon
             App.game.breeding.hasFreeEggSlot() // Has an open egg slot
         ) {
@@ -172,7 +172,7 @@ function autoHatcher() {
                         storedEggName.push(selEgg)
                     }
                 }
-                if (storedEggName.length != 0) {
+                if (storedEggName.length !== 0) {
                     randEggIndex = ((Math.floor(Math.random() * storedEggName.length) + 1) - 1)
                     hasEgg = true;
                 } else {
@@ -189,7 +189,7 @@ function autoHatcher() {
                     const valueType = player.mineInventory()[e].valueType;
                     //valueType 3 equals fossil or old "Mine Egg" type
                     const itemAmount = player.mineInventory()[e].amount()
-                    if (valueType == 3 && itemAmount > 0) {
+                    if (valueType === 3 && itemAmount > 0) {
                         const fossilName = player.mineInventory()[e].name;
                         const fossilID = player.mineInventory()[e].id;
                         const fossilePoke = GameConstants.FossilToPokemon[fossilName];
@@ -197,14 +197,14 @@ function autoHatcher() {
                         const checkShiny = PartyController.getCaughtStatusByName(fossilePoke);
                         const pokeRegion = PokemonHelper.calcNativeRegion(fossilePoke)
                         const validFossil = pokeRegion <= player.highestRegion();
-                        const shinyFossilize = shinyFossilState && checkShiny != 2;
+                        const shinyFossilize = shinyFossilState && checkShiny !== 2;
                         if (validFossil && shinyFossilize || validFossil && !shinyFossilState) {
                             storedFossilName.push(fossilName)
                             storedFossilID.push(fossilID)
                         }
                     }
                 }
-                if (storedFossilID.length != 0) {
+                if (storedFossilID.length !== 0) {
                     randFossilIndex = ((Math.floor(Math.random() * storedFossilID.length) + 1) - 1)
                     hasFossil = true;
                 } else {
@@ -213,19 +213,19 @@ function autoHatcher() {
             }
 
             if (eggState || fossilState) {
-                if (hasEgg == true && hasFossil == true) {
+                if (hasEgg === true && hasFossil === true) {
                     const isEggFossil = (Math.floor(Math.random() * 2) + 1)
-                    if (isEggFossil == 1) {
+                    if (isEggFossil === 1) {
                         ItemList[storedEggName[randEggIndex]].use()
                         return true;
                     } else {
                         Underground.sellMineItem(storedFossilID[randFossilIndex])
                         return true;
                     }
-                } else if (hasEgg == true) {
+                } else if (hasEgg === true) {
                     ItemList[storedEggName[randEggIndex]].use()
                     return true;
-                } else if (hasFossil == true) {
+                } else if (hasFossil === true) {
                     Underground.sellMineItem(+storedFossilID[randFossilIndex])
                     return true;
                 }
@@ -275,7 +275,7 @@ function autoHatcher() {
                     if (type1 !== null || type2 !== null) {
                         const { type: types } = pokemonMap[partyPokemon.name];
                         if ([type1, type2].includes(PokemonType.None)) {
-                            const type = type1 == PokemonType.None ? type2 : type1;
+                            const type = type1 === PokemonType.None ? type2 : type1;
                             if (!BreedingController.isPureType(partyPokemon, type)) {
                                 return false;
                             }
@@ -292,13 +292,13 @@ function autoHatcher() {
 
             const hasPKRS = App.game.keyItems.hasKeyItem(KeyItemType.Pokerus_virus);
             const starterName = GameConstants.Starter[player.starter()];
-            const starterPKMN = PartyController.getSortedList().filter(p => p.name == starterName)[0];
-            const virusReady = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false && e.pokerus == false);
-            if (pkrsState && hasPKRS && virusReady.length != 0) {
-                if (starterPKMN._level() == 100 && !starterPKMN.breeding) {
+            const starterPKMN = PartyController.getSortedList().filter(p => p.name === starterName)[0];
+            const virusReady = PartyController.getSortedList().filter(e => e._level() === 100 && e.breeding === false && e.pokerus === false);
+            if (pkrsState && hasPKRS && virusReady.length !== 0) {
+                if (starterPKMN._level() === 100 && !starterPKMN.breeding) {
                     App.game.breeding.addPokemonToHatchery(starterPKMN);
                     return true;
-                } else if (starterPKMN._level() == 100 && starterPKMN.breeding) {
+                } else if (starterPKMN._level() === 100 && starterPKMN.breeding) {
                     App.game.breeding.addPokemonToHatchery(virusReady[0]);
                     return true;
                 }
@@ -316,8 +316,8 @@ function autoHatcher() {
                     App.game.breeding.addPokemonToHatchery(filteredEggList[0]);
                 } catch (err) {
                     const isFavorite = BreedingFilters.category.value();
-                    if (isFavorite != 1) {
-                        const canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
+                    if (isFavorite !== 1) {
+                        const canBreed = PartyController.getSortedList().filter(e => e._level() === 100 && e.breeding === false);
                         const randBreed = getRandomInt(canBreed.length);
                         App.game.breeding.addPokemonToHatchery(canBreed[randBreed]);
                     } else {
@@ -333,28 +333,28 @@ function autoHatcher() {
 if (!localStorage.getItem('autoHatchState')) {
     localStorage.setItem("autoHatchState", false);
 }
-if (!localStorage.getItem('autoEgg') == null) {
+if (!localStorage.getItem('autoEgg') === null) {
     localStorage.setItem("autoEgg", false);
 }
-if (!localStorage.getItem('autoFossil') == null) {
+if (!localStorage.getItem('autoFossil') === null) {
     localStorage.setItem("autoFossil", false);
 }
-if (!localStorage.getItem('shinyFossil') == null) {
+if (!localStorage.getItem('shinyFossil') === null) {
     localStorage.setItem("shinyFossil", false);
 }
-if (!localStorage.getItem('hatcherySortVal') == null) {
+if (!localStorage.getItem('hatcherySortVal') === null) {
     localStorage.setItem("hatcherySortVal", 0);
 }
-if (!localStorage.getItem('hatcherySortDir') == null) {
+if (!localStorage.getItem('hatcherySortDir') === null) {
     localStorage.setItem("hatcherySortDir", true);
 }
-if (!localStorage.getItem('hatcherySortSync') == null) {
+if (!localStorage.getItem('hatcherySortSync') === null) {
     localStorage.setItem("hatcherySortSync", false);
 }
-if (!localStorage.getItem('pokerusModeState') == null) {
+if (!localStorage.getItem('pokerusModeState') === null) {
     localStorage.setItem("pokerusModeState", false);
 }
-if (!localStorage.getItem('pokerusModeStrict') == null) {
+if (!localStorage.getItem('pokerusModeStrict') === null) {
     localStorage.setItem("pokerusModeStrict", false);
 }
 hatchState = JSON.parse(localStorage.getItem('autoHatchState'));
@@ -379,12 +379,12 @@ function loadScript() {
 
 var scriptName = 'enhancedautohatchery'
 
-if (document.getElementById('scriptHandler') != undefined) {
+if (document.getElementById('scriptHandler') !== undefined) {
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null) {
-        if (localStorage.getItem(scriptName) == 'true') {
+    if (localStorage.getItem(scriptName) !== null) {
+        if (localStorage.getItem(scriptName) === 'true') {
             loadScript()
         }
     }

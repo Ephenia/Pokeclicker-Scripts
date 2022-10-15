@@ -53,7 +53,7 @@ function initAutoBattleItems() {
         itemABLoop = setInterval(() => {
             //In order the towns required to be unlocked for each Battle Item
             const townReqs = ['Viridian City','Pewter City','Lavender Town'].flatMap(i => [i,i]);
-            const battleItems = GameHelper.chunk(6, Object.keys(ItemList).filter(i=>ItemList[i].constructor.name == 'BattleItem'))[0];
+            const battleItems = GameHelper.chunk(6, Object.keys(ItemList).filter(i=>ItemList[i].constructor.name === 'BattleItem'))[0];
             for (let i = 0; i < battleItems.length; i++) {
                 if (ItemABPrefs[i]) {
                     const itemAmnt = player.itemList[battleItems[i]]();
@@ -63,11 +63,11 @@ function initAutoBattleItems() {
                         const getMoney = App.game.wallet.currencies[GameConstants.Currency.money]();
                         const basePrice = ItemList[battleItems[i]].basePrice;
                         const price = ItemList[battleItems[i]].price();
-                        if (itemAmnt == 0 && basePrice == price && price <= getMoney) {
+                        if (itemAmnt === 0 && basePrice === price && price <= getMoney) {
                             ItemList[battleItems[i]].buy(1);
                         }
                     }
-                    if (itemAmnt != 0 && effectActive <= 1) {
+                    if (itemAmnt !== 0 && effectActive <= 1) {
                         ItemHandler.useItem(battleItems[i], 1);
                     }
                 }
@@ -100,12 +100,12 @@ function loadScript(){
 
 var scriptName = 'autobattleitems'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

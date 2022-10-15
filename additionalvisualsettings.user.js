@@ -89,7 +89,7 @@ function initVisualSettings() {
     document.querySelector('[id="settingsNotificationGeneral"] table tbody').prepend(notifiyHTML)
     //Add 'Disable all notifications' option
     document.querySelector('#all-notify').addEventListener('change', event => {
-        if (event.target.checked == false) {
+        if (event.target.checked === false) {
             checkAllNotification = "OFF";
             localStorage.setItem("checkAllNotification", "OFF");
             Notifier.notify = notificFunc;
@@ -121,58 +121,58 @@ function initVisualSettings() {
     addGlobalStyle('.dungeons-info { position: relative;font-weight: bold }');
 
     //The elements removed by the scripts don't ever get added back after a restart, waiting a second before removing makes them load properly
-    if (checkWildPokeName == "OFF") {
+    if (checkWildPokeName === "OFF") {
         document.querySelector('#poke-name').checked = true
     } else {
         remPokeName();
     }
-    if (checkWildPokeDefeat == "OFF") {
+    if (checkWildPokeDefeat === "OFF") {
         document.querySelector('#poke-defeat').checked = true
     } else {
         remPokeDefeat();
     }
-    if (checkWildPokeImg == "OFF") {
+    if (checkWildPokeImg === "OFF") {
         document.querySelector('#poke-image').checked = true
     } else {
         remPokeImg();
     }
-    if (checkWildPokeHealth == "OFF") {
+    if (checkWildPokeHealth === "OFF") {
         document.querySelector('#poke-health').checked = true
     } else {
         remPokeHealth();
     }
-    if (checkWildPokeCatch == "OFF") {
+    if (checkWildPokeCatch === "OFF") {
         document.querySelector('#poke-catch').checked = true
     } else {
         remPokeCatch();
     }
-    if (checkAllNotification == "ON") {
+    if (checkAllNotification === "ON") {
         document.querySelector('#all-notify').checked = true
         remNotifications();
     }
 
     document.getElementById('map').addEventListener('click', event => {
         if (event.target.matches('[data-route]')) {
-            if (checkWildPokeName == "ON") {
+            if (checkWildPokeName === "ON") {
                 remPokeName();
             }
-            if (checkWildPokeDefeat == "ON") {
+            if (checkWildPokeDefeat === "ON") {
                 remPokeDefeat();
             }
-            if (checkWildPokeImg == "ON") {
+            if (checkWildPokeImg === "ON") {
                 remPokeImg();
             }
-            if (checkWildPokeHealth == "ON") {
+            if (checkWildPokeHealth === "ON") {
                 remPokeHealth();
             }
-            if (checkWildPokeCatch == "ON") {
+            if (checkWildPokeCatch === "ON") {
                 remPokeCatch();
             }
         }
     });
 
     document.querySelector('#poke-name').addEventListener('change', event => {
-        if (event.target.checked == true) {
+        if (event.target.checked === true) {
             checkWildPokeName = "OFF";
             localStorage.setItem("checkWildPokeName", "OFF");
         } else {
@@ -182,7 +182,7 @@ function initVisualSettings() {
     });
 
     document.querySelector('#poke-defeat').addEventListener('change', event => {
-        if (event.target.checked == true) {
+        if (event.target.checked === true) {
             checkWildPokeDefeat = "OFF";
             localStorage.setItem("checkWildPokeDefeat", "OFF");
         } else {
@@ -192,7 +192,7 @@ function initVisualSettings() {
     });
 
     document.querySelector('#poke-image').addEventListener('change', event => {
-        if (event.target.checked == true) {
+        if (event.target.checked === true) {
             checkWildPokeImg = "OFF";
             localStorage.setItem("checkWildPokeImg", "OFF");
         } else {
@@ -202,7 +202,7 @@ function initVisualSettings() {
     });
 
     document.querySelector('#poke-health').addEventListener('change', event => {
-        if (event.target.checked == true) {
+        if (event.target.checked === true) {
             checkWildPokeHealth = "OFF";
             localStorage.setItem("checkWildPokeHealth", "OFF");
         } else {
@@ -212,7 +212,7 @@ function initVisualSettings() {
     });
 
     document.querySelector('#poke-catch').addEventListener('change', event => {
-        if (event.target.checked == true) {
+        if (event.target.checked === true) {
             checkWildPokeCatch = "OFF";
             localStorage.setItem("checkWildPokeCatch", "OFF");
         } else {
@@ -263,7 +263,7 @@ function initVisualSettings() {
     function remNotifications() {
         Notifier.notify = function(message) {
             const sound = message.sound;
-            if (typeof sound != 'undefined') {
+            if (typeof sound !== 'undefined') {
                 sound.play();
             }
         }
@@ -334,14 +334,14 @@ function initVisualSettings() {
         const fragment = new DocumentFragment();
         for (const gym in GymList) {
             let region;
-            try { region = GymList[gym].parent.region } catch (err) { region = null };
-            if (player.region == region) {
+            try { region = GymList[gym].parent.region } catch (err) { region = null }
+            if (player.region === region) {
                 const selGym = GymList[gym];
                 const btn = document.createElement('button');
                 btn.setAttribute('style', 'position: relative;');
                 btn.setAttribute('class', 'btn btn-block btn-success');
                 btn.addEventListener('click', () => { $("#GymsModal").modal("hide");GymRunner.startGym(selGym, false); });
-                selGym.isUnlocked() && MapHelper.calculateTownCssClass(selGym.parent.name) != 'locked' ? btn.disabled = false : btn.disabled = true;
+                selGym.isUnlocked() && MapHelper.calculateTownCssClass(selGym.parent.name) !== 'locked' ? btn.disabled = false : btn.disabled = true;
                 btn.innerHTML = `<div class="gyms-leaders">
                     <img src="assets/images/gymLeaders/${selGym.leaderName}.png" onerror="this.onerror=null;this.style.display='none';">
                     </div>
@@ -363,14 +363,14 @@ function initVisualSettings() {
         const fragment = new DocumentFragment();
         for (const town in TownList) {
             const townData = TownList[town];
-            if (townData.constructor.name == 'DungeonTown') {
+            if (townData.constructor.name === 'DungeonTown') {
                 const dungeonRegion = townData.region;
                 const dungeonData = townData.dungeon;
                 const dungeonClears = App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(dungeonData.name)]();
                 const dungeonTokens = App.game.wallet.currencies[GameConstants.Currency.dungeonToken]();
                 const affordEntry = dungeonData.tokenCost <= dungeonTokens ? true : false;
                 const canAccess = townData.isUnlocked() && affordEntry;
-                if (dungeonRegion == player.region) {
+                if (dungeonRegion === player.region) {
                     const btn = document.createElement('button');
                     btn.setAttribute('style', `position: relative;background-image: url("assets/images/towns/${dungeonData.name}.png");background-position: center;opacity: ${canAccess ? 1 : 0.70};filter: brightness(${canAccess ? 1 : 0.70});`);
                     btn.setAttribute('class', 'btn btn-block btn-success');
@@ -393,22 +393,22 @@ function initVisualSettings() {
     }
 }
 
-if (localStorage.getItem('checkWildPokeName') == null) {
+if (localStorage.getItem('checkWildPokeName') === null) {
     localStorage.setItem("checkWildPokeName", "OFF");
 }
-if (localStorage.getItem('checkWildPokeDefeat') == null) {
+if (localStorage.getItem('checkWildPokeDefeat') === null) {
     localStorage.setItem("checkWildPokeDefeat", "OFF");
 }
-if (localStorage.getItem('checkWildPokeImg') == null) {
+if (localStorage.getItem('checkWildPokeImg') === null) {
     localStorage.setItem("checkWildPokeImg", "OFF");
 }
-if (localStorage.getItem('checkWildPokeHealth') == null) {
+if (localStorage.getItem('checkWildPokeHealth') === null) {
     localStorage.setItem("checkWildPokeHealth", "OFF");
 }
-if (localStorage.getItem('checkWildPokeCatch') == null) {
+if (localStorage.getItem('checkWildPokeCatch') === null) {
     localStorage.setItem("checkWildPokeCatch", "OFF");
 }
-if (localStorage.getItem('checkAllNotification') == null) {
+if (localStorage.getItem('checkAllNotification') === null) {
     localStorage.setItem("checkAllNotification", "OFF");
 }
 
@@ -424,12 +424,12 @@ function loadScript(){
 
 var scriptName = 'additionalvisualsettings'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

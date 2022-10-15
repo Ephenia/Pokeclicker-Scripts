@@ -23,13 +23,13 @@ function initBallAdjust() {
     ballCont.append(ballAdj)
     document.getElementById('ball-adjust').addEventListener('click', event => changeAdjust(event.target));
 
-    if (ballAdjuster == "true") {
+    if (ballAdjuster === "true") {
         document.getElementById('ball-adjust').checked = true;
         catchDelay();
     }
 
-    function changeAdjust(ele) {
-        if (ballAdjuster == "true") {
+    function changeAdjust() {
+        if (ballAdjuster === "true") {
             ballAdjuster = "false"
         } else {
             ballAdjuster = "true"
@@ -40,7 +40,7 @@ function initBallAdjust() {
 
     function catchDelay() {
         for (var i = 0; i < getBalls.length; i++) {
-            if (ballAdjuster == "true") {
+            if (ballAdjuster === "true") {
                 getBalls[i].catchTime = 0;
             } else {
                 getBalls[i].catchTime = defaultTime[i];
@@ -49,7 +49,7 @@ function initBallAdjust() {
     }
 }
 
-if (localStorage.getItem('ballAdjuster') == null) {
+if (localStorage.getItem('ballAdjuster') === null) {
     localStorage.setItem("ballAdjuster", "false");
 }
 ballAdjuster = localStorage.getItem('ballAdjuster');
@@ -66,12 +66,12 @@ function loadScript(){
 
 var scriptName = 'catchspeedadjuster'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

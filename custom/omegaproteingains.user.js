@@ -17,12 +17,12 @@ var trainerCards;
 
 function initOmegaProtein() {
     document.getElementById('itemBag').querySelectorAll('div')[2].addEventListener('click', initProtein, true);
-    
+
     function initProtein() {
         //This setInterval is one of the few required ones because this table does not exist until loaded once
         awaitProteinTable = setInterval(function () {
             proteinTable = document.getElementById('pokemonSelectorModal').querySelectorAll('tbody')
-            if (proteinTable.length != 0) {
+            if (proteinTable.length !== 0) {
                 clearInterval(awaitProteinTable);
                 proteinTable[0].addEventListener('click', bypassProtein, true);
                 function bypassProtein(event) {
@@ -31,7 +31,7 @@ function initOmegaProtein() {
                     var setProtein = VitaminController.getMultiplier()
                     var usedProtein = protein - setProtein;
                     var pokeProtein = PartyController.getProteinSortedList()[child].proteinsUsed()
-                    if (setProtein == Infinity && protein > 0) {
+                    if (setProtein === Infinity && protein > 0) {
                         PartyController.getProteinSortedList()[child].proteinsUsed(pokeProtein + protein)
                         player.itemList.Protein(0)
                     } else if (usedProtein >= 0) {
@@ -62,12 +62,12 @@ function loadScript(){
 
 var scriptName = 'omegaproteingains'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

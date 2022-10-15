@@ -15,12 +15,12 @@ function initAutoQuests(){
         return true;
     }
     //Create localStorage variable to enable/disable auto quests
-    if (localStorage.getItem('autoQuestEnable') == null){
+    if (localStorage.getItem('autoQuestEnable') === null){
         localStorage.setItem('autoQuestEnable', 'true')
     }
     //Define quest types
     let questTypes = [];
-    if (localStorage.getItem('autoQuestTypes') == null){
+    if (localStorage.getItem('autoQuestTypes') === null){
         for (const type in QuestHelper.quests) {
             questTypes.push(type);
         }
@@ -34,13 +34,13 @@ function initAutoQuests(){
     //Add button
     var autoQuestBtn = document.createElement('button')
     autoQuestBtn.id = 'toggle-auto-quest'
-    autoQuestBtn.className = localStorage.getItem('autoQuestEnable') == 'true' ? 'btn btn-block btn-success' : 'btn btn-block btn-danger'
+    autoQuestBtn.className = localStorage.getItem('autoQuestEnable') === 'true' ? 'btn btn-block btn-success' : 'btn btn-block btn-danger'
     autoQuestBtn.style = 'position: absolute; left: 0px; top: 0px; width: auto; height: 41px; font-size: 9px;'
-    autoQuestBtn.textContent = localStorage.getItem('autoQuestEnable') == 'true' ? 'Auto [ON]' : 'Auto [OFF]'
+    autoQuestBtn.textContent = localStorage.getItem('autoQuestEnable') === 'true' ? 'Auto [ON]' : 'Auto [OFF]'
     document.getElementById('questDisplayContainer').appendChild(autoQuestBtn)
     //Add function to toggle auto quests
     document.getElementById('toggle-auto-quest').addEventListener('click',() => {
-        if (localStorage.getItem('autoQuestEnable') == 'true'){
+        if (localStorage.getItem('autoQuestEnable') === 'true'){
             localStorage.setItem('autoQuestEnable', 'false')
             document.getElementById('toggle-auto-quest').className = 'btn btn-block btn-danger'
             document.getElementById('toggle-auto-quest').textContent = 'Auto [OFF]'
@@ -55,32 +55,32 @@ function initAutoQuests(){
     //Checks for new quests to add to the list and claims completed ones
     var autoQuest = setInterval(function(){
         let questsNeed = 0;
-        if (trackRefresh != App.game.quests.lastRefresh) {
+        if (trackRefresh !== App.game.quests.lastRefresh) {
             trackRefresh = App.game.quests.lastRefresh;
             resetQuestModify();
         }
-        if (localStorage.getItem('autoQuestEnable') == 'true'){
+        if (localStorage.getItem('autoQuestEnable') === 'true'){
             if (App.game.quests.currentQuests().length > 0){
                 //Claim all completed quest & check if quests should refresh
                 App.game.quests.currentQuests().forEach(quest => {
-                    if (quest.notified == true){
+                    if (quest.notified === true){
                         App.game.quests.claimQuest(quest.index)
                     }
                     if (questTypes.includes(quest.constructor.name)) {
                         questsNeed++;
                     }
                 })
-            } else if (App.game.quests.currentQuests().length == 0) {
+            } else if (App.game.quests.currentQuests().length === 0) {
                 //Quest refresh handling
-                if (questsNeed == 0 && App.game.quests.canAffordRefresh()) {
+                if (questsNeed === 0 && App.game.quests.canAffordRefresh()) {
                     App.game.quests.refreshQuests();
                 }
             }
             //Attempt to start all available quests & quit the filtered ones
             App.game.quests.questList().forEach(quest => {
-                if (quest.inProgress() == true && !questTypes.includes(quest.constructor.name)) {
+                if (quest.inProgress() === true && !questTypes.includes(quest.constructor.name)) {
                     App.game.quests.quitQuest(quest.index);
-                } else if (quest.isCompleted() == false && quest.inProgress() == false && questTypes.includes(quest.constructor.name)){
+                } else if (quest.isCompleted() === false && quest.inProgress() === false && questTypes.includes(quest.constructor.name)){
                     App.game.quests.beginQuest(quest.index);
                 }
             })
@@ -100,9 +100,9 @@ function initAutoQuests(){
         const index = +event.target.getAttribute('data-src');
         const questName = App.game.quests.questList()[index].constructor.name;
         const indexPos = questTypes.indexOf(questName);
-        if (indexPos != -1) {
+        if (indexPos !== -1) {
             questTypes[indexPos] = null;
-        } else if (indexPos == -1) {
+        } else if (indexPos === -1) {
             const empty = questTypes.indexOf(null);
             questTypes[empty] = questName;
         }
@@ -122,12 +122,12 @@ function loadScript(){
 
 var scriptName = 'autoquestcomplete'
 
-if (document.getElementById('scriptHandler') != undefined){
+if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
+    if (localStorage.getItem(scriptName) !== null){
+        if (localStorage.getItem(scriptName) === 'true'){
             loadScript()
         }
     }

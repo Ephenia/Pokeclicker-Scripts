@@ -114,7 +114,7 @@ function initShinySynapse() {
     const globalBtn = document.createElement('button');
     globalBtn.textContent = 'Modify';
     globalBtn.setAttribute('class', 'btn btn-sm btn-success');
-    globalBtn.addEventListener('click', event => {
+    globalBtn.addEventListener('click', () => {
         const rate = +document.getElementById('shiny-modifier-global').value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
         const shinyMulti = App.game.multiplier.getBonus('shiny');
         globalShinyRate = rate;
@@ -168,7 +168,7 @@ function initShinySynapse() {
         } catch (err) {
             genType = (new Error()).stack.split("\n")[1].trim().split(" ")[0].replace(/@(.*?)$/, '');
         }
-        const index = genType == 'generateDungeonBoss' ? 1 : genSource.indexOf(genType);
+        const index = genType === 'generateDungeonBoss' ? 1 : genSource.indexOf(genType);
 
         let trueChance;
         if (karmaMode) {
@@ -240,13 +240,13 @@ function initShinySynapse() {
 
         const shinyView = document.getElementsByClassName('shiny-modifier-view');
         for (let i = 0; i <= prefShinyRates.length; i++) {
-            if (i == 8) {
+            if (i === 8) {
                 break;
             }
             if (i < 7) {
                 prefShinyRates[i] = null;
             }
-            if (0 == i) {
+            if (0 === i) {
                 shinyView[i].querySelector('input').value = globalShinyRate.toLocaleString('en-US');
                 document.getElementById('shiny-charm-rate-global').textContent = (globalShinyRate / shinyMulti);
             } else {
@@ -340,8 +340,8 @@ if (document.getElementById('scriptHandler') != undefined) {
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null) {
-        if (localStorage.getItem(scriptName) == 'true') {
+    if (localStorage.getItem(scriptName) !== null) {
+        if (localStorage.getItem(scriptName) === 'true') {
             loadScript()
         }
     }
