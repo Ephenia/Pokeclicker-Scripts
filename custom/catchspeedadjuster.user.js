@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Catch Speed Adjuster
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     1.1
-// @author      Ephenia
-// @description Adjusts catch speed of all Pokeballs. Currently only makes Pokeballs catch as fast as possible.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/catchspeedadjuster.user.js
+// @name          [Pokeclicker] Catch Speed Adjuster
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia
+// @description   Adjusts catch speed of all Pokeballs. Currently only makes Pokeballs catch as fast as possible.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       1.1
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/catchspeedadjuster.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/catchspeedadjuster.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 var ballAdjuster;

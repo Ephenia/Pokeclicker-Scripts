@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Additional Visual Settings
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     2.1
-// @author      Ephenia
-// @description Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/additionalvisualsettings.user.js
+// @name          [Pokeclicker] Additional Visual Settings
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia
+// @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       2.1
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/additionalvisualsettings.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/additionalvisualsettings.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 var checkWildPokeName;

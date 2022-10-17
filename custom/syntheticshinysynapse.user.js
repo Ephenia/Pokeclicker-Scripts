@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Synthetic Shiny Synapse
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     1.5
-// @author      Ephenia
-// @description Allows you to adjust and modify the shiny rates of everything specifically, as well as set a global shiny rate.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/syntheticshinysynapse.user.js
+// @name          [Pokeclicker] Synthetic Shiny Synapse
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia
+// @description   Allows you to adjust and modify the shiny rates of everything specifically, as well as set a global shiny rate.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       1.5
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/syntheticshinysynapse.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/syntheticshinysynapse.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 const genSource = ['generateWildPokemon', //Wild Pokemon

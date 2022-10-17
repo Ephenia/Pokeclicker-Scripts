@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name         [Pokeclicker] Enhanced Auto Hatchery
-// @namespace    Pokeclicker Scripts
-// @match        https://www.pokeclicker.com/
-// @grant        none
-// @version      2.0
-// @author       Ephenia (Original/Credit: Drak + Ivan Lay)
-// @description  Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautohatchery.user.js
+// @name          [Pokeclicker] Enhanced Auto Hatchery
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia (Original/Credit: Drak + Ivan Lay)
+// @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       2.0
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautohatchery.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautohatchery.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 var hatchState;

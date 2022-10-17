@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Catch Filter Fantasia
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     1.7
-// @author      Ephenia
-// @description An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
+// @name          [Pokeclicker] Catch Filter Fantasia
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia
+// @description   An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       1.7
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/catchfilterfantasia.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 const ballNames = ['None', 'Pokeball', 'Greatball', 'Ultraball', 'Masterball', 'Fastball', 'Quickball', 'Timerball', 'Duskball', 'Luxuryball', 'Diveball', 'Lureball', 'Nestball', 'Repeatball', 'Beastball'];
