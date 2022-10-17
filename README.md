@@ -271,7 +271,8 @@ Auto Replant will wait for planted berries to be close to withering then harvest
 
 ```diff
 - Note: the Auto Farmer runs once every 1 second.
-- Note: activating Auto Replant will automatically disable other features.
+- Note: activating Auto Replant will momentarily block other features from being enabled.
+- Note: activating Auto Plant, Auto Harvest or Auto Mulch will momentarily block Auto Replant from being enabled.
 ```
 
 I plan to update this Auto Farmer with some additional features later on.
