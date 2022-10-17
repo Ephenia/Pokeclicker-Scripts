@@ -260,17 +260,18 @@ As of 1.1 this also includes 2 more additional features into the Treasures tab o
 
 <hr>
   
-## **Enhanced Auto Farmer** ([enhancedautofarmer.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/main/enhancedautofarmer.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautofarmer.user.js))
-This script is an Auto Farmer which adds 4 new buttons below the Plant and Harvest all buttons as shown:<br>
+## **Simple Auto Farmer** ([simpleautofarmer.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/simpleautofarmer.user.js))
+This script is a simple Auto Farmer which adds 4 new buttons below the Plant and Harvest all buttons as shown:<br>
 
 ![](https://i.imgur.com/ei7lR95.png)
 
 Auto Farm will plant the berry that you have selected and harvest all berries when they are ready. Auto mulch works in conjunction with Auto Farm, so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the mulch that you have selected on the entire field. This will also work with the Farm window closed, and these settings will persist upon refresh/browser close.
 
-Auto Replant will wait for planted berries to be close to withering then harvest and plant them again in the same spot. This can be expecially useful when trying to mutate berries. <strong>Please note that the Auto Replant button probably won't work as intended if used together with Auto Plant / Auto Harvest and Auto Mulch.</strong>
+Auto Replant will wait for planted berries to be close to withering then harvest and plant them again in the same spot. This can be expecially useful when trying to mutate berries.
 
 ```diff
 - Note: the Auto Farmer runs once every 1 second.
+- Note: activating Auto Replant will automatically disable other features.
 ```
 
 I plan to update this Auto Farmer with some additional features later on.
