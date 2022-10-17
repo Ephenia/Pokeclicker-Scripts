@@ -55,7 +55,7 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 - Note: in case it isn't mention below, all user set settings with these scripts are saved and persist even upon game close!!!
 ```
 
-<hr>s
+<hr>
 
 ### **Additional Visual Settings** ([additionalvisualsettings.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/additionalvisualsettings.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/additionalvisualsettings.user.js))
 
