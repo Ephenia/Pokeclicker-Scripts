@@ -18,7 +18,7 @@
 // @run-at        document-idle
 // ==/UserScript==
 
-function calculatePokerus(number) {
+function calculatePokerus(index) {
     //This will always spread Pokerus and ignore types
     for (let i = index; i < App.game.breeding.eggList.length; i++) {
         const pokemon = App.game.breeding.eggList[i]().partyPokemon();
