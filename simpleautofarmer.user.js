@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name          [Pokeclicker] Enhanced Auto Farmer
+// @name          [Pokeclicker] Simple Auto Farmer
 // @namespace     Pokeclicker Scripts
 // @author        Ephenia / Akwawa / perkasthor / davide-lugli (update 1.6)
-// @description   It Add buttons to automatically plant any specific berry, harvest or mulch all berries. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
+// @description   It Add buttons to automatically plant any specific berry, harvest, mulch or replant all berries. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
 // @version       1.6
@@ -120,6 +120,10 @@ function initAutoFarm() {
 
     // Plant - cmd, start, stop, do
     function autoPlant(elt, init=false) {
+        if ( replantState === "ON" ) {
+            return;
+        }
+
         if ( (init === true && plantState === "ON" ) || (init === false && plantState === "OFF") ) {
             startPlant(elt);
         } else {
@@ -155,6 +159,10 @@ function initAutoFarm() {
 
     // Harvest - cmd, start, stop, do
     function autoHarvest(elt, init=false) {
+        if ( replantState === "ON" ) {
+            return;
+        }
+
         if ( (init === true && harvestState === "ON" ) || (init === false && harvestState == "OFF") ) {
             startHarvest(elt);
         } else {
@@ -190,6 +198,10 @@ function initAutoFarm() {
 
     // Replant - cmd, start, stop, do
     function autoReplant(elt, init=false) {
+        if ( plantState === "ON" || harvestState === "ON" || mulchState === "ON" ) {
+            return;
+        }
+
         if ( (init === true && replantState === "ON" ) || (init === false && replantState == "OFF") ) {
             startReplant(elt);
         } else {
@@ -236,6 +248,10 @@ function initAutoFarm() {
 
     // Mulch - cmd, start, stop, do
     function autoMulch(elt, init=false) {
+        if ( replantState === "ON" ) {
+            return;
+        }
+
         if ( (init === true && mulchState === "ON" ) || (init === false && mulchState == "OFF") ) {
             startMulch(elt);
         } else {
