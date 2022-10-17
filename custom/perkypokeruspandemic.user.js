@@ -2,10 +2,10 @@
 // @name          [Pokeclicker] Perky Pokerus Pandemic
 // @namespace     Pokeclicker Scripts
 // @author        Ephenia
-// @description   This script makes it so that Pokérus will spread from any Pokémon (egg) that has it to all of the others inside of the Hatchery, instead of just your starter needing to be in the Hatchery for this to be done.
+// @description   This script makes it so that Pokérus will spread from any Pokémon (egg) that has it to all of the others inside of the Hatchery, instead of just types of Pokémon needing to match while in the Hatchery for this to be done.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.2
+// @version       1.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -20,36 +20,29 @@
 
 function initPokerusPandemic() {
     App.game.breeding.progressEggs = function(amount) {
-        amount *= this.getStepMultiplier();
-
         amount = Math.round(amount);
-        let index =  this.eggList.length;
+        let index = this.eggList.length;
         while (index-- > 0) {
             const helper = this.hatcheryHelpers.hired()[index];
             if (helper) {
                 continue;
             }
             const egg = this.eggList[index]();
-            const partyPokemon = App.game.party.caughtPokemon.find(p => p.name == egg.pokemon);
-            if (!egg.isNone() && partyPokemon && partyPokemon.canCatchPokerus() && !partyPokemon.pokerus) {
-                partyPokemon.pokerus = calculatePokerus();
-                function calculatePokerus() {
-                    return App.game.breeding.eggList.some(e => {
-                        let eggPkrs;
-                        try {
-                            eggPkrs = App.game.party.caughtPokemon.find(p => p.name == e().pokemon).pokerus;
-                            if (!e().canHatch() && !e().isNone() && eggPkrs) {
-                                const pokemon = App.game.party.getPokemon(PokemonHelper.getPokemonByName(e().pokemon).id);
-                                return pokemon.pokerus;
-                            }
-                        } catch (err) {
-                            return true;
+            const partyPokemon = egg.partyPokemon();
+            if (!egg.isNone() && partyPokemon && partyPokemon.canCatchPokerus() && partyPokemon.pokerus == GameConstants.Pokerus.Uninfected) {
+                calculatePokerus(index);
+                function calculatePokerus(number) {
+                    //This will always spread Pokerus and ignore types
+                    for (let i = index; i < App.game.breeding.eggList.length; i++) {
+                        const pokemon = App.game.breeding.eggList[i]().partyPokemon();
+                        if (pokemon && pokemon.pokerus == GameConstants.Pokerus.Uninfected) {
+                            pokemon.pokerus = GameConstants.Pokerus.Infected;
                         }
-                    });
+                    }
                 }
             }
             egg.addSteps(amount, this.multiplier);
-            if (this.queueList().length && egg.progress() >= 100) {
+            if (this._queueList().length && egg.canHatch()) {
                 this.hatchPokemonEgg(index);
             }
         }
