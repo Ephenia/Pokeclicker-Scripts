@@ -1,0 +1,8 @@
+{
+    // Extension - markdownlint > https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint
+    "markdownlint.config": {
+        "default": true,
+        "MD033": false,                         // https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#md033
+        "MD051": false                          // https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md#md051
+    }
+}
