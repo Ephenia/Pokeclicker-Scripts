@@ -5,7 +5,7 @@
 // @description   Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.1
+// @version       1.7
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
