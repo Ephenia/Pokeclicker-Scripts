@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Simple Auto Farmer
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     1.5
-// @author      Ephenia / Akwawa (update 1.5)
-// @description It Add buttons to automatically plant any specific berry, harvest or mulch all berries. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/simpleautofarmer.user.js
+// @name          [Pokeclicker] Simple Auto Farmer
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia / Akwawa (update 1.5)
+// @description   It Add buttons to automatically plant any specific berry, harvest or mulch all berries. Make sure to have the berry selected that you want to auto plant & harvest before enabling it. This includes an auto Mulcher as well.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       1.5
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/simpleautofarmer.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/simpleautofarmer.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 function initAutoFarm() {

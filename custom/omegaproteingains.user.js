@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Omega Protein Gains
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     1.0
-// @author      Ephenia
-// @description Removes the cap on the amount of Proteins that you can use on Pokémon which effectively makes them infinite use.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/omegaproteingains.user.js
+// @name          [Pokeclicker] Omega Protein Gains
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia
+// @description   Removes the cap on the amount of Proteins that you can use on Pokémon which effectively makes them infinite use.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       1.0
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/omegaproteingains.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/omegaproteingains.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 var proteinTable;

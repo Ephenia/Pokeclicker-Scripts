@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Enhanced Auto Clicker
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     2.3
-// @author      Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951)
-// @description Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautoclicker.user.js
+// @name          [Pokeclicker] Enhanced Auto Clicker
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951, Kaias26)
+// @description   Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       2.5
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautoclicker.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/enhancedautoclicker.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 var clickState;
@@ -349,7 +358,7 @@ function autoDungeon() {
         }
 
         if (App.game.gameState === GameConstants.GameState.dungeon) {
-            var dungeonBoard = DungeonRunner.map.board();
+            var dungeonBoard = DungeonRunner.map.board()[DungeonRunner.map.playerPosition().floor];
             //The boss can be found at any time
             if (foundBoss == false) {
                 bossCoords = scan(dungeonBoard)
@@ -371,7 +380,7 @@ function scan(dungeonBoard) {
     var playerCoords = []*/
     for (var i = 0; i < dungeonBoard.length; i++) {
         for (var j = 0; j < dungeonBoard[i].length; j++) {
-            if (dungeonBoard[i][j].type() == GameConstants.DungeonTile.boss) {
+            if (dungeonBoard[i][j].type() == GameConstants.DungeonTile.boss || dungeonBoard[i][j].type() == GameConstants.DungeonTile.ladder) {
                 foundBoss = true
                 return [i, j]
             }
@@ -391,6 +400,11 @@ function wander(dungeonBoard, bossCoords) {
         foundBoss = false
         bossCoords.length = 0
         DungeonRunner.startBossFight()
+    }
+    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.ladder) {
+        foundBoss = false
+        bossCoords.length = 0
+        DungeonRunner.nextFloor()
     }
     //Iterates through the board and compiles all possible moves
     for (var i = 0; i < dungeonBoard.length; i++) {
@@ -450,7 +464,12 @@ function fullClear(dungeonBoard, bossCoords) {
         DungeonRunner.map.moveToCoordinates(bossCoords[1], bossCoords[0]);
         foundBoss = false;
         bossCoords.length = 0;
-        DungeonRunner.startBossFight();
+
+        if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
+            DungeonRunner.startBossFight();
+        } else if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.ladder) {
+            DungeonRunner.nextFloor();
+        }
     }
 }
 
@@ -480,7 +499,7 @@ gymState = JSON.parse(localStorage.getItem('autoGymState'));
 gymSelect = JSON.parse(localStorage.getItem('selectedGym'));
 
 try {
-    dungeonState = localStorage.getItem('autoDungeonState');
+    dungeonState = JSON.parse(localStorage.getItem('autoDungeonState'));
 } catch (error) {
     dungeonState = false
     localStorage.setItem("autoDungeonState", false);

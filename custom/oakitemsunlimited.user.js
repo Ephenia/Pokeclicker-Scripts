@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Oak Items Unlimited
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     1.0
-// @author      Ephenia
-// @description Removes the limit for the amount of Oak Items that you're able to equip so that you're able to equip all of them.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/oakitemsunlimited.user.js
+// @name          [Pokeclicker] Oak Items Unlimited
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia
+// @description   Removes the limit for the amount of Oak Items that you're able to equip so that you're able to equip all of them.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       1.0
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/oakitemsunlimited.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/oakitemsunlimited.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 function initOakItems() {

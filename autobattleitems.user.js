@@ -1,12 +1,21 @@
 // ==UserScript==
-// @name        [Pokeclicker] Auto Battle Items
-// @namespace   Pokeclicker Scripts
-// @match       https://www.pokeclicker.com/
-// @grant       none
-// @version     1.1
-// @author      Ephenia
-// @description Automates the usage of Battle Items as effectively and efficiently as possible. Now includes which items you would like to automate specifically and being able to toggle them.
-// @updateURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/autobattleitems.user.js
+// @name          [Pokeclicker] Auto Battle Items
+// @namespace     Pokeclicker Scripts
+// @author        Ephenia
+// @description   Automates the usage of Battle Items as effectively and efficiently as possible. Now includes which items you would like to automate specifically and being able to toggle them.
+// @copyright     https://github.com/Ephenia
+// @license       GPL-3.0 License
+// @version       1.1
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/autobattleitems.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/autobattleitems.user.js
+
+// @match         https://www.pokeclicker.com/
+// @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
+// @grant         none
+// @run-at        document-idle
 // ==/UserScript==
 
 var battleItemState;
