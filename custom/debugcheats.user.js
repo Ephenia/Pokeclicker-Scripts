@@ -5,7 +5,7 @@
 // @description   Edit your save for debug (currency, pokeballs, pokemons, ...)
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       0.1
+// @version       0.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -19,8 +19,6 @@
 // ==/UserScript==
 
 // This script has many more cheats, but it's already too much... https://greasyfork.org/en/scripts/435557-pokeclicker
-
-"use strict";
 
 const profileDrop = document.getElementById('startMenu').querySelectorAll('ul li')[0];
 const profileModal = document.getElementById('profileModal');
@@ -69,7 +67,7 @@ function filterPkdx(){
                 case 'all':
                     break;
                 default:
-                    display = tdb.innerHTML.toLowerCase().includes(document.getElementById('pkdxRegionFilter').value.toLowerCase());
+                    display = tdb.innerHTML.toLowerCase().includes(document.getElementById('pkdxRegionFilter').value);
                     break;
             }
         }
@@ -115,7 +113,7 @@ function filterPkdx(){
 
 // eslint-disable-next-line no-unused-vars
 function loadPkdx(){
-    let playerRegion = player.region;
+    let playerRegion = player.regionStarters.length - 1;
     let pkdxBody = document.querySelector(':scope #pkdx tbody');
     pkdxBody.innerHTML = '';
     let toAdd = "";
@@ -131,7 +129,7 @@ function loadPkdx(){
                     <td>${pokemon.name}</td>
                     <td><img width="18px" src="${getPokeballImgSrc(pokemon.id, lpkm)}" onclick="gainPk(${pokemon.id})"/></td>
                     <td><img src="${getPokerusImgSrc(pokemon.id, lpkm)}"  onclick="gainPkrs(${pokemon.id})"/></td>
-                    <td>${Object.keys(PokemonHelper.getPokemonLocations(pokemon.name, player.region)).length ? "YES" : "NO"}</td>
+                    <td>${Object.keys(PokemonHelper.getPokemonLocations(pokemon.name, playerRegion)).length ? "YES" : "NO"}</td>
                 </tr>
             `;
         }
@@ -266,11 +264,13 @@ function initSaveEditor() {
 
     // pokedex
     let regFilt = modalBody.querySelector('#pkdxRegionFilter');
-    for (let i = 0; i < player.region; i++) {
+    for (let i = 0; i < (player.regionStarters.length - 1); i++) {
         const reg = GameConstants.Region[i]
         regFilt.innerHTML += `<option value="${reg}">${reg.charAt(0).toUpperCase() + reg.slice(1)}</option>`;
     }
 }
+
+// initSaveEditor();
 
 //Made this script load like the others for consistency
 function loadScript(){
@@ -283,7 +283,7 @@ function loadScript(){
     }
 }
 
-var scriptName = 'saveeditor'
+var scriptName = 'debugcheats'
 
 if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
