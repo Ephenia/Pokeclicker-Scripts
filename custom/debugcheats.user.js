@@ -5,7 +5,7 @@
 // @description   Edit your save for debug (currency, pokeballs, pokemons, ...)
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       0.3
+// @version       0.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -52,7 +52,6 @@ function gainPkrs(id){
 }
 
 function filterPkdx(){
-    console.debug("Laggy filter")
     let lst = document.querySelectorAll(':scope #pkdx tbody tr');
     for (let i = 0; i < lst.length; i++) {
         const tdb = lst[i];
@@ -121,8 +120,9 @@ function loadPkdx(){
         if (pokemon.nativeRegion <= playerRegion) {
             let lpkm = App.game.party.getPokemon(pokemon.id);
             let region = GameConstants.Region[pokemon.nativeRegion].charAt(0).toUpperCase() + GameConstants.Region[pokemon.nativeRegion].slice(1)
-            let roadsHint = "";
-            let roadLocations = PokemonHelper.getPokemonLocations(pokemon.name, playerRegion)[0]
+            let hint = "";
+            let getPokemonLocation = PokemonHelper.getPokemonLocations(pokemon.name, playerRegion);
+            let roadLocations = getPokemonLocation[0]
             if (roadLocations) {
                 for (let i = 0; i < (player.regionStarters.length - 1); i++) {
                     const reg = GameConstants.Region[i];
@@ -131,10 +131,10 @@ function loadPkdx(){
                         roads += ` ${route.route},`
                     });
                     if (roads !== "Route")
-                        roadsHint += `${roadsHint !== "" ? `\n` : ""}${reg.charAt(0).toUpperCase() + reg.slice(1)}: ${roads.slice(0, -1)}`;
+                        hint += `${hint !== "" ? `\n` : ""}${reg.charAt(0).toUpperCase() + reg.slice(1)}: ${roads.slice(0, -1)}`;
                 }
-                if (roadsHint !== "")
-                    roadsHint = ` title="${roadsHint}"`;
+                if (hint !== "")
+                    hint = ` title="${hint}"`;
             }
             toAdd += `
                 <tr id="pkdx_${pokemon.id.toString().replace('.','_')}">
@@ -144,7 +144,7 @@ function loadPkdx(){
                     <td>${pokemon.name}</td>
                     <td><img width="18px" src="${getPokeballImgSrc(pokemon.id, lpkm)}" onclick="gainPk(${pokemon.id})"/></td>
                     <td><img src="${getPokerusImgSrc(pokemon.id, lpkm)}"  onclick="gainPkrs(${pokemon.id})"/></td>
-                    <td${roadsHint}>${Object.keys(PokemonHelper.getPokemonLocations(pokemon.name, playerRegion)).length ? ('<span class="badge text-light" style="background-color: rgb(' + (roadsHint !== "" ? '122, 199, 76' : '99, 144, 240') + ');"><strong>YES</strong></span>') : '<span class="badge text-light" style="background-color: rgb(194, 46, 40);"><strong>NO</strong></span>'}</td>
+                    <td${hint}><span class="badge text-light" style="background-color: rgb(${Object.keys(getPokemonLocation).length ? ((hint !== "" ? (hint.includes(region) ? '122, 199, 76'  : '166, 185, 26' ) : '99, 144, 240') + ');">YES') : '194, 46, 40);">NO'}</span></td>
                 </tr>
             `;
         }
