@@ -5,7 +5,7 @@
 // @description   Edit your save for debug (currency, pokeballs, pokemons, ...)
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       0.5
+// @version       0.6
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -112,7 +112,7 @@ function filterPkdx(){
 
 // eslint-disable-next-line no-unused-vars
 function loadPkdx(){
-    let playerRegion = GameConstants.MAX_AVAILABLE_REGION;
+    let playerRegion = player.highestRegion();
     let pkdxBody = document.querySelector(':scope #pkdx tbody');
     pkdxBody.innerHTML = '';
     let toAdd = "";
@@ -279,7 +279,7 @@ function initSaveEditor() {
 
     // pokedex
     let regFilt = modalBody.querySelector('#pkdxRegionFilter');
-    for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
+    for (let i = 0; i <= player.highestRegion(); i++) {
         const reg = GameConstants.Region[i]
         regFilt.innerHTML += `<option value="${reg}">${reg.charAt(0).toUpperCase() + reg.slice(1)}</option>`;
     }
