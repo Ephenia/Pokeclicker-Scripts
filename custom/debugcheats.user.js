@@ -117,14 +117,14 @@ function loadPkdx(){
     pkdxBody.innerHTML = '';
     let toAdd = "";
     for (const pokemon of pokemonList) {
-        if (pokemon.nativeRegion < playerRegion) {
+        if (pokemon.nativeRegion <= playerRegion) {
             let lpkm = App.game.party.getPokemon(pokemon.id);
             let region = GameConstants.Region[pokemon.nativeRegion].charAt(0).toUpperCase() + GameConstants.Region[pokemon.nativeRegion].slice(1)
             let hint = "";
             let getPokemonLocation = PokemonHelper.getPokemonLocations(pokemon.name, playerRegion);
             let roadLocations = getPokemonLocation[0]
             if (roadLocations) {
-                for (let i = 0; i < playerRegion; i++) {
+                for (let i = 0; i <= playerRegion; i++) {
                     const reg = GameConstants.Region[i];
                     let roads = "Route"
                     roadLocations[i]?.forEach((route) => {
@@ -279,7 +279,7 @@ function initSaveEditor() {
 
     // pokedex
     let regFilt = modalBody.querySelector('#pkdxRegionFilter');
-    for (let i = 0; i < GameConstants.MAX_AVAILABLE_REGION; i++) {
+    for (let i = 0; i <= GameConstants.MAX_AVAILABLE_REGION; i++) {
         const reg = GameConstants.Region[i]
         regFilt.innerHTML += `<option value="${reg}">${reg.charAt(0).toUpperCase() + reg.slice(1)}</option>`;
     }
