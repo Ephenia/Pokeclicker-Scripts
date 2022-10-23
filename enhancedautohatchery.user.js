@@ -5,7 +5,7 @@
 // @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.1
+// @version       2.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -259,8 +259,9 @@ function autoHatcher() {
                     }
                 }
                 // Check based on native region
-                if (BreedingFilters.region.value() != 127) {
-                    const regionVal = [1, 2, 4, 8, 16, 32, 64];
+                const useRegion = BreedingFilters.region.value() == 2 ** (player.highestRegion() + 1) - 1;
+                if (!useRegion) {
+                    const regionVal = [1, 2, 4, 8, 16, 32, 64, 128];
                     const pokeNatRegion = PokemonHelper.calcNativeRegion(partyPokemon.name);
                     if (regionVal[pokeNatRegion] !== BreedingFilters.region.value()) {
                         return false;
