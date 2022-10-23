@@ -5,7 +5,7 @@
 // @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.0
+// @version       2.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -241,63 +241,50 @@ function autoHatcher() {
             }
 
             // Filter the sorted list of Pokemon based on the parameters set in the Hatchery screen
-            let filteredEggList = PartyController.getSortedList().filter(
-                (partyPokemon) => {
-                    // Only breedable Pokemon
-                    if (partyPokemon.breeding || partyPokemon.level < 100) {
+            let filteredEggList = PartyController.getSortedList().filter((partyPokemon) => {
+                // Only breedable Pokemon
+                if (partyPokemon.breeding || partyPokemon.level < 100) {
+                    return false;
+                }
+                // Check based on category
+                if (BreedingFilters.category.value() >= 0) {
+                    if (partyPokemon.category !== BreedingFilters.category.value()) {
                         return false;
                     }
-                    // Check based on category
-                    if (BreedingFilters.category.value() >= 0) {
-                        if (
-                            partyPokemon.category !== BreedingFilters.category.value()
-                        ) {
-                            return false;
-                        }
-                    }
-                    // Check based on shiny status
-                    if (BreedingFilters.shinyStatus.value() >= 0) {
-                        if (
-                            +partyPokemon.shiny !== BreedingFilters.shinyStatus.value()
-                        ) {
-                            return false;
-                        }
-                    }
-                    // Check based on native region
-                    if (BreedingFilters.region.value() > -2) {
-                        if (
-                            PokemonHelper.calcNativeRegion(partyPokemon.name) !==
-                            BreedingFilters.region.value()
-                        ) {
-                            return false;
-                        }
-                    }
-                    // Check if either of the types match
-                    const type1 =
-                          BreedingFilters.type1.value() > -2
-                    ? BreedingFilters.type1.value()
-                    : null;
-                    const type2 =
-                          BreedingFilters.type2.value() > -2
-                    ? BreedingFilters.type2.value()
-                    : null;
-                    if (type1 !== null || type2 !== null) {
-                        const { type: types } = pokemonMap[partyPokemon.name];
-                        if ([type1, type2].includes(PokemonType.None)) {
-                            const type = type1 == PokemonType.None ? type2 : type1;
-                            if (!BreedingController.isPureType(partyPokemon, type)) {
-                                return false;
-                            }
-                        } else if (
-                            (type1 !== null && !types.includes(type1)) ||
-                            (type2 !== null && !types.includes(type2))
-                        ) {
-                            return false;
-                        }
-                    }
-                    return true;
                 }
-            );
+                // Check based on shiny status
+                if (BreedingFilters.shinyStatus.value() >= 0) {
+                    if (+partyPokemon.shiny !== BreedingFilters.shinyStatus.value()) {
+                        return false;
+                    }
+                }
+                // Check based on native region
+                if (BreedingFilters.region.value() != 127) {
+                    const regionVal = [1, 2, 4, 8, 16, 32, 64];
+                    const pokeNatRegion = PokemonHelper.calcNativeRegion(partyPokemon.name);
+                    if (regionVal[pokeNatRegion] !== BreedingFilters.region.value()) {
+                        return false;
+                    }
+                }
+                // Check if either of the types match
+                const type1 = BreedingFilters.type1.value() > -2 ? BreedingFilters.type1.value() : null;
+                const type2 = BreedingFilters.type2.value() > -2 ? BreedingFilters.type2.value() : null;
+                if (type1 !== null || type2 !== null) {
+                    const { type: types } = pokemonMap[partyPokemon.name];
+                    if ([type1, type2].includes(PokemonType.None)) {
+                        const type = type1 == PokemonType.None ? type2 : type1;
+                        if (!BreedingController.isPureType(partyPokemon, type)) {
+                            return false;
+                        }
+                    } else if (
+                        (type1 !== null && !types.includes(type1)) ||
+                        (type2 !== null && !types.includes(type2))
+                    ) {
+                        return false;
+                    }
+                }
+                return true;
+            });
 
             const hasPKRS = App.game.keyItems.hasKeyItem(KeyItemType.Pokerus_virus);
             const starterName = GameConstants.Starter[player.starter()];
@@ -324,14 +311,9 @@ function autoHatcher() {
                 try {
                     App.game.breeding.addPokemonToHatchery(filteredEggList[0]);
                 } catch (err) {
-                    const isFavorite = BreedingFilters.category.value();
-                    if (isFavorite != 1) {
-                        const canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
-                        const randBreed = getRandomInt(canBreed.length);
-                        App.game.breeding.addPokemonToHatchery(canBreed[randBreed]);
-                    } else {
-                        return true;
-                    }
+                    const canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
+                    const randBreed = getRandomInt(canBreed.length);
+                    App.game.breeding.addPokemonToHatchery(canBreed[randBreed]);
                 }
             }
 
