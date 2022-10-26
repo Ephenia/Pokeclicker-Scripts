@@ -5,7 +5,7 @@
 // @description   Removes the limit for the number of quests you can do at once and auto completes/starts new ones.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.1
+// @version       1.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -29,13 +29,22 @@ function initAutoQuests(){
     }
     //Define quest types
     let questTypes = [];
-    if (localStorage.getItem('autoQuestTypes') == null){
+    const savedTypes = JSON.parse(localStorage.getItem('autoQuestTypes'));
+    const getQuests = QuestHelper.quests;
+    if (savedTypes != null) {
+        if (Object.keys(savedTypes).length !== Object.keys(getQuests).length) {
+            saveQuests();
+        } else {
+            questTypes = savedTypes;
+        }
+    } else {
+        saveQuests();
+    }
+    function saveQuests() {
         for (const type in QuestHelper.quests) {
             questTypes.push(type);
         }
-        localStorage.setItem('autoQuestTypes', JSON.stringify(questTypes))
-    } else {
-        questTypes = JSON.parse(localStorage.getItem('autoQuestTypes'));
+        localStorage.setItem('autoQuestTypes', JSON.stringify(questTypes));
     }
     resetQuestModify();
     //Track the last refresh
