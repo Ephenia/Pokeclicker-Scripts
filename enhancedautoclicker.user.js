@@ -30,7 +30,9 @@ var allSelectedGym = 0;
 var gymState;
 var gymSelect;
 var dungeonState;
+var achievementState;
 var dungeonSelect;
+var achievementSelect;
 var foundBoss = false;
 var foundBossX;
 var foundBossY;
@@ -83,16 +85,33 @@ function initAutoClicker() {
   </select>
     </td>
     </tr>
+    <tr>
+    <td style="width: 40%;">
+    <button id="auto-achievement-start" class="btn btn-block btn-${achievementState ? 'success' : 'danger'}" style="font-size: 8pt;">
+    Auto Achievement [`+ achievementState + `]
+    </button>
+    </td>
+    <td>
+    <select id = "achievement-select">
+        <option value = "0">Routes</option>
+		<option value = "1">Gyms</option>
+        <option value = "2">Dungeons</option>
+    </select>
+    </td>
+    </tr>
     </tbody>`
     battleView.before(elemAC)
     document.getElementById('gym-select').value = gymSelect;
     document.getElementById('dungeon-select').value = dungeonSelect;
+    document.getElementById('achievement-select').value = achievementSelect;
 
     document.getElementById('auto-click-start').addEventListener('click', () => { toggleAutoClick(); });
     document.getElementById('auto-gym-start').addEventListener('click', event => { toggleAutoGym(event); });
     document.getElementById('auto-dungeon-start').addEventListener('click', event => { toggleAutoDungeon(event); });
+	document.getElementById('auto-achievement-start').addEventListener('click', event => { toggleAutoAchievement(event); });
     document.getElementById('gym-select').addEventListener('change', event => { changeSelectedGym(event); });
     document.getElementById('dungeon-select').addEventListener('change', event => { changeSelectedDungeon(event); });
+    document.getElementById('achievement-select').addEventListener('change', event => { changeSelectedAchievement(event); });
     document.getElementById('auto-click-delay').addEventListener('change', event => { changeClickDelay(event); });
 
     addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
@@ -145,6 +164,14 @@ function toggleAutoDungeon(event) {
     localStorage.setItem('autoDungeonState', dungeonState);
 }
 
+function toggleAutoAchievement(event) {
+    const element = event.target;
+    achievementState = !achievementState;
+    achievementState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.textContent = `Auto Achievement [${achievementState ? 'ON' : 'OFF'}]`;
+    localStorage.setItem('autoAchievementState', achievementState);
+}
+
 function changeSelectedGym(event) {
     const element = event.target;
     if (gymSelect != +element.value) {
@@ -158,6 +185,14 @@ function changeSelectedDungeon(event) {
     if (dungeonSelect != +element.value) {
         dungeonSelect = +element.value;
         localStorage.setItem("selectedDungeon", dungeonSelect);
+    }
+}
+
+function changeSelectedAchievement() {
+    const element = event.target;
+    if (achievementSelect != +element.value) {
+        achievementSelect = +element.value;
+        localStorage.setItem("selectedAchievement", achievementSelect);
     }
 }
 
@@ -221,6 +256,11 @@ function autoClicker() {
         if ((!dungeonState && foundBoss) || (dungeonState && DungeonRunner.dungeonFinished() && foundBoss)) {
             foundBoss = false
             bossCoords.length = 0
+        }
+
+		//Auto Achievement checking
+		if (achievementState) {
+            autoAchievement();
         }
 
         // Click while in a gym battle
@@ -373,6 +413,124 @@ function autoDungeon() {
     }
 }
 
+function autoAchievement()
+{
+
+    let currentRoute = player.route();
+    let currentRegion = player.region;
+    let currentDungeon = player.town().dungeon?.name;
+    let currentGym = player.town().name;
+
+    //Route
+    if(achievementSelect == 0)
+    {
+        let newRoute = getNextRoute();
+        currentRoute = player.route();
+        if(newRoute && newRoute.number != currentRoute || newRoute.region != currentRegion)
+        {
+            currentRoute = newRoute.number;
+            currentRegion = newRoute.region;
+
+            if(newRoute.region != player.subregion)
+            {
+                player.subregion = newRoute.subRegion;
+            }
+            MapHelper.moveToRoute(newRoute.number, newRoute.region);
+        }
+    }
+    //Gym
+    
+    else if(achievementSelect == 1)
+    {
+        //Toggle Auto Gym ON
+
+        if (gymState === false) {
+            document.getElementById("auto-gym-start").click();
+        }
+
+        let newGym = getNextGym();
+        if(newGym && newGym != currentGym)
+        {
+            //ToggleAutoGym();
+            currentGym = newGym;
+            MapHelper.moveToTown(newGym);
+        }
+
+    }
+
+    //Dungeon
+    else if(achievementSelect == 2)
+    {
+        //Toggle Auto Dungeon ON
+        if (dungeonState === false) {
+            document.getElementById("auto-dungeon-start").click();
+        }
+
+        //Move
+        let newDungeon = getNextDungeon();
+        if(newDungeon && newDungeon != currentDungeon)
+        {
+            //ToggleAutoDungeon();
+            currentDungeon = newDungeon;
+            MapHelper.moveToTown(newDungeon);
+        }
+    }
+}
+
+function getNextRoute()
+{
+    let regionRoutes = Routes.getRoutesByRegion(player.region);
+    for(let j = 0; j < regionRoutes.length; j ++)
+    {
+        if(getDefeatedOnRoute(player.region, regionRoutes[j].number) < GameConstants.ACHIEVEMENT_DEFEAT_ROUTE_VALUES[GameConstants.ACHIEVEMENT_DEFEAT_ROUTE_VALUES.length-1])
+        {
+            return regionRoutes[j];
+        }
+    }
+}
+
+function getNextGym()
+{
+    let regionGyms = GameConstants.RegionGyms[player.region];
+    for(let j = 0; j < regionGyms.length; j ++)
+    {
+        if(getDefeatedOnGym(regionGyms[j]) < GameConstants.ACHIEVEMENT_DEFEAT_GYM_VALUES[GameConstants.ACHIEVEMENT_DEFEAT_GYM_VALUES.length-1])
+        {
+            return regionGyms[j];
+        }
+    }
+}
+
+function getNextDungeon()
+{
+    let regionDungeons = GameConstants.RegionDungeons[player.region];
+    for(let j = 0; j < regionDungeons.length; j ++)
+    {
+        let defeated = getDefeatedOnDungeon(regionDungeons[j]);
+
+        if(getDefeatedOnDungeon(regionDungeons[j]) < GameConstants.ACHIEVEMENT_DEFEAT_DUNGEON_VALUES[GameConstants.ACHIEVEMENT_DEFEAT_DUNGEON_VALUES.length-1])
+        {
+            return regionDungeons[j];
+        }
+    }
+}
+
+function getDefeatedOnRoute(region, route)
+{
+    return App.game.statistics.routeKills[region][route]();
+}
+
+function getDefeatedOnGym(gymName)
+{
+    return App.game.statistics.gymsDefeated[GameConstants.getGymIndex(gymName)]();
+}
+
+function getDefeatedOnDungeon(dungeonName)
+{
+    return App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(dungeonName)]();
+}
+
+
 function scan(dungeonBoard) {
     /*var bossCoords = []
     var playerCoords = []*/
@@ -486,6 +644,12 @@ if (!validParse(localStorage.getItem('selectedGym'))) {
 if (!validParse(localStorage.getItem('autoDungeonState'))) {
     localStorage.setItem("autoDungeonState", false);
 }
+if (!validParse(localStorage.getItem('autoAchievementState'))) {
+    localStorage.setItem("autoAchievementState", false);
+}
+if (!validParse(localStorage.getItem('selectedAchievement'))) {
+    localStorage.setItem("selectedAchievement", 0);
+}
 if (!validParse(localStorage.getItem('selectedDungeon'))) {
     localStorage.setItem("selectedDungeon", 0);
 }
@@ -503,7 +667,15 @@ try {
     localStorage.setItem("autoDungeonState", false);
 }
 
+try {
+    achievementState = JSON.parse(localStorage.getItem('autoAchievementState'));
+} catch (error) {
+    achievementState = false
+    localStorage.setItem("autoAchievementState", false);
+}
+
 dungeonSelect = JSON.parse(localStorage.getItem('selectedDungeon'));
+achievementSelect = JSON.parse(localStorage.getItem('selectedAchievement'));
 delayAutoClick = JSON.parse(localStorage.getItem('delayAutoClick'));
 clickDPS = clickState ? JSON.parse(localStorage.getItem('storedClickDPS')) : 0;
 
