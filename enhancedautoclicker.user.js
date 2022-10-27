@@ -5,7 +5,7 @@
 // @description   Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.5
+// @version       2.6
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -473,25 +473,25 @@ function fullClear(dungeonBoard, bossCoords) {
     }
 }
 
-if (!localStorage.getItem('autoClickState')) {
+if (!validParse(localStorage.getItem('autoClickState'))) {
     localStorage.setItem("autoClickState", false);
 }
-if (!localStorage.getItem('storedClickDPS')) {
+if (!validParse(localStorage.getItem('storedClickDPS'))) {
     localStorage.setItem("storedClickDPS", 0);
 }
-if (!localStorage.getItem('autoGymState')) {
+if (!validParse(localStorage.getItem('autoGymState'))) {
     localStorage.setItem("autoGymState", false);
 }
-if (!localStorage.getItem('selectedGym')) {
+if (!validParse(localStorage.getItem('selectedGym'))) {
     localStorage.setItem("selectedGym", 0);
 }
-if (!localStorage.getItem('autoDungeonState')) {
+if (!validParse(localStorage.getItem('autoDungeonState'))) {
     localStorage.setItem("autoDungeonState", false);
 }
-if (!localStorage.getItem('selectedDungeon')) {
+if (!validParse(localStorage.getItem('selectedDungeon'))) {
     localStorage.setItem("selectedDungeon", 0);
 }
-if (!localStorage.getItem('delayAutoClick')) {
+if (!validParse(localStorage.getItem('delayAutoClick'))) {
     localStorage.setItem("delayAutoClick", 50);
 }
 clickState = JSON.parse(localStorage.getItem('autoClickState'));
@@ -537,6 +537,18 @@ if (document.getElementById('scriptHandler') != undefined) {
 }
 else {
     loadScript();
+}
+
+function validParse(key) {
+    try {
+        if (key === null) {
+            throw new Error;
+        }
+        JSON.parse(key);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function addGlobalStyle(css) {
