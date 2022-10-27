@@ -5,7 +5,7 @@
 // @description   Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.8
+// @version       1.9
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -17,8 +17,6 @@
 // @grant         none
 // @run-at        document-idle
 // ==/UserScript==
-
-const SCRIPT_VERSION = 1.8
 
 var mineState;
 var smallRestoreState;
@@ -275,22 +273,22 @@ function setTreasureImage() {
     document.getElementById('treasure-image').title = imageTitles[1+treasureHunter];
 }
 
-if (!localStorage.getItem('autoMineState')) {
+if (!validParse(localStorage.getItem('autoMineState'))) {
     localStorage.setItem("autoMineState", false);
 }
-if (!localStorage.getItem('autoSmallRestore')) {
+if (!validParse(localStorage.getItem('autoSmallRestore'))) {
     localStorage.setItem("autoSmallRestore", false);
 }
-if (!localStorage.getItem('autoBuyThreshold')) {
+if (!validParse(localStorage.getItem('autoBuyThreshold'))) {
     localStorage.setItem("autoBuyThreshold", 0);
 }
-if (!localStorage.getItem('autoSellTreasure')) {
+if (!validParse(localStorage.getItem('autoSellTreasure'))) {
     localStorage.setItem("autoSellTreasure", false);
 }
-if (!localStorage.getItem('treasureHunter')) {
+if (!validParse(localStorage.getItem('treasureHunter'))) {
     localStorage.setItem("treasureHunter", -1);
 }
-if (!localStorage.getItem('itemThreshold')) {
+if (!validParse(localStorage.getItem('itemThreshold'))) {
     localStorage.setItem("itemThreshold", 0);
 }
 /*if (!localStorage.getItem('autoMineSkip')) {
@@ -332,6 +330,18 @@ if (document.getElementById('scriptHandler') != undefined) {
 }
 else {
     loadScript();
+}
+
+function validParse(key) {
+    try {
+        if (key === null) {
+            throw new Error;
+        }
+        JSON.parse(key);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function addGlobalStyle(css) {
