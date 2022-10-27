@@ -5,7 +5,7 @@
 // @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.2
+// @version       2.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -322,31 +322,31 @@ function autoHatcher() {
     }, 50); // Runs every game tick
 }
 
-if (!localStorage.getItem('autoHatchState')) {
+if (!validParse(localStorage.getItem('autoHatchState'))) {
     localStorage.setItem("autoHatchState", false);
 }
-if (!localStorage.getItem('autoEgg') == null) {
+if (!validParse(localStorage.getItem('autoEgg'))) {
     localStorage.setItem("autoEgg", false);
 }
-if (!localStorage.getItem('autoFossil') == null) {
+if (!validParse(localStorage.getItem('autoFossil'))) {
     localStorage.setItem("autoFossil", false);
 }
-if (!localStorage.getItem('shinyFossil') == null) {
+if (!validParse(localStorage.getItem('shinyFossil'))) {
     localStorage.setItem("shinyFossil", false);
 }
-if (!localStorage.getItem('hatcherySortVal') == null) {
+if (!validParse(localStorage.getItem('hatcherySortVal'))) {
     localStorage.setItem("hatcherySortVal", 0);
 }
-if (!localStorage.getItem('hatcherySortDir') == null) {
+if (!validParse(localStorage.getItem('hatcherySortDir'))) {
     localStorage.setItem("hatcherySortDir", true);
 }
-if (!localStorage.getItem('hatcherySortSync') == null) {
+if (!validParse(localStorage.getItem('hatcherySortSync'))) {
     localStorage.setItem("hatcherySortSync", false);
 }
-if (!localStorage.getItem('pokerusModeState') == null) {
+if (!validParse(localStorage.getItem('pokerusModeState'))) {
     localStorage.setItem("pokerusModeState", false);
 }
-if (!localStorage.getItem('pokerusModeStrict') == null) {
+if (!validParse(localStorage.getItem('pokerusModeStrict'))) {
     localStorage.setItem("pokerusModeStrict", false);
 }
 hatchState = JSON.parse(localStorage.getItem('autoHatchState'));
@@ -391,6 +391,18 @@ else {
 
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
+}
+
+function validParse(key) {
+    try {
+        if (key === null) {
+            throw new Error;
+        }
+        JSON.parse(key);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function addGlobalStyle(css) {
