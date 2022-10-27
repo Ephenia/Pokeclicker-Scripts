@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name          [Pokeclicker] Enhanced Auto Clicker
 // @namespace     Pokeclicker Scripts
-// @author        Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951, Kaias26)
+// @author        Ephenia (Original/Credit: Ivan Lay, Novie53, andrew951, Kaias26, kevingrillet)
 // @description   Clicks through battles appropriately depending on the game state. Also, includes a toggle button to turn Auto Clicking on or off and various insightful statistics. Now also includes an automatic Gym battler as well as Auto Dungeon with different modes, as well as being able to adjust the speed at which the Auto CLicker can click at.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.6
+// @version       2.7
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -288,50 +288,48 @@ function overideClickAttack() {
 }
 
 function autoGym() {
-    if (player.town().content.length != 0) {
-        //Might break in some towns, needs more testing
-        if (player.town().content[0] instanceof Gym) {
-            const townName = player.town().name;
-            if (!MapHelper.isTownCurrentLocation(townName)) {
-                MapHelper.moveToTown(townName)
-            }
-            /*Don't think this can ever happen
+    //Checking if Gyms exist here and grabbing them
+    const getGyms = player.town().content.filter((c) => ['Gym'].includes(c.constructor.name));
+    if (getGyms.length != 0) {
+        const townName = player.town().name;
+        if (!MapHelper.isTownCurrentLocation(townName)) {
+            MapHelper.moveToTown(townName)
+        }
+        /*Don't think this can ever happen
             if (player.region != player.town().region) {
                 player.region = player.town().region
             }*/
 
-            if (App.game.gameState != GameConstants.GameState.gym) {
-                //Checking if Champion exists here and is unlocked
-                let champCheck;
-                try {
-                    champCheck = player.town().content[4];
-                    champCheck = champCheck.constructor.name == 'Champion'
-                } catch (err) {
-                    champCheck = false;
-                };
-                let champUnlocked;
-                try { champUnlocked = player.town().content[4].isUnlocked() } catch (err) { champUnlocked = false };
-                //If "All" is selected and the Champion is unlocked, then go through list of league fully from 0-4
-                if (gymSelect === 5 && champCheck && champUnlocked) {
-                    GymRunner.startGym(player.town().content[allSelectedGym])
-                    allSelectedGym++
-                    if (allSelectedGym === 5) {
-                        allSelectedGym = 0
-                    }
-                } else {
-                    //If the content is a Gym or league champion and we unlocked it we fight
-                    if ((player.town().content[gymSelect] instanceof Gym && player.town().content[gymSelect].isUnlocked()) || (player.town().content[gymSelect] instanceof Champion && player.town().content[gymSelect].isUnlocked())) {
-                        GymRunner.startGym(player.town().content[gymSelect])
-                    }
-                    else {
-                        //Otherwise we try to fight the previous gyms (elite 4)
-                        for (var i = player.town().content.length - 1; i >= 0; i--) {
-                            if ((player.town().content[i] instanceof Gym && player.town().content[i].isUnlocked()) || (player.town().content[i] instanceof Champion && player.town().content[i].isUnlocked())) {
-                                GymRunner.startGym(player.town().content[i])
-                                break;
-                            }
-                        }
-                    }
+        if (App.game.gameState != GameConstants.GameState.gym) {
+            //Checking if Champion exists here and grabbing them
+            const getChamp = player.town().content.filter((c) => ['Champion'].includes(c.constructor.name));
+            const gymChampLen = (getGyms.length + getChamp.length) - 1;
+            //Checking if Champion is unlocked
+            let champUnlocked;
+            try { champUnlocked = getChamp[0].isUnlocked() } catch (err) { champUnlocked = false };
+            //If "All" is selected we attempt to fight and loop through all Gyms, including the Champion if available and unlocked
+            if (gymSelect === 5) {
+                //Reset if exceeded
+                if (allSelectedGym === 5 || allSelectedGym > gymChampLen) {
+                    allSelectedGym = 0;
+                }
+                if (champUnlocked && allSelectedGym === gymChampLen) {
+                    //We fight the Champion if Champion exists and is unlocked
+                    GymRunner.startGym(getChamp[0]);
+                } else if (getGyms[allSelectedGym].isUnlocked()) {
+                    //We fight Gyms instead if they're unlocked
+                    GymRunner.startGym(getGyms[allSelectedGym]);
+                }
+                allSelectedGym++;
+            } else {
+                //Making sure we don't fight Gyms that don't exist and fight the lowest if we pick higher
+                const selGym = Math.min(gymSelect, gymChampLen);
+                //#5 is purely for the Champion and typically E4 where there's 5 total
+                if (gymSelect == 4 && gymSelect === gymChampLen && champUnlocked) {
+                    GymRunner.startGym(getChamp[0]);
+                } else if (getGyms[selGym].isUnlocked()) {
+                    //Fighting the selected Gym here
+                    GymRunner.startGym(getGyms[selGym])
                 }
             }
         }
