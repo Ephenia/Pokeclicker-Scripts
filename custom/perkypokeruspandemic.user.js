@@ -5,7 +5,7 @@
 // @description   This script makes it so that Pokérus will spread from any Pokémon (egg) that has it to all of the others inside of the Hatchery, instead of just types of Pokémon needing to match while in the Hatchery for this to be done.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.3
+// @version       1.6
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -20,6 +20,8 @@
 
 function initPokerusPandemic() {
     App.game.breeding.progressEggs = function(amount) {
+        amount *= this.getStepMultiplier();
+
         amount = Math.round(amount);
         let index = this.eggList.length;
         while (index-- > 0) {
