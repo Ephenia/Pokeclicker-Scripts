@@ -170,6 +170,15 @@ function toggleAutoAchievement(event) {
     achievementState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
     element.textContent = `Auto Achievement [${achievementState ? 'ON' : 'OFF'}]`;
     localStorage.setItem('autoAchievementState', achievementState);
+
+    // Deactivate AutoGym and AutoDungeon that could have been triggered
+    if(gymState === true){
+        document.getElementById("auto-gym-start").click();
+    }
+
+    if(dungeonState === true){
+        document.getElementById("auto-dungeon-start").click();
+    }
 }
 
 function changeSelectedGym(event) {
@@ -439,11 +448,10 @@ function autoAchievement()
         }
     }
     //Gym
-    
+
     else if(achievementSelect == 1)
     {
         //Toggle Auto Gym ON
-
         if (gymState === false) {
             document.getElementById("auto-gym-start").click();
         }
@@ -451,8 +459,8 @@ function autoAchievement()
         let newGym = getNextGym();
         if(newGym && newGym != currentGym)
         {
-            //ToggleAutoGym();
             currentGym = newGym;
+            player.subregion = TownList[newGym].subRegion;
             MapHelper.moveToTown(newGym);
         }
 
@@ -470,8 +478,8 @@ function autoAchievement()
         let newDungeon = getNextDungeon();
         if(newDungeon && newDungeon != currentDungeon)
         {
-            //ToggleAutoDungeon();
             currentDungeon = newDungeon;
+            player.subregion = TownList[newDungeon].subRegion;
             MapHelper.moveToTown(newDungeon);
         }
     }
@@ -506,8 +514,6 @@ function getNextDungeon()
     let regionDungeons = GameConstants.RegionDungeons[player.region];
     for(let j = 0; j < regionDungeons.length; j ++)
     {
-        let defeated = getDefeatedOnDungeon(regionDungeons[j]);
-
         if(getDefeatedOnDungeon(regionDungeons[j]) < GameConstants.ACHIEVEMENT_DEFEAT_DUNGEON_VALUES[GameConstants.ACHIEVEMENT_DEFEAT_DUNGEON_VALUES.length-1])
         {
             return regionDungeons[j];
