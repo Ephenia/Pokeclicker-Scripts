@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name          [Pokeclicker] Debug Cheats
+// @name          [Pokeclicker] Debug Cheats Tools
 // @namespace     Pokeclicker Scripts
 // @author        kevingrillet
 // @description   Edit your save for debug (currency, pokeballs, pokemons, ...)
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       0.6
+// @version       1.0
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -172,7 +172,7 @@ function initSaveEditor() {
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header" style="justify-content: space-around;">
-                    <h5 class="modal-title">Debug Cheats</h5>
+                    <h5 class="modal-title">Debug Cheats Tools</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
