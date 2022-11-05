@@ -298,7 +298,7 @@ function loadScript(){
     }
 }
 
-var scriptName = 'debugcheats'
+var scriptName = 'debugcheatstools'
 
 if (document.getElementById('scriptHandler') !== undefined){
     var scriptElement = document.createElement('div')
