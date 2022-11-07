@@ -354,7 +354,7 @@ There may be some other cool or neat custom events added in with this as well.
 
 <hr>
 
-## **[Custom] Oak Iems Unlimited** ([oakitemsunlimited.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/oakitemsunlimited.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/oakitemsunlimited.user.js))
+## **[Custom] Oak Items Unlimited** ([oakitemsunlimited.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/oakitemsunlimited.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/oakitemsunlimited.user.js))
 This script removes the limit for the amount of Oak Items that you're able to equip:<br>
 
 ![image](https://i.imgur.com/0Peh94W.png)
