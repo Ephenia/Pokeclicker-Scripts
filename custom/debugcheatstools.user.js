@@ -2,7 +2,7 @@
 // @name          [Pokeclicker] Debug Cheats Tools
 // @namespace     Pokeclicker Scripts
 // @author        kevingrillet
-// @description   Edit your save for debug (currency, pokeballs, pokemons, ...)
+// @description   Edit your save for debug (currency, gems, pokeballs, pokemons, ...)
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
 // @version       1.0
@@ -180,6 +180,7 @@ function initSaveEditor() {
                 <div class="modal-body">
                     <ul class="nav nav-tabs nav-fill">
                         <li class="nav-item"><a data-toggle="tab" class="nav-link active" href="#currency">Currency</a></li>
+                        <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#gems">Gems</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#pokeballs">Pokeballs</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#pokedex">Pokedex</a></li>
                     </ul>
@@ -188,6 +189,11 @@ function initSaveEditor() {
                         <div id="currency" class="tab-pane p-3 active">
                             <p>Click on button to add money (input * achievement bonus)</p>
                             <input id="inputAddCurrency" class="form-control" type="number" placeholder="1000000" value="1000000" min="0">
+                        </div>
+
+                        <div id="gems" class="tab-pane p-3">
+                            <p>On click add gems (input)</p>
+                            <input id="inputAddGems" class="form-control" type="number" placeholder="1000000" value="1000000" min="0">
                         </div>
 
                         <div id="pokeballs" class="tab-pane p-3">
@@ -259,7 +265,7 @@ function initSaveEditor() {
 
     // currency
     for (let i = 0; i <= 5; i++) {
-        let curr = GameConstants.Currency[i];
+        const curr = GameConstants.Currency[i];
         modalBody.querySelector('#currency').innerHTML += `
             <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.wallet.gain${curr.charAt(0).toUpperCase() + curr.slice(1)}${i > 0 ? "s" : ""}(parseInt(document.getElementById('inputAddCurrency').value || 0))">
                 <img title="${curr.charAt(0).toUpperCase() + curr.replace(/[A-Z]/g, ' $&').trim().slice(1)}" src="assets/images/currency/${curr}.svg" height="25px">
@@ -267,18 +273,30 @@ function initSaveEditor() {
         `;
     }
 
+    // gems
+    for (let i = 0; i < Gems.nTypes; i++) {
+        const pt = PokemonType[i];
+        modalBody.querySelector('#gems').innerHTML += `
+            <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.gems.gainGems(parseInt(document.getElementById('inputAddGems').value || 0), ${i})">
+                <img title="${pt}" src="assets/images/gems/${pt} Gem.png" height="25px">
+                <div>${pt}</div>
+            </div>
+        `;
+    }
+
     // pokeballs
     for (let i = 0; i <= 13; i++) {
-        let pkb = GameConstants.Pokeball[i];
+        const pkb = GameConstants.Pokeball[i];
         modalBody.querySelector('#pokeballs').innerHTML += `
             <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.pokeballs.gainPokeballs(${i}, parseInt(document.getElementById('inputAddPokeballs').value || 0), true)">
                 <img title="${pkb}" src="assets/images/pokeball/${pkb}.svg" height="25px">
+                <div>${pkb}</div>
             </div>
         `;
     }
 
     // pokedex
-    let regFilt = modalBody.querySelector('#pkdxRegionFilter');
+    const regFilt = modalBody.querySelector('#pkdxRegionFilter');
     for (let i = 0; i <= player.highestRegion(); i++) {
         const reg = GameConstants.Region[i]
         regFilt.innerHTML += `<option value="${reg}">${reg.charAt(0).toUpperCase() + reg.slice(1)}</option>`;
