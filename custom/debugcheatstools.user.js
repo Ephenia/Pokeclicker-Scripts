@@ -182,6 +182,7 @@ function initSaveEditor() {
                         <li class="nav-item"><a data-toggle="tab" class="nav-link active" href="#currency">Currency</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#gems">Gems</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#pokeballs">Pokeballs</a></li>
+                        <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#evolutionitems">Evolution Items</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#pokedex">Pokedex</a></li>
                     </ul>
 
@@ -199,6 +200,11 @@ function initSaveEditor() {
                         <div id="pokeballs" class="tab-pane p-3">
                             <p>On click add pokeballs (input)</p>
                             <input id="inputAddPokeballs" class="form-control" type="number" placeholder="1000" value="1000" min="0">
+                        </div>
+
+                        <div id="evolutionitems" class="tab-pane p-3">
+                            <p>On click add evolution items (input)</p>
+                            <input id="inputAddEvolutionItems" class="form-control" type="number" placeholder="100" value="100" min="0">
                         </div>
 
                         <div id="pokedex" class="tab-pane p-3">
@@ -291,6 +297,16 @@ function initSaveEditor() {
             <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.pokeballs.gainPokeballs(${i}, parseInt(document.getElementById('inputAddPokeballs').value || 0), true)">
                 <img title="${pkb}" src="assets/images/pokeball/${pkb}.svg" height="25px">
                 <div>${pkb}</div>
+            </div>
+        `;
+    }
+
+    // evolutionitems
+    for (let i = 0; i<= 38; i++) {
+        const st = GameConstants.StoneType[i];
+        modalBody.querySelector('#evolutionitems').innerHTML += `
+            <div class="btn btn-primary col-2 item-bag-item" onclick="player.gainItem(ItemList['${st}'].name, parseInt(document.getElementById('inputAddEvolutionItems').value || 0), true)">
+                <img title="${st}" src="assets/images/items/evolution/${st}.png" height="25px">
             </div>
         `;
     }
