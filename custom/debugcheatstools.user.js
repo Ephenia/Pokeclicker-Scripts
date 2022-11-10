@@ -47,6 +47,7 @@ function gainPk(id){
 function gainPkrs(id){
     let lpkm = App.game.party.getPokemon(id);
     if (!lpkm) return;
+    lpkm.effortPoints = ((lpkm.pokerus < 2) ? 1 : 50) * 1000; // strange
     lpkm.pokerus = (lpkm.pokerus < 2) ? 2 : 3;
     document.querySelectorAll(`:scope #pkdx_${id.toString().replace('.','_')} img`)[2].src = getPokerusImgSrc(id, lpkm);
 }
