@@ -325,7 +325,8 @@ function autoGym() {
                 //Making sure we don't fight Gyms that don't exist and fight the lowest if we pick higher
                 const selGym = Math.min(gymSelect, gymChampLen);
                 //#5 is purely for the Champion and typically E4 where there's 5 total
-                if (gymSelect == 4 && gymSelect === gymChampLen && champUnlocked) {
+                //Whatever value is selected, if it's above the # of gyms, we fight a champion if available 
+                if (gymSelect >= gymChampLen && champUnlocked) {
                     GymRunner.startGym(getChamp[0]);
                 } else if (getGyms[selGym].isUnlocked()) {
                     //Fighting the selected Gym here
