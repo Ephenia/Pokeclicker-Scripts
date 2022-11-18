@@ -258,6 +258,12 @@ function autoHatcher() {
                         return false;
                     }
                 }
+                // Check based on pokerus
+                if (BreedingFilters.pokerus.value() >= 0) {
+                    if (+partyPokemon.pokerus !== BreedingFilters.pokerus.value()) {
+                        return false;
+                    }
+                }
                 // Check based on native region
                 const useRegion = BreedingFilters.region.value() == 2 ** (player.highestRegion() + 1) - 1;
                 if (!useRegion) {
