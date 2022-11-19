@@ -294,8 +294,8 @@ function autoHatcher() {
             });
 
             const hasPKRS = App.game.keyItems.hasKeyItem(KeyItemType.Pokerus_virus);
-            const starterName = GameConstants.Starter[player.starter()];
-            const starterPKMN = PartyController.getSortedList().filter(p => p.name == starterName)[0];
+            const starterID = GameConstants.RegionalStarters[GameConstants.Region.kanto][player.regionStarters[GameConstants.Region.kanto]()];
+            const starterPKMN = PartyController.getSortedList().filter(p => p.id == starterID)[0];
             const virusReady = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false && e.pokerus == false);
             if (pkrsState && hasPKRS && virusReady.length != 0) {
                 if (starterPKMN._level() == 100 && !starterPKMN.breeding) {
