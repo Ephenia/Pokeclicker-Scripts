@@ -163,34 +163,69 @@ function filterPokemonRoute(event) {
     let routePoke;
     try {routePoke = Routes.getRoute(player.region, player.route()).pokemon
          const frag = new DocumentFragment();
+         //Using a side array to ensure adding pokemons only once in results (multiple occurences can occur with special)
+         let routePokesList = [];
          for (const area in routePoke) {
-             const routeArea = routePoke[area];
-             if (routeArea.length > 0) {
-                 const thisArea = routePoke[area];
-                 for (const poke of thisArea) {
-                     const findPoke = pokemonList.find(p => p.name == poke);
-                     const pokeIndex = pokemonList.indexOf(findPoke);
-                     const ballPrefN = filterBallPref[pokeIndex].normal;
-                     const ballPrefS = filterBallPref[pokeIndex].shiny;
-                     const div = document.createElement('div');
-                     div.innerHTML = `${findPoke.name}
-                     <img src="assets/images/pokeball/${ballNames[ballPrefN]}.svg" class="filter-pokeball-n pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="normal">
-                     <img src="assets/images/pokeball/${ballNames[ballPrefS]}.svg" class="filter-pokeball-s pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="shiny">
-                     <div class="filter-shiny">✨</div>`;
-                     div.setAttribute('data-src', findPoke.id);
-                     if (catchFilter.includes(findPoke.id)) {
-                         div.setAttribute('style', 'background-color: yellowgreen;');
-                     }
-                     div.addEventListener('click', (event) => { toggleFilteredPoke(event); });
-                     frag.appendChild(div);
-                 }
-                 document.getElementById('filter-results').appendChild(frag);
-                 setRightClick();
-             }
+            const routeArea = routePoke[area];
+            if (routeArea.length > 0) {
+                //Special Route Pokemons (Weather, Quests, ...)
+                if (area ==="special") {
+                    for (const speRoute of routeArea) {
+                        const speRoutePokes = speRoute.pokemon;
+                        for (const poke of speRoutePokes) {
+                            const findPoke = pokemonList.find(p => p.name == poke);
+                            if (!routePokesList.includes(findPoke.id)) {
+                                routePokesList.push(findPoke.id);
+                                const pokeIndex = pokemonList.indexOf(findPoke);
+                                const ballPrefN = filterBallPref[pokeIndex].normal;
+                                const ballPrefS = filterBallPref[pokeIndex].shiny;
+                                const div = document.createElement('div');
+                                div.innerHTML = `${findPoke.name}
+                                <img src="assets/images/pokeball/${ballNames[ballPrefN]}.svg" class="filter-pokeball-n pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="normal">
+                                <img src="assets/images/pokeball/${ballNames[ballPrefS]}.svg" class="filter-pokeball-s pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="shiny">
+                                <div class="filter-shiny">✨</div>`;
+                                div.setAttribute('data-src', findPoke.id);
+                                if (catchFilter.includes(findPoke.id)) {
+                                    div.setAttribute('style', 'background-color: yellowgreen;');
+                                }
+                                div.addEventListener('click', (event) => { toggleFilteredPoke(event); });
+                                frag.appendChild(div);
+                            }
+                        }
+                    }
+                }
+                else {
+                    const thisArea = routePoke[area];
+                    for (const poke of routeArea) {
+                        const findPoke = pokemonList.find(p => p.name == poke);
+                        if (!routePokesList.includes(findPoke.id)) {
+                            routePokesList.push(findPoke.id);
+                            const pokeIndex = pokemonList.indexOf(findPoke);
+                            const ballPrefN = filterBallPref[pokeIndex].normal;
+                            const ballPrefS = filterBallPref[pokeIndex].shiny;
+                            const div = document.createElement('div');
+                            div.innerHTML = `${findPoke.name}
+                            <img src="assets/images/pokeball/${ballNames[ballPrefN]}.svg" class="filter-pokeball-n pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="normal">
+                            <img src="assets/images/pokeball/${ballNames[ballPrefS]}.svg" class="filter-pokeball-s pokeball-small pokeball-selected" ball-pref="${pokeIndex}" pref-type="shiny">
+                            <div class="filter-shiny">✨</div>`;
+                            div.setAttribute('data-src', findPoke.id);
+                            if (catchFilter.includes(findPoke.id)) {
+                                div.setAttribute('style', 'background-color: yellowgreen;');
+                            }
+                            div.addEventListener('click', (event) => { toggleFilteredPoke(event); });
+                            frag.appendChild(div);
+                        }
+                    }
+                }
+            }
          }
-        } catch (err) {
-            document.getElementById('filter-results').innerHTML = '<b style="color: red">You are not on a route.</b>';
-        };
+         if (routePokesList.length > 0) {
+            document.getElementById('filter-results').appendChild(frag);
+            setRightClick();
+        }
+    } catch (err) {
+        document.getElementById('filter-results').innerHTML = '<b style="color: red">You are not on a route.</b>';
+    };
 }
 
 function filterPokemonDungeon(event) {
