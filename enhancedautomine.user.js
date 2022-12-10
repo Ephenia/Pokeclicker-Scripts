@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name          [Pokeclicker] Enhanced Auto Mine
 // @namespace     Pokeclicker Scripts
-// @author        Ephenia (Credit: falcon71, KarmaAlex, umbralOptimatum)
+// @author        Ephenia (Credit: falcon71, KarmaAlex, umbralOptimatum, Pastaficionado)
 // @description   Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.9
+// @version       2.0
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -185,7 +185,7 @@ function doAutoMine() {
         }
         if (!surveyResult && treasureHunting && skipsRemain != 0) {
             if (getEnergy >= App.game.underground.getSurvey_Cost()) {
-                Mine.survey(); 
+                Mine.survey();
                 $('#mine-survey-result').tooltip("hide");
             }
             return true;
@@ -195,40 +195,71 @@ function doAutoMine() {
                 if (Mine.toolSelected() != 0) {
                     Mine.toolSelected(Mine.Tool.Chisel);
                 }
-                var mineEl = document.getElementById('mineBody');
-                var rewards = mineEl.querySelectorAll('.mineReward');
+                let mineBody = document.querySelector(`div[id="mineBody"]`);
+                let mineGrid = mineBody.children;
+                let rewards = mineBody.querySelectorAll('.mineReward');
                 for (var ii = 0; ii < rewards.length; ii++) {
                     var reward = rewards[ii];
                     var rewardParent = reward.parentNode;
                     var ri = +reward.parentNode.getAttribute('data-i');
                     var rj = +reward.parentNode.getAttribute('data-j');
-                    for (var i = -1; i <= 1; i++) {
-                        for (var j = -1; j <= 1; j++) {
-                            var ti = ri + i;
-                            var tj = rj + j;
-                            var checkTile = mineEl.querySelector('.mineSquare[data-i="' + ti + '"][data-j="' + tj + '"]');
-                            if (checkTile && (
-                                checkTile.classList.contains('rock1') ||
-                                checkTile.classList.contains('rock2') ||
-                                checkTile.classList.contains('rock3') ||
-                                checkTile.classList.contains('rock4') ||
-                                checkTile.classList.contains('rock5')
-                            )) {
-                                Mine.click(ti, tj);
-                                getEnergy -= 1;
-                                minedThisInterval = true;
+                    //the tile's classes describe the dimensions of the shape, the coordinates of the tile within the image, and the rotation of the image 
+                    let classList = reward.classList;
+                    let rotations = +classList[3].split("-")[1]; //e.g. 1
+                    const sizeString = classList[1].split("-"); //e.g. ["size", "3", "3"]
+                    let size = [+sizeString[1], +sizeString[2]]
+                    const positionString = classList[2].split("-"); //e.g. ["pos", "1", "1"];
+                    const originalPos = [+positionString[1], +positionString[2]];
+                    let pos;
+
+                    //originalPos is relative to the top left corner [0,0] of the unrotated image
+                    //we will update pos to be relative to the new top left and reverse the size dimensions as rotation requires
+                    switch (rotations) {
+                        case 0: //rotations-0: initial orientation
+                            pos = originalPos;
+                            break;
+                        case 1: //rotations-1: 1 turn clockwise
+                            size = size.reverse();
+                            pos = [size[0] - 1 - originalPos[1], originalPos[0]];
+                            break;
+                        case 2: //rotations-2: 3 turns clockwise!?!?
+                            size = size.reverse();
+                            pos = [originalPos[1], (size[1] - 1 - originalPos[0])];
+                            break;
+                        case 3: //rotations-3: 2 turns clockwise
+                            pos = [(size[0] - 1 - originalPos[0]), (size[1] - 1 - originalPos[1])];
+                            break;
+                        default:
+                            console.log("Switch statement fallthrough. Suggests unexpected class structure.")
+                    }
+
+                    for (let i = 0; i < size[1]; i++) {
+                        for (let j = 0; j < size[0]; j++) {
+                            //ri, pos[1], and i are vertical - rj, pos[0], and j are horizontal
+                            const verticalCoordinate = ri - pos[1] + i;
+                            const horizontalCoordinate = rj - pos[0] + j;
+                            if (mineGrid[verticalCoordinate] && mineGrid[verticalCoordinate].children[horizontalCoordinate]) {
+                                let selectedTile = mineGrid[verticalCoordinate].children[horizontalCoordinate];
+                                //highlights entire reward before chiseling for testing purposes
+                                // selectedTile.style.filter = "sepia(50%) saturate(120%) brightness(80%) hue-rotate(320deg)";
+                                if (!selectedTile.className.includes("Reward") &&
+                                    !selectedTile.className.includes("rock0")
+                                ) {
+                                    Mine.click(verticalCoordinate, horizontalCoordinate);
+                                    getEnergy -= 1;
+                                    minedThisInterval = true;
+                                }
                             }
                         }
                     }
                 }
-            }
-            if (getEnergy >= 10 && !minedThisInterval) {
-                // Only bomb if out of places to chisel
-                Mine.bomb();
+                if (getEnergy >= 10 && !minedThisInterval) {
+                    // Only bomb if out of places to chisel
+                    Mine.bomb();
+                }
             }
         }
     }
-
     function resetLayer() {
         if (!Mine.loadingNewLayer) {
             Mine.loadingNewLayer = true;
@@ -240,6 +271,7 @@ function doAutoMine() {
         }
     }
 }
+
 
 function autoRestore(event) {
     const element = event.target;
@@ -266,11 +298,11 @@ function treasureHunt(event) {
 }
 
 function setTreasureImage() {
-    const imageSources = ['items/underground/Hard Stone.png', 'breeding/Helix Fossil.png', 'items/evolution/Fire_stone.png', 
-    'items/underground/Flame Plate.png', 'items/underground/Red Shard.png', 'currency/diamond.svg'];
+    const imageSources = ['items/underground/Hard Stone.png', 'breeding/Helix Fossil.png', 'items/evolution/Fire_stone.png',
+        'items/underground/Flame Plate.png', 'items/underground/Red Shard.png', 'currency/diamond.svg'];
     const imageTitles = ['Item', 'Fossil', 'Evolution Stone', 'Plate', 'Shard', 'Diamond'];
-    document.getElementById('treasure-image').src = `assets/images/${imageSources[1+treasureHunter]}`;
-    document.getElementById('treasure-image').title = imageTitles[1+treasureHunter];
+    document.getElementById('treasure-image').src = `assets/images/${imageSources[1 + treasureHunter]}`;
+    document.getElementById('treasure-image').title = imageTitles[1 + treasureHunter];
 }
 
 if (!validParse(localStorage.getItem('autoMineState'))) {
