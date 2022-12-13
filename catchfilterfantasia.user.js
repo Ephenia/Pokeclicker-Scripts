@@ -468,11 +468,12 @@ function overideDefeatPokemon() {
             pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
         }
 
+        const route = player.town()?.dungeon?.difficultyRoute || 1;
         if (pokeBall !== GameConstants.Pokeball.None && filterState && (catchFilter.includes(enemyPokemon.id) || (filterTypes[type1] || filterTypes[type2]))) {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
-                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
+                    this.attemptCatch(enemyPokemon, route, player.region);
                     if (DungeonRunner.defeatedBoss()) {
                         DungeonRunner.dungeonWon();
                     }
@@ -483,7 +484,7 @@ function overideDefeatPokemon() {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
-                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
+                    this.attemptCatch(enemyPokemon, route, player.region);
                     if (DungeonRunner.defeatedBoss()) {
                         DungeonRunner.dungeonWon();
                     }
