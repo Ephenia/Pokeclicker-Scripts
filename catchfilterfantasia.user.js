@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name          [Pokeclicker] Catch Filter Fantasia
 // @namespace     Pokeclicker Scripts
-// @author        Ephenia
+// @author        Ephenia (Credit: Pastaficionado)
 // @description   An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.7
+// @version       1.8
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
