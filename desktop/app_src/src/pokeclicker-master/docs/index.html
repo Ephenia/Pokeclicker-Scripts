@@ -42,10 +42,9 @@
     }
 
     .loader-pokeball {
-        animation-name: loader;
-        animation-duration: 1000ms;
-        animation-iteration-count: infinite;
-        animation-timing-function: ease-in-out;
+        height: 96px;
+        padding: 10px;
+        animation:loader 1s ease-in-out infinite;
     }
 
     @keyframes loader {
@@ -69,7 +68,7 @@
             <div class="row">
                 <div class="col-sm-8 offset-sm-2 text-center text-light">
                     <img style="width:100%" src="assets/images/pokeclickerlogo.png">
-                    <img src="assets/images/pokeball/Pokeball.png" class="loader-pokeball"/>
+                    <img src="assets/images/pokeball/Pokeball.svg" class="loader-pokeball"/>
                     <br/>
                     <strong id="status">Downloading Files...</strong>
                 </div>

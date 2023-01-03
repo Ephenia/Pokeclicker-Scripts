@@ -1,6 +1,6 @@
 {
   "name": "pokeclicker-desktop",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "PokeClicker Desktop",
   "repository": {
     "type": "git",
@@ -13,8 +13,10 @@
   },
   "license": "ISC",
   "dependencies": {
-    "adm-zip": "^0.5.5",
+    "adm-zip": "^0.5.9",
     "discord-rpc": "^4.0.1",
-    "electron-updater": "^4.3.9"
+    "electron-updater": "^5.3.0",
+    "ini": "^3.0.1",
+    "xmlhttprequest": "^1.8.0"
   }
 }

@@ -1,4 +1,4 @@
-function initManager(){
+﻿function initManager(){
     console.log('ran scripthandler')
     var scriptElement = document.createElement('div')
     scriptElement.id = 'scriptHandler'
