@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name          [Pokeclicker] Catch Filter Fantasia
 // @namespace     Pokeclicker Scripts
-// @author        Ephenia
+// @author        Ephenia (Credit: Pastaficionado)
 // @description   An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.7
+// @version       1.8
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -468,11 +468,12 @@ function overideDefeatPokemon() {
             pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
         }
 
+        const route = player.town()?.dungeon?.difficultyRoute || 1;
         if (pokeBall !== GameConstants.Pokeball.None && filterState && (catchFilter.includes(enemyPokemon.id) || (filterTypes[type1] || filterTypes[type2]))) {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
-                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
+                    this.attemptCatch(enemyPokemon, route, player.region);
                     if (DungeonRunner.defeatedBoss()) {
                         DungeonRunner.dungeonWon();
                     }
@@ -483,7 +484,7 @@ function overideDefeatPokemon() {
             this.prepareCatch(enemyPokemon, pokeBall);
             setTimeout(
                 () => {
-                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
+                    this.attemptCatch(enemyPokemon, route, player.region);
                     if (DungeonRunner.defeatedBoss()) {
                         DungeonRunner.dungeonWon();
                     }
