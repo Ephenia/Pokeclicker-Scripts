@@ -5,7 +5,7 @@
 // @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.1
+// @version       2.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -231,13 +231,9 @@ function initVisualSettings() {
     });
 
     function remPokeName() {
-        const enemyName = document.querySelectorAll('knockout[data-bind*="text: Battle.enemyPokemon().name"]');
+        const enemyName = document.querySelectorAll('.pageItemTitle knockout');
         if (enemyName.length > 0) {
             enemyName[0].remove();
-        }
-        var caughtStatus = document.querySelectorAll('knockout[data-bind*="caughtStatusTemplate"');
-        if (caughtStatus.length > 0) {
-            caughtStatus[0].remove();
         }
     }
 
@@ -249,7 +245,7 @@ function initVisualSettings() {
     }
 
     function remPokeImg() {
-        const enemyPoke = document.querySelectorAll('img.enemy');
+        const enemyPoke = document.querySelectorAll('knockout[data-bind*="pokemonSpriteTemplate"]');
         if (enemyPoke.length > 0) {
             enemyPoke[0].remove()
         }
