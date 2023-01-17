@@ -21,7 +21,7 @@ const settingsFile = path.join(dataDir, "settings.ini");
 // Upstream scripts directory
 const defaultScriptsDir = path.join(dataDir, "scripts");
 // Custom scripts directory
-const customScriptsDir = path.join(dataDir, "user-scripts");
+const customScriptsDir = path.join(dataDir, "custom-scripts");
 
 console.info("Data directory:", dataDir);
 
@@ -39,7 +39,7 @@ function createWindow() {
     app.setAppUserModelId("PokéClicker");
   } catch (e) {}
 
-  if (fs.existsSync(`settings.ini`)) {
+  if (fs.existsSync(settingsFile)) {
     getConfig();
   } else {
     config = { Sizing: { Width: "800", Height: "600", Maximized: false } };
