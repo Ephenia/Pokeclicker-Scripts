@@ -5,7 +5,7 @@
 // @description   Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.0
+// @version       2.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -52,12 +52,11 @@ function initAutoMine() {
   <option value="1">Evolution Items</option>
   <option value="2">Gem Plates</option>
   <option value="3">Shards</option>
-  <option value="4">Diamond Value</option>
+  <option value="4">Mega Stones</option>
+  <option value="5">Diamond Value</option>
 </select>
 <div id="item-threshold-input" class="col-12 col-md-2 btn-secondary"><img id="treasure-image" src="assets/images/currency/money.svg" height="25px">
 <input title="Skips layers with fewer target items than this value." type="text" id="item-threshold"></div>`
-    /* <div id="skip-input" class="col-12 col-md-3 btn-secondary">
-    <input title="Automatically skips layers with fewer items than this value." type="text" id="auto-skip"></div> */
     document.querySelectorAll('#mineBody + div')[0].prepend(minerHTML);
     $("#auto-mine-start").unwrap();
     document.getElementById('small-restore').value = setThreshold.toLocaleString('en-US');
@@ -128,8 +127,8 @@ function doAutoMine() {
     const mediumRestore = player.itemList["MediumRestore"]();
     const largeRestore = player.itemList["LargeRestore"]();
     const getCost = ItemList["SmallRestore"].price();
-    const treasureHunting = Math.sign(treasureHunter) >= 0;
-    const treasureTypes = ['Fossils', 'Evolution Items', 'Gem Plates', 'Shards', 'Diamond Value'];
+    const treasureHunting = Math.sign(treasureHunter) >= 0 && itemThreshold > 0;
+    const treasureTypes = ['Fossils', 'Evolution Items', 'Gem Plates', 'Shards', 'Mega Stones', 'Diamond Value'];
     const surveyResult = Mine.surveyResult();
     let treasureAmount;
     if (Mine.loadingNewLayer) {
@@ -139,8 +138,13 @@ function doAutoMine() {
     if (treasureHunting && surveyResult) {
         // Parse survey for the treasure type we want
         try {
-            const re = new RegExp(String.raw`${treasureTypes[treasureHunter]}: (\d+)`);
+            let re = new RegExp(String.raw`${treasureTypes[treasureHunter]}: (\d+)`);
             treasureAmount = +re.exec(surveyResult)[1];
+            // Count fossil pieces as fossils
+            if (treasureHunter == 0) {
+              re = new RegExp(`Fossil Pieces: (\d+)`);
+              treasureAmount += +re.exec(surveyResult)[1];
+            }
         } catch (err) {
             treasureAmount = 0;
         }
@@ -203,7 +207,7 @@ function doAutoMine() {
                     var rewardParent = reward.parentNode;
                     var ri = +reward.parentNode.getAttribute('data-i');
                     var rj = +reward.parentNode.getAttribute('data-j');
-                    //the tile's classes describe the dimensions of the shape, the coordinates of the tile within the image, and the rotation of the image 
+                    //the tile's classes describe the dimensions of the shape, the coordinates of the tile within the image, and the rotation of the image
                     let classList = reward.classList;
                     let rotations = +classList[3].split("-")[1]; //e.g. 1
                     const sizeString = classList[1].split("-"); //e.g. ["size", "3", "3"]
@@ -299,8 +303,8 @@ function treasureHunt(event) {
 
 function setTreasureImage() {
     const imageSources = ['items/underground/Hard Stone.png', 'breeding/Helix Fossil.png', 'items/evolution/Fire_stone.png',
-        'items/underground/Flame Plate.png', 'items/underground/Red Shard.png', 'currency/diamond.svg'];
-    const imageTitles = ['Item', 'Fossil', 'Evolution Stone', 'Plate', 'Shard', 'Diamond'];
+        'items/underground/Flame Plate.png', 'items/underground/Red Shard.png', 'megaStone/142.png', 'currency/diamond.svg'];
+    const imageTitles = ['Item', 'Fossil', 'Evolution Stone', 'Plate', 'Shard', 'Mega Stone', 'Diamond'];
     document.getElementById('treasure-image').src = `assets/images/${imageSources[1 + treasureHunter]}`;
     document.getElementById('treasure-image').title = imageTitles[1 + treasureHunter];
 }
