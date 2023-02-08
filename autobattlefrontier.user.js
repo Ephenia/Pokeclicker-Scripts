@@ -5,7 +5,7 @@
 // @description   Adds in stage resetting to the Battle Frontier that allows you to set a target stage and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.1
+// @version       1.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -48,7 +48,7 @@ function initBattleFrontier() {
                 if(bfOneClickState === "ON") {
                     oneClick();
                 } else {
-                    if (BattleFrontierRunner.stage() > battleFrontFloor) {
+                    if (BattleFrontierRunner.stage() > battleFrontFloor && battleFrontFloor > 0) {
                         battleReset();
                         BattleFrontierRunner.stage(1);
                     }
@@ -75,14 +75,14 @@ function initBattleFrontier() {
         oneClickBtn.addEventListener('click', event => { toggleOneClick() })
         var bfInput = document.createElement("div");
         bfInput.setAttribute("id", "battle-front-cont");
-        bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 125px;">`
+        bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 70px;"> <button id="battle-front-input-submit" class="btn btn-block btn-danger" style="font-size: 8pt; width: 42px; display:inline-block;">OK</button>`
         battleFront.before(bfInput)
         battleFront.before(oneClickBtn)
         document.getElementById('battle-front-input').value = battleFrontFloor.toLocaleString('en-US');
-        document.querySelector('#battle-front-input').addEventListener('input', event => {
-            battleFrontFloor = +event.target.value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
+        document.querySelector('#battle-front-input-submit').addEventListener('click', event => {
+            battleFrontFloor = +document.getElementById('battle-front-input').value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
             localStorage.setItem("battleFrontFloor", battleFrontFloor);
-            event.target.value = battleFrontFloor.toLocaleString('en-US');
+            document.getElementById('battle-front-input').value = battleFrontFloor.toLocaleString('en-US');
         });
     }
 
