@@ -48,7 +48,7 @@ function initBattleFrontier() {
                 if(bfOneClickState === "ON") {
                     oneClick();
                 } else {
-                    if (BattleFrontierRunner.stage() > battleFrontFloor) {
+                    if (BattleFrontierRunner.stage() > battleFrontFloor && battleFrontFloor > 0) {
                         battleReset();
                         BattleFrontierRunner.stage(1);
                     }
