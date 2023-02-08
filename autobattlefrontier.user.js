@@ -5,7 +5,7 @@
 // @description   Adds in stage resetting to the Battle Frontier that allows you to set a target stage and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.2
+// @version       1.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -30,7 +30,18 @@ function initBattleFrontier() {
     addGlobalStyle('#battle-front-cont { position:absolute;right:5px;top:5px;width:auto;height:41px; }');
     addGlobalStyle('#bf-one-click-btn { position:absolute;left:5px;top:5px;width:auto;height:41px; }');
 
-    document.getElementById('middle-column').addEventListener('click', event => {
+    const middleCol = document.getElementById('middle-column');
+    const bfEnter = $( "button:contains('Enter Battle Frontier')" );
+    bfEnter[0].addEventListener('click', () => {
+        modifyBattleFrontier();
+    });
+    middleCol.addEventListener('click', event => {
+        const bfEnter = $( "button:contains('Enter Battle Frontier')" );
+        if (bfEnter.is(":visible")) {
+            bfEnter[0].addEventListener('click', () => {
+                modifyBattleFrontier();
+            });
+        }
         if (BattleFrontierRunner.started() && existHTML) {
             //console.log("already started")
         }
@@ -41,6 +52,13 @@ function initBattleFrontier() {
             //console.log("starting")
         }
     });
+
+    function modifyBattleFrontier() {
+        const middleCol = document.getElementById('middle-column');
+        const bfStartNew = middleCol.querySelector('[onclick="BattleFrontierRunner.start(false)"]');
+        bfStartNew.setAttribute('onclick', 'BattleFrontierRunner.start(true)');
+        bfStartNew.textContent = 'Start (Stage: 0)';
+    }
 
     function floorReset() {
         awaitFloorReset = setInterval(function () {
@@ -68,22 +86,26 @@ function initBattleFrontier() {
         } else {
             bfOneClickColor = "success"
         }
-        var battleFront = document.getElementById('battleFrontierInformation').querySelector('div');
-        var oneClickBtn = document.createElement("div");
+        const battleFrontInfo = document.getElementById('battleFrontierInformation');
+        const battleFrontTitle = battleFrontInfo.querySelector('div');
+        const oneClickBtn = document.createElement("div");
         oneClickBtn.setAttribute("id", "bf-one-click-btn");
         oneClickBtn.innerHTML = `<button id="bf-one-click-start" class="btn btn-block btn-`+ bfOneClickColor + `" style="font-size: 8pt;">One Click Attack [`+ bfOneClickState + `]</button>`
         oneClickBtn.addEventListener('click', event => { toggleOneClick() })
-        var bfInput = document.createElement("div");
+        const bfInput = document.createElement("div");
         bfInput.setAttribute("id", "battle-front-cont");
         bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 70px;"> <button id="battle-front-input-submit" class="btn btn-block btn-danger" style="font-size: 8pt; width: 42px; display:inline-block;">OK</button>`
-        battleFront.before(bfInput)
-        battleFront.before(oneClickBtn)
+        battleFrontTitle.before(bfInput);
+        battleFrontTitle.before(oneClickBtn);
         document.getElementById('battle-front-input').value = battleFrontFloor.toLocaleString('en-US');
         document.querySelector('#battle-front-input-submit').addEventListener('click', event => {
             battleFrontFloor = +document.getElementById('battle-front-input').value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
             localStorage.setItem("battleFrontFloor", battleFrontFloor);
             document.getElementById('battle-front-input').value = battleFrontFloor.toLocaleString('en-US');
         });
+        const bfQuit = battleFrontInfo.querySelector('[onclick="BattleFrontierRunner.battleQuit()"]');
+        bfQuit.setAttribute('onclick', 'BattleFrontierRunner.end()');
+        bfQuit.addEventListener('click', () => {modifyBattleFrontier();});
     }
 
     function battleReset() {
@@ -124,7 +146,7 @@ function initBattleFrontier() {
         if(Battle.enemyPokemon().maxHealth() > App.game.party.calculatePokemonAttack(
             Battle.enemyPokemon().type1,
             Battle.enemyPokemon().type2, true,)
-        ) {
+          ) {
             battleReset();
             BattleFrontierRunner.stage(1);
         }
