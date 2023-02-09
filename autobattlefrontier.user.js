@@ -5,7 +5,7 @@
 // @description   Adds in stage resetting to the Battle Frontier that allows you to set a target stage and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.3
+// @version       1.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -31,17 +31,11 @@ function initBattleFrontier() {
     addGlobalStyle('#bf-one-click-btn { position:absolute;left:5px;top:5px;width:auto;height:41px; }');
 
     const middleCol = document.getElementById('middle-column');
-    const bfEnter = $( "button:contains('Enter Battle Frontier')" );
-    bfEnter[0].addEventListener('click', () => {
-        modifyBattleFrontier();
-    });
+    //If you initially load the game and are at the Battle Frontier entry, to keep things smooth
+    checkBattleFrontierEntry();
+
     middleCol.addEventListener('click', event => {
-        const bfEnter = $( "button:contains('Enter Battle Frontier')" );
-        if (bfEnter.is(":visible")) {
-            bfEnter[0].addEventListener('click', () => {
-                modifyBattleFrontier();
-            });
-        }
+        checkBattleFrontierEntry();
         if (BattleFrontierRunner.started() && existHTML) {
             //console.log("already started")
         }
@@ -52,6 +46,15 @@ function initBattleFrontier() {
             //console.log("starting")
         }
     });
+
+    function checkBattleFrontierEntry() {
+        const bfEnter = $( "button:contains('Enter Battle Frontier')" );
+        if (bfEnter.is(":visible")) {
+            bfEnter[0].addEventListener('click', () => {
+                modifyBattleFrontier();
+            });
+        }
+    }
 
     function modifyBattleFrontier() {
         const middleCol = document.getElementById('middle-column');
