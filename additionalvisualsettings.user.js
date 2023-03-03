@@ -369,6 +369,7 @@ function initVisualSettings() {
         for (const town in TownList) {
             const townData = TownList[town];
             if (townData.constructor.name == 'DungeonTown') {
+                const townName = townData.name;
                 const dungeonRegion = townData.region;
                 const dungeonData = townData.dungeon;
                 const dungeonClears = App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(dungeonData.name)]();
@@ -379,7 +380,13 @@ function initVisualSettings() {
                     const btn = document.createElement('button');
                     btn.setAttribute('style', `position: relative;background-image: url("assets/images/towns/${dungeonData.name}.png");background-position: center;opacity: ${canAccess ? 1 : 0.70};filter: brightness(${canAccess ? 1 : 0.70});`);
                     btn.setAttribute('class', 'btn btn-block btn-success');
-                    btn.addEventListener('click', () => { $("#DungeonsModal").modal("hide");DungeonRunner.initializeDungeon(dungeonData); });
+                    btn.addEventListener('click', () => {
+                        if (!MapHelper.isTownCurrentLocation(townName)) {
+                            MapHelper.moveToTown(townName)
+                        }
+                        $("#DungeonsModal").modal("hide");
+                        DungeonRunner.initializeDungeon(dungeonData);
+                    });
                     canAccess ? btn.disabled = false : btn.disabled = true;
                     btn.innerHTML = `<div class="dungeons-overlay"></div>
                     <div class="dungeons-costs">
