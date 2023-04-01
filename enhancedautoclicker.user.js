@@ -214,7 +214,11 @@ function changeSelectedGym(event) {
     if ([0, 1, 2, 3, 4, 100].includes(val)) {
         autoGymSelect = val;
         localStorage.setItem("autoGymSelect", autoGymSelect);
-        // In case currently fighting a gym 
+        // In case currently fighting a gym
+        if (autoClickState() && autoGymState()) {
+            // Since gym-cycling support (below) is disabled
+            GymRunner.autoRestart(false);
+        }
         //setGymIndex(autoGymSelect);
         //gymChanged = true;
     }
