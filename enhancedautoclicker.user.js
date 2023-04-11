@@ -29,7 +29,7 @@ var autoGymState = ko.observable(false);
 var autoGymSelect;
 var gymList = [];
 var gymIndex;
-//var gymChanged;
+//var gymChanged = false;
 //var gymChangedNotifier = ko.observable(false);
 // Auto Dungeon
 var autoDungeonState = ko.observable(false);
@@ -45,6 +45,7 @@ var dungeonFlashCols;
 // Clicker statistics calculator
 var calculatorLoop;
 var calculatorDisplayMode;
+var calcLastUpdate;
 var calcPlayerState = -1;
 var calcPlayerLocation;
 var calcTicks;
@@ -136,7 +137,7 @@ function initAutoClicker() {
         </td>`;
 
     settingsHeader.after(...settingsElems);
-    
+
     document.getElementById('auto-gym-select').value = autoGymSelect;
     document.getElementById('auto-dungeon-mode').value = autoDungeonMode;
     document.getElementById('select-calculatorDisplayMode').value = calculatorDisplayMode;
@@ -216,8 +217,8 @@ function changeSelectedGym(event) {
         localStorage.setItem("autoGymSelect", autoGymSelect);
         // In case currently fighting a gym
         if (autoClickState() && autoGymState()) {
-            // Since gym-cycling support (below) is disabled
-            GymRunner.autoRestart(false);
+        // Only break out of this script's auto restart, not the built-in one
+          GymRunner.autoRestart(false);
         }
         //setGymIndex(autoGymSelect);
         //gymChanged = true;
@@ -272,7 +273,7 @@ function autoClicker() {
     var delay = Math.ceil(1000 / ticksPerSecond);
     clearInterval(autoClickerLoop);
     // Restart stats calculator
-    calcClickStats(); 
+    calcClickStats();
     // Only use click multiplier while autoclicking
     overrideClickAttack(autoClickState() ? autoClickMultiplier : 1);
     if (autoClickState()) {
@@ -471,7 +472,7 @@ function autoDungeon() { // TODO more thoroughly test switching between modes an
             if (dungeon?.isUnlocked() && App.game.wallet.hasAmount(new Amount(dungeon.tokenCost, GameConstants.Currency.dungeonToken))) {
                 DungeonRunner.initializeDungeon(dungeon);
                 return;
-            } 
+            }
         }
         // Disable if locked, can't afford entry cost, or there's no dungeon here
         toggleAutoDungeon();
@@ -479,7 +480,7 @@ function autoDungeon() { // TODO more thoroughly test switching between modes an
 }
 
 /**
- * Scans current dungeon floor for relevant locations and pathfinding data 
+ * Scans current dungeon floor for relevant locations and pathfinding data
  */
 function scan() {
     var dungeonBoard = DungeonRunner.map.board()[DungeonRunner.map.playerPosition().floor];
@@ -559,7 +560,7 @@ function seekBoss() {
         // One move per tick to look more natural
         if (!DungeonRunner.map.board()[dungeonFloor][dungeonCoords.y][dungeonCoords.x].isVisited) {
             DungeonRunner.map.moveToCoordinates(dungeonCoords.x, dungeonCoords.y);
-            return; 
+            return;
         }
     }
     // Start boss / move floors
@@ -584,12 +585,12 @@ function fullClear() {
             } else {
                 dungeonCoords.x += 1;
             }
-        } 
+        }
         // Move in one direction until reaching the wall
         else {
             var direction = (-1) ** (dungeonFloorSize - dungeonCoords.y);
             // End of row, move up one
-            if ((dungeonCoords.x == (dungeonFloorSize - 1) && direction > 0) || 
+            if ((dungeonCoords.x == (dungeonFloorSize - 1) && direction > 0) ||
                 (dungeonCoords.x == 0 && direction < 0)) {
                 if (dungeonCoords.y == 0) {
                     // Floor fully explored
@@ -605,7 +606,7 @@ function fullClear() {
         // One move per tick to look more natural
         if (!DungeonRunner.map.board()[dungeonFloor][dungeonCoords.y][dungeonCoords.x].isVisited) {
             DungeonRunner.map.moveToCoordinates(dungeonCoords.x, dungeonCoords.y);
-            return; 
+            return;
         }
         // Just in case changed to allow multiple moves per tick
         else if (DungeonRunner.fighting() || DungeonBattle.catching()) {
@@ -670,7 +671,7 @@ function overrideDungeonRunner() {
         if (autoClickState() && autoDungeonState()) {
             DungeonRunner.dungeonWonAuto(...args);
         } else {
-            DungeonRunner.dungeonWonNormal(...args); 
+            DungeonRunner.dungeonWonNormal(...args);
         }
     }
 }
@@ -695,18 +696,20 @@ function calcClickStats() {
             if (!hasPlayerMoved()) {
                 var elem;
                 var clickDamage = App.game.party.calculateClickAttack(true);
-                
-                // Percentage of maximum ticksPerSecond 
+                var actualElapsed = (Date.now() - calcLastUpdate.at(-1)) / (1000 * calcLastUpdate.length);
+
+
+                // Percentage of maximum ticksPerSecond
                 elem = document.getElementById('tick-percentage');
                 var avgTicks = calcTicks.reduce((a, b) => a + b, 0) / calcTicks.length;
-                avgTicks = Math.round((avgTicks / ticksPerSecond) * 100) / 100; // round to integer percentage point
-                avgTicks = avgTicks.toLocaleString('en-US', {style: 'percent', maximumFractionDigits: 1} );
-                elem.innerHTML = avgTicks;
+                var tickFraction = avgTicks / (ticksPerSecond * actualElapsed);
+                elem.innerHTML = tickFraction.toLocaleString('en-US', {style: 'percent', maximumFractionDigits: 1} );
                 elem.style.color = 'gold';
 
                 // Average clicks/damage per second
                 elem = document.getElementById('clicks-per-second');
                 var avgClicks = (App.game.statistics.clickAttacks() - calcClicks.at(-1)) / calcClicks.length;
+                avgClicks = avgClicks / actualElapsed;
                 if (calculatorDisplayMode == 1) {
                     // display damage mode
                     var avgDPS = avgClicks * clickDamage;
@@ -736,8 +739,9 @@ function calcClickStats() {
                 // Enemies per second
                 elem = document.getElementById('enemies-per-second')
                 var avgEnemies = (App.game.statistics.totalPokemonDefeated() - calcEnemies.at(-1)) / calcEnemies.length;
+                avgEnemies = avgEnemies / actualElapsed;
                 elem.innerHTML = avgEnemies.toLocaleString('en-US', {maximumFractionDigits: 1});
-                
+
                 // Make room for next second's stats tracking
                 // Add new entries to start of array for easier incrementing
                 calcTicks.unshift(0);
@@ -752,7 +756,11 @@ function calcClickStats() {
                 if (calcEnemies.length > 10) {
                     calcEnemies.pop();
                 }
-            } 
+                calcLastUpdate.unshift(Date.now());
+                if (calcLastUpdate.length > 10) {
+                    calcLastUpdate.pop();
+                }
+            }
             // Reset statistics on area / game state change
             else {
                 resetCalculator();
@@ -766,6 +774,7 @@ function calcClickStats() {
  * Resets stats trackers and calculator info display
  */
 function resetCalculator() {
+    calcLastUpdate = [Date.now()];
     calcTicks = [0];
     calcClicks = [App.game.statistics.clickAttacks()];
     calcEnemies = [App.game.statistics.totalPokemonDefeated()];
@@ -775,7 +784,7 @@ function resetCalculator() {
     document.getElementById('auto-click-info').innerHTML = `<div>Clicker Efficiency:<br><div id="tick-percentage" style="font-weight:bold;">-</div></div>
         <div>${calculatorDisplayMode == 0 ? 'Clicks/s' : 'DPS'}:<br><div id="clicks-per-second" style="font-weight:bold;">-</div></div>
         <div>Req. ${calculatorDisplayMode == 0 ? 'Clicks' : 'Click Damage'}:<br><div id="req-clicks" style="font-weight:bold;">-</div></div>
-        <div>Enemies/s:<br><div id="enemies-per-second" style="font-weight:bold; color:black;">-</div></div>`;
+        <div>Enemies/s:<br><div id="enemies-per-second" style="font-weight:bold; color:gold;">-</div></div>`;
 }
 
 
@@ -873,7 +882,7 @@ function addGraphicsBindings() {
             elem.after(new Comment("/ko"))
         }
     });
-    // Always hide stop button during autoGym, even with graphics enabled 
+    // Always hide stop button during autoGym, even with graphics enabled
     var restartButton = gymContainer.querySelector('button[data-bind="visible: GymRunner.autoRestart()"]');
     restartButton.setAttribute('data-bind', 'visible: GymRunner.autoRestart() && !GymRunner.autoGymOn()');
     // Make leader name and sprites use observables to support gym-cycling mode
@@ -902,7 +911,7 @@ function addGraphicsBindings() {
  * -Otherwise returns null
  */
 function validateStorage(key, type) {
-    try { 
+    try {
         var val = localStorage.getItem(key);
         if (val === null) {
             throw new Error();
