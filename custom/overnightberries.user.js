@@ -39,7 +39,7 @@ function initSettings() {
         <select id="select-overnightGrowthMode" class="form-control">
         <option value="0">Until ripe</option>
         <option value="1">Until withered</option>
-        <option value="2">Harvest before withered</option>
+        <option value="2">Harvest before withering</option>
         </select>
         </td>`;
     settingsHeader.after(...settingsElems);
