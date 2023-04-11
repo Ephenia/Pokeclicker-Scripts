@@ -18,11 +18,11 @@
 // @run-at        document-idle
 // ==/UserScript==
 
-
 const scriptName = "overnightberries";
-var overnightGrowthMode;
 const stageMargin = 2; // buffer in seconds around stage changes
+var overnightGrowthMode;
 
+// handle settings
 
 function initSettings() {
     // Add settings to settings menu
@@ -54,6 +54,18 @@ function changeGrowthMode(event) {
     localStorage.setItem("overnightGrowthMode", overnightGrowthMode);
 }
 
+// trigger growth when enough of the game has loaded
+
+const gameInitOld = Game.prototype.initialize;
+Game.prototype.initialize = function () {
+    var returnVal = gameInitOld.apply(this, arguments);
+    var elapsedTime = Math.floor((Date.now() - player._lastSeen) / 1000);
+    growOffline(elapsedTime);
+    return returnVal;
+}
+
+// growth functions
+
 class trackPlot {
     constructor(plot) {
         this.plot = plot;
@@ -63,13 +75,13 @@ class trackPlot {
         const growthTime = this.plot.berryData.growthTime.find(t => this.plot.age < t);
         const timeLeft = Math.ceil(growthTime - this.plot.age);
         const growthMultiplier = App.game.farming.getGrowthMultiplier() * this.plot.getGrowthMultiplier();
-        this.timeToNextStage = Math.ceil(timeLeft / growthMultiplier);
+        this.timeLeft = Math.ceil(timeLeft / growthMultiplier);
+        this.isRipe = (this.plot.stage() === PlotStage.Berry);
     }
 }
 
 function growOffline(timeToGrow) {
     var plotList = [];
-    // build berry list
     for (const plot of App.game.farming.plotList) {
         if (plot.berry != undefined && plot.berry != BerryType.None) {
             // account for berries already ripe in until-ripe mode
@@ -78,26 +90,23 @@ function growOffline(timeToGrow) {
             }
         }
     }
-    // repeatedly add just enough time for one berry to change stage
-    // (adding all at once risks unpredictable growth with auras)
     while (timeToGrow > 0 && plotList.length > 0) {
         for (const tracker of plotList) {
             tracker.calcUpdateTime();
         }
-        // sort in descending order
-        plotList.sort((a, b) => (b.timeToNextStage - a.timeToNextStage));
-        var growthTimeThisLoop = Math.min(plotList.at(-1).timeToNextStage, timeToGrow);
-        // grow until right before a stage change to avoid auras changing
+        plotList.sort((a, b) => (b.timeLeft - a.timeLeft)); // sort in descending order
+        var growthTimeThisLoop = Math.min(plotList.at(-1).timeLeft, timeToGrow);
+        // grow until stage changes that could affect growth times
         for (const tracker of plotList) {
-            tracker.plot.update(Math.max(growthTimeThisLoop - stageMargin, 0));
+            tracker.plot.update(growthTimeThisLoop - stageMargin);
         }
-        // add last second(s) for stage change
+        // add last second(s)
         for (var i = 0; i < plotList.length; i++) {
             const tracker = plotList[i];
-            if (tracker.timeToNextStage == growthTimeThisLoop) {
+            if (tracker.timeLeft == growthTimeThisLoop) {
                 tracker.calcUpdateTime()
             }
-            if (tracker.timeToNextStage <= stageMargin) {
+            if (tracker.timeLeft <= stageMargin) {
                 var toRemove = changeStage(tracker.plot);
                 if (toRemove) {
                     plotList.splice(i, 1);
@@ -144,6 +153,8 @@ function changeStage(plot) {
     return false;
 }
 
+// load settings from storage
+
 function validateStorage(key, type) {
     try { 
         var val = localStorage.getItem(key);
@@ -166,15 +177,7 @@ if (![0, 1, 2].includes(overnightGrowthMode)) {
     overnightGrowthMode = 0;
 }
 
-
-const computeOfflineOld = Game.prototype.computeOfflineEarnings;
-Game.prototype.computeOfflineEarnings = function () {
-    var elapsedTime = Math.floor((Date.now() - player._lastSeen) / 1000);
-    var returnVal = computeOfflineOld.apply(this, arguments);
-    growOffline(elapsedTime);
-    return returnVal;
-}
-
+// load script
 
 function loadScript() {
     const oldInit = Preload.hideSplashScreen;
