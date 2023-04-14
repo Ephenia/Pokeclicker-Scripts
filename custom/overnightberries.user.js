@@ -18,7 +18,7 @@
 // @run-at        document-idle
 // ==/UserScript==
 
-const scriptName = "overnightberries";
+var scriptName = "overnightberries";
 const stageMargin = 2; // buffer in seconds around stage changes
 var overnightGrowthMode;
 
