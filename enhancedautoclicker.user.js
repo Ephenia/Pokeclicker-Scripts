@@ -18,7 +18,7 @@
 // @run-at        document-idle
 // ==/UserScript==
 
-const scriptName = 'enhancedautoclicker';
+var scriptName = 'enhancedautoclicker';
 const ticksPerSecond = 20;
 // Auto Clicker
 var autoClickState = ko.observable(false);
@@ -215,11 +215,13 @@ function changeSelectedGym(event) {
     if ([0, 1, 2, 3, 4, 100].includes(val)) {
         autoGymSelect = val;
         localStorage.setItem("autoGymSelect", autoGymSelect);
-        // In case currently fighting a gym
+        // In case currently fighting a gym 
+        // TODO temporary, replace this with the commented code below once gym-cycling gets enabled
         if (autoClickState() && autoGymState()) {
-        // Only break out of this script's auto restart, not the built-in one
-          GymRunner.autoRestart(false);
+            // Only break out of this script's auto restart, not the built-in one
+            GymRunner.autoRestart(false);
         }
+        // For gym-cycling purposes
         //setGymIndex(autoGymSelect);
         //gymChanged = true;
     }
