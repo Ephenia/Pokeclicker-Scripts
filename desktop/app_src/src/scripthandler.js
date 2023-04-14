@@ -25,7 +25,7 @@
 
                 //Create and append the content for the script tab to Settings
                 scriptFrag = new DocumentFragment();
-                let div = document.createElement('biv');
+                let div = document.createElement('div');
                 div.classList.add('tab-pane');
                 div.setAttribute('id', 'settings-scripts')
 
