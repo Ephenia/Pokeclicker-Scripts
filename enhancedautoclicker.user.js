@@ -705,7 +705,7 @@ function calcClickStats() {
                 elem = document.getElementById('tick-percentage');
                 var avgTicks = calcTicks.reduce((a, b) => a + b, 0) / calcTicks.length;
                 var tickFraction = avgTicks / (ticksPerSecond * actualElapsed);
-                elem.innerHTML = tickFraction.toLocaleString('en-US', {style: 'percent', maximumFractionDigits: 1} );
+                elem.innerHTML = tickFraction.toLocaleString('en-US', {style: 'percent', maximumFractionDigits: 0} );
                 elem.style.color = 'gold';
 
                 // Average clicks/damage per second
