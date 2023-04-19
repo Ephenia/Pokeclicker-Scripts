@@ -231,7 +231,7 @@ function initVisualSettings() {
     });
 
     function remPokeName() {
-        if (player.route() {
+        if (player.route()) {
             const enemyName = document.querySelectorAll('.pageItemTitle knockout');
             if (enemyName.length > 0) {
                 enemyName[0].remove();
@@ -339,23 +339,27 @@ function initVisualSettings() {
         gymsHead.textContent = `Gym Select (${GameConstants.camelCaseToString(GameConstants.Region[player.region])})`;
         gymBtns.innerHTML = '';
         const fragment = new DocumentFragment();
-        for (const gym in GymList) {
-            let region;
-            try { region = GymList[gym].parent.region } catch (err) { region = null };
+        for (const gym of Object.values(GymList)) {
+            let region = gym.parent?.region;
             if (player.region == region) {
-                const selGym = GymList[gym];
                 const btn = document.createElement('button');
                 btn.setAttribute('style', 'position: relative;');
                 btn.setAttribute('class', 'btn btn-block btn-success');
-                btn.addEventListener('click', () => { $("#GymsModal").modal("hide");GymRunner.startGym(selGym, false); });
-                selGym.isUnlocked() && MapHelper.calculateTownCssClass(selGym.parent.name) != 'locked' ? btn.disabled = false : btn.disabled = true;
+                btn.addEventListener('click', () => {
+                    if (!MapHelper.isTownCurrentLocation(gym.parent.name)) {
+                        MapHelper.moveToTown(gym.parent.name);
+                    }
+                    $("#GymsModal").modal("hide");
+                    GymRunner.startGym(gym, false); 
+                });
+                btn.disabled = !(gym.isUnlocked() && MapHelper.calculateTownCssClass(gym.parent.name));
                 btn.innerHTML = `<div class="gyms-leaders">
-                    <img src="assets/images/gymLeaders/${selGym.leaderName}.png" onerror="this.onerror=null;this.style.display='none';">
+                    <img src="assets/images/gymLeaders/${gym.leaderName}.png" onerror="this.onerror=null;this.style.display='none';">
                     </div>
                     <div class="gyms-badges">
-                    <img src="assets/images/badges/${BadgeEnums[selGym.badgeReward]}.png" onerror="this.onerror=null;this.style.display='none';">
+                    <img src="assets/images/badges/${BadgeEnums[gym.badgeReward]}.png" onerror="this.onerror=null;this.style.display='none';">
                     </div>
-                    ${selGym.leaderName}`;
+                    ${gym.leaderName}`;
                 fragment.appendChild(btn);
             }
         }
@@ -384,7 +388,7 @@ function initVisualSettings() {
                     btn.setAttribute('class', 'btn btn-block btn-success');
                     btn.addEventListener('click', () => {
                         if (!MapHelper.isTownCurrentLocation(townName)) {
-                            MapHelper.moveToTown(townName)
+                            MapHelper.moveToTown(townName);
                         }
                         $("#DungeonsModal").modal("hide");
                         DungeonRunner.initializeDungeon(dungeonData);
