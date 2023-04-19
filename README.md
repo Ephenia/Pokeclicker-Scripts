@@ -167,44 +167,47 @@ I think the rest of the buttons there are self-explanatory, and you guys can hav
 <hr>
 
 ## **Enhanced Auto Clicker** ([enhancedautoclicker.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautoclicker.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautoclicker.user.js))
-This script was originally created by <b>Ivan Lay</b> and [can be found over here](//github.com/ivanlay/pokeclicker-automator).
+This script is based on one originally created by <b>Ivan Lay</b>, which [can be found here](//github.com/ivanlay/pokeclicker-automator). 
 
-This script currently features quite a lot more over the old one. This enhanced version mainly adds in a button to toggle the Auto Clicker on/off without the need of a refresh. This setting will also save and persist through refresh/browser close.
+<img width="608" src="https://user-images.githubusercontent.com/12092270/229034199-21bb914c-d6c3-4d97-bc4a-4521052a2740.png">
 
-The button can be found under your currencies, as shown here:<br>
+The main Auto Clicker button can be found under your currencies. Clicking it toggles the Auto Clicker on/off without the need of a refresh. This setting will also save and persist through page refresh/close.
 
-![image](https://user-images.githubusercontent.com/26987203/139553777-6c8fbeb9-6ebf-4884-9b60-04bbc218d148.png)
+The Auto Clicker button displays various statistics while running:<br>
 
-I have also added 4 new values to the auto clicker component:<br>
+<strong>• Clicker Efficiency</strong> - How close the Auto Clicker is to its maximum speed. The closer to 100%, the better.<br>
+<strong>• Clicks/s</strong> or <strong>DPS</strong> - The number of clicks per second or click damage per second the Auto Clicker is producing.<br>
+<strong>• Req. Clicks</strong> or <strong>Req. Click Damage</strong> - The number of clicks or click attack necessary to one-shot enemies in the current route, gym, or dungeon. The color changes depending on whether you meet the requirement. This ignores dungeon boss health and health bonuses from dungeon chests.<br>
+<strong>• Enemy/s</strong> - How many enemies you are defeating per second.<br>
 
-<strong>• Auto Click DPS</strong> - This will tell you the total amount of click damage that you're dealing per second while the Auto Clicker is active.<br>
-<strong>• Req. DPS</strong> - This will tell you the total required amount of click damage (Auto Click DPS) needed for you to 1 shot the route and fully cap out the red (health) bar.<br>
-<strong>• Enemy/s</strong> - How many enemies you are defeating per second through the use of the Auto Clicker and it being currently active (20 is cap).
+You can switch between clicks and damage display modes in the settings menu. Statistics are averaged over the last ten seconds, reset upon changing locations.
 
-<strong>Auto Click DPS will always show in Gold. Required DPS will change color depending on if you meet it or not.</strong><br>
+### **Auto Gym**
 
-> <strong>As of 1.4 the Auto Gym feature has been released and is found below the Auto Click button. Some notes about how this works:</strong><br><br>
+The Auto Gym feature is found below the Auto Click button. Some notes about how this works:
+
 • Auto Gym will only work while the Auto Clicker is active.<br>
-• Auto Gym when activated will automatically fight the Gym in the town you are in or the one you visited last (if it has a Gym).<br>
-• There is a dropdown to the right of the Auto Gym button which is meant for Elite Fours. The number that you set this to will be which Elite Four member you will fight (or at least try to). So for example, if you set this to #5 then you will be fighting the Champion or at least that's what Auto Gym's priority will be. This means Auto Gym will also automatically fight through all the Elite Four preceding the one you set it to if they were undefeated previously.
+• Auto Gym when activated will automatically fight the Gym in the town you are in.<br>
+• There is a dropdown to the right of the Auto Gym button which is meant for Elite Fours and other towns with multiple gyms. The number that you set this to determines which gym or Elite Four member you will fight. For example, if you set it to #5 while at a Pokemon League, you will fight the Champion. However, if you set Auto Gym to fight a gym you have not yet unlocked, you will instead end up fighting the last unlocked gym in that town (if one exists) until you restart Auto Gym or select a different gym to fight. 
 
-<br>
+### **Auto Dungeon**
 
-> <strong>As of 1.5 the Auto Dungeon feature has been released which can be seen below the Auto Click button. Some notes about how this works:</strong><br><br>
+The Auto Dungeon feature is found below the Auto Click button. Some notes about how this works:
+
 • Auto Dungeon will only work while the Auto Clicker is active.<br>
-• Auto Dungeon when activated will automatically fight the current dungeon, the last dungeon you've visited or the dungeon in the one in the last town you were in (if it has one).<br>
-• There is a dropdown to the right of the Auto Dungeon button which contains 2 modes:<br><br>
-<strong>"F" for Farm Mode</strong> - this will run through the dungeon in its entirety and fight all the enemies as well as loot all the chests. The boss will be saved for last.<br>
-<strong>"B" for Boss Rusher</strong> - this will try to clear the dungeon as fast as possible and rush the Boss. The Boss will always be the top priority, chests will not be opened as they increase enemy hp, making clearing slower. Note that this currently does not include pathfinding, so it will only fight the Boss if it is adjecent to a visited tile.
+• Auto Dungeon when activated will automatically explore the current dungeon, or begin exploring a dungeon whose entrance you are at. 
+• There is a dropdown to the right of the Auto Dungeon button to choose between two modes:<br><br>
+<strong>"F" for Farm Mode</strong> - this runs through the dungeon in its entirety and fights all the enemies as well as loot all the chests, saving the boss for last. It now waits to open chests until right before the boss fight for faster clearing.<br/>
+<strong>"B" for Boss Rusher</strong> - this tries to clear the dungeon as fast as possible to fight the boss. Chests are not opened as they increase enemy HP, making clearing slower. If you have unlocked Flash for a dungeon, this mode will now use it to find the boss while visiting as few columns as possible. It does not include pathfinding that uses information, like the location of the boss, not visible to the player.
 
-<br>
+### **Graphics settings**
+
+The Auto Clicker now includes graphics settings for Auto Gym and Auto Dungeon to save on performance, similar to those in the Additional Visual Settings script. These settings are located along with the statistics display mode setting in the Visual Settings tab of the settings menu. These disable most gym graphics while Auto Gym is running and most dungeon graphics while Auto Dungeon is running, respectively.
 
 ```diff
 - Note: the Auto Clicker runs every 0.05 seconds.
 - Note: statistics are checked and updated every 1 second while the Auto Clicker is active.
 ```
-
-I thought that these were some neat and useful additions to add. I hope that you guys would like them as well. I spent a lot of time on these especially with creating Auto Dungeon.
 
 <hr>
 
