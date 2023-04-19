@@ -17,6 +17,12 @@ const clientVersion = app.getVersion();
 
 const dataDir = (electron.app || electron.remote.app).getPath("userData");
 
+const settingsFile = path.join(dataDir, "settings.ini");
+// Upstream scripts directory
+const defaultScriptsDir = path.join(dataDir, "scripts");
+// Custom scripts directory
+const customScriptsDir = path.join(dataDir, "custom-scripts");
+
 console.info("Data directory:", dataDir);
 
 let checkForUpdatesInterval;
@@ -33,20 +39,19 @@ function createWindow() {
     app.setAppUserModelId("PokéClicker");
   } catch (e) {}
 
-  if (fs.existsSync(`settings.ini`)) {
+  if (fs.existsSync(settingsFile)) {
     getConfig();
   } else {
     config = { Sizing: { Width: "800", Height: "600", Maximized: false } };
     fs.writeFile(
-      "settings.ini",
+      settingsFile,
       "[Sizing]\r\nWidth=800\r\nHeight=600\r\nMaximized=false",
       function () {}
     );
   }
 
   function getConfig() {
-    config = ini.parse(fs.readFileSync("settings.ini", "utf-8"));
-    //fs.writeFile("output.txt", JSON.stringify(config), function () {});
+    config = ini.parse(fs.readFileSync(settingsFile, "utf-8"));
   }
 
   mainWindow = new BrowserWindow({
@@ -62,40 +67,45 @@ function createWindow() {
     },
   });
 
+  function runScript(scriptFilePath) {
+    mainWindow.webContents
+      .executeJavaScript(fs.readFileSync(scriptFilePath, "utf-8"))
+      .catch(e => {
+        console.error("Failed to run script '%s': %s", scriptFilePath, e);
+      });
+  }
+
   mainWindow.webContents.on("did-finish-load", () => {
     mainWindow.webContents
       .executeJavaScript(
         `(() => { DiscordRichPresence.clientVersion = '${clientVersion}' })()`
       )
       .catch((e) => {});
-    mainWindow.webContents
-      .executeJavaScript(
-        fs.readFileSync(`${__dirname}/scripthandler.js`).toString()
-      )
-      .catch((e) => {});
-    //List of custom scripts file names
-    var cScripts = [];
-    //pokeclicker-desktop/resources
-    const directory = `${__dirname}/../../`;
-    //pokeclicker-desktop/resources/scripts
-    const dirScript = `${__dirname}/../../scripts`;
-    //Creates scripts folder if non existant
-    if (!fs.existsSync(dirScript)) {
-      fs.mkdirSync(dirScript, { recursive: true });
-    } else {
-      //Gets list of custom scripts
-      fs.readdir(dirScript, (err, files) => {
-        files.forEach((file) => {
+    runScript(`${__dirname}/scripthandler.js`);
+
+    function ensureScriptsDirsExist() {
+      if (!fs.existsSync(defaultScriptsDir)) {
+        fs.mkdirSync(defaultScriptsDir, { recursive: true });
+      }
+      if (!fs.existsSync(customScriptsDir)) {
+        fs.mkdirSync(customScriptsDir, { recursive: true });
+      }
+    }
+
+    function getCustomScripts() {
+      let customScripts = [];
+      fs.readdir(customScriptsDir, (err, files) => {
+        files.forEach(file => {
           if (file.includes(".js")) {
-            // mainWindow.webContents.executeJavaScript(
-            //   fs.readFileSync(`${__dirname}/../../${file}`).toString()
-            // ).catch(e => { });
-            cScripts.push(file.replace(/.js/g, ""));
-            //fs.appendFileSync(`${__dirname}/../../scripts/filelist.txt`, `\r\n${file.replace(/.js/g, "")}`, 'utf-8');
+            customScripts.push(file.replace(/.js/g, ""));
           }
         });
       });
+      return customScripts;
     }
+
+    ensureScriptsDirsExist();
+    var customScripts = getCustomScripts();
 
     var reqInc = 0;
     var filePre = "";
@@ -125,26 +135,26 @@ function createWindow() {
     request.onload = printRepoCont;
     //Loads all scripts from files if you don't have internet
     request.onerror = function () {
-      fs.readdir(directory, (err, files) => {
+      fs.readdir(defaultScriptsDir, (err, files) => {
         files.forEach((file) => {
-          //Looks for any js files in /pokeclicker-desktop/resources/
           if (file.includes(".js")) {
-            //Checks if the file is not already included in the list of scripts in /pokeclicker-desktop/resources/scripts/
-            //This means if i include a script with the same name as an existing one in /scripts/ it will be run instead of the base file?
-            if (!cScripts.includes(file.replace(/.js/g, ""))) {
+            // Ignore the script if there is a custom script with the same name
+            if (customScripts.includes(file.replace(/.js/g, ""))) {
+              console.log(
+                "Ignoring '%s' as another script with this name is in '%s'",
+                file,
+                customScriptsDir
+              );
+            } else {
               //Execute the script
-              mainWindow.webContents
-                .executeJavaScript(
-                  fs.readFileSync(`${__dirname}/../../${file}`).toString()
-                )
-                .catch((e) => {});
-              //fs.appendFileSync(`${__dirname}/../../loadedvanilla.txt`, `\r\n${file.replace(/.js/g, "")}`, 'utf-8');
+              const filePath = path.join(defaultScriptsDir, file);
+              runScript(filePath);
             }
           }
         });
       });
-      //Same as this but for scripts in /pokeclicker-desktop/resources/scripts
-      customScripts();
+      // Same as this but for custom scripts
+      runCustomScripts();
     };
     request.open(
       "get",
@@ -178,11 +188,11 @@ function createWindow() {
             });
             res.on("end", function () {
               files = files.replace(/custom[/]/g, "");
-              console.log(data);
               var global_data;
+              const filePath = path.join(defaultScriptsDir, files);
 
-              if (fs.existsSync(`${__dirname}/../../${files}.js`)) {
-                global_data = fs.readFileSync(`${__dirname}/../../${files}.js`);
+              if (fs.existsSync(filePath)) {
+                global_data = fs.readFileSync(filePath);
               } else {
                 global_data = null;
               }
@@ -190,28 +200,21 @@ function createWindow() {
               try {
                 if (data.toString() != global_data) {
                   fs.writeFileSync(
-                    `${__dirname}/../../${files}.js`,
+                    filePath,
                     data,
                     "utf-8"
                   );
                 }
               } catch (e) {
-                console.log("Failed to save the file !");
+                console.error("Failed to save '%s': %s", filePath, e);
               }
 
               try {
                 if (
-                  !cScripts.includes(files) &&
+                  !customScripts.includes(files) &&
                   !files.includes("scripthandler")
                 ) {
-                  mainWindow.webContents
-                    .executeJavaScript(
-                      fs
-                        .readFileSync(`${__dirname}/../../${files}.js`)
-                        .toString()
-                    )
-                    .catch((e) => {});
-                  //fs.appendFileSync(`${__dirname}/../../loadedvanilla.txt`, `\r\n${files}`, 'utf-8');
+                  runScript(filePath);
                 }
               } catch (e) {}
             });
@@ -222,19 +225,15 @@ function createWindow() {
           request.end();
         }, i * 1);
       });
-      customScripts();
+      runCustomScripts();
     }
 
-    function customScripts() {
-      fs.readdir(dirScript, (err, files) => {
+    function runCustomScripts() {
+      fs.readdir(customScriptsDir, (err, files) => {
         files.forEach((file) => {
           if (file.includes(".js")) {
-            mainWindow.webContents
-              .executeJavaScript(
-                fs.readFileSync(`${__dirname}/../../scripts/${file}`).toString()
-              )
-              .catch((e) => {});
-            //fs.appendFileSync(`${__dirname}/../../scripts/loadedcustom.txt`, `\r\n${file.replace(/.js/g, "")}`, 'utf-8');
+            const filePath = path.join(customScriptsDir, file);
+            runScript(filePath);
           }
         });
       });
@@ -260,7 +259,7 @@ function createWindow() {
     config.Sizing.Width = width;
     config.Sizing.Height = height;
     config.Sizing.Maximized = mainWindow.isMaximized();
-    fs.writeFileSync("settings.ini", ini.stringify(config));
+    fs.writeFileSync(settingsFile, ini.stringify(config));
   });
   mainWindow.on("close", (event) => {
     windowClosed = true;
