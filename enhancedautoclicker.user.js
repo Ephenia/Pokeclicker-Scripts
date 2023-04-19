@@ -321,26 +321,32 @@ function autoClicker() {
  */
 function overrideClickAttack(clickMultiplier = 1) {
     // Set delay based on the autoclicker's tick rate
-    // (minus 1 ms to avoid rounding issues)
-    var delay = Math.min(Math.ceil(1000 / ticksPerSecond) - 1, 50);
+    // (lower to give setInterval some wiggle room)
+    var delay = Math.min(Math.ceil(1000 / ticksPerSecond) - 10, 50);
+    var clickDamageCached = 0;
+    var lastCached = 0;
     Battle.clickAttack = function () {
         // click attacks disabled and we already beat the starter
         if (App.game.challenges.list.disableClickAttack.active() && player.regionStarters[GameConstants.Region.kanto]() != GameConstants.Starter.None) {
             return;
         }
         const now = Date.now();
-        if (this.lastClickAttack > now - delay) {
+        if (now - this.lastClickAttack < delay) {
             return;
         }
         this.lastClickAttack = now;
         if (!this.enemyPokemon()?.isAlive()) {
             return;
         }
+        // Avoid recalculating damage 20 times per second
+        if (now - lastCached > 1000) {
+            clickDamageCached = App.game.party.calculateClickAttack(true);
+            lastCached = now;
+        }
         // Don't autoclick more than needed for lethal
-        var clickDamage = App.game.party.calculateClickAttack(true);
-        var clicks = Math.min(clickMultiplier, Math.ceil(this.enemyPokemon().health() / clickDamage));
+        var clicks = Math.min(clickMultiplier, Math.ceil(this.enemyPokemon().health() / clickDamageCached));
         GameHelper.incrementObservable(App.game.statistics.clickAttacks, clicks);
-        this.enemyPokemon().damage(clickDamage * clicks);
+        this.enemyPokemon().damage(clickDamageCached * clicks);
         if (!this.enemyPokemon().isAlive()) {
             this.defeatPokemon();
         }
