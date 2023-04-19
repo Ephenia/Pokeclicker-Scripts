@@ -368,7 +368,7 @@ function initVisualSettings() {
         const fragment = new DocumentFragment();
         for (const town in TownList) {
             const townData = TownList[town];
-            if (townData.constructor.name == 'DungeonTown') {
+            if (townData.constructor.name == 'DungeonTown' && townData.dungeon != null) {
                 const townName = townData.name;
                 const dungeonRegion = townData.region;
                 const dungeonData = townData.dungeon;
