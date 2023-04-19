@@ -41,6 +41,7 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 5. [**Infinite Seasonal Events** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-infinite-seasonal-events-infiniteseasonaleventsuserjs-one-click-install)
 6. [**Oak Items Unlimited** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-oak-iems-unlimited-oakitemsunlimiteduserjs-one-click-install)
 7. [**Omega Protein Gains** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-omega-protein-gains-omegaproteingainsuserjs-one-click-install)
+7. [**Overnight Berry Growth** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-overnight-berry-growth-overnightberrygrowth-one-click-install)
 8. [**Perky Pokerus Pandemic** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-perky-pokerus-pandemic-perkypokeruspandemicuserjs-one-click-install)
 9. [**Simple Weather Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-simple-weather-changer-simpleweatherchangeruserjs-one-click-install)
 
@@ -371,6 +372,15 @@ This script removes the limit for the amount of Proteins that you're able to use
 ![image](https://i.imgur.com/2kXCzUA.png)
 
 I haven't tested the limits of how many Proteins you can give, but it should practically be infinite.
+
+<hr>
+
+## **[Custom] Overnight Berry Growth** ([overnightberrygrowth.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/overnightberrygrowth.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/overnightberrygrowth.user.js))
+This script allows berries to grow while the game is closed, simulating their growth when the game loads. No mutations occur, aside from Kebia replanting, and Farm Hands are not active. Withered berries can replant as normal, but the script will ignore replanted berries to avoid lag. You can choose between three modes in the settings: 
+
+- Until ripe: Berries will only grow until they are ripe and no time will pass for already-ripe berries. The default mode.
+- Until withered: Berries will continue aging once they are ripe and may wither.
+- Harvest before withering: Berries will continue aging once they are ripe, but the script harvests berries right before they would wither (during offline growth only).
 
 <hr>
 
