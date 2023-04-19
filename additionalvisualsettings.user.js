@@ -231,9 +231,11 @@ function initVisualSettings() {
     });
 
     function remPokeName() {
-        const enemyName = document.querySelectorAll('.pageItemTitle knockout');
-        if (enemyName.length > 0) {
-            enemyName[0].remove();
+        if (player.route() {
+            const enemyName = document.querySelectorAll('.pageItemTitle knockout');
+            if (enemyName.length > 0) {
+                enemyName[0].remove();
+            }
         }
     }
 
