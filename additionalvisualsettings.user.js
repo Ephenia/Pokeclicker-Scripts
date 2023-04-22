@@ -5,7 +5,7 @@
 // @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.2
+// @version       2.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -231,9 +231,11 @@ function initVisualSettings() {
     });
 
     function remPokeName() {
-        const enemyName = document.querySelectorAll('.pageItemTitle knockout');
-        if (enemyName.length > 0) {
-            enemyName[0].remove();
+        if (player.route()) {
+            const enemyName = document.querySelectorAll('.pageItemTitle knockout');
+            if (enemyName.length > 0) {
+                enemyName[0].remove();
+            }
         }
     }
 
@@ -337,23 +339,27 @@ function initVisualSettings() {
         gymsHead.textContent = `Gym Select (${GameConstants.camelCaseToString(GameConstants.Region[player.region])})`;
         gymBtns.innerHTML = '';
         const fragment = new DocumentFragment();
-        for (const gym in GymList) {
-            let region;
-            try { region = GymList[gym].parent.region } catch (err) { region = null };
+        for (const gym of Object.values(GymList)) {
+            let region = gym.parent?.region;
             if (player.region == region) {
-                const selGym = GymList[gym];
                 const btn = document.createElement('button');
                 btn.setAttribute('style', 'position: relative;');
                 btn.setAttribute('class', 'btn btn-block btn-success');
-                btn.addEventListener('click', () => { $("#GymsModal").modal("hide");GymRunner.startGym(selGym, false); });
-                selGym.isUnlocked() && MapHelper.calculateTownCssClass(selGym.parent.name) != 'locked' ? btn.disabled = false : btn.disabled = true;
+                btn.addEventListener('click', () => {
+                    if (!MapHelper.isTownCurrentLocation(gym.parent.name)) {
+                        MapHelper.moveToTown(gym.parent.name);
+                    }
+                    $("#GymsModal").modal("hide");
+                    GymRunner.startGym(gym, false); 
+                });
+                btn.disabled = !(gym.isUnlocked() && MapHelper.calculateTownCssClass(gym.parent.name));
                 btn.innerHTML = `<div class="gyms-leaders">
-                    <img src="assets/images/gymLeaders/${selGym.leaderName}.png" onerror="this.onerror=null;this.style.display='none';">
+                    <img src="assets/images/gymLeaders/${gym.leaderName}.png" onerror="this.onerror=null;this.style.display='none';">
                     </div>
                     <div class="gyms-badges">
-                    <img src="assets/images/badges/${BadgeEnums[selGym.badgeReward]}.png" onerror="this.onerror=null;this.style.display='none';">
+                    <img src="assets/images/badges/${BadgeEnums[gym.badgeReward]}.png" onerror="this.onerror=null;this.style.display='none';">
                     </div>
-                    ${selGym.leaderName}`;
+                    ${gym.leaderName}`;
                 fragment.appendChild(btn);
             }
         }
@@ -368,7 +374,8 @@ function initVisualSettings() {
         const fragment = new DocumentFragment();
         for (const town in TownList) {
             const townData = TownList[town];
-            if (townData.constructor.name == 'DungeonTown') {
+            if (townData.constructor.name == 'DungeonTown' && townData.dungeon != null) {
+                const townName = townData.name;
                 const dungeonRegion = townData.region;
                 const dungeonData = townData.dungeon;
                 const dungeonClears = App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(dungeonData.name)]();
@@ -379,7 +386,13 @@ function initVisualSettings() {
                     const btn = document.createElement('button');
                     btn.setAttribute('style', `position: relative;background-image: url("assets/images/towns/${dungeonData.name}.png");background-position: center;opacity: ${canAccess ? 1 : 0.70};filter: brightness(${canAccess ? 1 : 0.70});`);
                     btn.setAttribute('class', 'btn btn-block btn-success');
-                    btn.addEventListener('click', () => { $("#DungeonsModal").modal("hide");DungeonRunner.initializeDungeon(dungeonData); });
+                    btn.addEventListener('click', () => {
+                        if (!MapHelper.isTownCurrentLocation(townName)) {
+                            MapHelper.moveToTown(townName);
+                        }
+                        $("#DungeonsModal").modal("hide");
+                        DungeonRunner.initializeDungeon(dungeonData);
+                    });
                     canAccess ? btn.disabled = false : btn.disabled = true;
                     btn.innerHTML = `<div class="dungeons-overlay"></div>
                     <div class="dungeons-costs">
