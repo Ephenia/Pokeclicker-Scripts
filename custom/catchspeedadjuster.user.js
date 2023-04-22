@@ -5,7 +5,7 @@
 // @description   Adjusts catch speed of all Pokeballs. Currently only makes Pokeballs catch as fast as possible.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.1
+// @version       1.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -28,7 +28,7 @@ function initBallAdjust() {
     }
     var ballCont = document.getElementById('pokeballSelectorBody').querySelector('thead');
     var ballAdj = document.createElement("tr");
-    ballAdj.innerHTML = `<td colspan="4"><div style="height: 25px;"><label for="ball-adjust">0 Delay Capture <label><input id="ball-adjust" type="checkbox" style="position: relative;top: 2px;"></div></td>`
+    ballAdj.innerHTML = `<td colspan="5"><div style="height: 25px;"><label for="ball-adjust">0 Delay Capture <label><input id="ball-adjust" type="checkbox" style="position: relative;top: 2px;"></div></td>`
     ballCont.append(ballAdj)
     document.getElementById('ball-adjust').addEventListener('click', event => changeAdjust(event.target));
 
