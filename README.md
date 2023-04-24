@@ -4,6 +4,14 @@
 [![GitHub issues](https://img.shields.io/github/issues/Ephenia/Pokeclicker-Scripts?color=%23AA4A44)](https://github.com/Ephenia/Pokeclicker-Scripts/issues)
 [![GitHub forks](https://img.shields.io/github/forks/Ephenia/Pokeclicker-Scripts?color=40826d)](https://github.com/Ephenia/Pokeclicker-Scripts/network)
 
+**UPDATE: April 18th, 2023**
+
+[PLEASE READ](https://github.com/Ephenia/Pokeclicker-Scripts/issues/298)
+
+It's very important for the future of the project in general and how things will be like going forward.
+
+<hr>
+
 Various scripts & enhancements for the game [Pokéclicker](https://www.pokeclicker.com/).
 
 These are originally created and intended for the use of the browser extension known as [Tampermonkey](https://www.tampermonkey.net/). These should be compatible with any Script Manager, however. If you have a Script Manager installed, such as Tampermonkey, you can click on the One-Click install to easily install any scripts here.
