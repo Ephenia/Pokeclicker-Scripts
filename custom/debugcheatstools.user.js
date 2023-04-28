@@ -9,8 +9,8 @@
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
-// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/debugcheats.user.js
-// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/debugcheats.user.js
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/debugcheatstools.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/debugcheatstools.user.js
 
 // @match         https://www.pokeclicker.com/
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
@@ -111,6 +111,26 @@ function filterPkdx(){
     }
 }
 
+function filterQuestLine(){
+    let lst = document.querySelectorAll(':scope #questlinelist tbody tr');
+    for (let i = 0; i < lst.length; i++) {
+        const tdb = lst[i];
+        let display = true;
+
+        if (display === true) {
+            switch (document.getElementById('questLineFilter').value) {
+                case 'all':
+                    break;
+                default:
+                    display = tdb.innerHTML.toLowerCase().includes(document.getElementById('questLineFilter').value);
+                    break;
+            }
+        }
+
+        tdb.style.display = (display === true ? "" : "none");
+    }
+}
+
 // eslint-disable-next-line no-unused-vars
 function loadPkdx(){
     let playerRegion = player.highestRegion();
@@ -154,6 +174,42 @@ function loadPkdx(){
     filterPkdx();
 }
 
+function loadQuestLines() {
+    let qlBody = document.querySelector(':scope #questlinelist tbody');
+    qlBody.innerHTML = '';
+    let toAdd = "";
+	
+    for (const ql of App.game.quests.questLines()) {		
+		let state = QuestLineState[ql.state()]
+		state = state.charAt(0).toUpperCase() + state.slice(1)
+		
+		let stateColor;
+		switch (ql.state()) {
+			case 0:
+				stateColor = "244, 80, 80";
+				break;
+			case 1:
+				stateColor = "99, 144, 240";
+				break;
+			case 2:
+				stateColor = "122, 199, 76";
+				break;
+		}
+		
+		toAdd += `
+			<tr id="ql_${ql.name.toString().replace('.','_')}">
+				<td>${ql.name}</td>
+				<td><span class="badge text-light" style="background-color: rgb(${stateColor})">${state}</span></td>
+			</tr>
+		`;
+    }
+	
+	// App.game.quests.questLines().filter(e => e.state() < 2).forEach(e => console.log(e.name, e.state()))
+	
+    qlBody.innerHTML = toAdd;
+    filterQuestLine();
+}
+
 function initSaveEditor() {
     // Add menu item
     let eventLi = document.createElement('li');
@@ -185,29 +241,25 @@ function initSaveEditor() {
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#pokeballs">Pokeballs</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#evolutionitems">Evolution Items</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#pokedex">Pokedex</a></li>
+                        <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#questlines">Quests</a></li>
                     </ul>
-
                     <div class="tab-content">
                         <div id="currency" class="tab-pane p-3 active">
                             <p>Click on button to add money (input * achievement bonus)</p>
                             <input id="inputAddCurrency" class="form-control" type="number" placeholder="1000000" value="1000000" min="0">
                         </div>
-
                         <div id="gems" class="tab-pane p-3">
                             <p>On click add gems (input)</p>
                             <input id="inputAddGems" class="form-control" type="number" placeholder="1000000" value="1000000" min="0">
                         </div>
-
                         <div id="pokeballs" class="tab-pane p-3">
                             <p>On click add pokeballs (input)</p>
                             <input id="inputAddPokeballs" class="form-control" type="number" placeholder="1000" value="1000" min="0">
                         </div>
-
                         <div id="evolutionitems" class="tab-pane p-3">
                             <p>On click add evolution items (input)</p>
                             <input id="inputAddEvolutionItems" class="form-control" type="number" placeholder="100" value="100" min="0">
                         </div>
-
                         <div id="pokedex" class="tab-pane p-3">
                             <p><b>You can break your game, please backup!</b></br><i>Do not complete pokedex from another region if you are not in the region you will not be able to go to the next region!</i></p>
                             <button class="btn btn-primary btn-block" onclick="loadPkdx()">(Re)Load Data</button>
@@ -232,7 +284,6 @@ function initSaveEditor() {
                                         <option value="caught-shiny">Caught Shiny</option>
                                     </select>
                                 </div>
-
                                 <div class="form-group col-md-6 col-6">
                                     <label for="pkdxPKRSFilter">Pokerus Status</label>
                                     <select id="pkdxPKRSFilter" autocomplete="off" class="custom-select" onchange="filterPkdx()">
@@ -243,7 +294,6 @@ function initSaveEditor() {
                                     </select>
                                 </div>
                             </div>
-
                             <table id="pkdx" class="table table-striped table-hover table-sm m-0">
                                 <thead>
                                     <tr>
@@ -254,6 +304,30 @@ function initSaveEditor() {
                                         <td>Caught</td>
                                         <td>Pokerus</td>
                                         <td>Available</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="questlines" class="tab-pane p-3">
+                            <button class="btn btn-primary btn-block" onclick="loadQuestLines()">(Re)Load Data</button>
+                            <div class="form-row text-left">
+                                <div class="form-group col-md-6 col-6">
+                                    <label for="questLineFilter">Quest Status</label>
+                                    <select id="questLineFilter" autocomplete="off" class="custom-select" onchange="filterQuestLine()">
+                                        <option value="all" selected="">All</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="started">Started</option>
+                                        <option value="ended">Ended</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <table id="questlinelist" class="table table-striped table-hover table-sm m-0">
+                                <thead>
+                                    <tr>
+                                        <td>Name</td>
+                                        <td>Status</td>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -313,10 +387,10 @@ function initSaveEditor() {
     }
 
     // pokedex
-    const regFilt = modalBody.querySelector('#pkdxRegionFilter');
+    const pkdxRegFilt = modalBody.querySelector('#pkdxRegionFilter');
     for (let i = 0; i <= player.highestRegion(); i++) {
         const reg = GameConstants.Region[i]
-        regFilt.innerHTML += `<option value="${reg}">${reg.charAt(0).toUpperCase() + reg.slice(1)}</option>`;
+        pkdxRegFilt.innerHTML += `<option value="${reg}">${reg.charAt(0).toUpperCase() + reg.slice(1)}</option>`;
     }
 }
 
@@ -335,7 +409,7 @@ function loadScript(){
 
 var scriptName = 'debugcheatstools'
 
-if (document.getElementById('scriptHandler') !== undefined){
+if (document.getElementById('scriptHandler') != undefined){
     var scriptElement = document.createElement('div')
     scriptElement.id = scriptName
     document.getElementById('scriptHandler').appendChild(scriptElement)
