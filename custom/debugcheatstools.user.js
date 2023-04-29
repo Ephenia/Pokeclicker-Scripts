@@ -178,39 +178,44 @@ function loadQuestLines() {
     let qlBody = document.querySelector(':scope #questlinelist tbody');
     qlBody.innerHTML = '';
     let toAdd = "";
-	
-    for (const ql of App.game.quests.questLines()) {		
-		let state = QuestLineState[ql.state()]
-		state = state.charAt(0).toUpperCase() + state.slice(1)
-		
-		let stateColor;
-		switch (ql.state()) {
-			case 0:
-				stateColor = "244, 80, 80";
-				break;
-			case 1:
-				stateColor = "99, 144, 240";
-				break;
-			case 2:
-				stateColor = "122, 199, 76";
-				break;
-		}
-		
-		toAdd += `
+
+    for (const ql of App.game.quests.questLines()) {
+        let state = QuestLineState[ql.state()]
+        state = state.charAt(0).toUpperCase() + state.slice(1)
+
+        let stateColor;
+        switch (ql.state()) {
+            case 0:
+                stateColor = "244, 80, 80";
+                break;
+            case 1:
+                stateColor = "99, 144, 240";
+                break;
+            case 2:
+                stateColor = "122, 199, 76";
+                break;
+        }
+
+        toAdd += `
 			<tr id="ql_${ql.name.toString().replace('.','_')}">
 				<td>${ql.name}</td>
 				<td><span class="badge text-light" style="background-color: rgb(${stateColor})">${state}</span></td>
 			</tr>
 		`;
     }
-	
-	// App.game.quests.questLines().filter(e => e.state() < 2).forEach(e => console.log(e.name, e.state()))
-	
+
+    // App.game.quests.questLines().filter(e => e.state() < 2).forEach(e => console.log(e.name, e.state()))
+
     qlBody.innerHTML = toAdd;
     filterQuestLine();
 }
 
 function initSaveEditor() {
+    window.loadPkdx = loadPkdx;
+    window.filterPkdx = filterPkdx;
+    window.loadQuestLines = loadQuestLines;
+    window.filterQuestLine = filterQuestLine;
+
     // Add menu item
     let eventLi = document.createElement('li');
     eventLi.innerHTML = `<a class="dropdown-item" href="#saveEditorModal" data-toggle="modal">Debug Cheats</a>`
