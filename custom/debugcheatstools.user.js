@@ -350,7 +350,7 @@ function initSaveEditor() {
     let modalBody = document.querySelector('[id=saveEditorModal] div div [class=modal-body]');
 
     // currency
-    for (let i = 0; i <= 5; i++) {
+    for (let i = 0; i < Object.keys(GameConstants.Currency).filter(isNaN).length; i++) {
         const curr = GameConstants.Currency[i];
         modalBody.querySelector('#currency').innerHTML += `
             <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.wallet.gain${curr.charAt(0).toUpperCase() + curr.slice(1)}${i > 0 ? "s" : ""}(parseInt(document.getElementById('inputAddCurrency').value || 0))">
@@ -371,7 +371,7 @@ function initSaveEditor() {
     }
 
     // pokeballs
-    for (let i = 0; i <= 13; i++) {
+    for (let i = 0; i < Object.keys(GameConstants.Pokeball).filter(isNaN).length - 1; i++) {
         const pkb = GameConstants.Pokeball[i];
         modalBody.querySelector('#pokeballs').innerHTML += `
             <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.pokeballs.gainPokeballs(${i}, parseInt(document.getElementById('inputAddPokeballs').value || 0), true)">
@@ -382,7 +382,7 @@ function initSaveEditor() {
     }
 
     // evolutionitems
-    for (let i = 0; i<= 38; i++) {
+    for (let i = 0; i < Object.keys(GameConstants.StoneType).filter(isNaN).length - 1; i++) {
         const st = GameConstants.StoneType[i];
         modalBody.querySelector('#evolutionitems').innerHTML += `
             <div class="btn btn-primary col-2 item-bag-item" onclick="player.gainItem(ItemList['${st}'].name, parseInt(document.getElementById('inputAddEvolutionItems').value || 0), true)">
