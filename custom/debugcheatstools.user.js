@@ -244,7 +244,10 @@ function initSaveEditor() {
                         <li class="nav-item"><a data-toggle="tab" class="nav-link active" href="#currency">Currency</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#gems">Gems</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#pokeballs">Pokeballs</a></li>
+                        <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#berries">Berries</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#evolutionitems">Evolution Items</a></li>
+                        <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#vitamins">Vitamins</a></li>
+                        <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#heldItems">Held items</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#pokedex">Pokedex</a></li>
                         <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#questlines">Quests</a></li>
                     </ul>
@@ -261,9 +264,21 @@ function initSaveEditor() {
                             <p>On click add pokeballs (input)</p>
                             <input id="inputAddPokeballs" class="form-control" type="number" placeholder="1000" value="1000" min="0">
                         </div>
+                        <div id="berries" class="tab-pane p-3">
+                            <p>On click add berries (input)</p>
+                            <input id="inputAddBerries" class="form-control" type="number" placeholder="1000" value="1000" min="0">
+                        </div>
                         <div id="evolutionitems" class="tab-pane p-3">
                             <p>On click add evolution items (input)</p>
                             <input id="inputAddEvolutionItems" class="form-control" type="number" placeholder="100" value="100" min="0">
+                        </div>
+                        <div id="vitamins" class="tab-pane p-3">
+                            <p>On click add vitamins (input)</p>
+                            <input id="inputAddVitamins" class="form-control" type="number" placeholder="100" value="100" min="0">
+                        </div>
+                        <div id="heldItems" class="tab-pane p-3">
+                            <p>On click add held items items (input)</p>
+                            <input id="inputAddHeldItems" class="form-control" type="number" placeholder="100" value="100" min="0">
                         </div>
                         <div id="pokedex" class="tab-pane p-3">
                             <p><b>You can break your game, please backup!</b></br><i>Do not complete pokedex from another region if you are not in the region you will not be able to go to the next region!</i></p>
@@ -351,45 +366,82 @@ function initSaveEditor() {
 
     // currency
     for (let i = 0; i < Object.keys(GameConstants.Currency).filter(isNaN).length; i++) {
-        const curr = GameConstants.Currency[i];
+        const itm = GameConstants.Currency[i];
+        const itmPretty = itm.charAt(0).toUpperCase() + itm.replace(/[A-Z]/g, ' $&').trim().slice(1);
         modalBody.querySelector('#currency').innerHTML += `
-            <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.wallet.gain${curr.charAt(0).toUpperCase() + curr.slice(1)}${i > 0 ? "s" : ""}(parseInt(document.getElementById('inputAddCurrency').value || 0))">
-                <img title="${curr.charAt(0).toUpperCase() + curr.replace(/[A-Z]/g, ' $&').trim().slice(1)}" src="assets/images/currency/${curr}.svg" height="25px">
+            <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.wallet.gain${itm.charAt(0).toUpperCase() + itm.slice(1)}${i > 0 ? "s" : ""}(parseInt(document.getElementById('inputAddCurrency').value || 0))">
+                <img title="${itmPretty}" src="assets/images/currency/${itm}.svg" height="25px">
+                <div>${itmPretty}</div>
             </div>
         `;
     }
 
     // gems
     for (let i = 0; i < Gems.nTypes; i++) {
-        const pt = PokemonType[i];
+        const itm = PokemonType[i];
         modalBody.querySelector('#gems').innerHTML += `
             <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.gems.gainGems(parseInt(document.getElementById('inputAddGems').value || 0), ${i})">
-                <img title="${pt}" src="assets/images/gems/${pt} Gem.png" height="25px">
-                <div>${pt}</div>
+                <img title="${itm}" src="assets/images/gems/${itm} Gem.png" height="25px">
+                <div>${itm}</div>
             </div>
         `;
     }
 
     // pokeballs
     for (let i = 0; i < Object.keys(GameConstants.Pokeball).filter(isNaN).length - 1; i++) {
-        const pkb = GameConstants.Pokeball[i];
+        const itm = GameConstants.Pokeball[i];
         modalBody.querySelector('#pokeballs').innerHTML += `
             <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.pokeballs.gainPokeballs(${i}, parseInt(document.getElementById('inputAddPokeballs').value || 0), true)">
-                <img title="${pkb}" src="assets/images/pokeball/${pkb}.svg" height="25px">
-                <div>${pkb}</div>
+                <img title="${itm}" src="assets/images/pokeball/${itm}.svg" height="25px">
+                <div>${itm}</div>
+            </div>
+        `;
+    }
+
+    // berries
+    for (let i = 0; i < Object.keys(BerryType).filter(isNaN).length - 1; i++) {
+        const itm = BerryType[i];
+        modalBody.querySelector('#berries').innerHTML += `
+            <div class="btn btn-primary col-2 item-bag-item" onclick="App.game.farming.gainBerry(${i}, parseInt(document.getElementById('inputAddBerries').value || 0), true)">
+                <img title="${itm}" src="assets/images/items/berry/${itm}.png" height="25px">
+                <div>${itm}</div>
             </div>
         `;
     }
 
     // evolutionitems
     for (let i = 0; i < Object.keys(GameConstants.StoneType).filter(isNaN).length - 1; i++) {
-        const st = GameConstants.StoneType[i];
+        const itm = GameConstants.StoneType[i];
+        const itmPretty = itm.replaceAll('_', ' ');
         modalBody.querySelector('#evolutionitems').innerHTML += `
-            <div class="btn btn-primary col-2 item-bag-item" onclick="player.gainItem(ItemList['${st}'].name, parseInt(document.getElementById('inputAddEvolutionItems').value || 0), true)">
-                <img title="${st}" src="assets/images/items/evolution/${st}.png" height="25px">
+            <div class="btn btn-primary col-2 item-bag-item" onclick="player.gainItem(ItemList['${itm}'].name, parseInt(document.getElementById('inputAddEvolutionItems').value || 0), true)">
+                <img title="${itmPretty}" src="assets/images/items/evolution/${itm}.png" height="25px">
+                <div>${itmPretty}</div>
             </div>
         `;
     }
+
+    // vitamins
+    for (let i = 0; i < Object.keys(GameConstants.VitaminType).filter(isNaN).length; i++) {
+        const itm = GameConstants.VitaminType[i];
+        modalBody.querySelector('#vitamins').innerHTML += `
+            <div class="btn btn-primary col-2 item-bag-item" onclick="player.gainItem(ItemList['${itm}'].name, parseInt(document.getElementById('inputAddVitamins').value || 0), true)">
+                <img title="${itm}" src="assets/images/items/vitamin/${itm}.png" height="25px">
+                <div>${itm}</div>
+            </div>
+        `;
+    }
+
+    // heldItems
+    HeldItem.getSortedHeldItems().forEach((itm, idx) => {
+        const itmPretty = itm.name.replaceAll('_', ' ');
+        modalBody.querySelector('#heldItems').innerHTML += `
+            <div class="btn btn-primary col-2 item-bag-item" onclick="HeldItem.getSortedHeldItems()[${idx}].gain(parseInt(document.getElementById('inputAddHeldItems').value || 0))">
+                <img title="${itmPretty}" src="assets/images/items/heldItems/${itm.name}.png" height="25px">
+                <div>${itmPretty}</div>
+            </div>
+        `;
+    });
 
     // pokedex
     const pkdxRegFilt = modalBody.querySelector('#pkdxRegionFilter');
