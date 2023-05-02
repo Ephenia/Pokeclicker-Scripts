@@ -211,6 +211,8 @@ function loadQuestLines() {
 }
 
 function initSaveEditor() {
+    window.gainPk = gainPk;
+    window.gainPkrs = gainPkrs;
     window.loadPkdx = loadPkdx;
     window.filterPkdx = filterPkdx;
     window.loadQuestLines = loadQuestLines;
@@ -450,6 +452,25 @@ function initSaveEditor() {
         pkdxRegFilt.innerHTML += `<option value="${reg}">${reg.charAt(0).toUpperCase() + reg.slice(1)}</option>`;
     }
 }
+
+/* WIP, sevii helper
+var lst = pokemonList.filter((p) => p.name.includes('Pinkan')
+    || p.name.includes('Valencian')
+    || p.name === 'Crystal Onix'
+    || p.name === 'Ash\'s Butterfree'
+    || p.name === 'Pink Butterfree');
+var caught = App.game.party.caughtPokemon
+    .filter((p) => p.name.includes('Pinkan')
+    || p.name.includes('Valencian')
+    || p.name === 'Crystal Onix'
+    || p.name === 'Ash\'s Butterfree'
+    || p.name === 'Pink Butterfree');
+
+var caughtNames = caught.map(e => e.name);
+var missing = lst.filter(e => !caughtNames.includes(e.name));
+
+console.log(missing);
+*/
 
 // initSaveEditor();
 
