@@ -73,7 +73,7 @@ class trackPlot {
     calcUpdateTime() {
         // adapted from Plot.calcFormattedStageTimeLeft
         const growthTime = this.plot.berryData.growthTime.find(t => this.plot.age < t);
-        const timeLeft = Math.ceil(growthTime - this.plot.age);
+        const timeLeft = growthTime - this.plot.age;
         const growthMultiplier = App.game.farming.getGrowthMultiplier() * this.plot.getGrowthMultiplier();
         this.timeLeft = Math.ceil(timeLeft / growthMultiplier);
         this.isRipe = (this.plot.stage() === PlotStage.Berry);
@@ -126,6 +126,10 @@ function changeStage(plot) {
     if (overnightGrowthMode == 0) {
         if (stage === PlotStage.Bloom) {
             plot.update(stageMargin);
+            return true;
+        }
+        // just-in-case check
+        else if (stage === PlotStage.Berry) {
             return true;
         }
     }
