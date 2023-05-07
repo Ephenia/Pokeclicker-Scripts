@@ -5,7 +5,7 @@
 // @description   Adds in toggable options to have seasonal events infinitely run. Events can also run simultaneously with one another. Includes custom events as well.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.1
+// @version       1.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -103,25 +103,25 @@ function initEvents() {
             case "Flying Pikachu":
                 modalBody.innerHTML +=
                     `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
-                <img src="assets/images/pokemon/25.08.png">
-                <img src="assets/images/pokemon/21.1.png">
+                <img src="assets/images/pokemon/25.1.png">
+                <img src="assets/images/pokemon/21.01.png">
                 </div><hr>`
                 break
             case "Mewtwo strikes back!":
                 modalBody.innerHTML +=
                     `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
-                <img src="assets/images/pokemon/150.1.png">
-                <img src="assets/images/pokemon/1.1.png">
-                <img src="assets/images/pokemon/4.1.png">
-                <img src="assets/images/pokemon/7.1.png">
+                <img src="assets/images/pokemon/150.03.png">
+                <img src="assets/images/pokemon/1.01.png">
+                <img src="assets/images/pokemon/4.01.png">
+                <img src="assets/images/pokemon/7.01.png">
                 </div><hr>`
                 break
             case "Halloween!":
                 modalBody.innerHTML +=
                     `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
-                <img src="assets/images/pokemon/1.2.png">
-                <img src="assets/images/pokemon/175.1.png">
-                <img src="assets/images/pokemon/25.1.png"><br>
+                <img src="assets/images/pokemon/1.02.png">
+                <img src="assets/images/pokemon/25.12.png">
+                <img src="assets/images/pokemon/175.01.png"><br>
                 <img src="assets/images/pokemon/92.png">
                 <img src="assets/images/pokemon/200.png">
                 <img src="assets/images/pokemon/353.png">
@@ -131,40 +131,60 @@ function initEvents() {
             case "Let's GO!":
                 modalBody.innerHTML +=
                     `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
-                <img src="assets/images/pokemon/133.1.png">
-                <img src="assets/images/pokemon/25.11.png">
+                <img src="assets/images/pokemon/25.13.png">
+                <img src="assets/images/pokemon/133.02.png">
                 </div><hr>`
                 break
             case "Merry Christmas!":
                 modalBody.innerHTML +=
                     `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
-                <img src="assets/images/pokemon/143.1.png">
-                <img src="assets/images/pokemon/251.1.png">
-                <img src="assets/images/pokemon/446.1.png">
+                <img src="assets/images/pokemon/143.02.png">
+                <img src="assets/images/pokemon/251.01.png">
+                <img src="assets/images/pokemon/446.01.png">
                 </div><hr>`
                 break
             case "Hoopa Day":
                 modalBody.innerHTML +=
                     `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
+                <i>(Note that this event only adds a special joke questline and doesn't add Hoopa as an additional roamer. Hoopa is available without this event.)</i><br>
                 <img src="assets/images/pokemon/720.png">
                 </div><hr>`
                 break
             case "Lunar New Year":
                 modalBody.innerHTML +=
                     `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
-                <img src="assets/images/pokemon/666.19.png">
+                <img src="assets/images/pokemon/666.png">
+                <img src="assets/images/pokemon/666.19.png"><br>
+                <img src="assets/images/pokemon/666.01.png">
+                <img src="assets/images/pokemon/666.02.png">
+                <img src="assets/images/pokemon/666.03.png">
+                <img src="assets/images/pokemon/666.04.png">
+                <img src="assets/images/pokemon/666.05.png">
+                <img src="assets/images/pokemon/666.06.png">
+                <img src="assets/images/pokemon/666.07.png">
+                <img src="assets/images/pokemon/666.08.png">
+                <img src="assets/images/pokemon/666.09.png">
+                <img src="assets/images/pokemon/666.1.png">
+                <img src="assets/images/pokemon/666.11.png">
+                <img src="assets/images/pokemon/666.12.png">
+                <img src="assets/images/pokemon/666.13.png">
+                <img src="assets/images/pokemon/666.14.png">
+                <img src="assets/images/pokemon/666.15.png">
+                <img src="assets/images/pokemon/666.16.png">
+                <img src="assets/images/pokemon/666.17.png">
+                <img src="assets/images/pokemon/666.18.png">
                 </div><hr>`
                 break
             case "Easter":
                 modalBody.innerHTML +=
                     `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
-                <img src="assets/images/pokemon/175.2.png">
+                <img src="assets/images/pokemon/175.02.png">
                 </div><hr>`
                 break
             case "Golden Week":
                 modalBody.innerHTML +=
                     `<div id="event-`+i+`" class="event-select" data-value="`+i+`"><b>`+getEvents[i].title+`</b><br>`+getEvents[i].description+`<br>
-                <img src="assets/images/pokemon/1.3.png">
+                <img src="assets/images/pokemon/1.03.png">
                 </div><hr>`
                 break
             case "Ephenia's Gift":
