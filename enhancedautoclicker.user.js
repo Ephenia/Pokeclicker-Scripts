@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed and a toggle button, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes, now both with settings to disable graphics for performance.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.0
+// @version       3.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -44,7 +44,8 @@ var dungeonFlashDistance;
 var dungeonFlashCols;
 // Clicker statistics calculator
 var calculatorLoop;
-var calculatorDisplayMode;
+var calculatorEfficiencyDisplay;
+var calculatorDamageDisplay
 var calcLastUpdate;
 var calcPlayerState = -1;
 var calcPlayerLocation;
@@ -115,11 +116,21 @@ function initAutoClicker() {
     var settingsElems = [];
     settingsElems.push(document.createElement('tr'));
     settingsElems.at(-1).innerHTML = `<td class="p-2">
-        Auto Clicker info display mode
+        Auto Clicker efficiency display mode
         </td>
         <td class="p-0">
-        <select id="select-calculatorDisplayMode" class="form-control">
-        <option value="0">Clicks</option>
+        <select id="select-calculatorEfficiencyDisplay" class="form-control">
+        <option value="0">Percentage</option>
+        <option value="1">Ticks/s</option>
+        </select>
+        </td>`;
+    settingsElems.push(document.createElement('tr'));
+    settingsElems.at(-1).innerHTML = `<td class="p-2">
+        Auto Clicker damage display mode
+        </td>
+        <td class="p-0">
+        <select id="select-calculatorDamageDisplay" class="form-control">
+        <option value="0">Click Attacks</option>
         <option value="1">Damage</option>
         </select>
         </td>`;
@@ -140,7 +151,8 @@ function initAutoClicker() {
 
     document.getElementById('auto-gym-select').value = autoGymSelect;
     document.getElementById('auto-dungeon-mode').value = autoDungeonMode;
-    document.getElementById('select-calculatorDisplayMode').value = calculatorDisplayMode;
+    document.getElementById('select-calculatorEfficiencyDisplay').value = calculatorEfficiencyDisplay;
+    document.getElementById('select-calculatorDamageDisplay').value = calculatorDamageDisplay;
     document.getElementById('checkbox-gymGraphicsDisabled').checked = gymGraphicsDisabled();
     document.getElementById('checkbox-dungeonGraphicsDisabled').checked = dungeonGraphicsDisabled();
 
@@ -152,7 +164,8 @@ function initAutoClicker() {
     document.getElementById('auto-dungeon-mode').addEventListener('change', (event) => { changeDungeonMode(event); });
     document.getElementById('checkbox-gymGraphicsDisabled').addEventListener('change', (event) => { toggleAutoGymGraphics(event); } );
     document.getElementById('checkbox-dungeonGraphicsDisabled').addEventListener('change', (event) => { toggleAutoDungeonGraphics(event); } );
-    document.getElementById('select-calculatorDisplayMode').addEventListener('change', (event) => { changeCalcDisplayMode(event); } );
+    document.getElementById('select-calculatorEfficiencyDisplay').addEventListener('change', (event) => { changeCalcEfficiencyDisplay(event); } );
+    document.getElementById('select-calculatorDamageDisplay').addEventListener('change', (event) => { changeCalcDamageDisplay(event); } );
 
     addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
     addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
@@ -215,7 +228,7 @@ function changeSelectedGym(event) {
     if ([0, 1, 2, 3, 4, 100].includes(val)) {
         autoGymSelect = val;
         localStorage.setItem("autoGymSelect", autoGymSelect);
-        // In case currently fighting a gym 
+        // In case currently fighting a gym
         // TODO temporary, replace this with the commented code below once gym-cycling gets enabled
         if (autoClickState() && autoGymState()) {
             // Only break out of this script's auto restart, not the built-in one
@@ -255,11 +268,20 @@ function toggleAutoDungeonGraphics(event) {
     localStorage.setItem('dungeonGraphicsDisabled', dungeonGraphicsDisabled());
 }
 
-function changeCalcDisplayMode(event) {
+function changeCalcEfficiencyDisplay(event) {
     const val = +event.target.value;
-    if (val != calculatorDisplayMode && [0, 1].includes(val)) {
-        calculatorDisplayMode = val;
-        localStorage.setItem('calculatorDisplayMode', calculatorDisplayMode);
+    if (val != calculatorEfficiencyDisplay && [0, 1].includes(val)) {
+        calculatorEfficiencyDisplay = val;
+        localStorage.setItem('calculatorEfficiencyDisplay', calculatorEfficiencyDisplay);
+        resetCalculator();
+    }
+}
+
+function changeCalcDamageDisplay(event) {
+    const val = +event.target.value;
+    if (val != calculatorDamageDisplay && [0, 1].includes(val)) {
+        calculatorDamageDisplay = val;
+        localStorage.setItem('calculatorDamageDisplay', calculatorDamageDisplay);
         resetCalculator();
     }
 }
@@ -708,30 +730,38 @@ function calcClickStats() {
 
 
                 // Percentage of maximum ticksPerSecond
-                elem = document.getElementById('tick-percentage');
+                elem = document.getElementById('tick-efficiency');
                 var avgTicks = calcTicks.reduce((a, b) => a + b, 0) / calcTicks.length;
-                var tickFraction = avgTicks / (ticksPerSecond * actualElapsed);
-                elem.innerHTML = tickFraction.toLocaleString('en-US', {style: 'percent', maximumFractionDigits: 0} );
-                elem.style.color = 'gold';
+                avgTicks = avgTicks / actualElapsed;
+                if (calculatorEfficiencyDisplay == 1) {
+                    // display ticks mode
+                    elem.innerHTML = avgTicks.toLocaleString('en-US', {maximumFractionDigits: 1} );
+                    elem.style.color = 'gold';
+                } else {
+                    // display percentage mode
+                    var tickFraction = avgTicks / ticksPerSecond;
+                    elem.innerHTML = tickFraction.toLocaleString('en-US', {style: 'percent', maximumFractionDigits: 0} );
+                    elem.style.color = 'gold';
+                }
 
                 // Average clicks/damage per second
                 elem = document.getElementById('clicks-per-second');
                 var avgClicks = (App.game.statistics.clickAttacks() - calcClicks.at(-1)) / calcClicks.length;
                 avgClicks = avgClicks / actualElapsed;
-                if (calculatorDisplayMode == 1) {
+                if (calculatorDamageDisplay == 1) {
                     // display damage mode
                     var avgDPS = avgClicks * clickDamage;
                     elem.innerHTML = avgDPS.toLocaleString('en-US', {maximumFractionDigits: 0});
                     elem.style.color = 'gold';
                 } else {
-                    // display clicks mode
+                    // display click attacks mode
                     elem.innerHTML = avgClicks.toLocaleString('en-US', {maximumFractionDigits: 1});
                     elem.style.color = 'gold';
                 }
 
                 // Required clicks/click damage
                 elem = document.getElementById('req-clicks');
-                if (calculatorDisplayMode == 1) {
+                if (calculatorDamageDisplay == 1) {
                     // display damage mode
                     var reqDamage = calcAreaHealth;
                     elem.innerHTML = reqDamage.toLocaleString('en-US');
@@ -789,9 +819,9 @@ function resetCalculator() {
     playerTown = player.town().name;
     playerRoute = player.route();
     calculateAreaHealth();
-    document.getElementById('auto-click-info').innerHTML = `<div>Clicker Efficiency:<br><div id="tick-percentage" style="font-weight:bold;">-</div></div>
-        <div>${calculatorDisplayMode == 0 ? 'Clicks/s' : 'DPS'}:<br><div id="clicks-per-second" style="font-weight:bold;">-</div></div>
-        <div>Req. ${calculatorDisplayMode == 0 ? 'Clicks' : 'Click Damage'}:<br><div id="req-clicks" style="font-weight:bold;">-</div></div>
+    document.getElementById('auto-click-info').innerHTML = `<div>${calculatorEfficiencyDisplay == 0 ? 'Clicker Efficiency' : 'Ticks/s'}:<br><div id="tick-efficiency" style="font-weight:bold;">-</div></div>
+        <div>${calculatorDamageDisplay == 0 ? 'Click Attacks/s' : 'DPS'}:<br><div id="clicks-per-second" style="font-weight:bold;">-</div></div>
+        <div>Req. ${calculatorDamageDisplay == 0 ? 'Clicks' : 'Click Damage'}:<br><div id="req-clicks" style="font-weight:bold;">-</div></div>
         <div>Enemies/s:<br><div id="enemies-per-second" style="font-weight:bold; color:gold;">-</div></div>`;
 }
 
@@ -956,9 +986,13 @@ if (![0, 1].includes(autoDungeonMode)) {
 }
 
 // Stats calculator
-calculatorDisplayMode = validateStorage('calculatorDisplayMode', 'number') ?? 0;
-if (![0, 1].includes(calculatorDisplayMode)) {
-    calculatorDisplayMode = 0;
+calculatorEfficiencyDisplay = validateStorage('calculatorEfficiencyDisplay', 'number') ?? 0;
+if (![0, 1].includes(calculatorEfficiencyDisplay)) {
+    calculatorEfficiencyDisplay = 0;
+}
+calculatorDamageDisplay = validateStorage('calculatorDamageDisplay', 'number') ?? 0;
+if (![0, 1].includes(calculatorDamageDisplay)) {
+    calculatorDamageDisplay = 0;
 }
 
 // Graphics settings
