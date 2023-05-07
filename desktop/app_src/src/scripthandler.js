@@ -10,7 +10,7 @@
                 document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px'
 
                 //Select the top header row of tabs in Settings
-                const settingTabs = document.querySelectorAll('.nav.nav-tabs.nav-fill')[1];
+                const settingTabs = document.querySelectorAll('.nav.nav-tabs.nav-fill')[2];
 
                 //Create and append the new tab for scripts to Settings
                 let scriptFrag = new DocumentFragment();
@@ -21,7 +21,7 @@
                 settingTabs.appendChild(scriptFrag);
 
                 //Select the parent element that contains the content of the tabs
-                const tabContent = document.querySelectorAll('.tab-content')[3];
+                const tabContent = document.querySelectorAll('.tab-content')[4];
 
                 //Create and append the content for the script tab to Settings
                 scriptFrag = new DocumentFragment();
