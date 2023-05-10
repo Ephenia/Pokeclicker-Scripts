@@ -4,18 +4,20 @@
 
 const { autoUpdater } = require("electron-updater");
 const { app, BrowserWindow, dialog } = require("electron");
-const path = require("path");
-const url = require("url");
 const DiscordRPC = require("discord-rpc");
 const https = require("https");
 const fs = require("fs");
-const ini = require("ini");
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const Zip = require("adm-zip");
 const electron = require("electron");
 const clientVersion = app.getVersion();
 
 const dataDir = (electron.app || electron.remote.app).getPath("userData");
+
+// Used for Ephenia scripts
+const path = require("path");
+const url = require("url");
+const ini = require("ini");
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 const settingsFile = path.join(dataDir, "settings.ini");
 // Upstream scripts directory
@@ -67,177 +69,14 @@ function createWindow() {
     },
   });
 
-  function runScript(scriptFilePath) {
-    mainWindow.webContents
-      .executeJavaScript(fs.readFileSync(scriptFilePath, "utf-8"))
-      .catch(e => {
-        console.error("Failed to run script '%s': %s", scriptFilePath, e);
-      });
-  }
-
   mainWindow.webContents.on("did-finish-load", () => {
     mainWindow.webContents
       .executeJavaScript(
         `(() => { DiscordRichPresence.clientVersion = '${clientVersion}' })()`
       )
       .catch((e) => {});
-    runScript(`${__dirname}/scripthandler.js`);
 
-    function ensureScriptsDirsExist() {
-      if (!fs.existsSync(defaultScriptsDir)) {
-        fs.mkdirSync(defaultScriptsDir, { recursive: true });
-      }
-      if (!fs.existsSync(customScriptsDir)) {
-        fs.mkdirSync(customScriptsDir, { recursive: true });
-      }
-    }
-
-    function getCustomScripts() {
-      let customScripts = [];
-      fs.readdir(customScriptsDir, (err, files) => {
-        files.forEach(file => {
-          if (file.includes(".js")) {
-            customScripts.push(file.replace(/.js/g, ""));
-          }
-        });
-      });
-      return customScripts;
-    }
-
-    ensureScriptsDirsExist();
-    var customScripts = getCustomScripts();
-
-    var reqInc = 0;
-    var filePre = "";
-    var fileName = [];
-    //Prints content of github repo and handles downloading of files
-    function printRepoCont() {
-      var responseObj = JSON.parse(this.responseText);
-      console.log(responseObj.filter((e) => e.name.includes(".js")));
-      responseObj = responseObj.filter((e) => e.name.includes(".js"));
-
-      for (let i = 0; i < responseObj.length; i++) {
-        fileName.push(filePre + responseObj[i].name.replace(/.js/g, ""));
-      }
-
-      if (reqInc == 0) {
-        filePre = "custom/";
-        //Download scripts in custom folder from github
-        getCustom();
-        reqInc++;
-      } else {
-        console.log(fileName);
-        //Download and runs scripts in base folder
-        handleScripts();
-      }
-    }
-    var request = new XMLHttpRequest();
-    request.onload = printRepoCont;
-    //Loads all scripts from files if you don't have internet
-    request.onerror = function () {
-      fs.readdir(defaultScriptsDir, (err, files) => {
-        files.forEach((file) => {
-          if (file.includes(".js")) {
-            // Ignore the script if there is a custom script with the same name
-            if (customScripts.includes(file.replace(/.js/g, ""))) {
-              console.log(
-                "Ignoring '%s' as another script with this name is in '%s'",
-                file,
-                customScriptsDir
-              );
-            } else {
-              //Execute the script
-              const filePath = path.join(defaultScriptsDir, file);
-              runScript(filePath);
-            }
-          }
-        });
-      });
-      // Same as this but for custom scripts
-      runCustomScripts();
-    };
-    request.open(
-      "get",
-      "https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/",
-      true
-    );
-    request.send();
-
-    function getCustom() {
-      var request = new XMLHttpRequest();
-      request.onload = printRepoCont;
-      request.open(
-        "get",
-        "https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/custom",
-        true
-      );
-      request.send();
-    }
-
-    function handleScripts() {
-      fileName.forEach((files, i) => {
-        setTimeout(() => {
-          var options = {
-            host: "raw.githubusercontent.com",
-            path: `/Ephenia/Pokeclicker-Scripts/master/${files}.js`,
-          };
-          var request = https.request(options, function (res) {
-            var data = "";
-            res.on("data", function (chunk) {
-              data += chunk;
-            });
-            res.on("end", function () {
-              files = files.replace(/custom[/]/g, "");
-              var global_data;
-              const filePath = path.join(defaultScriptsDir, files);
-
-              if (fs.existsSync(filePath)) {
-                global_data = fs.readFileSync(filePath);
-              } else {
-                global_data = null;
-              }
-
-              try {
-                if (data.toString() != global_data) {
-                  fs.writeFileSync(
-                    filePath,
-                    data,
-                    "utf-8"
-                  );
-                }
-              } catch (e) {
-                console.error("Failed to save '%s': %s", filePath, e);
-              }
-
-              try {
-                if (
-                  !customScripts.includes(files) &&
-                  !files.includes("scripthandler")
-                ) {
-                  runScript(filePath);
-                }
-              } catch (e) {}
-            });
-          });
-          request.on("error", function (e) {
-            console.log(e.message);
-          });
-          request.end();
-        }, i * 1);
-      });
-      runCustomScripts();
-    }
-
-    function runCustomScripts() {
-      fs.readdir(customScriptsDir, (err, files) => {
-        files.forEach((file) => {
-          if (file.includes(".js")) {
-            const filePath = path.join(customScriptsDir, file);
-            runScript(filePath);
-          }
-        });
-      });
-    }
+      runEpheniaScripts();
   });
 
   mainWindow.setMenuBarVisibility(false);
@@ -618,3 +457,177 @@ if (!isMainInstance) {
     autoUpdater.checkForUpdatesAndNotify();
   } catch (e) {}
 }
+
+
+/*
+Ephenia scripts loading
+*/
+
+function runScript(scriptFilePath) {
+  mainWindow.webContents
+    .executeJavaScript(fs.readFileSync(scriptFilePath, "utf-8"))
+    .catch(e => {
+      console.error("Failed to run script '%s': %s", scriptFilePath, e);
+    });
+}
+
+function runEpheniaScripts() {
+  runScript(`${__dirname}/scripthandler.js`);
+
+  function ensureScriptsDirsExist() {
+    if (!fs.existsSync(defaultScriptsDir)) {
+      fs.mkdirSync(defaultScriptsDir, { recursive: true });
+    }
+    if (!fs.existsSync(customScriptsDir)) {
+      fs.mkdirSync(customScriptsDir, { recursive: true });
+    }
+  }
+
+  function getCustomScripts() {
+    let customScripts = [];
+    fs.readdir(customScriptsDir, (err, files) => {
+      files.forEach(file => {
+        if (file.includes(".js")) {
+          customScripts.push(file.replace(/.js/g, ""));
+        }
+      });
+    });
+    return customScripts;
+  }
+
+  ensureScriptsDirsExist();
+  var customScripts = getCustomScripts();
+
+  var reqInc = 0;
+  var filePre = "";
+  var fileName = [];
+  //Prints content of github repo and handles downloading of files
+  function printRepoCont() {
+    var responseObj = JSON.parse(this.responseText);
+    console.log(responseObj.filter((e) => e.name.includes(".js")));
+    responseObj = responseObj.filter((e) => e.name.includes(".js"));
+
+    for (let i = 0; i < responseObj.length; i++) {
+      fileName.push(filePre + responseObj[i].name.replace(/.js/g, ""));
+    }
+
+    if (reqInc == 0) {
+      filePre = "custom/";
+      //Download scripts in custom folder from github
+      getCustom();
+      reqInc++;
+    } else {
+      console.log(fileName);
+      //Download and runs scripts in base folder
+      handleScripts();
+    }
+  }
+  var request = new XMLHttpRequest();
+  request.onload = printRepoCont;
+  //Loads all scripts from files if you don't have internet
+  request.onerror = function () {
+    fs.readdir(defaultScriptsDir, (err, files) => {
+      files.forEach((file) => {
+        if (file.includes(".js")) {
+          // Ignore the script if there is a custom script with the same name
+          if (customScripts.includes(file.replace(/.js/g, ""))) {
+            console.log(
+              "Ignoring '%s' as another script with this name is in '%s'",
+              file,
+              customScriptsDir
+            );
+          } else {
+            //Execute the script
+            const filePath = path.join(defaultScriptsDir, file);
+            runScript(filePath);
+          }
+        }
+      });
+    });
+    // Same as this but for custom scripts
+    runCustomScripts();
+  };
+  request.open(
+    "get",
+    "https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/",
+    true
+  );
+  request.send();
+
+  function getCustom() {
+    var request = new XMLHttpRequest();
+    request.onload = printRepoCont;
+    request.open(
+      "get",
+      "https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/custom",
+      true
+    );
+    request.send();
+  }
+
+  function handleScripts() {
+    fileName.forEach((files, i) => {
+      setTimeout(() => {
+        var options = {
+          host: "raw.githubusercontent.com",
+          path: `/Ephenia/Pokeclicker-Scripts/master/${files}.js`,
+        };
+        var request = https.request(options, function (res) {
+          var data = "";
+          res.on("data", function (chunk) {
+            data += chunk;
+          });
+          res.on("end", function () {
+            files = files.replace(/custom[/]/g, "");
+            var global_data;
+            const filePath = path.join(defaultScriptsDir, files);
+
+            if (fs.existsSync(filePath)) {
+              global_data = fs.readFileSync(filePath);
+            } else {
+              global_data = null;
+            }
+
+            try {
+              if (data.toString() != global_data) {
+                fs.writeFileSync(
+                  filePath,
+                  data,
+                  "utf-8"
+                );
+              }
+            } catch (e) {
+              console.error("Failed to save '%s': %s", filePath, e);
+            }
+
+            try {
+              if (
+                !customScripts.includes(files) &&
+                !files.includes("scripthandler")
+              ) {
+                runScript(filePath);
+              }
+            } catch (e) {}
+          });
+        });
+        request.on("error", function (e) {
+          console.log(e.message);
+        });
+        request.end();
+      }, i * 1);
+    });
+    runCustomScripts();
+  }
+
+  function runCustomScripts() {
+    fs.readdir(customScriptsDir, (err, files) => {
+      files.forEach((file) => {
+        if (file.includes(".js")) {
+          const filePath = path.join(customScriptsDir, file);
+          runScript(filePath);
+        }
+      });
+    });
+  }
+}
+
