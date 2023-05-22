@@ -5,7 +5,7 @@
 // @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.4
+// @version       2.4.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -241,7 +241,7 @@ function autoHatcher() {
             }
 
             // Filter the sorted list of Pokemon based on the parameters set in the Hatchery screen
-            let filteredEggList = PartyController.getSortedList().filter((partyPokemon) => {
+            let filteredEggList = PartyController.getHatcherySortedList().filter((partyPokemon) => {
                 // Only breedable Pokemon
                 if (partyPokemon.breeding || partyPokemon.level < 100) {
                     return false;
@@ -272,6 +272,20 @@ function autoHatcher() {
                     if (regionVal[pokeNatRegion] !== BreedingFilters.region.value()) {
                         return false;
                     }
+                }
+                // Check based on Mega status
+                const uniqueTransformation = BreedingFilters.uniqueTransformation.value();
+                // Only Base Pokémon with Mega available
+                if (uniqueTransformation == 'mega-available' && !PokemonHelper.hasMegaEvolution(partyPokemon.name)) {
+                    return false;
+                }
+                // Only Base Pokémon without Mega Evolution
+                if (uniqueTransformation == 'mega-unobtained' && !(PokemonHelper.hasMegaEvolution(partyPokemon.name) && partyPokemon.evolutions?.some((e) => !App.game.party.alreadyCaughtPokemonByName(e.evolvedPokemon)))) {
+                    return false;
+                }
+                // Only Mega Pokémon
+                if (uniqueTransformation == 'mega-evolution' && !(PokemonHelper.getPokemonPrevolution(partyPokemon.name)?.some((e) => PokemonHelper.hasMegaEvolution(e.basePokemon)))) {
+                    return false;
                 }
                 // Check if either of the types match
                 const type1 = BreedingFilters.type1.value() > -2 ? BreedingFilters.type1.value() : null;
