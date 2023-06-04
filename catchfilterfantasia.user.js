@@ -409,18 +409,20 @@ function overideDefeatPokemon() {
 
         const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
         const pokeIndex = pokemonList.indexOf(findPoke);
-        let ballPrefN = filterBallPref[pokeIndex].normal -1;
+        let ballPrefN = filterBallPref[pokeIndex].normal - 1;
+        const overrideBallN = ballPrefN !== GameConstants.Pokeball.None;
         ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
         let ballPrefS = filterBallPref[pokeIndex].shiny - 1;
+        const overrideBallS = ballPrefS !== GameConstants.Pokeball.None;
         ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
         const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
         const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
 
         const isShiny = enemyPokemon.shiny;
         let pokeBall;
-        if (ballQuantityS > 0 && filterState & isShiny) {
+        if (overrideBallS && ballQuantityS > 0 && filterState & isShiny) {
             pokeBall = ballPrefS;
-        } else if (ballQuantityN > 0 && filterState) {
+        } else if (overrideBallN && ballQuantityN > 0 && filterState) {
             pokeBall = ballPrefN;
         } else {
             pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
@@ -485,19 +487,20 @@ function overideDefeatPokemon() {
         // Attempting to catch Pokemon
         const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
         const pokeIndex = pokemonList.indexOf(findPoke);
-        let ballPrefN = filterBallPref[pokeIndex].normal -1;
+        let ballPrefN = filterBallPref[pokeIndex].normal - 1;
+        const overrideBallN = ballPrefN !== GameConstants.Pokeball.None;
         ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
         let ballPrefS = filterBallPref[pokeIndex].shiny - 1;
+        const overrideBallS = ballPrefS !== GameConstants.Pokeball.None;
         ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
         const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
         const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
 
         const isShiny = enemyPokemon.shiny;
-
         let pokeBall;
-        if (ballQuantityS > 0 && filterState & isShiny) {
+        if (overrideBallS && ballQuantityS > 0 && filterState & isShiny) {
             pokeBall = ballPrefS;
-        } else if (ballQuantityN > 0 && filterState) {
+        } else if (overrideBallN && ballQuantityN > 0 && filterState) {
             pokeBall = ballPrefN;
         } else {
             pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
