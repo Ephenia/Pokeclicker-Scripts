@@ -5,7 +5,7 @@
 // @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.4.1
+// @version       2.4.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -21,6 +21,7 @@
 var hatchState;
 var awaitAutoHatch;
 var autoHatchLoop;
+var updateHatchStateLoop;
 var randFossilEgg;
 var eggState;
 var fossilState;
@@ -129,6 +130,13 @@ function togglePKRSStrict(event) {
 }
 
 function autoHatcher() {
+    // Update the hatchery sort list every second so getHatcheryStory() is always up to date
+    updateHatchStateLoop = setInterval(function () {
+        let region = App.game.challenges.list.regionalAttackDebuff.active() ? BreedingController.regionalAttackDebuff() : -1;
+        PartyController.hatcherySortedList = [...App.game.party.caughtPokemon];
+        PartyController.hatcherySortedList.sort(PartyController.compareBy(Settings.getSetting('hatcherySort').observableValue(), Settings.getSetting('hatcherySortDirection').observableValue(), region));
+    }, 1000);
+    
     autoHatchLoop = setInterval(function () {
         //change daycare sorting
         if (hatcherySortSync) {
@@ -239,15 +247,9 @@ function autoHatcher() {
                     return true;
                 }
             }
-
-            // If hatchery hasn't been opened yet, default to main list sort
-            let sortedList = PartyController.getHatcherySortedList();
-            if (sortedList.length === 0) {
-                 sortedList = PartyController.getSortedList();
-            }
             
             // Filter the sorted list of Pokemon based on the parameters set in the Hatchery screen
-            let filteredEggList = sortedList.filter((partyPokemon) => {
+            let filteredEggList = PartyController.hatcherySortedList.filter((partyPokemon) => {
                 // Only breedable Pokemon
                 if (partyPokemon.breeding || partyPokemon.level < 100) {
                     return false;
