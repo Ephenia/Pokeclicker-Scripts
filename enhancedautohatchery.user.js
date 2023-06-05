@@ -240,8 +240,14 @@ function autoHatcher() {
                 }
             }
 
+            // If hatchery hasn't been opened yet, default to main list sort
+            let sortedList = PartyController.getHatcherySortedList();
+            if (sortedList.length === 0) {
+                 sortedList = PartyController.getSortedList();
+            }
+            
             // Filter the sorted list of Pokemon based on the parameters set in the Hatchery screen
-            let filteredEggList = PartyController.getHatcherySortedList().filter((partyPokemon) => {
+            let filteredEggList = sortedList.filter((partyPokemon) => {
                 // Only breedable Pokemon
                 if (partyPokemon.breeding || partyPokemon.level < 100) {
                     return false;
