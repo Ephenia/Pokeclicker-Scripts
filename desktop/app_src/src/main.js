@@ -489,9 +489,6 @@ function runScript(scriptFilePath) {
 
 function runEpheniaScript(file) {
   const filePath = path.join(defaultScriptsDir, file);
-  if (!fs.existsSync(filePath)) {
-    return;
-  }
   if (!customScripts.includes(file)) {
     runScript(filePath);
   } else {
@@ -556,6 +553,10 @@ function getRepoContents(url) {
     request.onerror = () => {
       reject(`Network request failed: could not read repository contents (status code ${request.status})`);
     }
+    request.timeout = 5000;
+    request.ontimeout = () => {
+      reject(`Network request timed out: could not read repository contents (status code ${request.status})`);
+    }
     request.open("get", url);
     request.send();
   });
@@ -581,93 +582,140 @@ function downloadScript(url) {
       });
     });
     request.on('error', (err) => {
-      reject(`Error while downloading '${url}':\n ${err.message}`);
+      reject(`Failed to download file '${file}' from repository:\n ${err.message}`);
     });
     request.setTimeout(5000, () => {
-      reject(`Timed out while trying to download '${url}'`);
+      reject(`Timed out while trying to download file '${file}' from repository`);
     });
     request.end();
   });
 }
 
-function handleScripts(files) {
-  const delayBetweenRequests = 5; // in milliseconds
-  var downloads = [];
-  files.forEach((fileinfo, i) => {
-    let download = new Promise((resolve, reject) => {
-      var [file, url] = fileinfo;
-      setTimeout(() => {
-        downloadScript(url)
-          .then((data) => {
-            const filePath = path.join(defaultScriptsDir, file);
-            var dataOld;
-            var status = 0; // 0 for no change, 1 for update, 2 for new file
+function downloadAndRunScript(fileinfo, delay) {
+  return new Promise(async (resolve, reject) => {
+    var [file, url] = fileinfo;
+    const filePath = path.join(defaultScriptsDir, file);
+    var dataNew;
+    var dataOld;
+    var status = 0; // -1 for download error, 0 for no change, 1 for update, 2 for new file
 
-            try {
-              if (fs.existsSync(filePath)) {
-                dataOld = fs.readFileSync(filePath, 'utf-8');
-              } else {
-                status = 2;
-              }
-            } catch (err) {
-              logInMainWindow(`Failed to read '${filePath}':\n${err}"`, 'error');
-              return reject();
+    // Don't make too many requests simultaneously
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    // Download file
+    try {
+      dataNew = await downloadScript(url);
+    } catch (err) {
+      logInMainWindow(err, 'error');
+      dataNew = null;
+      status = -1;
+    }
+
+    // Read old file, if it exists
+    if (fs.existsSync(filePath)) {
+      try {
+        dataOld = await new Promise((resolve, reject) => {
+          fs.readFile(filePath, 'utf-8', (err, data) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(data);
             }
-
-            try {
-              if (data !== dataOld) {
-                logInMainWindow(`Writing file to '${filePath}'`, 'debug')
-                fs.writeFileSync(filePath, data, "utf-8");
-                if (dataOld != undefined) {
-                  status = 1;
-                }
-              }
-            } catch (err) {
-              logInMainWindow(`Failed to save downloaded file '${filePath}':\n${err}"`, 'error');
-              return reject();
-            }
-
-            try {
-              // remove old files with malformed names
-              let badlyNamed = path.join(defaultScriptsDir, file.replace('.js', ''));
-              if (fs.existsSync(badlyNamed)) {
-                fs.unlink(badlyNamed, (err) => {
-                  if (err) {
-                    logInMainWindow(`Failed to delete old file '${badlyNamed}:\n${err}`, 'error');
-                 }
-                });
-              }
-            } catch (err) {}
-
-            runEpheniaScript(file);
-            resolve(status);
-          }, (err) => {
-            logInMainWindow(err, 'warn');
-            runEpheniaScript(file);
-            reject();
           });
-      }, delayBetweenRequests * i);
-    });
-    download.catch((err) => logInMainWindow(err, 'warn'))
-    downloads.push(download);
+        });
+      } catch (err) {
+        return reject(`Unable to read existing script file '${filePath}:\n${err}`);
+      }
+    } else {
+      dataOld = null;
+      status = 2;
+    }
+
+    // If downloaded file differs, save it
+    if (dataNew && dataNew !== dataOld) {
+      if (dataOld != null) {
+        status = 1;
+      }
+      try {
+        logInMainWindow(`Writing file to '${filePath}'`, 'debug');
+        await new Promise((resolve, reject) => {
+          fs.writeFile(filePath, dataNew, 'utf-8', (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      } catch (err) {
+        return reject(`Failed to save downloaded file '${filePath}':\n${err}"`);
+      }
+    }
+
+    // If there's a file to run, run it!
+    if (dataNew || dataOld) {
+      runEpheniaScript(file);
+    }
+    resolve(status);
   });
-  Promise.allSettled(downloads)
-    .then((values) => {
-      var failed = 0;
-      var changedFiles = 0;
-      var newFiles = 0;
-      values.forEach((val) => {
-        if (val.status == 'rejected') {
-          failed += 1;
-        } else if (val.value == 1) {
-          changedFiles += 1;
-        } else if (val.value == 2) {
-          newFiles += 1;
-        }
-      });
-      logInMainWindow(`${failed} files failed, ${changedFiles} files changed, ${newFiles} new files`);
-      // todo notify in pokeclicker somehow
-    });
+}
+
+async function handleScripts(files) {
+  const delay = 5; // time between requests in milliseconds
+  var downloads = [];
+
+  files.forEach((fileinfo, i) => {
+    let download = downloadAndRunScript(fileinfo, i * delay);
+    download.catch((err) => { logInMainWindow(err, 'error'); });
+    downloads.push(download);
+
+    // clean up old misnamed files
+    try {
+      let filePath = path.join(defaultScriptsDir, fileinfo[0].replace('.js', ''));
+      if (fs.existsSync(filePath)) {
+        fs.unlink(filePath);
+      }
+    } catch (err) { 
+      // do nothing
+    }
+  });
+
+  var downloadStatuses = await Promise.allSettled(downloads);
+  logInMainWindow('Finished downloading Ephenia scripts from repository');
+
+  let failedDownloads = 0;
+  let changedFiles = 0;
+  let newFiles = 0;
+
+  downloadStatuses.forEach((val) => {
+    if (val.value == -1 || val.status == 'rejected') {
+      failedDownloads += 1;
+    } else if (val.value == 1) {
+      changedFiles += 1;
+    } else if (val.value == 2) {
+      newFiles += 1;
+    }
+  });
+
+  let message = '';
+  if (failedDownloads) {
+    message += `${failedDownloads} download${failedDownloads > 1 ? 's' : ''} failed\n`;
+  }
+  if (newFiles) {
+    message += `${newFiles} new script${newFiles > 1 ? 's' : ''} downloaded\n`;
+  }
+  if (changedFiles) {
+    message += `${changedFiles} script update${changedFiles > 1 ? 's' : ''} downloaded`;
+  }
+
+  if (message.length > 0) {
+    mainWindow.webContents.executeJavaScript(`Notifier.notify({
+      type: NotificationConstants.NotificationOption.${failedDownloads ? 'warning' : 'info'},
+      title: 'Pokéclicker Scripts Desktop',
+      message: '${message.trim()}',
+      timeout: GameConstants.HOUR,
+    });`);
+  }
 }
 
 function startEpheniaScripts() {
