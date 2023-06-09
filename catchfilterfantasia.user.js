@@ -414,10 +414,14 @@ function overloadPokeballMethod() {
         const overrideBallN = ballPrefN !== GameConstants.Pokeball.None;
         const overrideBallS = ballPrefS !== GameConstants.Pokeball.None;
 
-        if (filterState && isShiny && overrideBallS && hasBall(ballPrefS)) {
+        const isAllowed = catchFilter.includes(id) || filterTypes[type1] || filterTypes[type2]
+
+        if (filterState && isAllowed && isShiny && overrideBallS && hasBall(ballPrefS)) {
             return ballPrefS;
-        } else if (filterState && !isShiny && overrideBallN && hasBall(ballPrefN)) {
+        } else if (filterState && isAllowed && !isShiny && overrideBallN && hasBall(ballPrefN)) {
             return ballPrefN;
+        } else if (filterState && !isAllowed) {
+            return GameConstants.Pokeball.None;
         } else {
             return App.game.pokeballs.oldCalculatePokeballToUse(id, isShiny, isShadow, encounterType);
         }
