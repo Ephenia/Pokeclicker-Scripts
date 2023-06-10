@@ -18,6 +18,7 @@
 // @run-at        document-idle
 // ==/UserScript==
 
+var scriptName = 'simpleweatherchanger';
 var weatherFunc;
 
 function initWeatherChange(){
@@ -84,26 +85,6 @@ function loadScript(){
     }
 }
 
-var scriptName = 'simpleweatherchanger'
-
-if (document.getElementById('scriptHandler') != undefined){
-    var scriptElement = document.createElement('div')
-    scriptElement.id = scriptName
-    document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
-            loadScript()
-        }
-    }
-    else{
-        localStorage.setItem(scriptName, 'true')
-        loadScript()
-    }
-}
-else{
-    loadScript();
-}
-
 function addGlobalStyle(css) {
     var head, style;
     head = document.getElementsByTagName('head')[0];
@@ -112,4 +93,8 @@ function addGlobalStyle(css) {
     style.type = 'text/css';
     style.innerHTML = css;
     head.appendChild(style);
+}
+
+if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
+    loadScript();
 }

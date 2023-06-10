@@ -18,6 +18,8 @@
 // @run-at        document-idle
 // ==/UserScript==
 
+var scriptName = 'enhancedautomine';
+
 var mineState;
 var smallRestoreState;
 var awaitAutoMine;
@@ -348,26 +350,6 @@ function loadScript() {
     }
 }
 
-var scriptName = 'enhancedautomine'
-
-if (document.getElementById('scriptHandler') != undefined) {
-    var scriptElement = document.createElement('div')
-    scriptElement.id = scriptName
-    document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null) {
-        if (localStorage.getItem(scriptName) == 'true') {
-            loadScript()
-        }
-    }
-    else {
-        localStorage.setItem(scriptName, 'true')
-        loadScript()
-    }
-}
-else {
-    loadScript();
-}
-
 function validParse(key) {
     try {
         if (key === null) {
@@ -388,4 +370,8 @@ function addGlobalStyle(css) {
     style.type = 'text/css';
     style.innerHTML = css;
     head.appendChild(style);
+}
+
+if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
+    loadScript();
 }

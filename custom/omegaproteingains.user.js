@@ -18,6 +18,7 @@
 // @run-at        document-idle
 // ==/UserScript==
 
+var scriptName = 'omegaproteingains';
 // 70 Carbos will make every (non-Magikarp) pokemon hatch in exactly 300 steps
 const maxCarbos = 70;
 
@@ -73,22 +74,6 @@ function loadScript() {
     }
 }
 
-var scriptName = 'omegaproteingains'
-
-if (document.getElementById('scriptHandler') != undefined) {
-    var scriptElement = document.createElement('div')
-    scriptElement.id = scriptName
-    document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null) {
-        if (localStorage.getItem(scriptName) == 'true') {
-            loadScript()
-        }
-    }
-    else {
-        localStorage.setItem(scriptName, 'true')
-        loadScript()
-    }
-}
-else {
+if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
     loadScript();
 }
