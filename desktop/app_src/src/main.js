@@ -463,8 +463,6 @@ if (!isMainInstance) {
 Ephenia scripts loading
 */
 
-let customScripts = [];
-
 function logInMainWindow(message, level = 'log') {
   if (message == null) {
     return;
@@ -478,9 +476,9 @@ function runScript(scriptFilePath) {
   if (fs.existsSync(scriptFilePath)) {
     logInMainWindow(`Running ${scriptFilePath}`, 'debug');
     mainWindow.webContents
-      .executeJavaScript(fs.readFileSync(scriptFilePath, "utf-8"))
+      .executeJavaScript(fs.readFileSync(scriptFilePath, 'utf-8'))
       .catch((err) => {
-        logInMainWindow(`Failed to run script '${scriptFilePath}':\n${err}`, 'error');
+        logInMainWindow(`Issue running script '${scriptFilePath}':\n${err}`, 'error');
       });
   } else {
     logInMainWindow(`Tried to run nonexistent file '${scriptFilePath}'`, 'error')
@@ -489,11 +487,16 @@ function runScript(scriptFilePath) {
 
 function runEpheniaScript(file) {
   const filePath = path.join(defaultScriptsDir, file);
-  if (!customScripts.includes(file)) {
-    runScript(filePath);
-  } else {
-    logInMainWindow(`Ignoring '${file}' as another script with this name is in '${customScriptsDir}'`);
-  }
+  const name = file.substring(0, file.indexOf('.'));
+  // Only run script if it is enabled
+  mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.isEpheniaScriptEnabled('${name}');`)
+    .then((res) => {
+      if (res) {
+        runScript(filePath);
+      }
+    });
+  // Add script toggle to desktop settings
+  mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.registerEpheniaScript('${name}');`);
 }
 
 function ensureScriptsDirsExist() {
@@ -508,18 +511,28 @@ function ensureScriptsDirsExist() {
 function getCustomScripts() {
   try {
     let files = fs.readdirSync(customScriptsDir);
-    files = files.filter((f) => (f.includes('.js')));
-    customScripts.push(...files);
+    return files.filter((f) => (f.includes('.js')));
   } catch (err) {
     logInMainWindow(`Unexpected issue reading custom-scripts directory:\n${err}`, 'error');
+    return [];
   }
 }
 
 function runCustomScripts() {
   logInMainWindow(`Running custom scripts`);
+  var customScripts = getCustomScripts();
   customScripts.forEach((file) => {
     const filePath = path.join(customScriptsDir, file);
-    runScript(filePath);
+    const name = file.substring(0, file.indexOf('.'));
+    // Only run script if it is enabled
+    mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.isUserScriptEnabled('${name}');`)
+      .then((res) => {
+        if (res) {
+          runScript(filePath);
+        }
+      });
+    // Add script toggle to desktop settings
+    mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.registerUserScript('${name}');`);
   });
 }
 
@@ -530,7 +543,7 @@ function runScriptsOffline() {
       return;
     }
     files.forEach((file) => {
-      if (file.includes(".js")) {
+      if (file.includes('.js')) {
         runEpheniaScript(file);
       }
     });
@@ -577,7 +590,6 @@ function downloadScript(url) {
         data += chunk;
       });
       res.on('end', () => {
-        logInMainWindow(`Request ended for '${url}'`, 'debug');
         resolve(data);
       });
     });
@@ -721,7 +733,6 @@ async function handleScripts(files) {
 function startEpheniaScripts() {
   runScript(`${__dirname}/scripthandler.js`);
   ensureScriptsDirsExist();
-  getCustomScripts();
 
   const repoUrl = 'https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/';
   var files;

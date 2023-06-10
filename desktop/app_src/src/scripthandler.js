@@ -1,94 +1,125 @@
-﻿function initManager(){
-    console.log('ran scripthandler')
-    var scriptElement = document.createElement('div')
-    scriptElement.id = 'scriptHandler'
-    document.body.appendChild(scriptElement)
-    function loadSettings(){
-        var addSettings = setInterval(function(){
-            try{
-                //Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
-                document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px'
-
-                //Select the top header row of tabs in Settings
-                const settingTabs = document.querySelectorAll('.nav.nav-tabs.nav-fill')[2];
-
-                //Create and append the new tab for scripts to Settings
-                let scriptFrag = new DocumentFragment();
-                let li = document.createElement('li');
-                li.classList.add('nav-item');
-                li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
-                scriptFrag.appendChild(li);
-                settingTabs.appendChild(scriptFrag);
-
-                //Select the parent element that contains the content of the tabs
-                const tabContent = document.querySelectorAll('.tab-content')[4];
-
-                //Create and append the content for the script tab to Settings
-                scriptFrag = new DocumentFragment();
-                let div = document.createElement('div');
-                div.classList.add('tab-pane');
-                div.setAttribute('id', 'settings-scripts')
-
-                //Add the table and tbody elements to match the other tabs
-                const scriptTabContent = 
-                `<table class="table table-striped table-hover m-0"><tbody></tbody></table>`
-                div.innerHTML = `${scriptTabContent}`;
-                scriptFrag.appendChild(div);
-                tabContent.appendChild(scriptFrag);
-
-                //Add a setting to enable each script in the scripts settings menu
-                document.getElementById('scriptHandler').childNodes.forEach(childNode => {
-                    var setting = document.createElement('tr')
-                    setting.innerHTML =
-                    `<td class="p-2">
-                            <label class="m-0">Enable ` + childNode.id + `</label>
-                        </td>
-                        <td class="p-2 tight">
-                            <input id="Toggle-`+ childNode.id + `" type="checkbox">
-                        </td>`
-            
-                    document.getElementById('settings-scripts').querySelector('table tbody').prepend(setting)
-                    //Check if the checkbox should be filled or not
-                    document.getElementById('Toggle-'+ childNode.id).checked = localStorage.getItem(childNode.id) == 'true' ? true : false
-                    document.getElementById('Toggle-'+ childNode.id).addEventListener('change', event => {
-                        if (event.target.checked == false) {
-                            localStorage.setItem(childNode.id, "false");
-                        } else {
-                            localStorage.setItem(childNode.id, "true");
-                        }
-                    });
-                })
-                //Add info about restarting to the top
-                var info = document.createElement('tr')
-                info.innerHTML =
-                `<td class="p-2">
-                        <label class="m-0">The script settings will take effect on restart</label>
-                    </td>`
-                document.getElementById('settings-scripts').querySelector('table tbody').prepend(info)
-                
-                clearInterval(addSettings)
-            } catch(err) { }
-        }, 100)
+﻿class DesktopScriptHandler {
+    static hasRegisteredUserScript = false;
+    
+    static getScriptEnabled(name) {
+        var val = localStorage.getItem(name);
+        val = JSON.parse(val);
+        if (typeof val === 'boolean') {
+            return val;
+        }
+        return null;
     }
-    
-    function loadScript(){
-        var scriptLoad = setInterval(function () {
-            try {
-                newSave = document.querySelectorAll('label')[0];
-                trainerCards = document.querySelectorAll('.trainer-card');
-            } catch (err) { }
-            if (typeof newSave != 'undefined') {
-                for (var i = 0; i < trainerCards.length; i++) {
-                    trainerCards[i].addEventListener('click', loadSettings, false);
-                }
-                newSave.addEventListener('click', loadSettings, false);
-                clearInterval(scriptLoad)
-            }
-        }, 50);
+
+    static isEpheniaScriptEnabled(name) {
+        return this.getScriptEnabled(name) ?? false;
     }
-    
-    loadScript();
-    
+
+    static isUserScriptEnabled(name) {
+        return this.getScriptEnabled(name) ?? true;
+    }
+
+    static registerEpheniaScript(name) {
+        const settingContainer = 'settings-scripts-enableScriptsEphenia';
+        const enabled = this.isEpheniaScriptEnabled(name);
+
+        this.addScriptEnabledSetting(name, settingContainer, enabled);
+    }
+
+    static registerUserScript(name) {
+        const settingContainer = 'settings-scripts-enableScriptsUser';
+        const enabled = this.isUserScriptEnabled(name);
+
+        // Remove no scripts installed message
+        if (!this.hasRegisteredUserScript) {
+            document.getElementById('settings-scripts-enableScriptsUser').innerHTML = '';
+            this.hasRegisteredUserScript = true;
+        }
+
+        this.addScriptEnabledSetting(name, settingContainer, enabled);
+    }
+
+    static addScriptEnabledSetting(name, container, enabled) {
+        var setting = document.createElement('tr')
+        setting.innerHTML =
+        `<td class="p-2">
+                <label class="m-0">Enable ${name}</label>
+            </td>
+            <td class="p-2 tight">
+                <input id="checkbox-${name}" type="checkbox">
+            </td>`
+
+        // Insert setting in alphabetical order
+        container = document.getElementById(container);
+        let settingsList = Array.from(container.children);
+        let insertBefore = settingsList.find(elem => elem.id > 'checkbox-' + name);
+        if (insertBefore) {
+            insertBefore.before(setting);
+        } else {
+            container.appendChild(setting);
+        }
+
+        document.getElementById('checkbox-'+ name).checked = enabled;
+        document.getElementById('checkbox-'+ name).addEventListener('change', event => {
+            localStorage.setItem(name, event.target.checked);
+        });
+    }
+
+    static init() {
+        console.log('Running scripthandler');
+        // TODO remove
+        var scriptElement = document.createElement('div');
+        scriptElement.id = 'scriptHandler';
+        document.body.appendChild(scriptElement);
+
+        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
+        document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
+
+        // Select the top header row of tabs in Settings
+        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
+
+        let li = document.createElement('li');
+        li.classList.add('nav-item');
+        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
+        settingTabs.appendChild(li);
+
+        // Select the parent element that contains the content of the tabs
+        const tabContent = document.querySelector('#settingsModal .tab-content');
+
+        // Create and append the content for the script tab to Settings
+        let div = document.createElement('div');
+        div.classList.add('tab-pane');
+        div.setAttribute('id', 'settings-scripts');
+
+        let table = document.createElement('table');
+        table.classList.add('table', 'table-striped', 'table-hover', 'm-0');
+        div.appendChild(table);
+
+        let tableSections = [['desktopSettings', 'Pokéclicker Scripts desktop settings'],
+            ['enableScriptsEphenia', 'Enabled scripts'],
+            ['enableScriptsUser', 'User-added scripts']];
+        tableSections.forEach(([id, desc]) => {
+            let elem = document.createElement('thead');
+            elem.innerHTML = `<tr><th colspan="2">${desc}</th></tr>`;
+            table.appendChild(elem);
+
+            elem = document.createElement('tbody');
+            elem.setAttribute('id', 'settings-scripts-' + id);
+            table.appendChild(elem);
+        });
+
+        tabContent.appendChild(div);
+
+        // Add info about restarting to the top
+        let info = document.createElement('tr');
+        info.innerHTML = `<td class="p-2"><label class="m-0">Settings changes will take effect on restart</label></td>`;
+        document.getElementById('settings-scripts-desktopSettings').appendChild(info);
+
+        // Add temporary no-user-added-scripts text
+        info = document.createElement('tr');
+        info.innerHTML = `<td class="p-2"><label class="m-0">No scripts installed</label></td>`;
+        document.getElementById('settings-scripts-enableScriptsUser').appendChild(info);
+    }
 }
 
-initManager();
+
+DesktopScriptHandler.init();
