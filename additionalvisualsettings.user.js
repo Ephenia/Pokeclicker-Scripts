@@ -5,7 +5,7 @@
 // @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.3
+// @version       2.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -45,61 +45,49 @@ function initVisualSettings() {
     quickPokedex.setAttribute("data-toggle", "modal")
     getMenu.prepend(quickPokedex)
 
-    document.querySelectorAll('tr[data-bind*="currencyMainDisplayReduced"')[0].outerHTML += `<tr>
-    <td class="p-2">
-        <label class="m-0">Show wild Pokémon Name</label>
-    </td>
-    <td class="p-2">
-        <input id="poke-name" type="checkbox">
-    </td>
-</tr>
-<tr>
-    <td class="p-2">
-        <label class="m-0">Show wild Pokémon Defeated</label>
-    </td>
-    <td class="p-2">
-        <input id="poke-defeat" type="checkbox">
-    </td>
-</tr>
-<tr>
-    <td class="p-2">
-        <label class="m-0">Show wild Pokémon Image</label>
-    </td>
-    <td class="p-2">
-        <input id="poke-image" type="checkbox">
-    </td>
-</tr>
-<tr>
-    <td class="p-2">
-        <label class="m-0">Show Pokémon Health</label>
-    </td>
-    <td class="p-2">
-        <input id="poke-health" type="checkbox">
-    </td>
-</tr>
-<tr>
-    <td class="p-2">
-        <label class="m-0">Show Catch Icon</label>
-    </td>
-    <td class="p-2">
-        <input id="poke-catch" type="checkbox">
-    </td>
-</tr>`
+    var scriptSettings = document.getElementById('settings-scripts');
+    // Create scripts settings tab if it doesn't exist yet
+    if (!scriptSettings) {
+        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
+        document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
+        // Create and attach script settings tab link
+        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
+        let li = document.createElement('li');
+        li.classList.add('nav-item');
+        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
+        settingTabs.appendChild(li);
+        // Create and attach script settings tab contents
+        const tabContent = document.querySelector('#settingsModal .tab-content');
+        let scriptSettings = document.createElement('div');
+        scriptSettings.classList.add('tab-pane');
+        scriptSettings.setAttribute('id', 'settings-scripts');
+        tabContent.appendChild(scriptSettings);
+    }
+    // Add AVS settings
+    let table = document.createElement('table');
+    table.classList.add('table', 'table-striped', 'table-hover', 'm-0');
+    scriptSettings.prepend(table);
+    let header = document.createElement('thead');
+    header.innerHTML = '<tr><th colspan="2">Additional Visual Settings</th></tr>';
+    table.appendChild(header);
+    let settingsBody = document.createElement('tbody');
+    settingsBody.setAttribute('id', 'settings-scripts-additionalvisualsettings');
+    table.appendChild(settingsBody);
+    let settingsToAdd = [['poke-name', 'Show wild Pokémon Name'],
+        ['poke-defeat', 'Show wild Pokémon Defeated'],
+        ['poke-image', 'Show wild Pokémon Image'],
+        ['poke-health', 'Show Pokémon Health'],
+        ['poke-catch', 'Show Catch Icon'],
+        ['all-notify', 'Disable all Notifications']];
+    settingsToAdd.forEach(([id, desc]) => {
+        let elem = document.createElement('tr');
+        elem.innerHTML = `<td class="p-2"><label class="m-0 col-md-8" for="${id}">${desc}</label></td>` + 
+        `<td class="p-2 col-md-4"><input id="checkbox-${id}" type="checkbox"></td>`;
+        settingsBody.appendChild(elem);
+    });
 
-    const notifiyHTML = document.createElement("tr");
-    notifiyHTML.innerHTML = `<td class="p-2">
-        <label class="m-0">Disable all Notifications</label>
-    </td>
-    <td class="p-2 tight">
-        <input id="all-notify" type="checkbox">
-    </td>`
-
-    //Moved to async function because it fails to execute on loading screen so we keep trying until the element exists
-
-    //Settings screen changed, this is where the option should go now
-    document.querySelector('[id="settingsNotificationGeneral"] table tbody').prepend(notifiyHTML)
     //Add 'Disable all notifications' option
-    document.querySelector('#all-notify').addEventListener('change', event => {
+    document.getElementById('checkbox-all-notify').addEventListener('change', event => {
         if (event.target.checked == false) {
             checkAllNotification = "OFF";
             localStorage.setItem("checkAllNotification", "OFF");
@@ -133,32 +121,32 @@ function initVisualSettings() {
 
     //The elements removed by the scripts don't ever get added back after a restart, waiting a second before removing makes them load properly
     if (checkWildPokeName == "OFF") {
-        document.querySelector('#poke-name').checked = true
+        document.getElementById('checkbox-poke-name').checked = true
     } else {
         remPokeName();
     }
     if (checkWildPokeDefeat == "OFF") {
-        document.querySelector('#poke-defeat').checked = true
+        document.getElementById('checkbox-poke-defeat').checked = true
     } else {
         remPokeDefeat();
     }
     if (checkWildPokeImg == "OFF") {
-        document.querySelector('#poke-image').checked = true
+        document.getElementById('checkbox-poke-image').checked = true
     } else {
         remPokeImg();
     }
     if (checkWildPokeHealth == "OFF") {
-        document.querySelector('#poke-health').checked = true
+        document.getElementById('checkbox-poke-health').checked = true
     } else {
         remPokeHealth();
     }
     if (checkWildPokeCatch == "OFF") {
-        document.querySelector('#poke-catch').checked = true
+        document.getElementById('checkbox-poke-catch').checked = true
     } else {
         remPokeCatch();
     }
     if (checkAllNotification == "ON") {
-        document.querySelector('#all-notify').checked = true
+        document.getElementById('checkbox-all-notify').checked = true
         remNotifications();
     }
 
@@ -182,7 +170,7 @@ function initVisualSettings() {
         }
     });
 
-    document.querySelector('#poke-name').addEventListener('change', event => {
+    document.getElementById('checkbox-poke-name').addEventListener('change', event => {
         if (event.target.checked == true) {
             checkWildPokeName = "OFF";
             localStorage.setItem("checkWildPokeName", "OFF");
@@ -192,7 +180,7 @@ function initVisualSettings() {
         }
     });
 
-    document.querySelector('#poke-defeat').addEventListener('change', event => {
+    document.getElementById('checkbox-poke-defeat').addEventListener('change', event => {
         if (event.target.checked == true) {
             checkWildPokeDefeat = "OFF";
             localStorage.setItem("checkWildPokeDefeat", "OFF");
@@ -202,7 +190,7 @@ function initVisualSettings() {
         }
     });
 
-    document.querySelector('#poke-image').addEventListener('change', event => {
+    document.getElementById('checkbox-poke-image').addEventListener('change', event => {
         if (event.target.checked == true) {
             checkWildPokeImg = "OFF";
             localStorage.setItem("checkWildPokeImg", "OFF");
@@ -212,7 +200,7 @@ function initVisualSettings() {
         }
     });
 
-    document.querySelector('#poke-health').addEventListener('change', event => {
+    document.getElementById('checkbox-poke-health').addEventListener('change', event => {
         if (event.target.checked == true) {
             checkWildPokeHealth = "OFF";
             localStorage.setItem("checkWildPokeHealth", "OFF");
@@ -222,7 +210,7 @@ function initVisualSettings() {
         }
     });
 
-    document.querySelector('#poke-catch').addEventListener('change', event => {
+    document.getElementById('checkbox-poke-catch').addEventListener('change', event => {
         if (event.target.checked == true) {
             checkWildPokeCatch = "OFF";
             localStorage.setItem("checkWildPokeCatch", "OFF");

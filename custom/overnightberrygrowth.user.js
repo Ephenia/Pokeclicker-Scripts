@@ -5,7 +5,7 @@
 // @description   Allows berres to grow while the game is closed.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.0
+// @version       1.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -25,24 +25,47 @@ var overnightGrowthMode;
 // handle settings
 
 function initSettings() {
-    // Add settings to settings menu
-    var settingsHeader = document.createElement("tr");
-    settingsHeader.innerHTML = '<th colspan="2">Overnight Berries settings</th>';
-    document.getElementById('settingsModal').querySelector('tr[data-bind*="showMuteButton"]').after(settingsHeader);
+    var scriptSettings = document.getElementById('settings-scripts');
+    // Create scripts settings tab if it doesn't exist yet
+    if (!scriptSettings) {
+        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
+        document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
+        // Create and attach script settings tab link
+        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
+        let li = document.createElement('li');
+        li.classList.add('nav-item');
+        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
+        settingTabs.appendChild(li);
+        // Create and attach script settings tab contents
+        const tabContent = document.querySelector('#settingsModal .tab-content');
+        let scriptSettings = document.createElement('div');
+        scriptSettings.classList.add('tab-pane');
+        scriptSettings.setAttribute('id', 'settings-scripts');
+        tabContent.appendChild(scriptSettings);
+    }
 
-    var settingsElems = [];
-    settingsElems.push(document.createElement('tr'));
-    settingsElems.at(-1).innerHTML = `<td class="p-2">
+    // Add overnightberrygrowth settings
+    let table = document.createElement('table');
+    table.classList.add('table', 'table-striped', 'table-hover', 'm-0');
+    scriptSettings.prepend(table);
+    let header = document.createElement('thead');
+    header.innerHTML = '<tr><th colspan="2">Overnight Berry Growth</th></tr>';
+    table.appendChild(header);
+    let settingsBody = document.createElement('tbody');
+    settingsBody.setAttribute('id', 'settings-scripts-overnightberrygrowth');
+    table.appendChild(settingsBody);
+    let settingsElem = document.createElement('tr');
+    settingsElem.innerHTML = `<td class="p-2 col-md-8">
         Game closed berry growth mode
         </td>
-        <td class="p-0">
+        <td class="p-0 col-md-4">
         <select id="select-overnightGrowthMode" class="form-control">
         <option value="0">Until ripe</option>
         <option value="1">Until withered</option>
         <option value="2">Harvest before withering</option>
         </select>
         </td>`;
-    settingsHeader.after(...settingsElems);
+    settingsBody.appendChild(settingsElem);
 
     document.getElementById('select-overnightGrowthMode').value = overnightGrowthMode;
     document.getElementById('select-overnightGrowthMode').addEventListener('change', (event) => { changeGrowthMode(event); } );;

@@ -41,12 +41,8 @@
     static addScriptEnabledSetting(name, container, enabled) {
         var setting = document.createElement('tr')
         setting.innerHTML =
-        `<td class="p-2">
-                <label class="m-0">Enable ${name}</label>
-            </td>
-            <td class="p-2 tight">
-                <input id="checkbox-${name}" type="checkbox">
-            </td>`
+        `<td class="p-2 col-md-8"><label class="m-0">Enable ${name}</label></td>` + 
+            `<td class="p-2 col-md-4"><input id="checkbox-${name}" type="checkbox"></td>`;
 
         // Insert setting in alphabetical order
         container = document.getElementById(container);
@@ -66,10 +62,6 @@
 
     static init() {
         console.log('Running scripthandler');
-        // TODO remove
-        var scriptElement = document.createElement('div');
-        scriptElement.id = 'scriptHandler';
-        document.body.appendChild(scriptElement);
 
         // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
         document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
@@ -95,7 +87,7 @@
         div.appendChild(table);
 
         let tableSections = [['desktopSettings', 'Pokéclicker Scripts desktop settings'],
-            ['enableScriptsEphenia', 'Enabled scripts'],
+            ['enableScriptsEphenia', 'Downloaded scripts'],
             ['enableScriptsUser', 'User-added scripts']];
         tableSections.forEach(([id, desc]) => {
             let elem = document.createElement('thead');
@@ -111,12 +103,12 @@
 
         // Add info about restarting to the top
         let info = document.createElement('tr');
-        info.innerHTML = `<td class="p-2"><label class="m-0">Settings changes will take effect on restart</label></td>`;
+        info.innerHTML = `<td class="p-2" colspan="2"><label class="m-0">Settings changes will take effect on restart</label></td>`;
         document.getElementById('settings-scripts-desktopSettings').appendChild(info);
 
         // Add temporary no-user-added-scripts text
         info = document.createElement('tr');
-        info.innerHTML = `<td class="p-2"><label class="m-0">No scripts installed</label></td>`;
+        info.innerHTML = `<td class="p-2" colspan="2"><label class="m-0">No scripts installed</label></td>`;
         document.getElementById('settings-scripts-enableScriptsUser').appendChild(info);
     }
 }
