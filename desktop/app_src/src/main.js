@@ -490,6 +490,11 @@ function runScript(scriptFilePath) {
 
 function runEpheniaScript(file) {
   const filePath = path.join(defaultScriptsDir, file);
+  // Hard-coded exception to guarantee users are notified of updates
+  if (file === 'desktopupdatechecker.js') {
+    runScript(filePath);
+    return;
+  }
   const name = file.substring(0, file.indexOf('.'));
   // Only run script if it is enabled
   mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.isEpheniaScriptEnabled('${name}');`)
