@@ -81,7 +81,7 @@ function initVisualSettings() {
         ['all-notify', 'Disable all Notifications']];
     settingsToAdd.forEach(([id, desc]) => {
         let elem = document.createElement('tr');
-        elem.innerHTML = `<td class="p-2"><label class="m-0 col-md-8" for="${id}">${desc}</label></td>` + 
+        elem.innerHTML = `<td class="p-2"><label class="m-0 col-md-8" for="checkbox-${id}">${desc}</label></td>` + 
         `<td class="p-2 col-md-4"><input id="checkbox-${id}" type="checkbox"></td>`;
         settingsBody.appendChild(elem);
     });
