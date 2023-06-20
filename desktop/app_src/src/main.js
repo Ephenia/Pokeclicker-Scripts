@@ -617,7 +617,11 @@ function downloadAndRunScript(fileinfo, delay) {
     const filePath = path.join(defaultScriptsDir, file);
     var dataNew;
     var dataOld;
-    var status = 0; // -1 for download error, 0 for no change, 1 for update, 2 for new file
+    // Statuses: -1 for download error, 0 for no change, 1 for update, 2 for new file
+    var resolveData = {
+      'name': file.substring(0, file.indexOf('.')),
+      'status': 0
+    };
 
     // Don't make too many requests simultaneously
     await new Promise((resolve) => setTimeout(resolve, delay));
@@ -628,7 +632,7 @@ function downloadAndRunScript(fileinfo, delay) {
     } catch (err) {
       logInMainWindow(err, 'error');
       dataNew = null;
-      status = -1;
+      resolveData.status = -1;
     }
 
     // Read old file, if it exists
@@ -644,17 +648,17 @@ function downloadAndRunScript(fileinfo, delay) {
           });
         });
       } catch (err) {
-        return reject(`Unable to read existing script file '${filePath}:\n${err}`);
+        return resolve(`Unable to read existing script file '${filePath}:\n${err}`);
       }
     } else {
       dataOld = null;
-      status = 2;
+      resolveData.status = 2;
     }
 
     // If downloaded file differs, save it
     if (dataNew && dataNew !== dataOld) {
       if (dataOld != null) {
-        status = 1;
+        resolveData.status = 1;
       }
       try {
         logInMainWindow(`Writing file to '${filePath}'`, 'debug');
@@ -676,7 +680,7 @@ function downloadAndRunScript(fileinfo, delay) {
     if (dataNew || dataOld) {
       runEpheniaScript(file);
     }
-    resolve(status);
+    resolve(resolveData);
   });
 }
 
@@ -700,39 +704,35 @@ async function handleScripts(files) {
     }
   });
 
-  var downloadStatuses = await Promise.allSettled(downloads);
+  var downloadResults = await Promise.allSettled(downloads);
   logInMainWindow('Finished downloading Ephenia scripts from repository');
 
-  let failedDownloads = 0;
-  let changedFiles = 0;
-  let newFiles = 0;
+  let failedDownloads = downloadResults.filter((res) => (res.status == 'rejected' || res.value.status == -1));
+  let changedFiles = downloadResults.filter((res) => (res.value?.status == 1)).map((res) => res.value.name);
+  let newFiles = downloadResults.filter((res) => (res.value?.status == 2)).map((res) => res.value.name);
 
-  downloadStatuses.forEach((val) => {
-    if (val.value == -1 || val.status == 'rejected') {
-      failedDownloads += 1;
-    } else if (val.value == 1) {
-      changedFiles += 1;
-    } else if (val.value == 2) {
-      newFiles += 1;
-    }
-  });
+  if (failedDownloads.length) {
+    mainWindow.webContents.executeJavaScript(`Notifier.notify({
+      type: NotificationConstants.NotificationOption.warning,
+      title: 'Pokéclicker Scripts Desktop',
+      message: '${failedDownloads.length} downloads failed',
+      timeout: GameConstants.HOUR,
+    });`);
+  }
 
-  let message = '';
-  if (failedDownloads) {
-    message += `${failedDownloads} download${failedDownloads > 1 ? 's' : ''} failed\n`;
+  let message = [];
+  if (newFiles.length) {
+    message.push(`${newFiles.length} new script${newFiles.length != 1 ? 's' : ''} downloaded:\n` + newFiles.join('\n'));
   }
-  if (newFiles) {
-    message += `${newFiles} new script${newFiles > 1 ? 's' : ''} downloaded\n`;
-  }
-  if (changedFiles) {
-    message += `${changedFiles} script update${changedFiles > 1 ? 's' : ''} downloaded`;
+  if (changedFiles.length) {
+    message.push(`${changedFiles.length} script update${changedFiles.length != 1 ? 's' : ''} downloaded\n` + changedFiles.join('\n'));
   }
 
   if (message.length > 0) {
     mainWindow.webContents.executeJavaScript(`Notifier.notify({
-      type: NotificationConstants.NotificationOption.${failedDownloads ? 'warning' : 'info'},
+      type: NotificationConstants.NotificationOption.info,
       title: 'Pokéclicker Scripts Desktop',
-      message: '${message.trim()}',
+      message: \`${message.join('\n\n')}\`,
       timeout: GameConstants.HOUR,
     });`);
   }
