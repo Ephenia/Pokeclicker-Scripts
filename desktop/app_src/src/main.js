@@ -527,8 +527,12 @@ function getCustomScripts() {
 }
 
 function runCustomScripts() {
-  logInMainWindow(`Running custom scripts`);
   var customScripts = getCustomScripts();
+  if (customScripts.length) {
+    logInMainWindow(`Running user-added scripts`);
+  } else {
+    logInMainWindow(`No user-added scripts found`);
+  }
   customScripts.forEach((file) => {
     const filePath = path.join(customScriptsDir, file);
     const name = file.substring(0, file.indexOf('.'));
@@ -611,13 +615,13 @@ function downloadScript(url) {
   });
 }
 
-function downloadAndRunScript(fileinfo, delay) {
+function downloadAndRunScript(fileinfo, delay, updateScript) {
   return new Promise(async (resolve, reject) => {
     var [file, url] = fileinfo;
     const filePath = path.join(defaultScriptsDir, file);
-    var dataNew;
     var dataOld;
-    // Statuses: -1 for download error, 0 for no change, 1 for update, 2 for new file
+    var dataNew;
+    // Statuses: -2 for skipped download, -1 for download error, 0 for no change, 1 for update, 2 for new file
     var resolveData = {
       'name': file.substring(0, file.indexOf('.')),
       'status': 0
@@ -625,15 +629,6 @@ function downloadAndRunScript(fileinfo, delay) {
 
     // Don't make too many requests simultaneously
     await new Promise((resolve) => setTimeout(resolve, delay));
-
-    // Download file
-    try {
-      dataNew = await downloadScript(url);
-    } catch (err) {
-      logInMainWindow(err, 'error');
-      dataNew = null;
-      resolveData.status = -1;
-    }
 
     // Read old file, if it exists
     if (fs.existsSync(filePath)) {
@@ -655,13 +650,27 @@ function downloadAndRunScript(fileinfo, delay) {
       resolveData.status = 2;
     }
 
+    // Download file, unless auto updates are disabled and a version of the file is already present
+    if (updateScript || dataOld == null) {
+      try {
+        dataNew = await downloadScript(url);
+      } catch (err) {
+        logInMainWindow(err, 'error');
+        dataNew = null;
+        resolveData.status = -1;
+      }
+    } else {
+      dataNew = null;
+      resolveData.status = -2;
+    }
+
     // If downloaded file differs, save it
     if (dataNew && dataNew !== dataOld) {
       if (dataOld != null) {
         resolveData.status = 1;
       }
       try {
-        logInMainWindow(`Writing file to '${filePath}'`, 'debug');
+        logInMainWindow(`Writing downloaded script file to '${filePath}'`, 'debug');
         await new Promise((resolve, reject) => {
           fs.writeFile(filePath, dataNew, 'utf-8', (err) => {
             if (err) {
@@ -672,6 +681,7 @@ function downloadAndRunScript(fileinfo, delay) {
           });
         });
       } catch (err) {
+        fs.unlink(filePath, (err) => { }); // just in case there's file corruption
         return reject(`Failed to save downloaded file '${filePath}':\n${err}"`);
       }
     }
@@ -688,8 +698,10 @@ async function handleScripts(files) {
   const delay = 5; // time between requests in milliseconds
   var downloads = [];
 
+  var scriptAutoUpdates = await mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.scriptAutoUpdatesEnabled();`);
+
   files.forEach((fileinfo, i) => {
-    let download = downloadAndRunScript(fileinfo, i * delay);
+    let download = downloadAndRunScript(fileinfo, i * delay, scriptAutoUpdates);
     download.catch((err) => { logInMainWindow(err, 'error'); });
     downloads.push(download);
 
@@ -711,6 +723,9 @@ async function handleScripts(files) {
   let changedFiles = downloadResults.filter((res) => (res.value?.status == 1)).map((res) => res.value.name);
   let newFiles = downloadResults.filter((res) => (res.value?.status == 2)).map((res) => res.value.name);
 
+  let skippedDownloads = downloadResults.filter((res) => (res.value?.status == -2));
+  logInMainWindow(`Skipped downloading ${skippedDownloads.length} file(s) as auto-updates are disabled`);
+
   if (failedDownloads.length) {
     mainWindow.webContents.executeJavaScript(`Notifier.notify({
       type: NotificationConstants.NotificationOption.warning,
@@ -725,7 +740,7 @@ async function handleScripts(files) {
     message.push(`${newFiles.length} new script${newFiles.length != 1 ? 's' : ''} downloaded:\n` + newFiles.join('\n'));
   }
   if (changedFiles.length) {
-    message.push(`${changedFiles.length} script update${changedFiles.length != 1 ? 's' : ''} downloaded\n` + changedFiles.join('\n'));
+    message.push(`${changedFiles.length} script update${changedFiles.length != 1 ? 's' : ''} downloaded:\n` + changedFiles.join('\n'));
   }
 
   if (message.length > 0) {
@@ -739,6 +754,7 @@ async function handleScripts(files) {
 }
 
 function startEpheniaScripts() {
+  logInMainWindow(`Pokéclicker Scripts Desktop v${POKECLICKER_SCRIPTS_DESKTOP_VERSION.toLocaleString('en-US', {minimumFractionDigits: 1})} initializing!`);
   mainWindow.webContents.executeJavaScript(`const POKECLICKER_SCRIPTS_DESKTOP_VERSION = ${POKECLICKER_SCRIPTS_DESKTOP_VERSION};`);
   runScript(`${__dirname}/scripthandler.js`);
   ensureScriptsDirsExist();

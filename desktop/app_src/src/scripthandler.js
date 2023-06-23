@@ -1,4 +1,4 @@
-﻿class DesktopScriptHandler {
+class DesktopScriptHandler {
     static hasRegisteredUserScript = false;
     
     static getScriptEnabled(name) {
@@ -41,7 +41,7 @@
     static addScriptEnabledSetting(name, container, enabled) {
         var setting = document.createElement('tr')
         setting.innerHTML =
-        `<td class="p-2 col-md-8"><label class="m-0">Enable ${name}</label></td>` + 
+        `<td class="p-2 col-md-8"><label class="m-0" for="checkbox-${name}">Enable ${name}</label></td>` + 
             `<td class="p-2 col-md-4"><input id="checkbox-${name}" type="checkbox"></td>`;
 
         // Insert setting in alphabetical order
@@ -60,8 +60,14 @@
         });
     }
 
+    static scriptAutoUpdatesEnabled() {
+        var val = localStorage.getItem('epheniaScriptAutoUpdates');
+        val = JSON.parse(val);
+        return val !== false;
+    }
+
     static init() {
-        console.log('Running scripthandler');
+        console.log('Loading Pokéclicker Scripts Desktop scripthandler');
 
         // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
         document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
@@ -110,6 +116,19 @@
         info = document.createElement('tr');
         info.innerHTML = `<td class="p-2" colspan="2"><label class="m-0">No scripts installed</label></td>`;
         document.getElementById('settings-scripts-enableScriptsUser').appendChild(info);
+
+
+        // Add setting to disable script auto-updates
+        let setting = document.createElement('tr')
+        setting.innerHTML =
+        `<td class="p-2 col-md-8"><label class="m-0" for="checkbox-scriptAutoUpdates">Script auto-updates enabled</label></td>` + 
+            `<td class="p-2 col-md-4"><input id="checkbox-scriptAutoUpdates" type="checkbox"></td>`;
+        document.getElementById('settings-scripts-desktopSettings').appendChild(setting);
+        document.getElementById('checkbox-scriptAutoUpdates').checked = this.scriptAutoUpdatesEnabled();
+        document.getElementById('checkbox-scriptAutoUpdates').addEventListener('change', event => {
+            localStorage.setItem('epheniaScriptAutoUpdates', event.target.checked);
+        });
+
     }
 }
 
