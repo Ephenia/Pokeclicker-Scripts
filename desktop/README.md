@@ -24,3 +24,5 @@ Optionally, you can add custom scripts from outside this project. This mod creat
 - Windows: `%APPDATA%/pokeclicker-desktop`
 - macOS: `~/Library/Application Support/pokeclicker-desktop`
 - Linux: either `$XDG_CONFIG_HOME/pokeclicker-desktop` or `~/.config/pokeclicker-desktop`
+
+You can now also disable automatic downloading of new script versions. This is only recommended for advanced users who want to modify scripts or update to in-development script versions before their official release. In this mode, the client will notify you when updates to scripts are available. You can either automatically download all updates via an option in the settings menu, or manually install individual updates. For manual installation, download the desired script file from this repository, save it in the `scripts` folder, and launch the game once before making any modifications to the script.

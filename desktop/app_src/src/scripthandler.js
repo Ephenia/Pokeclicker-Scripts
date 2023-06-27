@@ -60,10 +60,24 @@ class DesktopScriptHandler {
         });
     }
 
+    // Should only be called by main.js once per game launch!
+    static shouldScriptsAutoUpdate() {
+        var returnval = this.scriptAutoUpdatesEnabled() || this.updateScriptsNextLaunch();
+        // Clear one-time update flag
+        localStorage.setItem('epheniaUpdateScriptsNextLaunch', false);
+        return returnval;
+    }
+
     static scriptAutoUpdatesEnabled() {
         var val = localStorage.getItem('epheniaScriptAutoUpdates');
         val = JSON.parse(val);
         return val !== false;
+    }
+
+    static updateScriptsNextLaunch() {
+        var val = localStorage.getItem('epheniaUpdateScriptsNextLaunch');
+        val = JSON.parse(val);
+        return val === true;
     }
 
     static init() {
@@ -121,16 +135,27 @@ class DesktopScriptHandler {
         // Add setting to disable script auto-updates
         let setting = document.createElement('tr')
         setting.innerHTML =
-        `<td class="p-2 col-md-8"><label class="m-0" for="checkbox-scriptAutoUpdates">Script auto-updates enabled</label></td>` + 
+            `<td class="p-2 col-md-8"><label class="m-0" for="checkbox-scriptAutoUpdates">Script auto-updates enabled</label></td>` + 
             `<td class="p-2 col-md-4"><input id="checkbox-scriptAutoUpdates" type="checkbox"></td>`;
         document.getElementById('settings-scripts-desktopSettings').appendChild(setting);
         document.getElementById('checkbox-scriptAutoUpdates').checked = this.scriptAutoUpdatesEnabled();
         document.getElementById('checkbox-scriptAutoUpdates').addEventListener('change', event => {
             localStorage.setItem('epheniaScriptAutoUpdates', event.target.checked);
         });
+        // Add auto-updated-disabled-specific setting to update next launch
+        if (!this.scriptAutoUpdatesEnabled()) {
+            setting = document.createElement('tr');
+            setting.innerHTML =
+                `<td class="p-2 col-md-8"><label class="m-0" for="checkbox-updateScriptsNextLaunch">Update scripts on next game launch</label></td>` + 
+                `<td class="p-2 col-md-4"><input id="checkbox-updateScriptsNextLaunch" type="checkbox"></td>`;
+            document.getElementById('settings-scripts-desktopSettings').appendChild(setting);
+            document.getElementById('checkbox-updateScriptsNextLaunch').checked = this.updateScriptsNextLaunch();
+            document.getElementById('checkbox-updateScriptsNextLaunch').addEventListener('change', event => {
+                localStorage.setItem('epheniaUpdateScriptsNextLaunch', event.target.checked);
+            });
+        }
 
     }
 }
-
 
 DesktopScriptHandler.init();
