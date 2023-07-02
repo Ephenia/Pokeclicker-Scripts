@@ -149,7 +149,6 @@ class DesktopScriptHandler {
                 `<td class="p-2 col-md-8"><label class="m-0" for="checkbox-updateScriptsNextLaunch">Update scripts on next game launch</label></td>` + 
                 `<td class="p-2 col-md-4"><input id="checkbox-updateScriptsNextLaunch" type="checkbox"></td>`;
             document.getElementById('settings-scripts-desktopSettings').appendChild(setting);
-            document.getElementById('checkbox-updateScriptsNextLaunch').checked = this.updateScriptsNextLaunch();
             document.getElementById('checkbox-updateScriptsNextLaunch').addEventListener('change', event => {
                 localStorage.setItem('epheniaUpdateScriptsNextLaunch', event.target.checked);
             });
