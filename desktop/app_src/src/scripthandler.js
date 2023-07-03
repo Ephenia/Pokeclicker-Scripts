@@ -47,7 +47,7 @@ class DesktopScriptHandler {
         // Insert setting in alphabetical order
         container = document.getElementById(container);
         let settingsList = Array.from(container.children);
-        let insertBefore = settingsList.find(elem => elem.id > 'checkbox-' + name);
+        let insertBefore = settingsList.find(elem => elem.querySelector('input').id > 'checkbox-' + name);
         if (insertBefore) {
             insertBefore.before(setting);
         } else {
