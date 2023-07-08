@@ -18,6 +18,8 @@
 // @run-at        document-idle
 // ==/UserScript==
 
+var scriptName = 'scriptfixerupper';
+
 function initFixerUpper() {
     function clearLocalStorage() {
         for (let i = 0; i < localStorage.length; i++){
@@ -32,13 +34,15 @@ function initFixerUpper() {
             }, (localStorage.length * 25) + 25)
         }
     }
-    const isDesktop = navigator.userAgent.includes('desktop');
+    const isDesktop = App.isUsingClient;
     if (!isDesktop) {
         const warning = "Attempt to fix and reset script settings? This should clear out localStorage in relation to scripts and their dependencies, but should NOT affect any of your save data. You should back up your saves before doing so, just to be safe. Press OK to proceed!\r\n\r\nNote: This process may take a few seconds to complete and the page should reload when complete.";
         if (confirm(warning) == true) {
             clearLocalStorage();
         }
     } else {
+        const warning = "At the moment, scriptfixerupper does not support the desktop client. Sorry! You can still load your save in the web version and run this script there.";
+        confirm(warning);
         //we'll add logic for Desktop client here later for how we want to handle it
     }
 }
@@ -55,22 +59,6 @@ function loadScript(){
     }
 }
 
-var scriptName = 'scriptfixerupper'
-
-if (document.getElementById('scriptHandler') != undefined){
-    var scriptElement = document.createElement('div')
-    scriptElement.id = scriptName
-    document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
-            loadScript()
-        }
-    }
-    else{
-        localStorage.setItem(scriptName, 'true')
-        loadScript()
-    }
-}
-else{
+if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
     loadScript();
 }

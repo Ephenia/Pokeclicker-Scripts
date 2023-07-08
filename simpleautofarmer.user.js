@@ -18,6 +18,8 @@
 // @run-at        document-idle
 // ==/UserScript==//
 
+var scriptName = 'simpleautofarmer';
+
 function initAutoFarm() {
     var plantState;
     var plantColor;
@@ -305,20 +307,6 @@ initLocalStorage("autoHarvestState", "OFF");
 initLocalStorage("autoReplantState", "OFF");
 initLocalStorage("autoMulchState", "OFF");
 
-var scriptName = 'simpleautofarmer';
-
-if ( document.getElementById('scriptHandler') != undefined ) {
-    var scriptElement = document.createElement('div');
-    scriptElement.id = scriptName;
-    document.getElementById('scriptHandler').appendChild(scriptElement);
-    if ( localStorage.getItem(scriptName) != null ) {
-        if ( localStorage.getItem(scriptName) == 'true' ) {
-            loadScript();
-        }
-    } else {
-        localStorage.setItem(scriptName, 'true');
-        loadScript();
-    }
-} else {
+if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
     loadScript();
 }

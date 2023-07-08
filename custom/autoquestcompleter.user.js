@@ -18,6 +18,8 @@
 // @run-at        document-idle
 // ==/UserScript==
 
+var scriptName = 'autoquestcompleter';
+
 function initAutoQuests(){
     //Allows to start infinite  quests
     App.game.quests.canStartNewQuest = function(){
@@ -138,22 +140,6 @@ function loadScript(){
     }
 }
 
-var scriptName = 'autoquestcomplete'
-
-if (document.getElementById('scriptHandler') != undefined){
-    var scriptElement = document.createElement('div')
-    scriptElement.id = scriptName
-    document.getElementById('scriptHandler').appendChild(scriptElement)
-    if (localStorage.getItem(scriptName) != null){
-        if (localStorage.getItem(scriptName) == 'true'){
-            loadScript()
-        }
-    }
-    else{
-        localStorage.setItem(scriptName, 'true')
-        loadScript()
-    }
-}
-else{
+if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
     loadScript();
 }

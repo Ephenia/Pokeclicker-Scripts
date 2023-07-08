@@ -4,24 +4,30 @@
 
 const { autoUpdater } = require("electron-updater");
 const { app, BrowserWindow, dialog } = require("electron");
-const path = require("path");
-const url = require("url");
 const DiscordRPC = require("discord-rpc");
 const https = require("https");
 const fs = require("fs");
-const ini = require("ini");
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const Zip = require("adm-zip");
 const electron = require("electron");
 const clientVersion = app.getVersion();
 
 const dataDir = (electron.app || electron.remote.app).getPath("userData");
 
+// Used for Ephenia scripts
+const path = require("path");
+const url = require("url");
+const ini = require("ini");
+const { XMLHttpRequest } = require("xmlhttprequest");
+const { createHash } = require('crypto');
+
+
 const settingsFile = path.join(dataDir, "settings.ini");
 // Upstream scripts directory
 const defaultScriptsDir = path.join(dataDir, "scripts");
 // Custom scripts directory
 const customScriptsDir = path.join(dataDir, "custom-scripts");
+// Script checksums file for update checking
+const checksumsFile = path.join(defaultScriptsDir, "fileVersions.json");
 
 console.info("Data directory:", dataDir);
 
@@ -67,177 +73,14 @@ function createWindow() {
     },
   });
 
-  function runScript(scriptFilePath) {
-    mainWindow.webContents
-      .executeJavaScript(fs.readFileSync(scriptFilePath, "utf-8"))
-      .catch(e => {
-        console.error("Failed to run script '%s': %s", scriptFilePath, e);
-      });
-  }
-
   mainWindow.webContents.on("did-finish-load", () => {
     mainWindow.webContents
       .executeJavaScript(
         `(() => { DiscordRichPresence.clientVersion = '${clientVersion}' })()`
       )
       .catch((e) => {});
-    runScript(`${__dirname}/scripthandler.js`);
 
-    function ensureScriptsDirsExist() {
-      if (!fs.existsSync(defaultScriptsDir)) {
-        fs.mkdirSync(defaultScriptsDir, { recursive: true });
-      }
-      if (!fs.existsSync(customScriptsDir)) {
-        fs.mkdirSync(customScriptsDir, { recursive: true });
-      }
-    }
-
-    function getCustomScripts() {
-      let customScripts = [];
-      fs.readdir(customScriptsDir, (err, files) => {
-        files.forEach(file => {
-          if (file.includes(".js")) {
-            customScripts.push(file.replace(/.js/g, ""));
-          }
-        });
-      });
-      return customScripts;
-    }
-
-    ensureScriptsDirsExist();
-    var customScripts = getCustomScripts();
-
-    var reqInc = 0;
-    var filePre = "";
-    var fileName = [];
-    //Prints content of github repo and handles downloading of files
-    function printRepoCont() {
-      var responseObj = JSON.parse(this.responseText);
-      console.log(responseObj.filter((e) => e.name.includes(".js")));
-      responseObj = responseObj.filter((e) => e.name.includes(".js"));
-
-      for (let i = 0; i < responseObj.length; i++) {
-        fileName.push(filePre + responseObj[i].name.replace(/.js/g, ""));
-      }
-
-      if (reqInc == 0) {
-        filePre = "custom/";
-        //Download scripts in custom folder from github
-        getCustom();
-        reqInc++;
-      } else {
-        console.log(fileName);
-        //Download and runs scripts in base folder
-        handleScripts();
-      }
-    }
-    var request = new XMLHttpRequest();
-    request.onload = printRepoCont;
-    //Loads all scripts from files if you don't have internet
-    request.onerror = function () {
-      fs.readdir(defaultScriptsDir, (err, files) => {
-        files.forEach((file) => {
-          if (file.includes(".js")) {
-            // Ignore the script if there is a custom script with the same name
-            if (customScripts.includes(file.replace(/.js/g, ""))) {
-              console.log(
-                "Ignoring '%s' as another script with this name is in '%s'",
-                file,
-                customScriptsDir
-              );
-            } else {
-              //Execute the script
-              const filePath = path.join(defaultScriptsDir, file);
-              runScript(filePath);
-            }
-          }
-        });
-      });
-      // Same as this but for custom scripts
-      runCustomScripts();
-    };
-    request.open(
-      "get",
-      "https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/",
-      true
-    );
-    request.send();
-
-    function getCustom() {
-      var request = new XMLHttpRequest();
-      request.onload = printRepoCont;
-      request.open(
-        "get",
-        "https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/custom",
-        true
-      );
-      request.send();
-    }
-
-    function handleScripts() {
-      fileName.forEach((files, i) => {
-        setTimeout(() => {
-          var options = {
-            host: "raw.githubusercontent.com",
-            path: `/Ephenia/Pokeclicker-Scripts/master/${files}.js`,
-          };
-          var request = https.request(options, function (res) {
-            var data = "";
-            res.on("data", function (chunk) {
-              data += chunk;
-            });
-            res.on("end", function () {
-              files = files.replace(/custom[/]/g, "");
-              var global_data;
-              const filePath = path.join(defaultScriptsDir, files);
-
-              if (fs.existsSync(filePath)) {
-                global_data = fs.readFileSync(filePath);
-              } else {
-                global_data = null;
-              }
-
-              try {
-                if (data.toString() != global_data) {
-                  fs.writeFileSync(
-                    filePath,
-                    data,
-                    "utf-8"
-                  );
-                }
-              } catch (e) {
-                console.error("Failed to save '%s': %s", filePath, e);
-              }
-
-              try {
-                if (
-                  !customScripts.includes(files) &&
-                  !files.includes("scripthandler")
-                ) {
-                  runScript(filePath);
-                }
-              } catch (e) {}
-            });
-          });
-          request.on("error", function (e) {
-            console.log(e.message);
-          });
-          request.end();
-        }, i * 1);
-      });
-      runCustomScripts();
-    }
-
-    function runCustomScripts() {
-      fs.readdir(customScriptsDir, (err, files) => {
-        files.forEach((file) => {
-          if (file.includes(".js")) {
-            const filePath = path.join(customScriptsDir, file);
-            runScript(filePath);
-          }
-        });
-      });
-    }
+      startEpheniaScripts();
   });
 
   mainWindow.setMenuBarVisibility(false);
@@ -618,3 +461,385 @@ if (!isMainInstance) {
     autoUpdater.checkForUpdatesAndNotify();
   } catch (e) {}
 }
+
+
+/*
+Ephenia scripts loading
+*/
+
+// VERY IMPORTANT: update this in desktopupdatechecker.js as well!
+const POKECLICKER_SCRIPTS_DESKTOP_VERSION = 2.0;
+
+function logInMainWindow(message, level = 'log') {
+  if (message == null) {
+    return;
+  }
+  message = String(message).replaceAll('`', '\\`').replaceAll('$', '\\$');
+  mainWindow.webContents.executeJavaScript(`console.${level}(\`${message}\`);`)
+  .catch((err) => {
+    console.log(`Failed to log message:\n${message}\n\n${err}`) 
+  });
+}
+
+function runScript(scriptFilePath) {
+  if (fs.existsSync(scriptFilePath)) {
+    logInMainWindow(`Running ${scriptFilePath}`, 'debug');
+    mainWindow.webContents
+      .executeJavaScript(fs.readFileSync(scriptFilePath, 'utf-8'))
+      .catch((err) => {
+        logInMainWindow(`Issue running script '${scriptFilePath}':\n${err}`, 'error');
+      });
+  } else {
+    logInMainWindow(`Tried to run nonexistent file '${scriptFilePath}'`, 'error')
+  }
+}
+
+function runEpheniaScript(file) {
+  const filePath = path.join(defaultScriptsDir, file);
+  // Hard-coded exception to guarantee users are notified of updates
+  if (file === 'desktopupdatechecker.js') {
+    runScript(filePath);
+    return;
+  }
+  const name = file.substring(0, file.indexOf('.'));
+  // Only run script if it is enabled
+  mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.isEpheniaScriptEnabled('${name}');`)
+    .then((res) => {
+      if (res) {
+        runScript(filePath);
+      }
+    });
+  // Add script toggle to desktop settings
+  mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.registerEpheniaScript('${name}');`);
+}
+
+function ensureScriptsDirsExist() {
+  if (!fs.existsSync(defaultScriptsDir)) {
+    fs.mkdirSync(defaultScriptsDir, { recursive: true });
+  }
+  if (!fs.existsSync(customScriptsDir)) {
+    fs.mkdirSync(customScriptsDir, { recursive: true });
+  }
+  if (!fs.existsSync(checksumsFile)) {
+    fs.writeFileSync(checksumsFile, '{}', 'utf-8');
+  }
+}
+
+function getCustomScripts() {
+  try {
+    let files = fs.readdirSync(customScriptsDir);
+    return files.filter((f) => (f.endsWith('.js')));
+  } catch (err) {
+    logInMainWindow(`Unexpected issue reading custom-scripts directory:\n${err}`, 'error');
+    return [];
+  }
+}
+
+function runCustomScripts() {
+  var customScripts = getCustomScripts();
+  if (customScripts.length) {
+    logInMainWindow(`Running user-added scripts`);
+  } else {
+    logInMainWindow(`No user-added scripts found`);
+  }
+  customScripts.forEach((file) => {
+    const filePath = path.join(customScriptsDir, file);
+    const name = file.substring(0, file.indexOf('.'));
+    // Only run script if it is enabled
+    mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.isUserScriptEnabled('${name}');`)
+      .then((res) => {
+        if (res) {
+          runScript(filePath);
+        }
+      });
+    // Add script toggle to desktop settings
+    mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.registerUserScript('${name}');`);
+  });
+}
+
+function getRepoContents(url) {
+  return new Promise((resolve, reject) => {
+    var request = new XMLHttpRequest();
+    request.onload = () => {
+      if (request.status === 200) {
+        let files = JSON.parse(request.responseText);
+        files = files.filter((f) => (f.name.endsWith('.js')));
+        files = files.map((f) => ([f.name, f.download_url]));
+        resolve(files);
+      } else {
+        reject(`Failed to read repository contents (status code ${request.status})`);
+      }
+    }
+    request.onerror = () => {
+      reject(`Network request failed: could not read repository contents (status code ${request.status})`);
+    }
+    request.timeout = 5000;
+    request.ontimeout = () => {
+      reject(`Network request timed out: could not read repository contents (status code ${request.status})`);
+    }
+    request.open("get", url);
+    request.send();
+  });
+}
+
+function downloadScript(url) {
+  // TODO download files directly to temp file?
+  logInMainWindow(`Trying to download '${url}'`, 'debug')
+  return new Promise((resolve, reject) => {
+    var request = https.request(url, (res) => {
+      logInMainWindow(`Recieved result for '${url}'`, 'debug');
+      if (res.statusCode !== 200) {
+        reject(`Failed to download file '${file}' from repository (status code ${res.statusCode})`);
+      }
+      res.setEncoding('utf-8');
+      var data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        resolve(data);
+      });
+    });
+    request.on('error', (err) => {
+      reject(`Failed to download file '${file}' from repository:\n ${err.message}`);
+    });
+    request.setTimeout(5000, () => {
+      reject(`Timed out while trying to download file '${file}' from repository`);
+    });
+    request.end();
+  });
+}
+
+function downloadAndRunScript(fileinfo, delay, checksumOld, installUpdate) {
+  return new Promise(async (resolve, reject) => {
+    var [file, url] = fileinfo;
+    const filePath = path.join(defaultScriptsDir, file);
+    var dataOld;
+    var dataNew;
+    var checksumNew;
+    // Statuses: -1 for download error, 0 for no change, 1 for update available, 2 for update downloaded, 3 for new file
+    var resolveData = {
+      'filename': file,
+      'scriptname': file.substring(0, file.indexOf('.')),
+      'status': 0,
+      'checksum': checksumOld,
+    };
+
+    // Don't make too many requests simultaneously
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    // Read old file, if it exists
+    if (fs.existsSync(filePath)) {
+      try {
+        dataOld = await new Promise((resolve, reject) => {
+          fs.readFile(filePath, 'utf-8', (err, data) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(data);
+            }
+          });
+        });
+      } catch (err) {
+        return reject(`Unable to read existing script file '${filePath}:\n${err}`);
+      }
+    } else {
+      dataOld = null;
+      checksumOld = null;
+    }
+
+    // Download file
+    try {
+      dataNew = await downloadScript(url);
+      checksumNew = createHash('md5').update(dataNew).digest('hex');
+    } catch (err) {
+      logInMainWindow(err, 'error');
+      dataNew = null;
+      resolveData.status = -1;
+    }
+
+    // Check if remote version of the file has been updated
+    if (dataNew && dataOld !== dataNew) {
+      // If an update is available and updating is enabled, or newly-encountered file
+      if ((checksumOld !== checksumNew && installUpdate) || dataOld == null || checksumOld == null) {
+        if (dataOld == null) {
+          // Downloaded new script
+          resolveData.status = 3;
+        } else {
+          // Downloaded update
+          resolveData.status = 2;
+        }
+        resolveData.checksum = checksumNew;
+        try {
+          logInMainWindow(`Saving downloaded script file to '${filePath}'`, 'debug');
+          await new Promise((resolve, reject) => {
+            fs.writeFile(filePath, dataNew, 'utf-8', (err) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve();
+              }
+            });
+          });
+        } catch (err) {
+          return reject(`Failed to save downloaded file '${filePath}:\n${err}'`);
+        }
+      } else {
+        // Update available but updating disabled
+        resolveData.status = 1;
+      }
+    } else if (dataNew && checksumOld !== checksumNew) {
+      // File hasn't changed but the checksum doesn't match, silently update it
+      resolveData.status = 0;
+      resolveData.checksum = checksumNew;
+    }
+
+    // If there's a file to run, run it!
+    if (dataNew || dataOld) {
+      runEpheniaScript(file);
+      resolve(resolveData);
+    } else {
+      reject(`Unknown error while downloading/running '${file}' script`);
+    }
+  });
+}
+
+async function handleScripts(files) {
+  const delay = 5; // time between requests in milliseconds
+  var downloads = [];
+
+  var shouldScriptsAutoUpdate = await mainWindow.webContents.executeJavaScript(`DesktopScriptHandler.shouldScriptsAutoUpdate();`);
+
+  // Load checksums for update checking
+  var scriptChecksums;
+  try {
+    scriptChecksums = JSON.parse(fs.readFileSync(checksumsFile, 'utf-8'));
+  } catch (err) {
+    scriptChecksums = {};
+  }
+  
+  // Download and run files
+  files.forEach((fileinfo, i) => {
+    let filename = fileinfo[0];
+    let download = downloadAndRunScript(fileinfo, i * delay, scriptChecksums[filename], shouldScriptsAutoUpdate);
+    download.catch((err) => {
+      const filePath = path.join(defaultScriptsDir, filename);
+      logInMainWindow(err, 'error'); 
+      fs.unlink(filePath, (err) => { }); // just in case there's file corruption
+    });
+    downloads.push(download);
+  });
+
+  var downloadResults = await Promise.allSettled(downloads);
+  logInMainWindow('Finished downloading Ephenia scripts from repository');
+
+  // Save checksum data for script update checking
+  var updatedChecksums = {};
+  downloadResults.filter((res) => (res.status == 'fulfilled')).forEach((res) => {
+    updatedChecksums[res.value.filename] = res.value.checksum;
+  });
+  fs.writeFile(checksumsFile, JSON.stringify(updatedChecksums), 'utf-8', (err) => {
+    if (err) {
+      logInMainWindow(`Unable to save script checksums file!\n${err}`);
+    } else {
+      logInMainWindow('Saved script checksums file successfully', 'debug');
+    }
+  });
+
+  // Notify user about results of script updating
+  let failedDownloads = downloadResults.filter((res) => (res.status == 'rejected' || res.value.status == -1));
+  let updatesAvailable = downloadResults.filter((res) => (res.value?.status == 1)).map((res) => res.value.scriptname);
+  let changedFiles = downloadResults.filter((res) => (res.value?.status == 2)).map((res) => res.value.scriptname);
+  let newFiles = downloadResults.filter((res) => (res.value?.status == 3)).map((res) => res.value.scriptname);
+
+  if (failedDownloads.length) {
+    mainWindow.webContents.executeJavaScript(`Notifier.notify({
+      type: NotificationConstants.NotificationOption.warning,
+      title: 'Pokéclicker Scripts Desktop',
+      message: '${failedDownloads.length} downloads failed',
+      timeout: GameConstants.HOUR,
+    });`);
+  }
+
+  let message = [];
+  if (newFiles.length) {
+    message.push(`${newFiles.length} new script${newFiles.length != 1 ? 's' : ''} downloaded:\n` + newFiles.join('\n'));
+  }
+  if (changedFiles.length) {
+    message.push(`${changedFiles.length} script update${changedFiles.length != 1 ? 's' : ''} downloaded:\n` + changedFiles.join('\n'));
+  }
+  if (updatesAvailable.length) {
+    message.push(`${updatesAvailable.length} script update${updatesAvailable.length != 1 ? 's' : ''} available:\n` + updatesAvailable.join('\n'));
+  }
+
+  if (message.length > 0) {
+    mainWindow.webContents.executeJavaScript(`Notifier.notify({
+      type: NotificationConstants.NotificationOption.info,
+      title: 'Pokéclicker Scripts Desktop',
+      message: \`${message.join('\n\n')}\`,
+      timeout: GameConstants.HOUR,
+    });`);
+  }
+}
+
+function startEpheniaScripts() {
+  logInMainWindow(`Pokéclicker Scripts Desktop v${POKECLICKER_SCRIPTS_DESKTOP_VERSION.toLocaleString('en-US', {minimumFractionDigits: 1})} initializing!`);
+  mainWindow.webContents.executeJavaScript(`const POKECLICKER_SCRIPTS_DESKTOP_VERSION = ${POKECLICKER_SCRIPTS_DESKTOP_VERSION};`);
+  runScript(`${__dirname}/scripthandler.js`);
+  ensureScriptsDirsExist();
+
+  const repoUrl = 'https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/';
+  var repoFiles;
+  var localFiles;
+
+  try {
+    localFiles = fs.readdirSync(defaultScriptsDir);
+    // Clean up old misnamed files
+    let malformed = localFiles.filter((file) => file.endsWith('.user'));
+    malformed.forEach((file) => {
+      let oldPath = path.join(defaultScriptsDir, file);
+      let newPath = path.join(defaultScriptsDir, file + '.js');
+      fs.renameSync(oldPath, newPath);
+      localFiles[localFiles.indexOf(file)] += '.js';
+    });
+    localFiles = localFiles.filter((file) => file.endsWith('.js'));
+  } catch (err) {
+    logInMainWindow(`Unexpected issue accessing scripts directory, aborting Pokéclicker Scripts Desktop`, 'error');
+    logInMainWindow(err, 'error');
+    return;
+  }
+
+  getRepoContents(repoUrl)
+    .then((data) => {
+      repoFiles = data;
+      return getRepoContents(repoUrl + 'custom');
+    }, (err) => {
+      throw err;
+    })
+    .then((data) => {
+      repoFiles = repoFiles.concat(data);
+      let repoFilenames = repoFiles.map(f => f[0]);
+      logInMainWindow(`Found script files in Ephenia/Pokeclicker-Scripts/ github repository:\n${repoFilenames.join('\n')}`, 'debug');
+      handleScripts(repoFiles);
+      // Disable any files not found online (in case of script renames, etc)
+      let filesToDisable = localFiles.filter((file) => (!repoFilenames.includes(file)));
+      filesToDisable.forEach((file) => {
+        try {
+          let oldPath = path.join(defaultScriptsDir, file);
+          let newPath = path.join(defaultScriptsDir, file + '.disabled');
+          fs.renameSync(oldPath, newPath);
+        } catch (err) {
+          logInMainWindow(err, 'error');
+        }
+      });
+    }, (err) => { 
+      logInMainWindow(err, 'warn');
+      logInMainWindow('Could not connect to Ephenia GitHub repository, running scripts offline');
+      localFiles.forEach((file) => {
+        runEpheniaScript(file);
+      });
+    });
+
+  runCustomScripts();
+}
+

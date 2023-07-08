@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed and a toggle button, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes, now both with settings to disable graphics for performance.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.1
+// @version       3.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -108,46 +108,70 @@ function initAutoClicker() {
     battleView.before(elemAC);
     resetCalculator(); // initializes calculator display
 
-    // Add display settings to settings menu
-    var settingsHeader = document.createElement("tr");
-    settingsHeader.innerHTML = '<th colspan="2">Auto Clicker settings</th>';
-    document.getElementById('settingsModal').querySelector('tr[data-bind*="showMuteButton"]').after(settingsHeader);
+    var scriptSettings = document.getElementById('settings-scripts');
+    // Create scripts settings tab if it doesn't exist yet
+    if (!scriptSettings) {
+        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
+        document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
+        // Create and attach script settings tab link
+        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
+        let li = document.createElement('li');
+        li.classList.add('nav-item');
+        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
+        settingTabs.appendChild(li);
+        // Create and attach script settings tab contents
+        const tabContent = document.querySelector('#settingsModal .tab-content');
+        let scriptSettings = document.createElement('div');
+        scriptSettings.classList.add('tab-pane');
+        scriptSettings.setAttribute('id', 'settings-scripts');
+        tabContent.appendChild(scriptSettings);
+    }
+
+    let table = document.createElement('table');
+    table.classList.add('table', 'table-striped', 'table-hover', 'm-0');
+    scriptSettings.prepend(table);
+    let header = document.createElement('thead');
+    header.innerHTML = '<tr><th colspan="2">Enhanced Auto Clicker</th></tr>';
+    table.appendChild(header);
+    let settingsBody = document.createElement('tbody');
+    settingsBody.setAttribute('id', 'settings-scripts-enhancedautoclicker');
+    table.appendChild(settingsBody);
 
     var settingsElems = [];
     settingsElems.push(document.createElement('tr'));
-    settingsElems.at(-1).innerHTML = `<td class="p-2">
+    settingsElems.at(-1).innerHTML = `<td class="p-2 col-md-8">
         Auto Clicker efficiency display mode
         </td>
-        <td class="p-0">
+        <td class="p-0 col-md-4">
         <select id="select-calculatorEfficiencyDisplay" class="form-control">
         <option value="0">Percentage</option>
         <option value="1">Ticks/s</option>
         </select>
         </td>`;
     settingsElems.push(document.createElement('tr'));
-    settingsElems.at(-1).innerHTML = `<td class="p-2">
+    settingsElems.at(-1).innerHTML = `<td class="p-2 col-md-8">
         Auto Clicker damage display mode
         </td>
-        <td class="p-0">
+        <td class="p-0 col-md-4">
         <select id="select-calculatorDamageDisplay" class="form-control">
         <option value="0">Click Attacks</option>
         <option value="1">Damage</option>
         </select>
         </td>`;
     settingsElems.push(document.createElement('tr'));
-    settingsElems.at(-1).innerHTML = `<td class="p-2">
+    settingsElems.at(-1).innerHTML = `<td class="p-2 col-md-8">
         <label class="m-0" for="checkbox-gymGraphicsDisabled">Disable Auto Gym graphics</label>
-        </td><td class="p-2">
+        </td><td class="p-2 col-md-4">
         <input id="checkbox-gymGraphicsDisabled" type="checkbox">
         </td>`;
     settingsElems.push(document.createElement('tr'));
-    settingsElems.at(-1).innerHTML = `<td class="p-2">
+    settingsElems.at(-1).innerHTML = `<td class="p-2 col-md-8">
         <label class="m-0" for="checkbox-dungeonGraphicsDisabled">Disable Auto Dungeon graphics</label>
-        </td><td class="p-2">
+        </td><td class="p-2 col-md-4">
         <input id="checkbox-dungeonGraphicsDisabled" type="checkbox">
         </td>`;
 
-    settingsHeader.after(...settingsElems);
+    settingsBody.append(...settingsElems);
 
     document.getElementById('auto-gym-select').value = autoGymSelect;
     document.getElementById('auto-dungeon-mode').value = autoDungeonMode;
@@ -1014,20 +1038,6 @@ function loadScript() {
     }
 }
 
-if (document.getElementById('scriptHandler') != undefined) {
-    var scriptElement = document.createElement('div');
-    scriptElement.id = scriptName;
-    document.getElementById('scriptHandler').appendChild(scriptElement);
-    if (localStorage.getItem(scriptName) != null) {
-        if (localStorage.getItem(scriptName) == 'true') {
-            loadScript();
-        }
-    }
-    else {
-        localStorage.setItem(scriptName, 'true')
-        loadScript();
-    }
-}
-else {
+if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
     loadScript();
 }
