@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed and a toggle button, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes, now both with settings to disable graphics for performance.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.2
+// @version       3.2.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -121,7 +121,7 @@ function initAutoClicker() {
         settingTabs.appendChild(li);
         // Create and attach script settings tab contents
         const tabContent = document.querySelector('#settingsModal .tab-content');
-        let scriptSettings = document.createElement('div');
+        scriptSettings = document.createElement('div');
         scriptSettings.classList.add('tab-pane');
         scriptSettings.setAttribute('id', 'settings-scripts');
         tabContent.appendChild(scriptSettings);
@@ -193,7 +193,6 @@ function initAutoClicker() {
 
     addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
     addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
-    addGlobalStyle('#dungeonMap { padding-bottom: 9.513%; }');
     addGlobalStyle('#click-rate-cont { display: flex; flex-direction: column; align-items: stretch;}');
 
     overrideGymRunner()
