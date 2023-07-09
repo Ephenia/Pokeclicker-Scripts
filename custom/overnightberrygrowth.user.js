@@ -5,7 +5,7 @@
 // @description   Allows berres to grow while the game is closed.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.1
+// @version       1.1.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -38,7 +38,7 @@ function initSettings() {
         settingTabs.appendChild(li);
         // Create and attach script settings tab contents
         const tabContent = document.querySelector('#settingsModal .tab-content');
-        let scriptSettings = document.createElement('div');
+        scriptSettings = document.createElement('div');
         scriptSettings.classList.add('tab-pane');
         scriptSettings.setAttribute('id', 'settings-scripts');
         tabContent.appendChild(scriptSettings);

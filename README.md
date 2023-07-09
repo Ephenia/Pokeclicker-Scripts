@@ -294,34 +294,9 @@ I plan to update this Auto Farmer with some additional features later on.
 
 ## **Script manager (Exclusive to the desktop client)** ([app.asar](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/desktop/))
 This script manages all other loaded scripts that succsessfully subscribe to it. All the scripts in this repository are automatically managed.
-This is only intended to be used in the desktop client as userscript browser extensions already allow toggling scripts. Options are located in the <strong>Scripts</strong> tab in the settings.
+This is compatible with the desktop client as userscript browser extensions already allow toggling scripts. Options are located in the <strong>Scripts</strong> tab in the settings. For more detailed instructions on using the script manager, see [here](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/desktop/).
 
 <img width="840" alt="Script manager options" src="https://github.com/Ephenia/Pokeclicker-Scripts/assets/12092270/dc19411e-c565-48cb-8be6-6ac9b8abe17b">
-
-If you wish to manage your custom script through this, add code along the lines of:
-
-```javascript
-// Name of your script, doesn't have to match the name of the file
-var scriptname = 'myscript';
-
-function loadScript() {
-    var oldInit = Preload.hideSplashScreen
-    // Overriding this function runs your script after game objects you may need to access have been loaded
-    Preload.hideSplashScreen = function () {
-        var result = oldInit.apply(this, arguments);
-        // This should be the main function that executes the bulk of your code
-        initMyScript();
-        return result;
-    }
-}
-
-// This check allows your script to load even if the script manager is not present
-if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
-    loadScript();
-}
-```
-
-Then place your script in the relevant directory according to the [desktop instructions](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/desktop/).
 
 <hr>
 
