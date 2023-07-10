@@ -2,10 +2,10 @@
 
 {
 	// IMPORTANT: Always keep this up to date with the version number in app_src/main.js
-	const LATEST_VERSION = 2.0;
+	const LATEST_VERSION = '2.0.1';
 
 	if (App.isUsingClient) {
-		if (typeof POKECLICKER_SCRIPTS_DESKTOP_VERSION === 'undefined' 
+		if (typeof POKECLICKER_SCRIPTS_DESKTOP_VERSION !== 'string' 
 			|| POKECLICKER_SCRIPTS_DESKTOP_VERSION < LATEST_VERSION) {
 			Notifier.notify({
 		      type: NotificationConstants.NotificationOption.info,
