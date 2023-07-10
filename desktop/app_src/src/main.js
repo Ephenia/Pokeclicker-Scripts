@@ -468,7 +468,7 @@ Ephenia scripts loading
 */
 
 // VERY IMPORTANT: update this in desktopupdatechecker.js as well!
-const POKECLICKER_SCRIPTS_DESKTOP_VERSION = 2.0;
+const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.1';
 
 function logInMainWindow(message, level = 'log') {
   if (message == null) {
@@ -659,14 +659,18 @@ function downloadAndRunScript(fileinfo, delay, checksumOld, installUpdate) {
     }
 
     // Check if remote version of the file has been updated
-    if (dataNew && dataOld !== dataNew) {
-      // If an update is available and updating is enabled, or newly-encountered file
-      if ((checksumOld !== checksumNew && installUpdate) || dataOld == null || checksumOld == null) {
+    if (dataNew && checksumOld !== checksumNew) {
+      if (dataOld == dataNew) {
+        // File hasn't actually changed but the checksum doesn't match, silently update it
+        resolveData.status = 0;
+        resolveData.checksum = checksumNew;
+      } else if (installUpdate || dataOld == null || checksumOld == null) {
+        // Updating is enabled, or newly-encountered file takes priority
         if (dataOld == null) {
-          // Downloaded new script
+          // New script
           resolveData.status = 3;
         } else {
-          // Downloaded update
+          // Script update
           resolveData.status = 2;
         }
         resolveData.checksum = checksumNew;
@@ -688,10 +692,6 @@ function downloadAndRunScript(fileinfo, delay, checksumOld, installUpdate) {
         // Update available but updating disabled
         resolveData.status = 1;
       }
-    } else if (dataNew && checksumOld !== checksumNew) {
-      // File hasn't changed but the checksum doesn't match, silently update it
-      resolveData.status = 0;
-      resolveData.checksum = checksumNew;
     }
 
     // If there's a file to run, run it!
@@ -783,8 +783,8 @@ async function handleScripts(files) {
 }
 
 function startEpheniaScripts() {
-  logInMainWindow(`Pokéclicker Scripts Desktop v${POKECLICKER_SCRIPTS_DESKTOP_VERSION.toLocaleString('en-US', {minimumFractionDigits: 1})} initializing!`);
-  mainWindow.webContents.executeJavaScript(`const POKECLICKER_SCRIPTS_DESKTOP_VERSION = ${POKECLICKER_SCRIPTS_DESKTOP_VERSION};`);
+  logInMainWindow(`Pokéclicker Scripts Desktop v${POKECLICKER_SCRIPTS_DESKTOP_VERSION} initializing!`);
+  mainWindow.webContents.executeJavaScript(`const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '${POKECLICKER_SCRIPTS_DESKTOP_VERSION}';`);
   runScript(`${__dirname}/scripthandler.js`);
   ensureScriptsDirsExist();
 
