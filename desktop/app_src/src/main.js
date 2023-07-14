@@ -468,7 +468,7 @@ Ephenia scripts loading
 */
 
 // VERY IMPORTANT: update this in desktopupdatechecker.js as well!
-const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.1';
+const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.2';
 
 function logInMainWindow(message, level = 'log') {
   if (message == null) {
