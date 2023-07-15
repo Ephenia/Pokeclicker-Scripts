@@ -587,7 +587,7 @@ function getRepoContents(url) {
     request.onerror = () => {
       reject(`Network request failed: could not read repository contents (status code ${request.status})`);
     }
-    request.timeout = 5000;
+    request.timeout = 10000;
     request.ontimeout = () => {
       reject(`Network request timed out: could not read repository contents (status code ${request.status})`);
     }
