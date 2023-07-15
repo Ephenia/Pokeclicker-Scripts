@@ -33,17 +33,23 @@ var trainerCards;
 function initVisualSettings() {
     const getMenu = document.getElementById('startMenu');
     const quickSettings = document.createElement("img");
-    quickSettings.id = "quick-settings"
-    quickSettings.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAQAAABLCVATAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAHdElNRQfmAQcLFCMs4grwAAACzUlEQVRIx63WvWtbVxgG8J+Vkjgp9hKDwbTBcQoOBIINQUsnDe1gGy8h1VDswUMG4+4hYNwhpv4LumQ2d+gWSqnUwdZQUKFZDIUa4RqiYNyPLMEoUezodNDV7ZUsq1Xq507nvM957/t5zksvTCuqC4K6omnviFElQc0LL9QEJaPvpigvqJhz221zKoL82eT3Omz41Id2/eAlruNn34Idn/vIdTDsE5OeK/i9u9JbtgXBiUjOI3uCTQNgwKZgz7qcyIkg2Haru5qyoCJyKDgSNOxbSuRL9jViyaFIRfDTaVWjtgU7sphXVVewaFwmYWSMW1BQVzWPrB3BdmcCFgQV2XiVNWOoq/tDZlKsimChnfBQEPWd10jwsGVwE7veypnvQs644krKxX8wL+etX9s3h0WCamJ2ExNWREpKIl+40SbLqgoiw536c47UzSTrQcsqQuqrWDaYyGfVHcmdNnRdUEhCPGjDsaBs1T33rCoLjm0kqoYUBOvtqc97YE8jlYFlx2rWjCQ7V62pObac7Cxq2PNAvlkC00qx6fvGY8oNFcFaR4gz1gQVE/F63H58smSaYlzPm5aSgyuCsqun3B9RFqwkipdsxjVepK5mjrinmoRIsNq1clYFUcrSAcypqWdc9MozhFS+xuisjxi7GEvlLuCZVy5mnBMy3rjsWptrrx3gZlf+JA68bnPtmsve9Ar2yCk1PYM91SX9E32nf4p0QS4mh5oF+WXKqpF/K8gWerXIZ6kWuRQzmi3y6HQYO5v2Un9N23pFht33vuf+Soh1X/vejI+N4cCPvvNb6sd/+sMH7nvqZdqeu04c9n2xHTpxt0Vr1ccFW550oTfU1DS6SJ7YcsFku6Iq7qSu9dkzL//ZFOtOfDKFc3uOzu2BbKr6H092eoj4RT41RGw58pVMfL0EGTy2gae+cVNV8awhohN9jTW9cG6DFlP/ffT7G1t3ayJm6d3nAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIyLTAxLTA3VDExOjIwOjI2KzAwOjAwMddkKgAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMi0wMS0wN1QxMToyMDoyNiswMDowMECK3JYAAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAAAAElFTkSuQmCC"
-    quickSettings.setAttribute("href", "#settingsModal")
-    quickSettings.setAttribute("data-toggle", "modal")
-    getMenu.prepend(quickSettings)
+    quickSettings.id = "quick-settings";
+    quickSettings.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAQAAABLCVATAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAHdElNRQfmAQcLFCMs4grwAAACzUlEQVRIx63WvWtbVxgG8J+Vkjgp9hKDwbTBcQoOBIINQUsnDe1gGy8h1VDswUMG4+4hYNwhpv4LumQ2d+gWSqnUwdZQUKFZDIUa4RqiYNyPLMEoUezodNDV7ZUsq1Xq507nvM957/t5zksvTCuqC4K6omnviFElQc0LL9QEJaPvpigvqJhz221zKoL82eT3Omz41Id2/eAlruNn34Idn/vIdTDsE5OeK/i9u9JbtgXBiUjOI3uCTQNgwKZgz7qcyIkg2Haru5qyoCJyKDgSNOxbSuRL9jViyaFIRfDTaVWjtgU7sphXVVewaFwmYWSMW1BQVzWPrB3BdmcCFgQV2XiVNWOoq/tDZlKsimChnfBQEPWd10jwsGVwE7veypnvQs644krKxX8wL+etX9s3h0WCamJ2ExNWREpKIl+40SbLqgoiw536c47UzSTrQcsqQuqrWDaYyGfVHcmdNnRdUEhCPGjDsaBs1T33rCoLjm0kqoYUBOvtqc97YE8jlYFlx2rWjCQ7V62pObac7Cxq2PNAvlkC00qx6fvGY8oNFcFaR4gz1gQVE/F63H58smSaYlzPm5aSgyuCsqun3B9RFqwkipdsxjVepK5mjrinmoRIsNq1clYFUcrSAcypqWdc9MozhFS+xuisjxi7GEvlLuCZVy5mnBMy3rjsWptrrx3gZlf+JA68bnPtmsve9Ar2yCk1PYM91SX9E32nf4p0QS4mh5oF+WXKqpF/K8gWerXIZ6kWuRQzmi3y6HQYO5v2Un9N23pFht33vuf+Soh1X/vejI+N4cCPvvNb6sd/+sMH7nvqZdqeu04c9n2xHTpxt0Vr1ccFW550oTfU1DS6SJ7YcsFku6Iq7qSu9dkzL//ZFOtOfDKFc3uOzu2BbKr6H092eoj4RT41RGw58pVMfL0EGTy2gae+cVNV8awhohN9jTW9cG6DFlP/ffT7G1t3ayJm6d3nAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIyLTAxLTA3VDExOjIwOjI2KzAwOjAwMddkKgAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMi0wMS0wN1QxMToyMDoyNiswMDowMECK3JYAAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAAAAElFTkSuQmCC";
+    quickSettings.setAttribute("href", "#settingsModal");
+    quickSettings.setAttribute("data-toggle", "modal");
+    getMenu.prepend(quickSettings);
+    const quickInventory = document.createElement("img");
+    quickInventory.id = "quick-inventory";
+    quickInventory.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4BAMAAABaqCYtAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAACdQTFRFAAAA0KhgoHhA+PCw+OB46MhgQEhoqKioeHh4WFhYuEgA2GgAgCgAQaYPaAAAAA10Uk5TAP///////////////y0EQa0AAAH3SURBVHictdTNkpNAEABg5IBXe7bgnGGJOSuU3kmT8koq4xnWdZKjFasSHsBKyBuQV/AR9OKj2TP8zMCa1YtdRULPR1MzTIPj/D1ewKsbieO4d/Fbk93Hb2aOncbJkLvL2L7UjacYm9L5J8K0zyLCd+sBcxYnaBCXMfeH+0CAiFnRZt6GkhJmA0KEKLrUFYgpDOgBPKKAoM1KELgCKAyynIUh6AhD7vMRBms1xzaSdF6OK40pHVcyjK3Af0W9lBFaS3kWHf4UmWOjPdsnqErfH49fVeEIS4WoTCkqDCx8pBGsFdbqbGVjsKeRD7WOb3S6KA16wWGM27IwyI50X4LuZ3XkBt1wt9+gLqJyzBancHgG7l3y+rzf9Jgtqofl0Ln3ccJ354PsYlud2LLvXFdtA9vV9VVHXZ+42qTZgBEwOQSH1CDNPULVPG0AYEpDBmklmS905NS3Bj1kcorff/74pXErL9fbWNUyuoWefICbSC30DNJLNEVhLeV/4ZyOHgnWwjwhQhodUAiFhUHfxtzGTPA819W6yveZ2PRIl3LwgbfIIAdGd+la7DMAvefA228CoyMA+Nh3Ju3+GGnA9CZtm43y4NixraQV5ynWzbWLSz3Bl9Xl0mPTnL+M0NOVTaMuocpihI6k4Ua9ZPTXSGcSnplPMbU/xm/a6CAG6AGINQAAAABJRU5ErkJggg=="
+    quickInventory.setAttribute("href", "#showItemsModal");
+    quickInventory.setAttribute("data-toggle", "modal");
+    getMenu.prepend(quickInventory);
     const quickPokedex = document.createElement("img");
-    quickPokedex.id = "quick-pokedex"
-    quickPokedex.src = "data:image/png;base64,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"
-    quickPokedex.setAttribute("href", "#pokedexModal")
-    quickPokedex.setAttribute("data-toggle", "modal")
-    getMenu.prepend(quickPokedex)
+    quickPokedex.id = "quick-pokedex";
+    quickPokedex.src = "data:image/png;base64,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";
+    quickPokedex.setAttribute("href", "#pokedexModal");
+    quickPokedex.setAttribute("data-toggle", "modal");
+    getMenu.prepend(quickPokedex);
 
     var scriptSettings = document.getElementById('settings-scripts');
     // Create scripts settings tab if it doesn't exist yet
@@ -106,10 +112,8 @@ function initVisualSettings() {
     checkWildPokeCatch = localStorage.getItem('checkWildPokeCatch');
     checkAllNotification = localStorage.getItem('checkAllNotification');
     addGlobalStyle('.pageItemTitle { height:38px }');
-    addGlobalStyle('#quick-settings { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
-    addGlobalStyle('#quick-settings:hover { background-color:#ddd;border: 4px solid #ddd; }');
-    addGlobalStyle('#quick-pokedex { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
-    addGlobalStyle('#quick-pokedex:hover { background-color:#ddd;border: 4px solid #ddd; }');
+    addGlobalStyle('#quick-settings, #quick-inventory, #quick-pokedex { height:36px;background-color:#eee;border:4px solid #eee;cursor:pointer; }');
+    addGlobalStyle(':is(#quick-settings, #quick-inventory, #quick-pokedex):hover { background-color:#ddd;border: 4px solid #ddd; }');
     addGlobalStyle('#shortcutsContainer { display: block !important; }');
     addGlobalStyle('.gyms-leaders { display: flex;pointer-events: none;position: absolute;height: 36px;top: 0;left: 0;image-rendering: pixelated; }');
     addGlobalStyle('.gyms-badges { position: absolute;height: 36px;display: flex;top: 0;right: 0; }');
@@ -401,6 +405,60 @@ function initVisualSettings() {
     }
 }
 
+
+function addOptimizeVitamins() {
+    // Add button to vitamin menu
+    // (must execute before game loads and applies knockout bindings)
+    const btn = document.createElement('button');
+    btn.setAttribute('class', 'btn btn-link btn-sm text-decoration-none align-text-top');
+    btn.setAttribute('style', 'line-height: 0.6; font-size: 1rem; float: right;');
+    btn.setAttribute('data-bind', `click: () => { if ($data) { $data.optimizeVitamins() } }, class: (!$data.breeding ? 'text-success' : 'text-muted')`);
+    btn.innerHTML = '⚖';
+    document.querySelector('#pokemonVitaminExpandedModal tbody[data-bind*="PartyController.getvitaminSortedList"] td').appendChild(btn);
+
+    // Add optimize-vitamin functions for party pokemon (adapted from wiki)
+    PartyPokemon.prototype.calcBreedingEfficiency = function(vitaminsUsed) {
+        // attack bonus
+        const attackBonusPercent = (GameConstants.BREEDING_ATTACK_BONUS + vitaminsUsed[GameConstants.VitaminType.Calcium]) / 100;
+        const proteinBoost = vitaminsUsed[GameConstants.VitaminType.Protein];
+        const breedingAttackBonus = (this.baseAttack * attackBonusPercent) + proteinBoost;
+        // egg steps
+        const div = 300;
+        const extraCycles = (vitaminsUsed[GameConstants.VitaminType.Calcium] + vitaminsUsed[GameConstants.VitaminType.Protein]) / 2;
+        const steps = (this.eggCycles + extraCycles) * GameConstants.EGG_CYCLE_MULTIPLIER;
+        const adjustedSteps = (steps <= div ? steps : Math.round(((steps / div) ** (1 - vitaminsUsed[GameConstants.VitaminType.Carbos] / 70)) * div));
+        // efficiency
+        return (breedingAttackBonus / adjustedSteps) * GameConstants.EGG_CYCLE_MULTIPLIER;
+    }
+
+    PartyPokemon.prototype.optimizeVitamins = function() {
+        const totalVitamins = (player.highestRegion() + 1) * 5;
+        const carbosUnlocked = player.highestRegion() >= GameConstants.Region.unova;
+        const calciumUnlocked = player.highestRegion() >= GameConstants.Region.hoenn;
+        // Add our initial starting efficiency here
+        let optimalVitamins = [0, 0, 0];
+        let eff = this.calcBreedingEfficiency(optimalVitamins);
+        // Check all max-vitamin combinations
+        for (let carbos = carbosUnlocked * totalVitamins; carbos >= 0; carbos--) {
+            for (let calcium = calciumUnlocked * (totalVitamins - carbos); calcium >= 0; calcium--) {
+                let protein = totalVitamins - (carbos + calcium);
+                let newEff = this.calcBreedingEfficiency([protein, calcium, carbos]);
+                if (newEff > eff) {
+                    eff = newEff;
+                    optimalVitamins = [protein, calcium, carbos];
+                }
+            }
+        }
+        // Optimally use vitamins
+        GameHelper.enumNumbers(GameConstants.VitaminType).forEach((v) => {
+            this.removeVitamin(v, Infinity);
+            if (v < optimalVitamins.length && optimalVitamins[v] > 0) {
+                this.useVitamin(v, optimalVitamins[v]);
+            }
+        });
+    }
+}
+
 if (localStorage.getItem('checkWildPokeName') == null) {
     localStorage.setItem("checkWildPokeName", "OFF");
 }
@@ -421,13 +479,15 @@ if (localStorage.getItem('checkAllNotification') == null) {
 }
 
 function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+    var oldInit = Preload.hideSplashScreen;
 
-    Preload.hideSplashScreen = function(){
+    Preload.hideSplashScreen = function() {
         var result = oldInit.apply(this, arguments)
-        initVisualSettings()
-        return result
+        initVisualSettings();
+        return result;
     }
+
+    addOptimizeVitamins();
 }
 
 function addGlobalStyle(css) {
