@@ -64,23 +64,25 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 <hr>
 
 ## **Additional Visual Settings** ([additionalvisualsettings.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/additionalvisualsettings.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/additionalvisualsettings.user.js))
-This script adds new options in the Visual settings tab. These new options are shown here:<br>
+This script adds new options to customize the game's graphics alongside a handful of other quality of life features.
+
+### **Visual Settings**
+
+The added visual settings are found in the Scripts settings tab. Several of these new options are shown here:<br>
 
 ![](https://i.imgur.com/sWlhKlx.png)
 
 I made these options as a hacky way to help save on some performance, especially when you are idling and leaving the game open for longer periods of time. This ends up removing these HTML elements that are constantly getting updated, so that the DOM is less flooded. After enabling any of these options, you will have to change routes for these settings to take effect. When disabling, you will have to go to something like a Town/Dungeon then back to a route for these to start working again.
 
-This script also includes support for a quick Settings button, as shown below:<br>
-
-![](https://i.imgur.com/GHt61hr.png)
-
-The gear icon to the left of the Start Menu that you see here.
-
-![](https://i.imgur.com/8H1ZeBV.png)
-
 As of 1.3 there is now an option for disabling all notifications, this may be especially helpful if you are using Enhanced Auto Mine. This may also cause some popups and other things to not appear (such as trying to manually Skip layers in the Underground). You can still hear when you get shinies using this, but you won't be able to see what shiny you received. I have not fully tested this, so feel free to experiment with this setting.
 
-Additionally it now features a button above the map to quickly open the dock so you don't have to search for it, especially useful is alola.
+### **Convenience features**
+
+The script adds various buttons for quicker navigation and quality of life.
+
+• Quick Settings, Inventory, and Pokédex buttons, found to the left of the Start Menu.
+• Quick Dock, Gyms, and Dungeons buttons, found above the Town Map so you don't have to search for them. The Gyms and Dungeons buttons show all in the current region.
+• Optimize vitamins buttons, found in the all vitamins menu. This feature uses the optimal combination of vitamins for your current region on the pokemon you select (assuming you have enough). It looks like a set of scales: ⚖
 
 <hr>
 
@@ -278,17 +280,17 @@ This script is a simple Auto Farmer which adds 4 new buttons below the Plant and
 
 ![](https://i.imgur.com/ei7lR95.png)
 
-Auto Farm will plant the berry that you have selected and harvest all berries when they are ready. Auto mulch works in conjunction with Auto Farm, so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the mulch that you have selected on the entire field. This will also work with the Farm window closed, and these settings will persist upon refresh/browser close.
+• Auto Farm will plant the berry that you have selected.
+• Auto Harvest will harvest all ripe berries.
+• Auto Replant will wait for ripe berries to be close to withering before harvesting, then replant the same kind of berry in that plot. This can be especially useful for mutating berries.
+• Auto Mulch will wait for mulch to be close to running out, then use the same kind of mulch on that plot.
 
-Auto Replant will wait for planted berries to be close to withering then harvest and plant them again in the same spot. This can be expecially useful when trying to mutate berries.
+The Auto Farmer runs even while the farm window is closed. It also now saves your berry selection when the game restarts, to avoid farming interruptions.
 
 ```diff
 - Note: the Auto Farmer runs once every 1 second.
-- Note: activating Auto Replant will momentarily block other features from being enabled.
-- Note: activating Auto Plant, Auto Harvest or Auto Mulch will momentarily block Auto Replant from being enabled.
+- Note: Auto Replant cannot be used alongside Auto Plant or Auto Harvest.
 ```
-
-I plan to update this Auto Farmer with some additional features later on.
 
 <hr>
 
