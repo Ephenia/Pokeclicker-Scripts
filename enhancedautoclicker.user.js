@@ -20,6 +20,7 @@
 
 var scriptName = 'enhancedautoclicker';
 const ticksPerSecond = 20;
+const maxClickMultiplier = 5;
 // Auto Clicker
 var autoClickState = ko.observable(false);
 var autoClickMultiplier;
@@ -54,7 +55,6 @@ var calcAreaHealth;
 var gymGraphicsDisabled = ko.observable(false);
 var dungeonGraphicsDisabled = ko.observable(false);
 
-
 /* Initialization */
 
 function initAutoClicker() {
@@ -70,7 +70,7 @@ function initAutoClicker() {
     </button>
     <div id="click-rate-cont">
     <div id="auto-click-rate-info">Click Attack Rate: ${(ticksPerSecond * autoClickMultiplier).toLocaleString('en-US', {maximumFractionDigits: 2})}/s</div>
-    <input id="auto-click-rate" type="range" min="1" max="5" value="${autoClickMultiplier}">
+    <input id="auto-click-rate" type="range" min="1" max="${maxClickMultiplier}" value="${autoClickMultiplier}">
     </div>
     </td></tr>
     <tr style="display: flex;">
@@ -85,8 +85,19 @@ function initAutoClicker() {
   </select>
     </td>
     <td style="display: flex; flex-direction: column;">
-  <select id="auto-dungeon-loottier" style="flex: auto;">
-    ${Object.keys(baseLootTierChance).reduce((s, tier, i) => (s + `<option value="${i}">${tier}</option>\n`), '').trim()}
+    <div id="auto-dungeon-loottier" class="dropdown show">
+        <button type="button" class="text-left custom-select col-12 btn btn-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="max-height:30px; display:flex; flex:1; align-items:center;">
+            <div id="auto-dungeon-loottier-text" ${autoDungeonLootTier > -1 ? 'style="display:none;' : ''}>None</div>
+            <img id="auto-dungeon-loottier-img" src="${autoDungeonLootTier > -1 ? `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[autoDungeonLootTier]}.png` : ''}" style="height:100%; ${autoDungeonLootTier > -1 ? '' : 'display:none;'}">
+        </button>
+        <div id="auto-dungeon-loottier-dropdown" class="border-secondary dropdown-menu col-12">
+        <div class="dropdown-item dropdown-text" value="-1">None</div>
+        ${Object.keys(baseLootTierChance).reduce((options, tier, i) => {
+            return options + `<div class="dropdown-item" value="${i}">`
+                + `<img src="assets/images/dungeons/chest-${tier}.png"></div>\n`;
+        }, '').trim()}
+        </div>
+    </div>
     </td>
     <td style="flex: auto;">
     <button id="auto-gym-start" class="btn btn-block btn-${autoGymState() ? 'success' : 'danger'}" style="font-size: 8pt;">
@@ -175,7 +186,6 @@ function initAutoClicker() {
 
     document.getElementById('auto-gym-select').value = autoGymSelect;
     document.getElementById('auto-dungeon-mode').value = autoDungeonMode;
-    document.getElementById('auto-dungeon-loottier').value = autoDungeonLootTier;
     document.getElementById('select-calculatorEfficiencyDisplay').value = calculatorEfficiencyDisplay;
     document.getElementById('select-calculatorDamageDisplay').value = calculatorDamageDisplay;
     document.getElementById('checkbox-gymGraphicsDisabled').checked = gymGraphicsDisabled();
@@ -193,9 +203,14 @@ function initAutoClicker() {
     document.getElementById('select-calculatorEfficiencyDisplay').addEventListener('change', (event) => { changeCalcEfficiencyDisplay(event); } );
     document.getElementById('select-calculatorDamageDisplay').addEventListener('change', (event) => { changeCalcDamageDisplay(event); } );
 
+    document.querySelectorAll('#auto-dungeon-loottier-dropdown > div').forEach((elem) => {
+        elem.addEventListener('click', () => { changeDungeonLootTier(elem.getAttribute('value')); });
+    });
+
     addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
     addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
     addGlobalStyle('#click-rate-cont { display: flex; flex-direction: column; align-items: stretch;}');
+    addGlobalStyle('#auto-dungeon-loottier-dropdown img { max-height: 30px; width: auto; }')
 
     overrideGymRunner()
     overrideDungeonRunner();
@@ -279,10 +294,20 @@ function changeDungeonMode(event) {
     }
 }
 
-function changeDungeonLootTier(event) {
-    const val = +event.target.value;
-    if ([...Object.keys(baseLootTierChance).keys()].includes(val)) {
+function changeDungeonLootTier(tier) {
+    const val = +tier;
+    if ([-1, ...Object.keys(baseLootTierChance).keys()].includes(val)) {
         autoDungeonLootTier = val;
+        if (val > -1) {
+            document.getElementById('auto-dungeon-loottier-img').setAttribute('src', `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[val]}.png`);
+            document.getElementById('auto-dungeon-loottier-img').style.removeProperty('display');
+            document.getElementById('auto-dungeon-loottier-text').style.setProperty('display', 'none');
+        } else {
+            document.getElementById('auto-dungeon-loottier-img').setAttribute('src', '');
+            document.getElementById('auto-dungeon-loottier-img').style.setProperty('display', 'none');
+            document.getElementById('auto-dungeon-loottier-text').style.removeProperty('display');
+        }
+        
         localStorage.setItem("autoDungeonLootTier", autoDungeonLootTier);
     }
 }
@@ -527,8 +552,8 @@ function scan() {
             }
         }
     }
-    // Sort chests by rarity
-    dungeonChestCoords.sort((a, b) => a.tier - b.tier);
+    // Sort chests by descending rarity
+    dungeonChestCoords.sort((a, b) => b.tier - a.tier);
     // TODO find a more future-proof way to get flash distance
     dungeonFlashDistance = DungeonRunner.map.flash?.playerOffset[0] ?? 0;
     dungeonFlashCols = [];
@@ -560,7 +585,12 @@ function seekBoss() {
         if (dungeonBoard[dungeonFloor][dungeonBossCoords.y][dungeonBossCoords.x].isVisible) {
             // Boss tile unlocked
             if (dungeonBoard[dungeonFloor][dungeonBossCoords.y][dungeonBossCoords.x].isVisited) {
-                let chestIndex = dungeonChestCoords.findIndex((chest) => 'visibleFrom' in chest && chest.tier >= autoDungeonLootTier);
+                let chestIndex;
+                if (autoDungeonLootTier > -1) {
+                    chestIndex = dungeonChestCoords.findIndex((chest) => 'visibleFrom' in chest && chest.tier >= autoDungeonLootTier);
+                } else {
+                    chestIndex = -1;
+                }
                 // Open chests first
                 if (chestIndex > -1) {
                     let chest = dungeonChestCoords[chestIndex];
@@ -693,8 +723,8 @@ function fullClear() {
         }
     }
     // Floor explored, open chests
-    if (dungeonChestCoords.length > 0 && dungeonChestCoords.at(-1).tier >= autoDungeonLootTier) {
-        var chestPos = dungeonChestCoords.pop().pos;
+    if (dungeonChestCoords.length > 0 && dungeonChestCoords[0].tier >= autoDungeonLootTier) {
+        var chestPos = dungeonChestCoords.shift().pos;
         DungeonRunner.map.moveToCoordinates(chestPos.x, chestPos.y);
         DungeonRunner.openChest();
     }
@@ -810,7 +840,11 @@ function calcClickStats() {
 
                 // Required clicks/click damage
                 elem = document.getElementById('req-clicks');
-                if (calculatorDamageDisplay == 1) {
+                if (calcAreaHealth == 0) {
+                    // can't meaningfully calculate a value for this area/game state
+                    elem.innerHTML = '-';
+                    elem.style.removeProperty('color');
+                } else if (calculatorDamageDisplay == 1) {
                     // display damage mode
                     var reqDamage = calcAreaHealth;
                     elem.innerHTML = reqDamage.toLocaleString('en-US');
@@ -828,6 +862,7 @@ function calcClickStats() {
                 var avgEnemies = (App.game.statistics.totalPokemonDefeated() - calcEnemies.at(-1)) / calcEnemies.length;
                 avgEnemies = avgEnemies / actualElapsed;
                 elem.innerHTML = avgEnemies.toLocaleString('en-US', {maximumFractionDigits: 1});
+                elem.style.color = 'gold';
 
                 // Make room for next second's stats tracking
                 // Add new entries to start of array for easier incrementing
@@ -871,7 +906,7 @@ function resetCalculator() {
     document.getElementById('auto-click-info').innerHTML = `<div>${calculatorEfficiencyDisplay == 0 ? 'Clicker Efficiency' : 'Ticks/s'}:<br><div id="tick-efficiency" style="font-weight:bold;">-</div></div>
         <div>${calculatorDamageDisplay == 0 ? 'Click Attacks/s' : 'DPS'}:<br><div id="clicks-per-second" style="font-weight:bold;">-</div></div>
         <div>Req. ${calculatorDamageDisplay == 0 ? 'Clicks' : 'Click Damage'}:<br><div id="req-clicks" style="font-weight:bold;">-</div></div>
-        <div>Enemies/s:<br><div id="enemies-per-second" style="font-weight:bold; color:gold;">-</div></div>`;
+        <div>Enemies/s:<br><div id="enemies-per-second" style="font-weight:bold;">-</div></div>`;
 }
 
 
@@ -894,6 +929,11 @@ function hasPlayerMoved() {
             moved = true;
         }
         calcPlayerLocation = DungeonRunner.dungeon.name;
+    } else if (calcPlayerState === GameConstants.GameState.temporaryBattle) {
+        if (calcPlayerLocation != TemporaryBattleRunner.battleObservable().name) {
+            moved = true;
+        }
+        calcPlayerLocation = TemporaryBattleRunner.battleObservable().name;
     } else {
         // Conveniently, player.route() = 0 when not on a route
         if (calcPlayerLocation != (player.route() || player.town().name)) {
@@ -920,6 +960,9 @@ function calculateAreaHealth() {
         calcAreaHealth = GymRunner.gymObservable().getPokemonList().reduce((a, b) => Math.max(a, b.maxHealth), 0);
     } else if (App.game.gameState === GameConstants.GameState.dungeon) {
         calcAreaHealth = DungeonRunner.dungeon.baseHealth;
+    } else if (App.game.gameState === GameConstants.GameState.temporaryBattle) {
+        // Get highest health trainer pokemon
+        calcAreaHealth = TemporaryBattleRunner.battleObservable().getPokemonList().reduce((a, b) => Math.max(a, b.maxHealth), 0);
     } else {
         calcAreaHealth = 0;
     }
@@ -941,16 +984,6 @@ function addGraphicsBindings() {
     DungeonRunner.disableAutoDungeonGraphics = ko.pureComputed( () => {
         return dungeonGraphicsDisabled() && autoClickState() && autoDungeonState();
     });
-    /*
-    GymBattle.leaderNameComputable = ko.pureComputed( () => {
-        gymChangedNotifier();
-        return GymBattle.gym.leaderName;
-    });
-    GymBattle.imagePathComputable = ko.pureComputed( () => {
-        gymChangedNotifier();
-        return GymBattle.gym.imagePath;
-    });
-    */
 
     // Add gymView data bindings
     var gymContainer = document.querySelector('div[data-bind="if: App.game.gameState === GameConstants.GameState.gym"]');
@@ -971,13 +1004,6 @@ function addGraphicsBindings() {
     // Always hide stop button during autoGym, even with graphics enabled
     var restartButton = gymContainer.querySelector('button[data-bind="visible: GymRunner.autoRestart()"]');
     restartButton.setAttribute('data-bind', 'visible: GymRunner.autoRestart() && !GymRunner.autoGymOn()');
-    // Make leader name and sprites use observables to support gym-cycling mode
-    /*
-    var leaderNameElem = gymContainer.querySelector('knockout[data-bind*="GymBattle.gym.leaderName"]');
-    leaderNameElem.setAttribute('data-bind', leaderNameElem.getAttribute('data-bind').replace('GymBattle.gym.leaderName', 'GymBattle.leaderNameComputable()'));
-    var leaderSpriteElem = gymContainer.querySelector('img[data-bind*="GymBattle.gym.imagePath"]');
-    leaderSpriteElem.setAttribute('data-bind', leaderSpriteElem.getAttribute('data-bind').replace('GymBattle.gym.imagePath', 'GymBattle.imagePathComputable()'));
-    */
 
     // Add dungeonView data bindings
     var dungeonContainer = document.querySelector('div[data-bind="if: App.game.gameState === GameConstants.GameState.dungeon"]');
@@ -1030,8 +1056,8 @@ if (![0, 1].includes(autoDungeonMode)) {
     autoDungeonMode = 0;
 }
 autoDungeonLootTier = validateStorage('autoDungeonLootTier', 'number') ?? 0;
-if(![...Object.keys(baseLootTierChance).keys()].includes(autoDungeonLootTier)) {
-    autoDungeonLootTier = 0;
+if(![-1, ...Object.keys(baseLootTierChance).keys()].includes(autoDungeonLootTier)) {
+    autoDungeonLootTier = -1;
 }
 
 // Stats calculator

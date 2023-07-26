@@ -184,6 +184,8 @@ This script is based on one originally created by <b>Ivan Lay</b>, which [can be
 
 The main Auto Clicker button can be found under your currencies. Clicking it toggles the Auto Clicker on/off without the need of a refresh. This setting will also save and persist through page refresh/close.
 
+You can also adjust the number of clicks made per second. Higher click rates still max out at 20 enemies defeated per second, as the Auto Clicker makes multiple clicks simultaneously to reduce lag. Please note that while older script versions allowed you to set the Auto Clicker to up to 1000 clicks per second, this setting and its resulting click measurements <strong>were not</strong> accurate. The game engine cannot support speeds that high and the current version should provide similar performance.
+
 The Auto Clicker button displays various statistics while running:<br>
 
 <strong>• Clicker Efficiency</strong> - How close the Auto Clicker is to its maximum speed. The closer to 100%, the better.<br>
@@ -207,9 +209,10 @@ The Auto Dungeon feature is found below the Auto Click button. Some notes about 
 
 • Auto Dungeon will only work while the Auto Clicker is active.<br>
 • Auto Dungeon when activated will automatically explore the current dungeon, or begin exploring a dungeon whose entrance you are at. 
-• There is a dropdown to the right of the Auto Dungeon button to choose between two modes:<br><br>
-<strong>"F" for Farm Mode</strong> - this runs through the dungeon in its entirety and fights all the enemies as well as loot all the chests, saving the boss for last. It now waits to open chests until right before the boss fight for faster clearing.<br/>
-<strong>"B" for Boss Rusher</strong> - this tries to clear the dungeon as fast as possible to fight the boss. Chests are not opened as they increase enemy HP, making clearing slower. If you have unlocked Flash for a dungeon, this mode will now use it to find the boss while visiting as few columns as possible. It does not include pathfinding that uses information, like the location of the boss, not visible to the player.
+• There are two dropdowns to the right of the Auto Dungeon button. The first chooses between two modes:<br><br>
+<strong>"F" for Farm mode</strong> - this runs through the dungeon in its entirety and fights all the enemies, saving the boss for last. It now waits to open chests until right before the boss fight for faster clearing.<br/>
+<strong>"B" for Boss mode</strong> - this tries to clear the dungeon as fast as possible to fight the boss. If you have unlocked Flash for a dungeon, this mode will now use it to find the boss while visiting as few columns as possible. It does not include pathfinding that uses information, like the location of the boss, not visible to the player.
+• The second dropdown determines which chests, if any, Auto Dungeon will open. If you choose a tier of chest, Auto Dungeon will open chests of that tier or greater right before fighting the boss. In Farm mode it will open every chest of those tiers; in Boss mode it will open chests that were already visited or are visible with Flash. When "None" is selected, Auto Dungeon will predictably not open chests.
 
 ### **Graphics settings**
 
