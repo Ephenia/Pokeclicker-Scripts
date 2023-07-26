@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name          [Pokeclicker] Additional Visual Settings
 // @namespace     Pokeclicker Scripts
-// @author        Ephenia
+// @author        Ephenia (Credit: Optimatum)
 // @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.4.1
+// @version       2.5
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
