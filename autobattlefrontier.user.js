@@ -83,22 +83,16 @@ class AutoBattleFrontier {
 
         const oldPokemonAttack = BattleFrontierBattle.pokemonAttack;
         BattleFrontierBattle.pokemonAttack = function() {
-            if (!BattleFrontierBattle.enemyPokemon()) {
-                return;
-            }
             // One Click check
-            let willReset = false;
             if (AutoBattleFrontier.bfOneClickState) {
-                let attackDmg = App.game.party.calculatePokemonAttack(Battle.enemyPokemon().type1, Battle.enemyPokemon().type2, true);
-                if (Battle.enemyPokemon().maxHealth() > attackDmg) {
-                    willReset = true;
+                // Safety check the enemy exists (relevant for exiting the frontier)
+                if (BattleFrontierBattle.enemyPokemon() && 
+                    Battle.enemyPokemon().maxHealth() > App.game.party.calculatePokemonAttack(Battle.enemyPokemon().type1, Battle.enemyPokemon().type2, true)) {
+                        AutoBattleFrontier.battleReset();
+                    }
                 }
             }
-            var result = oldPokemonAttack.apply(this, arguments);
-            if (willReset) {
-                AutoBattleFrontier.battleReset();
-            }
-            return result;
+            return oldPokemonAttack.apply(this, arguments);
         }
     }
 
