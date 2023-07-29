@@ -52,6 +52,7 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 7. [**Overnight Berry Growth** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-overnight-berry-growth-overnightberrygrowth-one-click-install)
 8. [**Perky Pokerus Pandemic** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-perky-pokerus-pandemic-perkypokeruspandemicuserjs-one-click-install)
 9. [**Simple Weather Changer** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-simple-weather-changer-simpleweatherchangeruserjs-one-click-install)
+9. [**Auto Safari** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-auto-safari--auto-safariuserjs-one-click-install)
 
 
 ```diff
@@ -403,6 +404,18 @@ This script lets you freely edit the weather of the region you are currently in 
 ![image](https://i.imgur.com/2cBIfyH.png)
 
 In addition it will also prevent the weather from changing and will remember you choice when reloading the game
+
+<hr>
+
+## **[Custom] Auto Safari** ([autosafari.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autosafari.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/autosafari.user.js))
+This script script performs actions on both safari zones :
+- auto moving
+- auto battling
+- auto pick items
+- auto relaunch safari
+- fast animation speed during safari
+
+<br>
 
 <hr>
 
