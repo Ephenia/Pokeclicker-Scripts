@@ -3,7 +3,14 @@
 // @namespace     Pokeclicker Scripts
 // @author        Kanzen01 (Credit: Ephenia)
 // @description   Auto safari
-// @version       1.0.0
+// @copyright     https://github.com/Kanzen01
+// @license       GPL-3.0 License
+// @version       1.0
+
+// @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
+// @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/autosafari.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/autosafari.user.js
 
 // @match         https://www.pokeclicker.com/
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
