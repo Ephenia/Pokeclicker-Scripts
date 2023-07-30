@@ -1,16 +1,16 @@
 // ==UserScript==
-// @name          [Pokeclicker] Auto Safari
+// @name          [Pokeclicker] Auto Safari Zone
 // @namespace     Pokeclicker Scripts
 // @author        Kanzen01 (Credit: Ephenia)
-// @description   Auto safari
+// @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
 // @version       1.0
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
-// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/autosafari.user.js
-// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/autosafari.user.js
+// @downloadURL   https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/autosafarizone.user.js
+// @updateURL     https://raw.githubusercontent.com/Ephenia/Pokeclicker-Scripts/master/custom/autosafarizone.user.js
 
 // @match         https://www.pokeclicker.com/
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
@@ -18,7 +18,7 @@
 // @run-at        document-idle
 // ==/UserScript==
 
-var scriptName = 'autosafari';
+var scriptName = 'autosafarizone';
 
 var autoSafariState;
 var safAutoPickState;
@@ -209,7 +209,7 @@ function initAutoSafari() {
         // Auto safari button
         const autoSafariBtn = document.createElement("button");
         autoSafariBtn.setAttribute("id", "saf-auto-btn");
-        autoSafariBtn.classList.add("btn", "btn-block", "btn-"+autoSafariState === "OFF" ? "danger" : "success");
+        autoSafariBtn.classList.add("btn", "btn-block", autoSafariState === "OFF" ? "btn-danger" : "btn-success");
         autoSafariBtn.style.fontSize = "8pt";
         autoSafariBtn.style.width = "50%"
         autoSafariBtn.textContent = "Auto Safari [" + autoSafariState + "]";
@@ -218,7 +218,7 @@ function initAutoSafari() {
         // Auto pick items button
         const pickItemsBtn = document.createElement("button");
         pickItemsBtn.setAttribute("id", "saf-auto-pick-btn");
-        pickItemsBtn.classList.add("btn", "btn-block", "btn-"+safAutoPickState === "OFF" ? "danger" : "success");
+        pickItemsBtn.classList.add("btn", "btn-block", safAutoPickState === "OFF" ? "btn-danger" : "btn-success");
         pickItemsBtn.style.fontSize = "8pt";
         pickItemsBtn.style.width = "50%"
         pickItemsBtn.style.marginTop = "0px"
@@ -228,11 +228,11 @@ function initAutoSafari() {
         // Fast animations button
         const fastAnimationsBtn = document.createElement("button");
         fastAnimationsBtn.setAttribute("id", "saf-fast-anim-btn");
-        fastAnimationsBtn.classList.add("btn", "btn-block", "btn-"+fastAnimationsColor === "OFF" ? "danger" : "success");
+        fastAnimationsBtn.classList.add("btn", "btn-block", fastAnimationsState === "OFF" ? "btn-danger" : "btn-success");
         fastAnimationsBtn.style.fontSize = "8pt";
         fastAnimationsBtn.style.width = "50%"
         fastAnimationsBtn.style.marginTop = "0px"
-        fastAnimationsBtn.textContent = "Fast Animations [" + fastAnimationsColor + "]";
+        fastAnimationsBtn.textContent = "Fast Animations [" + fastAnimationsState + "]";
         fastAnimationsBtn.addEventListener('click', event => { toggleFastAnimations() });
 
         buttonsContainer.style.display = "flex";
