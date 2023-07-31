@@ -289,7 +289,7 @@ function initAutoSafari() {
       SafariBattle.Speed.enemyTransition = 1000;
       characterMovementSpeed = 250;
     }
-    localStorage.setItem('safAutoPickState', fastAnimationsState);
+    localStorage.setItem('fastAnimationsState', fastAnimationsState);
     document.getElementById('saf-fast-anim-btn').innerHTML = `Fast Animations [${fastAnimationsState}]`;
   }
 }
