@@ -93,7 +93,7 @@ This script adds in a stage resetter to the Battle Frontier.<br>
 
 You can specify a maximum stage in the input box on the right. When you complete that stage, you will earn the Battle Points and money for failing the stage, and then restart from the beginning. This allows you stay inside the Battle Frontier indefinitely farming BP while fully AFK.
 
-The Max Attacks mode restarts the Battle Frontier when you reach a stage with battles that you cannot defeat in the specified number of clicks, allowing you to loop through the early stages for quicker farming. The button toggles through 1 click, 2 clicks, and disabling the mode. Max Attacks is an enhancement of the previous One Click mode: the two-click mode is slightly more efficient for farming BP.
+The Max Attacks mode restarts the Battle Frontier when you reach a stage with battles that you cannot defeat in the specified number of attacks, allowing you to loop through the early stages for quicker farming. The button toggles through 1 attack, 2 attacks, and disabling the mode. Max Attacks is an enhancement of the previous One Click mode: the two-attack mode is slightly more efficient for farming BP.
 
 <hr>
 
@@ -226,25 +226,23 @@ The Auto Clicker now includes graphics settings for Auto Gym and Auto Dungeon to
 <hr>
 
 ## **Enhanced Auto Hatchery** ([enhancedautohatchery.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautohatchery.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautohatchery.user.js))
-This script was originally created by <b>Ivan Lay & Drak</b> and [can be found over here](//greasyfork.org/en/scripts/432768-auto-hatchery-edit-pokeclicker-com).
+This script is based on one created by <b>Ivan Lay & Drak</b> which [can be found over here](//greasyfork.org/en/scripts/432768-auto-hatchery-edit-pokeclicker-com).
 
-I wanted to take and re-make this script, not only to make it be another enhanced version of a script to add to the list, but also to fix and improve upon the original. Also, I found that the auto placement of store bought eggs & fossils wasn't working for me in the other script, so I re-wrote the entire code to hopefully make it a lot better as well as future-proof.
-
-Anyway, here's what this script adds:<br>
+The Auto Hatchery automatically hatches eggs and places new eggs/fossils in the hatchery. 
 
 ![](https://i.imgur.com/VpL6TTr.png)
 
-A button that will toggle On/Off the auto hatching of eggs.
-
-There is also this as well:<br>
+This button on the main-screen hatchery display toggles the Auto Hatchery.
 
 ![](https://i.imgur.com/J0QvYc2.png)
 
-When you open up the Daycare, you will see another button for automatically placing store bought eggs as well as fossils that you have dug up. This will randomly place what you have inside the Hatchery, and it will also prioritize placing them if you have any of the two available.
+These buttons inside the hatchery control the various Auto Hatchery modes, which activate in the following order.
 
-```diff
-- Note: the Auto Hatchery runs every 0.05 seconds.
-```
+• PKRS Mode tries to spread Pokerus. If you have an uninfected pokemon and a contagious pokemon that share a type, it will put them in the hatchery together.
+• Auto Egg hatches eggs (the items), if you have any.
+• Auto Fossil revives fossils, if you have any. When in Shiny Fossils mode, it will ignore fossils for which you already have the corresponding shiny.
+
+If none of the above modes are enabled or have targets, the Auto Hatchery will select the first pokemon (in hatchery sort order) that matches your hatchery filters. If none match, it will select the first possible pokemon.
 
 <hr>
 
