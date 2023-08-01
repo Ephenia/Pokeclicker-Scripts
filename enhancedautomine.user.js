@@ -223,7 +223,6 @@ function doAutoMine() {
         if (!Mine.loadingNewLayer) {
             Mine.loadingNewLayer = true;
             setTimeout(Mine.completed, 1500);
-            GameHelper.incrementObservable(App.game.statistics.undergroundLayersMined);
             if (Mine.skipsRemaining() > 0) {
                 GameHelper.incrementObservable(Mine.skipsRemaining, -1);
             }
