@@ -80,8 +80,8 @@ As of 1.3 there is now an option for disabling all notifications, this may be es
 
 The script adds various buttons for quicker navigation and quality of life.
 
-• Quick Settings, Inventory, and Pokédex buttons, found to the left of the Start Menu.
-• Quick Dock, Gyms, and Dungeons buttons, found above the Town Map so you don't have to search for them. The Gyms and Dungeons buttons show all in the current region.
+• Quick Settings, Inventory, and Pokédex buttons, found to the left of the Start Menu.<br/>
+• Quick Dock, Gyms, and Dungeons buttons, found above the Town Map so you don't have to search for them. The Gyms and Dungeons buttons show all in the current region.<br/>
 • Optimize vitamins buttons, found in the all vitamins menu. This feature uses the optimal combination of vitamins for your current region on the pokemon you select (assuming you have enough). It looks like a set of scales: ⚖
 
 <hr>
@@ -234,13 +234,13 @@ The Auto Hatchery automatically hatches eggs and places new eggs/fossils in the 
 
 This button on the main-screen hatchery display toggles the Auto Hatchery.
 
-![](https://i.imgur.com/J0QvYc2.png)
+![](https://github.com/Ephenia/Pokeclicker-Scripts/assets/12092270/acc89fd5-c559-4e21-a86b-ff2661f7bf3d)
 
 These buttons inside the hatchery control the various Auto Hatchery modes, which activate in the following order.
 
-• PKRS Mode tries to spread Pokerus. If you have an uninfected pokemon and a contagious pokemon that share a type, it will put them in the hatchery together.
+• PKRS Mode tries to spread Pokerus. If you have an uninfected pokemon and a contagious pokemon that share a type, it will put them in the hatchery together.<br/>
 • Auto Egg hatches eggs (the items), if you have any.
-• Auto Fossil revives fossils, if you have any. When in Shiny Fossils mode, it will ignore fossils for which you already have the corresponding shiny.
+• Auto Fossil revives fossils, if you have any. When in Shiny Fossils mode, it will ignore fossils for which you already have the corresponding shiny.<br/>
 
 If none of the above modes are enabled or have targets, the Auto Hatchery will select the first pokemon (in hatchery sort order) that matches your hatchery filters. If none match, it will select the first possible pokemon.
 
@@ -281,9 +281,9 @@ This script is a simple Auto Farmer which adds 4 new buttons below the Plant and
 
 ![](https://i.imgur.com/ei7lR95.png)
 
-• Auto Farm will plant the berry that you have selected.
-• Auto Harvest will harvest all ripe berries.
-• Auto Replant will wait for ripe berries to be close to withering before harvesting, then replant the same kind of berry in that plot. This can be especially useful for mutating berries.
+• Auto Farm will plant the berry that you have selected.<br/>
+• Auto Harvest will harvest all ripe berries.<br/>
+• Auto Replant will wait for ripe berries to be close to withering before harvesting, then replant the same kind of berry in that plot. This can be especially useful for mutating berries.<br/>
 • Auto Mulch will wait for mulch to be close to running out, then use the same kind of mulch on that plot.
 
 The Auto Farmer runs even while the farm window is closed. It also now saves your berry selection when the game restarts, to avoid farming interruptions.
