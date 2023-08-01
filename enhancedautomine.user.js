@@ -5,7 +5,7 @@
 // @description   Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.1
+// @version       2.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -26,7 +26,6 @@ var awaitAutoMine;
 var setThreshold;
 var autoMineTimer;
 var busyMining;
-//var autoMineSkip;
 var layersMined;
 var sellTreasureState;
 var treasureHunter;
@@ -65,7 +64,6 @@ function initAutoMine() {
     document.getElementById('treasure-hunter').value = treasureHunter;
     document.getElementById('item-threshold').value = itemThreshold.toLocaleString('en-US');
     setTreasureImage();
-    //document.getElementById('auto-skip').value = autoMineSkip.toLocaleString('en-US');
     const autoSeller = document.createElement("div");
     autoSeller.innerHTML = `<div>
     <button id="auto-sell-treasure" class="col-12 col-md-3 btn btn-${sellTreasureState ? 'success' : 'danger'}">Auto Sell Treasure [${sellTreasureState ? 'ON' : 'OFF'}]</button>
@@ -87,20 +85,11 @@ function initAutoMine() {
         localStorage.setItem("itemThreshold", itemThreshold);
         event.target.value = itemThreshold.toLocaleString('en-US');
     });
-    /*
-    document.querySelector('#auto-skip').addEventListener('input', event => {
-        autoMineSkip = +event.target.value.replace(/[A-Za-z!@#$%^&*()]/g, '').replace(/[,]/g, "");
-        localStorage.setItem("autoMineSkip", autoMineSkip);
-        event.target.value = autoMineSkip.toLocaleString('en-US');
-    });
-    */
 
     addGlobalStyle('#threshold-input { display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center; }');
     addGlobalStyle('#item-threshold-input { display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center; }');
     addGlobalStyle('#small-restore { width:150px; }');
     addGlobalStyle('#item-threshold { width:75px; }');
-    //addGlobalStyle('#skip-input { display:flex;flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:space-evenly;align-items:center; }');
-    //addGlobalStyle('#auto-skip { width:100px; }');
 }
 
 function startAutoMine(event) {
@@ -114,7 +103,6 @@ function startAutoMine(event) {
         }, 1000); // Happens every 1 second
     } else {
         clearTimeout(busyMining);
-        //clearTimeout(mineComplete);
         clearInterval(autoMineTimer)
     }
     localStorage.setItem('autoMineState', mineState);
@@ -177,7 +165,7 @@ function doAutoMine() {
             if ((getCost == 30000) && (smallRestore == 0) && (getMoney >= setThreshold + 30000)) {
                 ItemList["SmallRestore"].buy(1);
             }
-            if (getEnergy < 15) {
+            if (getEnergy < Math.max(App.game.underground.getSurvey_Cost(), Underground.BOMB_ENERGY)) {
                 if (largeRestore > 0) {
                     ItemList["LargeRestore"].use();
                 } else if (mediumRestore > 0) {
@@ -196,88 +184,52 @@ function doAutoMine() {
             }
             return true;
         } else {
-            let minedThisInterval = false;
             if (getEnergy >= 1) {
-                if (Mine.toolSelected() != 0) {
-                    Mine.toolSelected(Mine.Tool.Chisel);
-                }
-                let mineBody = document.querySelector(`div[id="mineBody"]`);
-                let mineGrid = mineBody.children;
-                let rewards = mineBody.querySelectorAll('.mineReward');
-                for (var ii = 0; ii < rewards.length; ii++) {
-                    var reward = rewards[ii];
-                    var rewardParent = reward.parentNode;
-                    var ri = +reward.parentNode.getAttribute('data-i');
-                    var rj = +reward.parentNode.getAttribute('data-j');
-                    //the tile's classes describe the dimensions of the shape, the coordinates of the tile within the image, and the rotation of the image
-                    let classList = reward.classList;
-                    let rotations = +classList[3].split("-")[1]; //e.g. 1
-                    const sizeString = classList[1].split("-"); //e.g. ["size", "3", "3"]
-                    let size = [+sizeString[1], +sizeString[2]]
-                    const positionString = classList[2].split("-"); //e.g. ["pos", "1", "1"];
-                    const originalPos = [+positionString[1], +positionString[2]];
-                    let pos;
-
-                    //originalPos is relative to the top left corner [0,0] of the unrotated image
-                    //we will update pos to be relative to the new top left and reverse the size dimensions as rotation requires
-                    switch (rotations) {
-                        case 0: //rotations-0: initial orientation
-                            pos = originalPos;
-                            break;
-                        case 1: //rotations-1: 1 turn clockwise
-                            size = size.reverse();
-                            pos = [size[0] - 1 - originalPos[1], originalPos[0]];
-                            break;
-                        case 2: //rotations-2: 3 turns clockwise!?!?
-                            size = size.reverse();
-                            pos = [originalPos[1], (size[1] - 1 - originalPos[0])];
-                            break;
-                        case 3: //rotations-3: 2 turns clockwise
-                            pos = [(size[0] - 1 - originalPos[0]), (size[1] - 1 - originalPos[1])];
-                            break;
-                        default:
-                            console.log("Switch statement fallthrough. Suggests unexpected class structure.")
+                // Get location of all reward tiles
+                let rewards = Mine.rewardGrid.map((row, y) => {
+                    return row.map((tile, x) => {
+                        return (tile ? {item: tile.value, revealed: tile.revealed, 'x': x, 'y': y} : 0);
+                    }).filter((tile) => tile != 0);
+                }).flat();
+                // Calculate number of distinct items visible
+                let rewardsSeen = new Set();
+                rewards.forEach((tile) => {
+                    if (tile.revealed) {
+                        rewardsSeen.add(tile.item);
                     }
-
-                    for (let i = 0; i < size[1]; i++) {
-                        for (let j = 0; j < size[0]; j++) {
-                            //ri, pos[1], and i are vertical - rj, pos[0], and j are horizontal
-                            const verticalCoordinate = ri - pos[1] + i;
-                            const horizontalCoordinate = rj - pos[0] + j;
-                            if (mineGrid[verticalCoordinate] && mineGrid[verticalCoordinate].children[horizontalCoordinate]) {
-                                let selectedTile = mineGrid[verticalCoordinate].children[horizontalCoordinate];
-                                //highlights entire reward before chiseling for testing purposes
-                                // selectedTile.style.filter = "sepia(50%) saturate(120%) brightness(80%) hue-rotate(320deg)";
-                                if (!selectedTile.className.includes("Reward") &&
-                                    !selectedTile.className.includes("rock0")
-                                ) {
-                                    Mine.click(verticalCoordinate, horizontalCoordinate);
-                                    getEnergy -= 1;
-                                    minedThisInterval = true;
-                                }
-                            }
-                        }
+                });
+                if (Mine.itemsBuried() > rewardsSeen.size) {
+                    // Use bombs while there are still items left to uncover
+                    if (getEnergy >= Underground.BOMB_ENERGY) {
+                        Mine.bomb();
                     }
-                }
-                if (getEnergy >= 10 && !minedThisInterval) {
-                    // Only bomb if out of places to chisel
-                    Mine.bomb();
+                } else {
+                    // All items have at least one tile revealed, let's excavate them
+                    if (Mine.toolSelected() != 0) {
+                        Mine.toolSelected(Mine.Tool.Chisel);
+                    }
+                    let tilesToMine = rewards.filter((tile) => rewardsSeen.has(tile.item) && !tile.revealed)
+                    while (tilesToMine.length && getEnergy >= Underground.CHISEL_ENERGY) {
+                        let tile = tilesToMine.pop();
+                        Mine.click(tile.y, tile.x);
+                        getEnergy -= Underground.CHISEL_ENERGY;
+                    }
                 }
             }
         }
     }
+
     function resetLayer() {
         if (!Mine.loadingNewLayer) {
             Mine.loadingNewLayer = true;
             setTimeout(Mine.completed, 1500);
-            //GameHelper.incrementObservable(App.game.statistics.undergroundLayersMined);
+            GameHelper.incrementObservable(App.game.statistics.undergroundLayersMined);
             if (Mine.skipsRemaining() > 0) {
                 GameHelper.incrementObservable(Mine.skipsRemaining, -1);
             }
         }
     }
 }
-
 
 function autoRestore(event) {
     const element = event.target;
@@ -329,13 +281,9 @@ if (!validParse(localStorage.getItem('treasureHunter'))) {
 if (!validParse(localStorage.getItem('itemThreshold'))) {
     localStorage.setItem("itemThreshold", 0);
 }
-/*if (!localStorage.getItem('autoMineSkip')) {
-    localStorage.setItem("autoMineSkip", 0);
-}*/
 mineState = JSON.parse(localStorage.getItem('autoMineState'));
 smallRestoreState = JSON.parse(localStorage.getItem('autoSmallRestore'));
 setThreshold = JSON.parse(localStorage.getItem('autoBuyThreshold'));
-//autoMineSkip = JSON.parse(localStorage.getItem('autoMineSkip'));
 sellTreasureState = JSON.parse(localStorage.getItem('autoSellTreasure'));
 treasureHunter = JSON.parse(localStorage.getItem('treasureHunter'));
 itemThreshold = JSON.parse(localStorage.getItem('itemThreshold'));
