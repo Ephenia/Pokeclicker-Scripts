@@ -87,13 +87,13 @@ The script adds various buttons for quicker navigation and quality of life.
 <hr>
 
 ## **Auto Battle Frontier** ([autobattlefrontier.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/autobattlefrontier.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/autobattlefrontier.user.js))
-This script adds in a stage resetter to the Battle Frontier:<br>
+This script adds in a stage resetter to the Battle Frontier.<br>
 
-![](https://i.imgur.com/Tl6ljbp.png)
+![](https://github.com/Ephenia/Pokeclicker-Scripts/assets/12092270/3e2200c4-294d-4a9f-9351-b03ff0d2bd96)
 
-When you reach and complete the specified stage, you will earn the Battle Points and Money you would have earned if you had failed the stage, then you are reset to the beginning.
+You can specify a maximum stage in the input box on the right. When you complete that stage, you will earn the Battle Points and money for failing the stage, and then restart from the beginning. This allows you stay inside the Battle Frontier indefinitely farming BP while fully AFK.
 
-This will effectively allow you to infinitely farm and stay inside the Battle Frontier while being fully AFK.
+The Max Attacks mode restarts the Battle Frontier when you reach a stage with battles that you cannot defeat in the specified number of clicks, allowing you to loop through the early stages for quicker farming. The button toggles through 1 click, 2 clicks, and disabling the mode. Max Attacks is an enhancement of the previous One Click mode: the two-click mode is slightly more efficient for farming BP.
 
 <hr>
 

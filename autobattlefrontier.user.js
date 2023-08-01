@@ -22,22 +22,22 @@ var scriptName = 'autobattlefrontier';
 
 class AutoBattleFrontier {
     static battleFrontCeil;
-    static bfOneClickState;
+    static battleFrontAttackCeil;
 
     static {
         if (localStorage.getItem('battleFrontCeil') == null) {
             localStorage.setItem("battleFrontCeil", 0);
         }
-        if (localStorage.getItem('bfOneClickState') == null) {
-            localStorage.setItem("bfOneClickState", false);
+        if (localStorage.getItem('battleFrontAttackCeil') == null) {
+            localStorage.setItem("battleFrontAttackCeil", 0);
         }
         this.battleFrontCeil = +localStorage.getItem('battleFrontCeil');
         if (!(Number.isInteger(this.battleFrontCeil) && this.battleFrontCeil > 0)) {
             this.battleFrontCeil = 0;
         }
-        this.bfOneClickState = localStorage.getItem('bfOneClickState');
-        if (typeof this.bfOneClickState !== 'boolean') {
-            this.bfOneClickState = false;
+        this.battleFrontAttackCeil = localStorage.getItem('battleFrontAttackCeil');
+        if (![0,1,2].includes(this.battleFrontAttackCeil)) {
+            this.battleFrontAttackCeil = 0;
         }
     }
 
@@ -48,24 +48,22 @@ class AutoBattleFrontier {
         bfStart.setAttribute('onclick', 'BattleFrontierRunner.start(true)');
         const bfQuit = document.querySelector('#battleFrontierInformation a[onclick="BattleFrontierRunner.battleQuit()"]');
         bfQuit.setAttribute('onclick', 'BattleFrontierRunner.end()');
-
-        let bfOneClickColor = (this.bfOneClickState ? 'success' : 'danger');
         
         const battleFrontTitle = document.querySelector('#battleFrontierInformation div.card-header');
-        const oneClickBtn = document.createElement("div");
-        oneClickBtn.setAttribute("id", "bf-one-click-btn");
-        oneClickBtn.innerHTML = `<button id="bf-one-click-start" class="btn btn-block btn-`+ bfOneClickColor + `" style="font-size: 8pt;">One Click Attack [${this.bfOneClickState ? 'ON' : 'OFF'}]</button>`
-        oneClickBtn.setAttribute('onclick', 'AutoBattleFrontier.toggleOneClick()');
+        const attackCeilButton = document.createElement("div");
+        attackCeilButton.setAttribute("id", "bf-attack-ceil-btn");
+        attackCeilButton.innerHTML = `<button id="bf-attack-ceil-start" class="btn btn-block btn-${this.battleFrontAttackCeil ? 'success' : 'danger'}" style="font-size: 8pt;">Max Attacks: ${this.battleFrontAttackCeil || 'OFF'}</button>`
+        attackCeilButton.setAttribute('onclick', 'AutoBattleFrontier.toggleBattleFrontAttackCeil()');
         const bfInput = document.createElement("div");
         bfInput.setAttribute("id", "battle-front-cont");
         bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 70px;"> <button id="battle-front-input-submit" class="btn btn-block btn-danger" style="font-size: 8pt; width: 42px; display:inline-block;">OK</button>`
         battleFrontTitle.before(bfInput);
-        battleFrontTitle.before(oneClickBtn);
+        battleFrontTitle.before(attackCeilButton);
         document.getElementById('battle-front-input').value = this.battleFrontCeil.toLocaleString('en-US');
         document.getElementById('battle-front-input-submit').setAttribute('onclick', 'AutoBattleFrontier.setBattleFrontCeil()');
 
         addGlobalStyle('#battle-front-cont { position:absolute;right:5px;top:5px;width:auto;height:41px; }');
-        addGlobalStyle('#bf-one-click-btn { position:absolute;left:5px;top:5px;width:auto;height:41px; }');
+        addGlobalStyle('#bf-attack-ceil-btn { position:absolute;left:5px;top:5px;width:auto;height:41px; }');
     }
 
     static overrideGameMethods() {
@@ -73,7 +71,7 @@ class AutoBattleFrontier {
         BattleFrontierRunner.nextStage = function() {
             var result = oldNextStage.apply(this, arguments);
             // Stage ceiling check
-            if (!AutoBattleFrontier.bfOneClickState && AutoBattleFrontier.battleFrontCeil > 0) {
+            if (!AutoBattleFrontier.battleFrontAttackCeil && AutoBattleFrontier.battleFrontCeil > 0) {
                 if (BattleFrontierRunner.stage() > AutoBattleFrontier.battleFrontCeil) {
                     AutoBattleFrontier.battleReset();
                 }
@@ -83,13 +81,12 @@ class AutoBattleFrontier {
 
         const oldPokemonAttack = BattleFrontierBattle.pokemonAttack;
         BattleFrontierBattle.pokemonAttack = function() {
-            // One Click check
-            if (AutoBattleFrontier.bfOneClickState) {
-                // Safety check the enemy exists (relevant for exiting the frontier)
-                if (BattleFrontierBattle.enemyPokemon() && 
-                    Battle.enemyPokemon().maxHealth() > App.game.party.calculatePokemonAttack(Battle.enemyPokemon().type1, Battle.enemyPokemon().type2, true)) {
-                        AutoBattleFrontier.battleReset();
-                    }
+            // Safety check the enemy exists (relevant for exiting the frontier)
+            if (AutoBattleFrontier.battleFrontAttackCeil && BattleFrontierBattle.enemyPokemon()) {
+                // Attack ceiling check
+                let clicksNeeded = Math.ceil(Battle.enemyPokemon().maxHealth() / App.game.party.calculatePokemonAttack(Battle.enemyPokemon().type1, Battle.enemyPokemon().type2, true));
+                if (clicksNeeded > AutoBattleFrontier.battleFrontAttackCeil) {
+                    AutoBattleFrontier.battleReset();
                 }
             }
             return oldPokemonAttack.apply(this, arguments);
@@ -133,17 +130,17 @@ class AutoBattleFrontier {
         BattleFrontierBattle.generateNewEnemy();
     }
 
-    static toggleOneClick() {
-        this.bfOneClickState = !this.bfOneClickState;
-        if (this.bfOneClickState) {
-            document.getElementById("bf-one-click-start").classList.remove('btn-danger');
-            document.getElementById("bf-one-click-start").classList.add('btn-success');
+    static toggleBattleFrontAttackCeil() {
+        this.battleFrontAttackCeil = (this.battleFrontAttackCeil + 1) % 3;
+        if (this.battleFrontAttackCeil) {
+            document.getElementById("bf-attack-ceil-start").classList.remove('btn-danger');
+            document.getElementById("bf-attack-ceil-start").classList.add('btn-success');
         } else {
-            document.getElementById("bf-one-click-start").classList.remove('btn-success');
-            document.getElementById("bf-one-click-start").classList.add('btn-danger');
+            document.getElementById("bf-attack-ceil-start").classList.remove('btn-success');
+            document.getElementById("bf-attack-ceil-start").classList.add('btn-danger');
         }
-        localStorage.setItem("bfOneClickState", this.bfOneClickState);
-        document.getElementById('bf-one-click-start').innerHTML = `One Click [${this.bfOneClickState ? 'ON' : 'OFF'}]`;
+        localStorage.setItem("battleFrontAttackCeil", this.battleFrontAttackCeil);
+        document.getElementById('bf-attack-ceil-start').innerHTML = `Max Attacks: ${this.battleFrontAttackCeil || 'OFF'}`;
     }
 
     static setBattleFrontCeil() {
