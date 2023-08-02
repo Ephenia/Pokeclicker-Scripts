@@ -239,7 +239,7 @@ This button on the main-screen hatchery display toggles the Auto Hatchery.
 These buttons inside the hatchery control the various Auto Hatchery modes, which activate in the following order.
 
 • PKRS Mode tries to spread Pokerus. If you have an uninfected pokemon and a contagious pokemon that share a type, it will put them in the hatchery together.<br/>
-• Auto Egg hatches eggs (the items), if you have any.
+• Auto Egg hatches eggs (the items), if you have any.<br/>
 • Auto Fossil revives fossils, if you have any. When in Shiny Fossils mode, it will ignore fossils for which you already have the corresponding shiny.<br/>
 
 If none of the above modes are enabled or have targets, the Auto Hatchery will select the first pokemon (in hatchery sort order) that matches your hatchery filters. If none match, it will select the first possible pokemon.

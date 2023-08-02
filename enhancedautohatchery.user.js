@@ -162,54 +162,61 @@ function autoHatchPkrs() {
     if (Date.now() - pkrsHatcherySearchTime < delayAfterFailure) {
         return false;
     }
-    let uninfected = {};
+    let uninfectedMono = {};
+    let uninfectedDual = {};
     let contagious = {};
     let foundPair = false;
     let infectedCount = 0;
     // Find first uninfected/contagious pair sharing a type
-    for (mon of App.game.party.caughtPokemon) {
+    // Ideally the uninfected mon is dual-type to accelerate future spreading
+    for (mon of PartyController.hatcherySortedList) {
         infectedCount += mon.pokerus > GameConstants.Pokerus.Uninfected;
         if (mon.breeding || mon.level < 100) {
             continue;
         }
-        let newEntry = false;
+        let checkMatch = false;
         const { type: types } = pokemonMap[mon.name];
         if (mon.pokerus == GameConstants.Pokerus.Uninfected) {
-            for (type of types) {
-                if (type != PokemonType.None && !(type in uninfected)) {
-                    uninfected[type] = mon;
-                    newEntry = true;
-                }
+            if (types.length == 2) {
+                uninfectedDual[types[0]] ??= mon;
+                uninfectedDual[types[1]] ??= mon;
+                checkMatch = true;
+            } else {
+                uninfectedMono[types[0]] ??= mon;
             }
         } else if (mon.pokerus >= GameConstants.Pokerus.Contagious) {
             for (type of types) {
-                if (type != PokemonType.None && !(type in contagious)) {
-                    contagious[type] = mon;
-                    newEntry = true;
-                }
+                contagious[type] ??= mon;
+                checkMatch = true;
             }
         }
-        // Stop searching upon finding a pair
-        if (newEntry) {
-            let matchType = null;
+        // Stop searching upon finding a infectable dual-type
+        if (checkMatch) {
             for (type of types) {
-                if (type in uninfected && type in contagious) {
-                    matchType = type;
+                if (type in uninfectedDual && type in contagious) {
+                    foundPair = {'uninfected': uninfectedDual[type], 'contagious': contagious[type]};
                 }
             }
-            if (matchType) {
-                uninfected = uninfected[matchType];
-                contagious = contagious[matchType];
-                foundPair = true;
+            if (foundPair) {
+                break;
+            }
+        }
+    }
+    if (!foundPair) {
+        numMonsWithPkrsCached = infectedCount;
+        // No infectable dual-type pokemon found, try a monotype
+        for (type of GameHelper.enumNumbers(PokemonType)) {
+            if (type in uninfectedMono && type in contagious) {
+                foundPair = {'uninfected': uninfectedMono[type], 'contagious': contagious[type]};
                 break;
             }
         }
     }
     if (foundPair) {
-        let success = App.game.breeding.addPokemonToHatchery(uninfected) && App.game.breeding.addPokemonToHatchery(contagious);
+        let success = App.game.breeding.addPokemonToHatchery(foundPair.uninfected) && App.game.breeding.addPokemonToHatchery(foundPair.contagious);
+        numMonsWithPkrsCached += success;
         return success;
     } else {
-        numMonsWithPkrsCached = infectedCount;
         pkrsHatcherySearchTime = Date.now();
         return false;
     }
@@ -244,10 +251,10 @@ function autoHatchFossil() {
 }
 
 function autoHatchMon() {
-    let toHatch = PartyController.getHatcherySortedList().find(p => p.isHatchable());
+    let toHatch = PartyController.hatcherySortedList.find(p => p.isHatchable());
     if (!toHatch) {
         // Nothing matches the hatchery filters
-        toHatch = PartyController.getHatcherySortedList().find(p => !(p.breeding || p.level < 100));
+        toHatch = PartyController.hatcherySortedList.find(p => !(p.breeding || p.level < 100));
     }
     if (!toHatch) {
         return false;
