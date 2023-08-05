@@ -56,7 +56,7 @@ function initSettings() {
     table.appendChild(settingsBody);
     let settingsElem = document.createElement('tr');
     settingsElem.innerHTML = `<td class="p-2 col-md-8">
-        Game closed berry growth mode
+        Offline berry growth mode
         </td>
         <td class="p-0 col-md-4">
         <select id="select-overnightGrowthMode" class="form-control">

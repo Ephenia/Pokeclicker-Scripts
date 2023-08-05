@@ -169,7 +169,7 @@ function autoHatchPkrs() {
     let infectedCount = 0;
     // Find first uninfected/contagious pair sharing a type
     // Ideally the uninfected mon is dual-type to accelerate future spreading
-    for (mon of PartyController.hatcherySortedList) {
+    for (let mon of PartyController.hatcherySortedList) {
         infectedCount += mon.pokerus > GameConstants.Pokerus.Uninfected;
         if (mon.breeding || mon.level < 100) {
             continue;
@@ -185,14 +185,14 @@ function autoHatchPkrs() {
                 uninfectedMono[types[0]] ??= mon;
             }
         } else if (mon.pokerus >= GameConstants.Pokerus.Contagious) {
-            for (type of types) {
+            for (let type of types) {
                 contagious[type] ??= mon;
                 checkMatch = true;
             }
         }
         // Stop searching upon finding a infectable dual-type
         if (checkMatch) {
-            for (type of types) {
+            for (let type of types) {
                 if (type in uninfectedDual && type in contagious) {
                     foundPair = {'uninfected': uninfectedDual[type], 'contagious': contagious[type]};
                 }
@@ -205,7 +205,7 @@ function autoHatchPkrs() {
     if (!foundPair) {
         numMonsWithPkrsCached = infectedCount;
         // No infectable dual-type pokemon found, try a monotype
-        for (type of GameHelper.enumNumbers(PokemonType)) {
+        for (let type of GameHelper.enumNumbers(PokemonType)) {
             if (type in uninfectedMono && type in contagious) {
                 foundPair = {'uninfected': uninfectedMono[type], 'contagious': contagious[type]};
                 break;

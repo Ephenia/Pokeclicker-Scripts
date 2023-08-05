@@ -87,7 +87,7 @@ function initAutoClicker() {
     <td style="display: flex; flex-direction: column;">
     <div id="auto-dungeon-loottier" class="dropdown show">
         <button type="button" class="text-left custom-select col-12 btn btn-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="max-height:30px; display:flex; flex:1; align-items:center;">
-            <div id="auto-dungeon-loottier-text" ${autoDungeonLootTier > -1 ? 'style="display:none;' : ''}>None</div>
+            <div id="auto-dungeon-loottier-text" ${autoDungeonLootTier > -1 ? 'style="display:none;"' : ''}>None</div>
             <img id="auto-dungeon-loottier-img" src="${autoDungeonLootTier > -1 ? `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[autoDungeonLootTier]}.png` : ''}" style="height:100%; ${autoDungeonLootTier > -1 ? '' : 'display:none;'}">
         </button>
         <div id="auto-dungeon-loottier-dropdown" class="border-secondary dropdown-menu col-12">
@@ -470,7 +470,7 @@ function overrideGymRunner() {
 
             if (GymRunner.autoRestart()) {
                 // Unlike the original function, autoclicker doesn't charge the player money
-                GymRunner.startGym(GymRunner.gym, GymRunner.autoRestart(), false);
+                GymRunner.startGym(GymRunner.gymObservable(), GymRunner.autoRestart(), false);
                 return;
             }
 
@@ -1055,7 +1055,7 @@ autoDungeonMode = validateStorage('autoDungeonMode', 'number') ?? 0;
 if (![0, 1].includes(autoDungeonMode)) {
     autoDungeonMode = 0;
 }
-autoDungeonLootTier = validateStorage('autoDungeonLootTier', 'number') ?? 0;
+autoDungeonLootTier = validateStorage('autoDungeonLootTier', 'number') ?? -1;
 if(![-1, ...Object.keys(baseLootTierChance).keys()].includes(autoDungeonLootTier)) {
     autoDungeonLootTier = -1;
 }

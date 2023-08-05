@@ -84,12 +84,10 @@ function initAutoFarm() {
     function toggleFarmLoop() {
         if (plantState || replantState || harvestState || mulchState) {
             if (!autoFarmLoop) {
-                console.log('Starting autofarm loop');
                 autoFarmLoop = setInterval(autoFarmTick, 1000);
             }
         } else {
             autoFarmLoop = clearInterval(autoFarmLoop);
-            console.log('Clearing autofarm loop');
         }
     }
 
