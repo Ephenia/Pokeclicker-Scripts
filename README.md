@@ -64,34 +64,36 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 <hr>
 
 ## **Additional Visual Settings** ([additionalvisualsettings.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/additionalvisualsettings.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/additionalvisualsettings.user.js))
-This script adds new options in the Visual settings tab. These new options are shown here:<br>
+This script adds new options to customize the game's graphics alongside a handful of other quality of life features.
+
+### **Visual Settings**
+
+The added visual settings are found in the Scripts settings tab. Several of these new options are shown here:<br>
 
 ![](https://i.imgur.com/sWlhKlx.png)
 
 I made these options as a hacky way to help save on some performance, especially when you are idling and leaving the game open for longer periods of time. This ends up removing these HTML elements that are constantly getting updated, so that the DOM is less flooded. After enabling any of these options, you will have to change routes for these settings to take effect. When disabling, you will have to go to something like a Town/Dungeon then back to a route for these to start working again.
 
-This script also includes support for a quick Settings button, as shown below:<br>
-
-![](https://i.imgur.com/GHt61hr.png)
-
-The gear icon to the left of the Start Menu that you see here.
-
-![](https://i.imgur.com/8H1ZeBV.png)
-
 As of 1.3 there is now an option for disabling all notifications, this may be especially helpful if you are using Enhanced Auto Mine. This may also cause some popups and other things to not appear (such as trying to manually Skip layers in the Underground). You can still hear when you get shinies using this, but you won't be able to see what shiny you received. I have not fully tested this, so feel free to experiment with this setting.
 
-Additionally it now features a button above the map to quickly open the dock so you don't have to search for it, especially useful is alola.
+### **Convenience features**
+
+The script adds various buttons for quicker navigation and quality of life.
+
+• Quick Settings, Inventory, and Pokédex buttons, found to the left of the Start Menu.<br/>
+• Quick Dock, Gyms, and Dungeons buttons, found above the Town Map so you don't have to search for them. The Gyms and Dungeons buttons show all in the current region.<br/>
+• Optimize vitamins buttons, found in the all vitamins menu. This feature uses the optimal combination of vitamins for your current region on the pokemon you select (assuming you have enough). It looks like a set of scales: ⚖
 
 <hr>
 
 ## **Auto Battle Frontier** ([autobattlefrontier.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/autobattlefrontier.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/autobattlefrontier.user.js))
-This script adds in a stage resetter to the Battle Frontier:<br>
+This script adds in a stage resetter to the Battle Frontier.<br>
 
-![](https://i.imgur.com/Tl6ljbp.png)
+![](https://github.com/Ephenia/Pokeclicker-Scripts/assets/12092270/3e2200c4-294d-4a9f-9351-b03ff0d2bd96)
 
-When you reach and complete the specified stage, you will earn the Battle Points and Money you would have earned if you had failed the stage, then you are reset to the beginning.
+You can specify a maximum stage in the input box on the right. When you complete that stage, you will earn the Battle Points and money for failing the stage, and then restart from the beginning. This allows you stay inside the Battle Frontier indefinitely farming BP while fully AFK.
 
-This will effectively allow you to infinitely farm and stay inside the Battle Frontier while being fully AFK.
+The Max Attacks mode restarts the Battle Frontier when you reach a stage with battles that you cannot defeat in the specified number of attacks, allowing you to loop through the early stages for quicker farming. The button toggles through 1 attack, 2 attacks, and disabling the mode. Max Attacks is an enhancement of the previous One Click mode: the two-attack mode is slightly more efficient for farming BP.
 
 <hr>
 
@@ -182,6 +184,8 @@ This script is based on one originally created by <b>Ivan Lay</b>, which [can be
 
 The main Auto Clicker button can be found under your currencies. Clicking it toggles the Auto Clicker on/off without the need of a refresh. This setting will also save and persist through page refresh/close.
 
+You can also adjust the number of clicks made per second. Higher click rates still max out at 20 enemies defeated per second, as the Auto Clicker makes multiple clicks simultaneously to reduce lag. Please note that while older script versions allowed you to set the Auto Clicker to up to 1000 clicks per second, this setting and its resulting click measurements <strong>were not</strong> accurate. The game engine cannot support speeds that high and the current version should provide similar performance.
+
 The Auto Clicker button displays various statistics while running:<br>
 
 <strong>• Clicker Efficiency</strong> - How close the Auto Clicker is to its maximum speed. The closer to 100%, the better.<br>
@@ -205,9 +209,10 @@ The Auto Dungeon feature is found below the Auto Click button. Some notes about 
 
 • Auto Dungeon will only work while the Auto Clicker is active.<br>
 • Auto Dungeon when activated will automatically explore the current dungeon, or begin exploring a dungeon whose entrance you are at. 
-• There is a dropdown to the right of the Auto Dungeon button to choose between two modes:<br><br>
-<strong>"F" for Farm Mode</strong> - this runs through the dungeon in its entirety and fights all the enemies as well as loot all the chests, saving the boss for last. It now waits to open chests until right before the boss fight for faster clearing.<br/>
-<strong>"B" for Boss Rusher</strong> - this tries to clear the dungeon as fast as possible to fight the boss. Chests are not opened as they increase enemy HP, making clearing slower. If you have unlocked Flash for a dungeon, this mode will now use it to find the boss while visiting as few columns as possible. It does not include pathfinding that uses information, like the location of the boss, not visible to the player.
+• There are two dropdowns to the right of the Auto Dungeon button. The first chooses between two modes:<br><br>
+<strong>"F" for Farm mode</strong> - this runs through the dungeon in its entirety and fights all the enemies, saving the boss for last. It now waits to open chests until right before the boss fight for faster clearing.<br/>
+<strong>"B" for Boss mode</strong> - this tries to clear the dungeon as fast as possible to fight the boss. If you have unlocked Flash for a dungeon, this mode will now use it to find the boss while visiting as few columns as possible. It does not include pathfinding that uses information, like the location of the boss, not visible to the player.
+• The second dropdown determines which chests, if any, Auto Dungeon will open. If you choose a tier of chest, Auto Dungeon will open chests of that tier or greater right before fighting the boss. In Farm mode it will open every chest of those tiers; in Boss mode it will open chests that were already visited or are visible with Flash. When "None" is selected, Auto Dungeon will predictably not open chests.
 
 ### **Graphics settings**
 
@@ -221,25 +226,23 @@ The Auto Clicker now includes graphics settings for Auto Gym and Auto Dungeon to
 <hr>
 
 ## **Enhanced Auto Hatchery** ([enhancedautohatchery.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautohatchery.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautohatchery.user.js))
-This script was originally created by <b>Ivan Lay & Drak</b> and [can be found over here](//greasyfork.org/en/scripts/432768-auto-hatchery-edit-pokeclicker-com).
+This script is based on one created by <b>Ivan Lay & Drak</b> which [can be found over here](//greasyfork.org/en/scripts/432768-auto-hatchery-edit-pokeclicker-com).
 
-I wanted to take and re-make this script, not only to make it be another enhanced version of a script to add to the list, but also to fix and improve upon the original. Also, I found that the auto placement of store bought eggs & fossils wasn't working for me in the other script, so I re-wrote the entire code to hopefully make it a lot better as well as future-proof.
-
-Anyway, here's what this script adds:<br>
+The Auto Hatchery automatically hatches eggs and places new eggs/fossils in the hatchery. 
 
 ![](https://i.imgur.com/VpL6TTr.png)
 
-A button that will toggle On/Off the auto hatching of eggs.
+This button on the main-screen hatchery display toggles the Auto Hatchery.
 
-There is also this as well:<br>
+![](https://github.com/Ephenia/Pokeclicker-Scripts/assets/12092270/acc89fd5-c559-4e21-a86b-ff2661f7bf3d)
 
-![](https://i.imgur.com/J0QvYc2.png)
+These buttons inside the hatchery control the various Auto Hatchery modes, which activate in the following order.
 
-When you open up the Daycare, you will see another button for automatically placing store bought eggs as well as fossils that you have dug up. This will randomly place what you have inside the Hatchery, and it will also prioritize placing them if you have any of the two available.
+• PKRS Mode tries to spread Pokerus. If you have an uninfected pokemon and a contagious pokemon that share a type, it will put them in the hatchery together.<br/>
+• Auto Egg hatches eggs (the items), if you have any.<br/>
+• Auto Fossil revives fossils, if you have any. When in Shiny Fossils mode, it will ignore fossils for which you already have the corresponding shiny.<br/>
 
-```diff
-- Note: the Auto Hatchery runs every 0.05 seconds.
-```
+If none of the above modes are enabled or have targets, the Auto Hatchery will select the first pokemon (in hatchery sort order) that matches your hatchery filters. If none match, it will select the first possible pokemon.
 
 <hr>
 
@@ -278,17 +281,17 @@ This script is a simple Auto Farmer which adds 4 new buttons below the Plant and
 
 ![](https://i.imgur.com/ei7lR95.png)
 
-Auto Farm will plant the berry that you have selected and harvest all berries when they are ready. Auto mulch works in conjunction with Auto Farm, so Auto Farm must be on for Auto Mulch to work. With Auto Mulch it will use the mulch that you have selected on the entire field. This will also work with the Farm window closed, and these settings will persist upon refresh/browser close.
+• Auto Farm will plant the berry that you have selected.<br/>
+• Auto Harvest will harvest all ripe berries.<br/>
+• Auto Replant will wait for ripe berries to be close to withering before harvesting, then replant the same kind of berry in that plot. This can be especially useful for mutating berries.<br/>
+• Auto Mulch will wait for mulch to be close to running out, then use the same kind of mulch on that plot.
 
-Auto Replant will wait for planted berries to be close to withering then harvest and plant them again in the same spot. This can be expecially useful when trying to mutate berries.
+The Auto Farmer runs even while the farm window is closed. It also now saves your berry selection when the game restarts, to avoid farming interruptions.
 
 ```diff
 - Note: the Auto Farmer runs once every 1 second.
-- Note: activating Auto Replant will momentarily block other features from being enabled.
-- Note: activating Auto Plant, Auto Harvest or Auto Mulch will momentarily block Auto Replant from being enabled.
+- Note: Auto Replant cannot be used alongside Auto Plant or Auto Harvest.
 ```
-
-I plan to update this Auto Farmer with some additional features later on.
 
 <hr>
 
@@ -305,7 +308,11 @@ This script automatically completes and starts quests and can be toggled with th
 
 ![image](https://i.imgur.com/3AYaNes.png)
 
-It also is able to ignore the limit of quests you can enable at once, letting you complete all 10 at the same time.
+The script now has settings in the Settings menu that let you customize its behavior.
+
+• <strong>Max quest slots</strong> — Overrides the number of quests you can have active simultaneously, anywhere from just 1 to all 10 quests.</br>
+• <strong>Quest reset timer</strong> — Choose a period of time (in minutes) to refresh your quests after if any are incomplete. Turn the timer on and off with the button at the bottom of the quest display.
+• <strong>Preferred quest types</strong> — Choose which quest types to prioritize. The script will automatically refresh your quests if all current preferred quests have been completed, though it will claim any unpreferred quests that happen to complete. If you are using fewer than 10 quest slots, prioritized quests will be selected first.
 
 <hr>
 
