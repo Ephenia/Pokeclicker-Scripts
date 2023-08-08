@@ -308,7 +308,10 @@ This script automatically completes and starts quests and can be toggled with th
 
 ![image](https://i.imgur.com/3AYaNes.png)
 
-It also is able to ignore the limit of quests you can enable at once, letting you complete all 10 at the same time.
+The script now has settings in the Settings menu that let you customize its behavior.
+
+• <strong>Max quest slots</strong> — Overrides the number of quests you can have active simultaneously, anywhere from just 1 to all 10 quests.</br>
+• <strong>Preferred quest types</strong> — Choose which quest types to prioritize. The script will automatically refresh your quests if all current preferred quests have been completed, though it will claim any unpreferred quests that happen to complete. If you are using fewer than 10 quest slots, prioritized quests will be selected first.
 
 <hr>
 
