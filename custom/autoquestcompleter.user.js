@@ -20,7 +20,7 @@
 
 var scriptName = 'autoquestcompleter';
 
-function initautoQuest() {
+function initAutoQuest() {
     /* Load settings */
     const questSubscriptions = [];
     var autoQuestEnabled = loadSetting('autoQuestEnabled', false);
@@ -30,6 +30,12 @@ function initautoQuest() {
     }
     var ignoredQuestTypes = loadSetting('autoQuestIgnoredQuestTypes', []);
     ignoredQuestTypes = ignoredQuestTypes.filter((type) => Object.keys(QuestHelper.quests).includes(type));
+    var questResetTimer = loadSetting('autoQuestResetTimer', 10);
+    if (!(Number.isInteger(questResetTimer) && questResetTimer > 0)) {
+        questResetTimer = 10;
+    }
+    var questResetState = loadSetting('autoQuestResetState', false);
+    var questResetTimeout;
 
     createSettings();
 
@@ -43,15 +49,22 @@ function initautoQuest() {
     /* Functions */
 
     function createSettings() {
-        // Toggle button
+        // Toggle buttons
         const autoQuestBtn = document.createElement('button');
-        autoQuestBtn.id = 'toggle-auto-quest'
+        autoQuestBtn.id = 'toggle-auto-quest';
         autoQuestBtn.className = `btn btn-block btn-${autoQuestEnabled ? 'success' : 'danger'}`;
-        autoQuestBtn.style = 'position: absolute; left: 0px; top: 0px; width: auto; height: 41px; font-size: 9px;'
+        autoQuestBtn.style = 'position: absolute; left: 0px; top: 0px; width: auto; height: 41px; font-size: 9px;';
         autoQuestBtn.textContent = `Auto [${autoQuestEnabled ? 'ON' : 'OFF'}]`;
-        autoQuestBtn.addEventListener('click', () => { toggleautoQuest(); })
+        autoQuestBtn.addEventListener('click', () => { toggleAutoQuest(); })
         document.getElementById('questDisplayContainer').appendChild(autoQuestBtn);
 
+        const questResetBtn = document.createElement('button');
+        questResetBtn.id = 'toggle-auto-quest-reset';
+        questResetBtn.className = `btn btn-block btn-${questResetState ? 'success' : 'danger'}`;
+        questResetBtn.style = 'width: auto; height: 41px; font-size: 12px;';
+        questResetBtn.textContent = `${questResetTimer} minute Reset Timer [${questResetState ? 'ON' : 'OFF'}]`;
+        questResetBtn.addEventListener('click', () => { toggleQuestResetState(); });
+        document.getElementById('questDisplayContainer').appendChild(questResetBtn);
         
         // Settings tab options
         var scriptSettings = document.getElementById('settings-scripts');
@@ -84,12 +97,19 @@ function initautoQuest() {
         settingsBody.setAttribute('id', 'settings-scripts-autoquestcompleter');
         table.appendChild(settingsBody);
         let maxQuestsElem = document.createElement('tr');
-        maxQuestsElem.innerHTML = `<td class="p-2 col-md-8">Max quest slots</td><td class="p-0 col-md-4"><select id="select-autoQuestMaxQuests" class="form-control">`
-            + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => `<option value="${i}">${i}</option>`).join('\n') + `</select></td>`;
-        let select = maxQuestsElem.querySelector('#select-autoQuestMaxQuests');
-        select.value = maxQuests;
-        select.addEventListener('change', (event) => { changeMaxQuests(event); })
+        maxQuestsElem.innerHTML = `<td class="p-2 col-md-8">Max quest slots</td><td class="p-0 col-md-4"><select id="select-autoQuestMaxQuests" class="form-control">` +
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => `<option value="${i}">${i}</option>`).join('\n') + `</select></td>`;
+        let maxSelect = maxQuestsElem.querySelector('#select-autoQuestMaxQuests');
+        maxSelect.value = maxQuests;
+        maxSelect.addEventListener('change', (event) => { changeMaxQuests(event); })
         settingsBody.appendChild(maxQuestsElem);
+        let resetTimerElem = document.createElement('tr');
+        resetTimerElem.innerHTML = '<td class="p-2 col-md-8">Quest reset timer (in minutes)</td><td class="p-0 col-md-4"><div style="display:flex;">' +
+            '<input id="input-autoQuestResetTimer" type="text" placeholder="0 to disable" class="form-control">' +
+            '<button id="input-autoQuestResetTimer-submit" class="btn btn-block btn-success" style="font-size: 8pt; flex: 0; min-width: 25%;">OK</button></div></td>';
+        resetTimerElem.querySelector('#input-autoQuestResetTimer').value = questResetTimer;
+        resetTimerElem.querySelector('#input-autoQuestResetTimer-submit').addEventListener('click', () => { changeQuestResetTimer(); })
+        settingsBody.appendChild(resetTimerElem);
         
         // Quest types filtering
         let info = document.createElement('tr');
@@ -109,12 +129,15 @@ function initautoQuest() {
         });
     }
 
-    function toggleautoQuest() {
+    function toggleAutoQuest() {
         autoQuestEnabled = !autoQuestEnabled;
         if (autoQuestEnabled) {
             refreshQuestSubscriptions();
         } else {
             clearQuestSubscriptions();
+        }
+        if (questResetState) {
+            toggleQuestResetState();
         }
         const autoQuestBtn = document.getElementById('toggle-auto-quest');
         autoQuestBtn.classList.replace(...(autoQuestEnabled ? ['btn-danger', 'btn-success'] : ['btn-success', 'btn-danger']));
@@ -128,6 +151,28 @@ function initautoQuest() {
             maxQuests = newVal;
             localStorage.setItem('autoQuestMaxQuests', maxQuests);
             beginQuests();
+        }
+    }
+
+    function toggleQuestResetState() {
+        questResetState = !questResetState;
+        resetQuestResetTimeout();
+        const questResetBtn = document.getElementById('toggle-auto-quest-reset');
+        questResetBtn.classList.replace(...(questResetState ? ['btn-danger', 'btn-success'] : ['btn-success', 'btn-danger']));
+        questResetBtn.textContent = `${questResetTimer} minute Reset Timer [${questResetState ? 'ON' : 'OFF'}]`;
+        localStorage.setItem('autoQuestResetState', questResetState);
+    }
+
+    function changeQuestResetTimer() {
+        const form = document.getElementById('input-autoQuestResetTimer');
+        let val = +form.value;
+        val = (Number.isInteger(val) && val > 0 ? val : 10);
+        form.value = val;
+        if (val != questResetTimer) {
+            questResetTimer = val;
+            resetQuestResetTimeout();
+            document.getElementById('toggle-auto-quest-reset').textContent = `${questResetTimer} minute Reset Timer [${questResetState ? 'ON' : 'OFF'}]`;
+            localStorage.setItem('autoQuestResetTimer', questResetTimer);
         }
     }
 
@@ -164,6 +209,7 @@ function initautoQuest() {
         });
 
         beginQuests();
+        resetQuestResetTimeout();
     }
 
     function clearQuestSubscriptions() {
@@ -171,6 +217,13 @@ function initautoQuest() {
             sub.dispose();
         }
         questSubscriptions.length = 0;
+    }
+
+    function resetQuestResetTimeout() {
+        clearTimeout(questResetTimeout);
+        if (questResetState) {
+            questResetTimeout = setTimeout(() => { App.game.quests.refreshQuests() }, questResetTimer * GameConstants.MINUTE);
+        }
     }
 
     function beginQuests() {
@@ -249,7 +302,7 @@ function loadScript(){
 
     Preload.hideSplashScreen = function() {
         var result = oldInit.apply(this, arguments);
-        initautoQuest();
+        initAutoQuest();
         return result;
     }
 }
