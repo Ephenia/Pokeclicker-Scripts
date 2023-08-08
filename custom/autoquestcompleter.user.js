@@ -136,7 +136,7 @@ function initAutoQuest() {
         } else {
             clearQuestSubscriptions();
         }
-        if (questResetState) {
+        if (!autoQuestEnabled && questResetState) {
             toggleQuestResetState();
         }
         const autoQuestBtn = document.getElementById('toggle-auto-quest');
