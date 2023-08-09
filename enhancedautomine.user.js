@@ -5,7 +5,7 @@
 // @description   Automatically mines the Underground with Bombs. Features adjustable settings as well.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.2
+// @version       2.2.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -149,7 +149,7 @@ function doAutoMine() {
                 ItemList["SmallRestore"].buy(1);
             }
             if (Math.floor(App.game.underground.energy) < Math.max(App.game.underground.getSurvey_Cost(), Underground.BOMB_ENERGY)) {
-                if (player.itemList["SmallRestore"]() > 0) {
+                if (player.itemList["LargeRestore"]() > 0) {
                     ItemList["LargeRestore"].use();
                 } else if (player.itemList["MediumRestore"]() > 0) {
                     ItemList["MediumRestore"].use();
