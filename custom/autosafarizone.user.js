@@ -116,6 +116,29 @@ function initAutoSafari() {
     return findShortestPathToTiles(tiles);
   }
 
+  function isIsolatedTile(row, col, targetValue) {
+    const adjacentTiles = [
+      [row - 1, col],
+      [row + 1, col],
+      [row, col - 1],
+      [row, col + 1],
+    ];
+
+    for (const [adjRow, adjCol] of adjacentTiles) {
+      if (isValidPosition(adjRow, adjCol) && Safari.grid[adjRow][adjCol] === targetValue) {
+        return false; // Found an adjacent tile with the same value
+      }
+    }
+
+    return true; // No adjacent tile with the same value found
+  }
+
+  function isValidPosition(row, col) {
+    const numRows = Safari.grid.length;
+    const numCols = Safari.grid[0].length;
+    return row >= 0 && row < numRows && col >= 0 && col < numCols;
+  }
+
   function findShortestPathToTiles(targetPositions) {
     const numRows = Safari.grid.length;
     const numCols = Safari.grid[0].length;
@@ -173,7 +196,10 @@ function initAutoSafari() {
     for (let row = 0; row < numRows; row += 1) {
       for (let col = 0; col < numCols; col += 1) {
         if (Safari.grid[row][col] === targetValue) {
-          targetPositions.push([row, col]);
+          // If searching for grass tiles, skipping it if isolated 
+          if (!(targetValue == GRASS_GRID_VALUE && isIsolatedTile(row, col, targetValue))) {
+            targetPositions.push([row, col]);
+          }
         }
       }
     }
@@ -187,11 +213,11 @@ function initAutoSafari() {
     } else if (!forceRunAway
       && ((App.game.party.getPokemon(SafariBattle.enemy.id)?.pokerus !== GameConstants.Pokerus.Uninfected
         && App.game.party.getPokemon(SafariBattle.enemy.id)?.evs() < 50)
-      || SafariBattle.enemy.shiny
-      || !App.game.party.alreadyCaughtPokemon(SafariBattle.enemy.id)
-      || autoSafariCatchAllState)
+        || SafariBattle.enemy.shiny
+        || !App.game.party.alreadyCaughtPokemon(SafariBattle.enemy.id)
+        || autoSafariCatchAllState)
       // to not skip lots of items if we use multiple pokeballs on the last fight
-      && !(Safari.balls() == 1 && Safari.itemGrid().length > 0  && !forceSkipItems)
+      && !(Safari.balls() == 1 && Safari.itemGrid().length > 0 && !forceSkipItems)
     ) {
       if (SafariBattle.enemy.angry === 0) {
         SafariBattle.throwRock();
