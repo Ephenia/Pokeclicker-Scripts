@@ -1,21 +1,22 @@
 class DesktopScriptHandler {
     static hasRegisteredUserScript = false;
     
-    static getScriptEnabled(name) {
+    static getScriptEnabled(name, defaultVal = false) {
         var val = localStorage.getItem(name);
         val = JSON.parse(val);
         if (typeof val === 'boolean') {
             return val;
         }
-        return null;
+        localStorage.setItem(name, defaultVal);
+        return defaultVal;
     }
 
     static isEpheniaScriptEnabled(name) {
-        return this.getScriptEnabled(name) ?? false;
+        return this.getScriptEnabled(name, false);
     }
 
     static isUserScriptEnabled(name) {
-        return this.getScriptEnabled(name) ?? true;
+        return this.getScriptEnabled(name, true);
     }
 
     static registerEpheniaScript(name) {
