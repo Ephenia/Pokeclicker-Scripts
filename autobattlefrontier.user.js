@@ -59,14 +59,14 @@ class AutoBattleFrontier {
         attackCeilButton.setAttribute('onclick', 'AutoBattleFrontier.toggleBattleFrontAttackCeil()');
         const bfInput = document.createElement("div");
         bfInput.setAttribute("id", "battle-front-cont");
-        bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 70px;"> <button id="battle-front-input-submit" class="btn btn-block btn-danger" style="font-size: 8pt; width: 42px; display:inline-block;">OK</button>`
+        bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 70px; margin: 5px;"> <button id="battle-front-input-submit" class="btn btn-block btn-danger" style="font-size: 8pt; width: 42px; display:inline-block;">OK</button>`
         battleFrontTitle.before(bfInput);
         battleFrontTitle.before(attackCeilButton);
         document.getElementById('battle-front-input').value = this.battleFrontCeil.toLocaleString('en-US');
         document.getElementById('battle-front-input-submit').setAttribute('onclick', 'AutoBattleFrontier.setBattleFrontCeil()');
 
-        addGlobalStyle('#battle-front-cont { position:absolute;right:5px;top:5px;width:auto;height:41px; }');
-        addGlobalStyle('#bf-attack-ceil-btn { position:absolute;left:5px;top:5px;width:auto;height:41px; }');
+        addGlobalStyle('#battle-front-cont { position:absolute;right:0px;top:0px;width:auto;height:41px;padding:5px;display:flex;align-items:center; }');
+        addGlobalStyle('#bf-attack-ceil-btn { position:absolute;left:0px;top:0px;width:auto;height:41px;padding:5px;display:flex;align-items:center; }');
     }
 
     static overrideGameMethods() {
