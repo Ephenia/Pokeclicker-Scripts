@@ -33,6 +33,8 @@ let autoSafariCatchAllState;
 let gettingItems = false;
 // To skip items if they are generated in buggy sections of the grid
 let forceSkipItems = false;
+// Flag to track if entrance fee payment is ongoing since we are playing with timeouts
+let isPayingEntranceFee = false;
 
 let autoSafariProcessId;
 
@@ -44,15 +46,28 @@ function initAutoSafari() {
   function checkSafariEntry() {
     if (player.town() instanceof Town && !player.route() && (player.town().name === 'Friend Safari' || player.town().name === 'Safari Zone')) {
       if (Safari.canAccess() && Safari.canPay()) {
-        // FIXME Doesn't work after a reset
-        Safari.openModal()
-        Safari.payEntranceFee()
+        isPayingEntranceFee = true;
+        openModalAndPayEntranceFee().then(() => {
+          isPayingEntranceFee = false;
+        });
       } else {
         toggleAutoSafari()
       }
     } else {
       toggleAutoSafari()
     }
+  }
+
+  function openModalAndPayEntranceFee() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        Safari.openModal();
+        setTimeout(() => {
+          Safari.payEntranceFee();
+          resolve(); // Signal that the process is complete
+        }, 500);
+      }, 500);
+    });
   }
 
   function processSafari() {
@@ -188,7 +203,7 @@ function initAutoSafari() {
       } else {
         SafariBattle.throwBall();
       }
-    } else { 
+    } else {
       SafariBattle.run();
     }
   }
@@ -244,7 +259,7 @@ function initAutoSafari() {
     if (autoSafariState) {
       // Process safari only if button in ON
       autoSafariProcessId = setInterval(() => {
-        if (!Safari.inProgress()) {
+        if (!isPayingEntranceFee & !Safari.inProgress()) {
           checkSafariEntry();
         } else if (Safari.inProgress()) {
           processSafari();
