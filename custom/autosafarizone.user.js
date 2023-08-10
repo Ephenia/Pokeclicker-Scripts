@@ -75,12 +75,12 @@ function initAutoSafari() {
 
     if (!Safari.inBattle()) {
       if (autoSafariPickState && Safari.itemGrid().length > 0 && Safari.balls() == 1 && !forceSkipItems) {
-        gettingItems = true // trying to get items, helps to skip fights
-        const shortestPath = findShortestPathToTiles(Safari.itemGrid().map(({ x, y }) => [y, x]), skipFights = true);
+        gettingItems = true // trying to pick up items, set to skip fights
+        const shortestPath = findShortestPathToTiles(Safari.itemGrid().map(({ x, y }) => [y, x]));
         if (shortestPath) {
           moveCharacterWithDelay(shortestPath);
         } else {
-          forceSkipItems = true // if items are generated in buggy sections of the map, skip them...
+          forceSkipItems = true // if items are generated in buggy sections of the map, skips them...
         }
       } else {
         gettingItems = false
@@ -116,7 +116,7 @@ function initAutoSafari() {
     return findShortestPathToTiles(tiles);
   }
 
-  function findShortestPathToTiles(targetPositions, skipFights = false) {
+  function findShortestPathToTiles(targetPositions) {
     const numRows = Safari.grid.length;
     const numCols = Safari.grid[0].length;
     const visited = new Set();
@@ -153,12 +153,7 @@ function initAutoSafari() {
           && GameConstants.LEGAL_WALK_BLOCKS.includes(Safari.grid[nextRow][nextCol]
           )
         ) {
-          if (skipFights && Safari.grid[nextRow][nextCol] === GRASS_GRID_VALUE
-            && !targetPositions.some(
-              ([targetRow, targetCol]) => nextRow === targetRow && nextCol === targetCol,
-            )) {
-            // To dodge fights while trying to pick all items, unless item is on grass
-          } else {
+          {
             const nextPath = [...currentPath, direction];
             queue.push([nextRow, nextCol, nextPath]);
             visited.add(nextPosStr);
@@ -190,13 +185,13 @@ function initAutoSafari() {
     if (autoSafariThrowBaitsState && App.game.statistics.safariBaitThrown() <= 1000) {
       SafariBattle.throwBait();
     } else if (!forceRunAway
-      && autoSafariCatchAllState
-      || (App.game.party.getPokemon(SafariBattle.enemy.id)?.pokerus !== GameConstants.Pokerus.Uninfected
+      && ((App.game.party.getPokemon(SafariBattle.enemy.id)?.pokerus !== GameConstants.Pokerus.Uninfected
         && App.game.party.getPokemon(SafariBattle.enemy.id)?.evs() < 50)
       || SafariBattle.enemy.shiny
       || !App.game.party.alreadyCaughtPokemon(SafariBattle.enemy.id)
-      // temporary condition to not skip lots of items if we use multiple pokeballs on the last fight, need to find something cleaner
-      || (Safari.balls() < 3 && Safari.itemGrid().length > 3)
+      || autoSafariCatchAllState)
+      // to not skip lots of items if we use multiple pokeballs on the last fight
+      && !(Safari.balls() == 1 && Safari.itemGrid().length > 0  && !forceSkipItems)
     ) {
       if (SafariBattle.enemy.angry === 0) {
         SafariBattle.throwRock();
@@ -260,6 +255,7 @@ function initAutoSafari() {
       // Process safari only if button in ON
       autoSafariProcessId = setInterval(() => {
         if (!isPayingEntranceFee & !Safari.inProgress()) {
+          forceSkipItems = false // resets value on new safari
           checkSafariEntry();
         } else if (Safari.inProgress()) {
           processSafari();
