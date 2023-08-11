@@ -5,7 +5,7 @@
 // @description   Adds in stage resetting to the Battle Frontier that allows you to set a target stage and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.5.1
+// @version       1.5.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -35,7 +35,7 @@ class AutoBattleFrontier {
         if (!(Number.isInteger(this.battleFrontCeil) && this.battleFrontCeil > 0)) {
             this.battleFrontCeil = 0;
         }
-        this.battleFrontAttackCeil = localStorage.getItem('battleFrontAttackCeil');
+        this.battleFrontAttackCeil = +localStorage.getItem('battleFrontAttackCeil');
         if (![0,1,2].includes(this.battleFrontAttackCeil)) {
             this.battleFrontAttackCeil = 0;
         }
