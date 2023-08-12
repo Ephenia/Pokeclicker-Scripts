@@ -26,12 +26,12 @@ function initPokerusPandemic() {
         // Spread pokerus before applying egg progress
         if (App.game.keyItems.hasKeyItem(KeyItemType.Pokerus_virus)) {
             const hasContagious = App.game.breeding.eggList.some((egg, i) => {
-                return !egg().isNone() && !egg().canHatch() && egg().partyPokemon()?.pokerus >= GameConstants.Pokerus.Contagious && (i > App.game.breeding.hatcheryHelpers.hired().length - 1);
+                return !egg()?.isNone() && !egg().canHatch() && egg().partyPokemon()?.pokerus >= GameConstants.Pokerus.Contagious && (i > App.game.breeding.hatcheryHelpers.hired().length - 1);
             });
             if (hasContagious) {
                 for (let i = App.game.breeding.hatcheryHelpers.hired().length; i < App.game.breeding.eggList.length; i++) {
                     let egg = App.game.breeding.eggList[i]();
-                    if (!egg.isNone() && egg.partyPokemon().pokerus == GameConstants.Pokerus.Uninfected) {
+                    if (!egg?.isNone() && egg.partyPokemon()?.pokerus == GameConstants.Pokerus.Uninfected) {
                         egg.partyPokemon().pokerus = GameConstants.Pokerus.Infected;
                     }
                 }
