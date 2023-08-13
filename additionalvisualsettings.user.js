@@ -347,7 +347,9 @@ function addOptimizeVitamins() {
         }
         // Optimally use vitamins
         GameHelper.enumNumbers(GameConstants.VitaminType).forEach((v) => {
-            this.removeVitamin(v, Infinity);
+            if (this.vitaminsUsed[v]()) {
+                this.removeVitamin(v, Infinity);
+            }
             if (v < optimalVitamins.length && optimalVitamins[v] > 0) {
                 this.useVitamin(v, optimalVitamins[v]);
             }
