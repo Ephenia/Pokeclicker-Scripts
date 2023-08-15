@@ -185,7 +185,6 @@ function initVisualSettings() {
     function overrideNotifications() {
         Notifier.oldNotifyAVS = Notifier.notify;
         Notifier.notify = function(...args) {
-        //    console.log(...args)
             if (avsDisableNotifications) {
                 if (args.length && args[0].sound) {
                     args[0].sound.play();
