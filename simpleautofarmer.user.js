@@ -240,11 +240,15 @@ function initSelectedBerryTracking() {
 }
 
 function loadScript() {
-    var oldInit = Preload.hideSplashScreen;
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function() {
-        var result = oldInit.apply(this, arguments);
-        initAutoFarm();
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initAutoFarm();
+            hasInitialized = true;
+        }
         return result;
     }
 

@@ -30,20 +30,24 @@ function initFixerUpper() {
         }
         setTimeout(() => { location.reload(); }, 1000);
     }
-    const warning = "Attempt to fix and reset script settings? This should clear out localStorage in relation to scripts and their dependencies, but should NOT affect any of your save data. You should back up your saves before doing so, just to be safe. Press OK to proceed!\r\n\r\nNote: This process may take a few seconds to complete and the page should reload when complete.";
-    if (confirm(warning) == true) {
-        clearLocalStorage();
-    }
+    setTimeout(() => {
+        const warning = "Attempt to fix and reset script settings? This should clear out localStorage in relation to scripts and their dependencies, but should NOT affect any of your save data. You should back up your saves before doing so, just to be safe. Press OK to proceed!\r\n\r\nNote: This process may take a few seconds to complete and the page should reload when complete.";
+        if (confirm(warning) == true) {
+            clearLocalStorage();
+        }
+    }, 3000);
 }
 
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        setTimeout(() => {
-            initFixerUpper()
-        }, 5000);
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initFixerUpper();
+            hasInitialized = true;
+        }
         return result
     }
 }

@@ -336,12 +336,16 @@ karmaRates = JSON.parse(localStorage.getItem('shinyKarmaRates'));
 shinyDOMUpdate = JSON.parse(localStorage.getItem('shinyDOMUpdate'));
 
 function loadScript() {
-    var oldInit = Preload.hideSplashScreen
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function () {
-        var result = oldInit.apply(this, arguments)
-        initShinySynapse()
-        return result
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initShinySynapse();
+            hasInitialized = true;
+        }
+        return result;
     }
 }
 

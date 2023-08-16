@@ -824,8 +824,8 @@ function startEpheniaScripts() {
       externalResolve = resolve;
     });
     const startApp = App.start.bind(App)
-    App.start = function start() {
-      allScriptsDone.finally(() => startApp());
+    App.start = function start(...args) {
+      allScriptsDone.finally(() => startApp(args));
     }
     return externalResolve;
   })();`);

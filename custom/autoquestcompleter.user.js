@@ -296,13 +296,16 @@ function loadSetting(key, defaultVal) {
     return val;
 }
 
-
 function loadScript(){
-    var oldInit = Preload.hideSplashScreen;
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function() {
-        var result = oldInit.apply(this, arguments);
-        initAutoQuest();
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initAutoQuest();
+            hasInitialized = true;
+        }
         return result;
     }
 }

@@ -1081,10 +1081,14 @@ addGraphicsBindings();
 
 function loadScript() {
     const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function () {
-        var result = oldInit.apply(this, arguments);
-        initAutoClicker();
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initAutoClicker();
+            hasInitialized = true;
+        }
         return result;
     }
 }
