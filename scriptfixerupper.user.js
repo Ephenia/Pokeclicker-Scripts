@@ -22,8 +22,8 @@ var scriptName = 'scriptfixerupper';
 
 function initFixerUpper() {
     function clearLocalStorage() {
-        for (let i = localStorage.length - 1; i >= 0; i--){
-            const key = localStorage.key(i);
+        const keys = Object.keys(localStorage);
+        for (const key of keys) {
             if (!key.startsWith('save') && !key.startsWith('player') && !key.startsWith('settings')) {
                 localStorage.removeItem(key);
             }
