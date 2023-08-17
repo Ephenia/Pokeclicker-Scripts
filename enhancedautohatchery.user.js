@@ -293,15 +293,19 @@ function addGlobalStyle(css) {
 }
 
 function loadScript() {
-    bindAutoHatcher();
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    var oldInit = Preload.hideSplashScreen;
-
-    Preload.hideSplashScreen = function () {
+    Preload.hideSplashScreen = function(...args) {
         var result = oldInit.apply(this, arguments);
-        initAutoHatch();
+        if (App.game && !hasInitialized) {
+            initAutoHatch();
+            hasInitialized = true;
+        }
         return result;
     }
+
+    bindAutoHatcher();
 }
 
 if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {

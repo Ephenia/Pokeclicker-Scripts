@@ -59,12 +59,16 @@ function overrideGenerateWeather() {
     }
 }
 
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen;
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function() {
-        var result = oldInit.apply(this, arguments);
-        initWeatherChange();
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initWeatherChange();
+            hasInitialized = true;
+        }
         return result;
     }
 }

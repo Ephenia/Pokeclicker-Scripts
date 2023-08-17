@@ -472,12 +472,16 @@ if (fixIt.length != 0) {
     localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
 }
 
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        initCatchFilter()
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initCatchFilter();
+            hasInitialized = true;
+        }
         return result
     }
 }

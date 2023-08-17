@@ -65,12 +65,16 @@ function initOmegaProtein() {
 }
 
 function loadScript() {
-    var oldInit = Preload.hideSplashScreen
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function () {
-        var result = oldInit.apply(this, arguments)
-        initOmegaProtein()
-        return result
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args)
+        if (App.game && !hasInitialized) {
+            initOmegaProtein();
+            hasInitialized = true;
+        }
+        return result;
     }
 }
 

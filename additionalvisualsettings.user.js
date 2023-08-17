@@ -185,7 +185,6 @@ function initVisualSettings() {
     function overrideNotifications() {
         Notifier.oldNotifyAVS = Notifier.notify;
         Notifier.notify = function(...args) {
-        //    console.log(...args)
             if (avsDisableNotifications) {
                 if (args.length && args[0].sound) {
                     args[0].sound.play();
@@ -379,11 +378,15 @@ function loadSetting(key, defaultVal) {
 }
 
 function loadScript(){
-    var oldInit = Preload.hideSplashScreen;
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function() {
-        var result = oldInit.apply(this, arguments)
-        initVisualSettings();
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args)
+        if (App.game && !hasInitialized) {
+            initVisualSettings();
+            hasInitialized = true;
+        }
         return result;
     }
 
