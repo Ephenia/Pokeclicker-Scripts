@@ -5,7 +5,7 @@
 // @description   Adds in stage resetting to the Battle Frontier that allows you to set a target stage and infinitely farm the Battle Frontier while being fully AFK. Also, gives the appropriate amount of Battle Points and Money without needing to fail and lose a stage.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.5.2
+// @version       1.5.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -53,16 +53,18 @@ class AutoBattleFrontier {
         bfQuit.setAttribute('onclick', 'BattleFrontierRunner.end()');
         
         const battleFrontTitle = document.querySelector('#battleFrontierInformation div.card-header');
-        const attackCeilButton = document.createElement("div");
-        attackCeilButton.setAttribute("id", "bf-attack-ceil-btn");
-        attackCeilButton.innerHTML = `<button id="bf-attack-ceil-start" class="btn btn-block btn-${this.battleFrontAttackCeil ? 'success' : 'danger'}" style="font-size: 8pt;">Max Attacks: ${this.battleFrontAttackCeil || 'OFF'}</button>`
+        const attackCeilContainer = document.createElement("div");
+        attackCeilContainer.setAttribute("id", "bf-attack-ceil-btn");
+        attackCeilContainer.innerHTML = `<button id="bf-attack-ceil-start" style="font-size: 8pt;"></button>`;
+        const attackCeilButton = attackCeilContainer.querySelector('#bf-attack-ceil-start');
+        attackCeilButton.setAttribute('data-bind', 'class: `btn btn-block btn-${AutoBattleFrontier.battleFrontAttackCeil ? \'success\' : \'danger\'}`, text: `Max Attacks: ${AutoBattleFrontier.battleFrontAttackCeil}`');
         attackCeilButton.setAttribute('onclick', 'AutoBattleFrontier.toggleBattleFrontAttackCeil()');
         const bfInput = document.createElement("div");
+        bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 70px; margin: 5px;"> <button id="battle-front-input-submit" class="btn btn-block btn-danger" style="font-size: 8pt; width: 42px; display:inline-block;">OK</button>`;
         bfInput.setAttribute("id", "battle-front-cont");
-        bfInput.innerHTML = `Max Stage: <input id="battle-front-input" style="width: 70px; margin: 5px;"> <button id="battle-front-input-submit" class="btn btn-block btn-danger" style="font-size: 8pt; width: 42px; display:inline-block;">OK</button>`
         battleFrontTitle.before(bfInput);
-        battleFrontTitle.before(attackCeilButton);
-        document.getElementById('battle-front-input').value = this.battleFrontCeil.toLocaleString('en-US');
+        battleFrontTitle.before(attackCeilContainer);
+        document.getElementById('battle-front-input').setAttribute('data-bind', 'value: AutoBattleFrontier.battleFrontCeil.toLocaleString(\'en-US\')');
         document.getElementById('battle-front-input-submit').setAttribute('onclick', 'AutoBattleFrontier.setBattleFrontCeil()');
 
         addGlobalStyle('#battle-front-cont { position:absolute;right:0px;top:0px;width:auto;height:41px;padding:5px;display:flex;align-items:center; }');
