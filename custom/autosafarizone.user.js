@@ -78,7 +78,7 @@ function initAutoSafari() {
         gettingItems = true // trying to pick up items, set to skip fights
         const shortestPath = findShortestPathToTiles(Safari.itemGrid().map(({ x, y }) => [y, x]));
         if (shortestPath) {
-          moveCharacterWithDelay(shortestPath);
+          moveCharacter(shortestPath);
         } else {
           forceSkipItems = true // if items are generated in buggy sections of the map, skips them...
         }
@@ -86,7 +86,7 @@ function initAutoSafari() {
         gettingItems = false
         const shortestPath = findShortestPathToValue(GRASS_GRID_VALUE);
         if (shortestPath) {
-          moveCharacterWithDelay(shortestPath);
+          moveCharacter(shortestPath);
         }
       }
     } else {
@@ -94,9 +94,8 @@ function initAutoSafari() {
     }
   }
 
-  function moveCharacterWithDelay(shortestPath) {
+  function moveCharacter(shortestPath) {
     // TODO this method needs some refactoring since it does not use the complete path but it is called again after every step
-    // if a grass tile is isolated and the character is walking on it, it will go back and forth on it and lose half of its time moving on an empty tile
     let moveIndex = 0;
 
     function moveNextStep() {
@@ -173,7 +172,8 @@ function initAutoSafari() {
         if (
           isValidPosition(nextRow, nextCol)
           && !visited.has(nextPosStr)
-          && GameConstants.LEGAL_WALK_BLOCKS.includes(Safari.grid[nextRow][nextCol]
+          && (GameConstants.SAFARI_LEGAL_WALK_BLOCKS.includes(Safari.grid[nextRow][nextCol])
+            || GameConstants.SAFARI_WATER_BLOCKS.includes(Safari.grid[nextRow][nextCol])
           )
         ) {
           {
