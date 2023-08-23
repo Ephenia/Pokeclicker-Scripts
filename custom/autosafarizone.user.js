@@ -23,90 +23,118 @@
 
 var scriptName = 'autosafarizone';
 
-let autoSafariState;
-let autoSafariPickState;
-let autoSafariFastAnimationsState;
-let autoSafariThrowBaitsState;
-let autoSafariCatchAllState;
-
-// Tells when we try to pick items and skip fights or run away when only 1 ball left
-let gettingItems = false;
-// To skip items if they are generated in buggy sections of the grid
-let forceSkipItems = false;
-// Flag to track if entrance fee payment is ongoing since we are playing with timeouts
-let isPayingEntranceFee = false;
-
-let autoSafariProcessId;
-
-const GRASS_GRID_VALUE = 10;
-
 function initAutoSafari() {
+  var autoSafariState = false;
+  var autoSafariPickState = loadSetting('autoSafariPickState', false);
+  var autoSafariFastAnimationsState = loadSetting('autoSafariFastAnimationsState', false);
+  var autoSafariThrowBaitsState = loadSetting('autoSafariThrowBaitsState', false);
+  var autoSafariCatchAllState = loadSetting('autoSafariCatchAllState', false);
+
+  var cachedPath = [];
+  // Tells when we try to pick items and skip fights or run away when only 1 ball left
+  var gettingItems = false;
+  // To skip items if they are generated in buggy sections of the grid
+  var forceSkipItems = false;
+
+  var autoSafariProcessId;
+  var skipTicks = 0;
+
+  const CACHED_ANIM_SPEEDS = Object.assign({}, SafariBattle.Speed);
+  const CACHED_MOVE_SPEED = Safari.moveSpeed;
+  // Faux enum
+  const DIRECTIONS = {
+    up: 0,
+    down: 1,
+    left: 2,
+    right: 3,
+    0: 'up',
+    1: 'down',
+    2: 'left',
+    3: 'right',
+  };
+
   createHTML();
 
-  function checkSafariEntry() {
-    if (player.town() instanceof Town && !player.route() && (player.town().name === 'Friend Safari' || player.town().name === 'Safari Zone')) {
-      if (Safari.canAccess() && Safari.canPay()) {
-        isPayingEntranceFee = true;
-        openModalAndPayEntranceFee().then(() => {
-          isPayingEntranceFee = false;
-        });
-      } else {
-        toggleAutoSafari()
-      }
+  function startAutoSafari() {
+    gettingItems = false;
+    forceSkipItems = false;
+    cachedPath.length = 0;
+    // Interval slightly longer than movement speed (0.25s by default) to avoid graphical glitches
+    autoSafariProcessId = setInterval(doSafariTick, Safari.moveSpeed + 25);
+  }
+
+
+  function doSafariTick() {
+    if (skipTicks) {
+      skipTicks--;
+    } else if (!Safari.inProgress() || modalUtils.observableState.safariModal !== 'show') {
+      enterSafari();
+    } else if (Safari.inBattle()) {
+      fightSafariPokemon();
     } else {
-      toggleAutoSafari()
+      processSafari();
     }
   }
 
-  function openModalAndPayEntranceFee() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        Safari.openModal();
-        setTimeout(() => {
-          Safari.payEntranceFee();
-          resolve(); // Signal that the process is complete
-        }, 500);
-      }, 500);
-    });
+  function enterSafari() {
+    if (!(Safari.canAccess() && !player.route() && ['Safari Zone', 'Friend Safari'].includes(player.town().name))) {
+      toggleAutoSafari();
+      return;
+    }
+    if (modalUtils.observableState.safariModal !== 'show') {
+      Safari.openModal();
+      skipTicks = 1;
+    } else if (!Safari.inProgress() && Safari.canPay()) {
+      Safari.payEntranceFee();
+      forceSkipItems = false;
+      cachedPath.length = 0;
+    } else {
+      toggleAutoSafari();
+    }
   }
 
   function processSafari() {
-    // Performs actions within the Safari : picking items, moving, fighting pokemons
-
-    if (!Safari.inBattle()) {
-      if (autoSafariPickState && Safari.itemGrid().length > 0 && Safari.balls() == 1 && !forceSkipItems) {
-        gettingItems = true // trying to pick up items, set to skip fights
-        const shortestPath = findShortestPathToTiles(Safari.itemGrid().map(({ x, y }) => [y, x]));
-        if (shortestPath) {
-          moveCharacter(shortestPath);
-        } else {
-          forceSkipItems = true // if items are generated in buggy sections of the map, skips them...
-        }
+    // Performs actions within the Safari: picking items, moving
+    if (autoSafariPickState && Safari.itemGrid().length > 0 && Safari.balls() == 1 && !forceSkipItems) {
+      console.log('Item time')
+      if (!gettingItems) {
+        console.log('Clearing cached path ' + cachedPath)
+        cachedPath.length = 0;
+        gettingItems = true; // trying to pick up items, set to skip fights
+      }
+      if (!cachedPath.length) {
+        cachedPath = findShortestPathToTiles(Safari.itemGrid().map(({ x, y }) => [y, x]));
+        console.log(cachedPath)
+      }
+      if (cachedPath.length) {
+        moveCharacter(cachedPath);
       } else {
-        gettingItems = false
-        const shortestPath = findShortestPathToValue(GRASS_GRID_VALUE);
-        if (shortestPath) {
-          moveCharacter(shortestPath);
-        }
+        console.log('Force skipping items')
+        forceSkipItems = true;
       }
     } else {
-      fightSafariPokemon();
+      if (gettingItems) {
+        cachedPath.length = 0;
+        gettingItems = false;
+      }
+      if (!cachedPath.length) {
+        // TODO seek water for water encounters in next game version
+        cachedPath = findShortestPathToValue(GameConstants.SafariTile.grass);
+      }
+      if (cachedPath.length) {
+        moveCharacter(cachedPath);
+      } else {
+        // Hopefully never possible
+        toggleAutoSafari();
+      }
     }
   }
 
-  function moveCharacter(shortestPath) {
-    // TODO this method needs some refactoring since it does not use the complete path but it is called again after every step
-    let moveIndex = 0;
-
-    function moveNextStep() {
-      if (moveIndex < shortestPath.length) {
-        Safari.step(shortestPath[moveIndex]);
-        moveIndex += 1;
-      }
-
+  function moveCharacter(path) {
+    if (!Safari.isMoving) {
+      let dir = path.shift();
+      Safari.step(DIRECTIONS[dir]);
     }
-
-    moveNextStep();
   }
 
   function findShortestPathToValue(target) {
@@ -139,12 +167,8 @@ function initAutoSafari() {
   }
 
   function findShortestPathToTiles(targetPositions) {
-    const numRows = Safari.grid.length;
-    const numCols = Safari.grid[0].length;
     const visited = new Set();
     const queue = [[Safari.playerXY.y, Safari.playerXY.x, []]];
-
-    const isValidPosition = (row, col) => row >= 0 && row < numRows && col >= 0 && col < numCols;
 
     while (queue.length > 0) {
       const [currentRow, currentCol, currentPath] = queue.shift();
@@ -159,14 +183,14 @@ function initAutoSafari() {
         return currentPath;
       }
 
-      const directions = [
-        [currentRow - 1, currentCol, 'up'],
-        [currentRow + 1, currentCol, 'down'],
-        [currentRow, currentCol - 1, 'left'],
-        [currentRow, currentCol + 1, 'right'],
+      const adjacent = [
+        [currentRow - 1, currentCol, DIRECTIONS.up],
+        [currentRow + 1, currentCol, DIRECTIONS.down],
+        [currentRow, currentCol - 1, DIRECTIONS.left],
+        [currentRow, currentCol + 1, DIRECTIONS.right],
       ];
 
-      for (const [nextRow, nextCol, direction] of directions) {
+      for (const [nextRow, nextCol, direction] of adjacent) {
         const nextPosStr = `${nextRow}-${nextCol}`;
 
         if (
@@ -177,14 +201,14 @@ function initAutoSafari() {
           )
         ) {
           {
-            const nextPath = [...currentPath, direction];
+            const nextPath = currentPath.concat([direction]);
             queue.push([nextRow, nextCol, nextPath]);
             visited.add(nextPosStr);
           }
         }
       }
     }
-    return null;
+    return [];
   }
 
   function findTilesWithValue(targetValue) {
@@ -197,7 +221,7 @@ function initAutoSafari() {
       for (let col = 0; col < numCols; col += 1) {
         if (Safari.grid[row][col] === targetValue) {
           // If searching for grass tiles, skipping it if isolated 
-          if (!(targetValue == GRASS_GRID_VALUE && isIsolatedTile(row, col, targetValue))) {
+          if (!(targetValue == GameConstants.SafariTile.grass && isIsolatedTile(row, col, targetValue))) {
             targetPositions.push([row, col]);
           }
         }
@@ -208,6 +232,8 @@ function initAutoSafari() {
   }
 
   function fightSafariPokemon(forceRunAway = gettingItems) {
+    // TODO skip ticks proportional to animation speed
+    // TODO scale speed with safari level in next game version
     if (autoSafariThrowBaitsState && App.game.statistics.safariBaitThrown() <= 1000) {
       SafariBattle.throwBait();
     } else if (!forceRunAway
@@ -239,9 +265,7 @@ function initAutoSafari() {
       var button = document.createElement('button');
       button.setAttribute('id', `auto-${name}-toggle`);
       button.classList.add('btn', 'btn-block', 'btn-' + (state ? 'success' : 'danger'));
-      button.style.height = '50%';
-      button.style.fontSize = '8pt';
-      button.style.marginTop = '0px';
+      button.setAttribute('style', 'font-size: 8pt; display: flex; align-items: center; justify-content: center; margin: 0px !important;')
       button.textContent = `Auto ${name[0].toUpperCase() + name.slice(1)}\n[${state ? 'ON' : 'OFF'}]`;
       button.onclick = function () { func(); };
 
@@ -254,6 +278,7 @@ function initAutoSafari() {
     createButton('throw-baits', autoSafariThrowBaitsState, toggleThrowBaits)
     createButton('catch-all', autoSafariCatchAllState, toggleCatchAll)
 
+    buttonsContainer.setAttribute('style', 'display: flex; height: 24px;')
     buttonsContainer.style.display = 'flex';
     modalHeader.after(buttonsContainer);
 
@@ -265,7 +290,7 @@ function initAutoSafari() {
     });
 
     if (autoSafariFastAnimationsState) {
-      autoSafariFastAnimations()
+      autoSafariFastAnimations();
     }
   }
 
@@ -278,17 +303,9 @@ function initAutoSafari() {
     document.getElementById('auto-safari-toggle').innerHTML = `Auto Safari [${autoSafariState ? 'ON' : 'OFF'}]`;
 
     if (autoSafariState) {
-      // Process safari only if button in ON
-      autoSafariProcessId = setInterval(() => {
-        if (!isPayingEntranceFee & !Safari.inProgress()) {
-          forceSkipItems = false // resets value on new safari
-          checkSafariEntry();
-        } else if (Safari.inProgress()) {
-          processSafari();
-        }
-      }, 250); // Happens every 0.25 seconds (= moving animation speed)
+      startAutoSafari();
     } else {
-      if (autoSafariProcessId) { clearInterval(autoSafariProcessId) }
+      clearInterval(autoSafariProcessId);
     }
   }
 
@@ -309,15 +326,18 @@ function initAutoSafari() {
     localStorage.setItem('autoSafariFastAnimationsState', autoSafariFastAnimationsState);
     document.getElementById('auto-fast-anim-toggle').innerHTML = `Auto Fast-anim [${autoSafariFastAnimationsState ? 'ON' : 'OFF'}]`;
 
-    autoSafariFastAnimations()
+    autoSafariFastAnimations();
   }
 
   function autoSafariFastAnimations() {
-    SafariBattle.Speed.animation = autoSafariFastAnimationsState ? 0 : 1000;
-    SafariBattle.Speed.ballBounce = autoSafariFastAnimationsState ? 0 : 750;
-    SafariBattle.Speed.ballThrow = autoSafariFastAnimationsState ? 0 : 850;
-    SafariBattle.Speed.ballRoll = autoSafariFastAnimationsState ? 0 : 700;
-    SafariBattle.Speed.enemyTransition = autoSafariFastAnimationsState ? 0 : 1000;
+    for (const anim of Object.keys(SafariBattle.Speed)) {
+      SafariBattle.Speed[anim] = autoSafariFastAnimationsState ? 0 : CACHED_ANIM_SPEEDS[anim];
+    }
+    Safari.moveSpeed = autoSafariFastAnimationsState ? CACHED_MOVE_SPEED / 2 : CACHED_MOVE_SPEED;
+    if (autoSafariState) {
+      clearInterval(autoSafariProcessId);
+      startAutoSafari();
+    }
   }
 
   function toggleThrowBaits() {
@@ -338,34 +358,30 @@ function initAutoSafari() {
   }
 }
 
-
-// Set to false by default
-localStorage.setItem('autoSafariState', false);
-
-if (!localStorage.getItem('autoSafariPickState')) {
-  localStorage.setItem('autoSafariPickState', false);
+function loadSetting(key, defaultVal) {
+    var val;
+    try {
+        val = JSON.parse(localStorage.getItem(key));
+        if (val == null || typeof val !== typeof defaultVal) {
+            throw new Error;
+        }
+    } catch {
+        val = defaultVal;
+        localStorage.setItem(key, defaultVal);
+    }
+    return val;
 }
-if (!localStorage.getItem('autoSafariFastAnimationsState')) {
-  localStorage.setItem('autoSafariFastAnimationsState', false);
-}
-if (!localStorage.getItem('autoSafariThrowBaitsState')) {
-  localStorage.setItem('autoSafariThrowBaitsState', false);
-}
-if (!localStorage.getItem('autoSafariCatchAllState')) {
-  localStorage.setItem('autoSafariCatchAllState', false);
-}
-autoSafariState = JSON.parse(localStorage.getItem('autoSafariState'));
-autoSafariPickState = JSON.parse(localStorage.getItem('autoSafariPickState'));
-autoSafariFastAnimationsState = JSON.parse(localStorage.getItem('autoSafariFastAnimationsState'));
-autoSafariThrowBaitsState = JSON.parse(localStorage.getItem('autoSafariThrowBaitsState'));
-autoSafariCatchAllState = JSON.parse(localStorage.getItem('autoSafariCatchAllState'));
 
 function loadScript() {
   const oldInit = Preload.hideSplashScreen;
+  var hasInitialized = false;
 
-  Preload.hideSplashScreen = function () {
-    const result = oldInit.apply(this, arguments);
-    initAutoSafari();
+  Preload.hideSplashScreen = function (...args) {
+    const result = oldInit.apply(this, args);
+    if (App.game && !hasInitialized) {
+      initAutoSafari();
+      hasInitialized = true;
+    }
     return result;
   };
 }
