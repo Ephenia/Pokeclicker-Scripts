@@ -4,7 +4,7 @@
 // ==UserScript==
 // @name          [Pokeclicker] Auto Safari Zone
 // @namespace     Pokeclicker Scripts
-// @author        Kanzen01 (Credit: Ephenia)
+// @author        Kanzen01 (Credit: Ephenia, Optimatum)
 // @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
@@ -25,16 +25,19 @@ var scriptName = 'autosafarizone';
 
 function initAutoSafari() {
   var autoSafariState = false;
-  var autoSafariPickState = loadSetting('autoSafariPickState', false);
-  var autoSafariFastAnimationsState = loadSetting('autoSafariFastAnimationsState', false);
+  var autoSafariPickItemsState = loadSetting('autoSafariPickItemsState', true);
   var autoSafariThrowBaitsState = loadSetting('autoSafariThrowBaitsState', false);
-  var autoSafariCatchAllState = loadSetting('autoSafariCatchAllState', false);
+  var autoSafariSeekUncaught = loadSetting('autoSafariSeekUncaught', false);
+  var autoSafariSeekContagious = loadSetting('autoSafariSeekContagious', false);
+  var autoSafariFastAnimationsState = loadSetting('autoSafariFastAnimationsState', false);
 
   var cachedPath = [];
   // Tells when we try to pick items and skip fights or run away when only 1 ball left
   var gettingItems = false;
   // To skip items if they are generated in buggy sections of the grid
   var forceSkipItems = false;
+  var hasPriority = false;
+  var inBattle = false;
 
   var autoSafariProcessId;
   var skipTicks = 0;
@@ -60,9 +63,8 @@ function initAutoSafari() {
     forceSkipItems = false;
     cachedPath.length = 0;
     // Interval slightly longer than movement speed (0.25s by default) to avoid graphical glitches
-    autoSafariProcessId = setInterval(doSafariTick, Safari.moveSpeed + 25);
+    autoSafariProcessId = setInterval(doSafariTick, tickSpeed());
   }
-
 
   function doSafariTick() {
     if (skipTicks) {
@@ -76,6 +78,10 @@ function initAutoSafari() {
     }
   }
 
+  function tickSpeed() {
+    return Safari.moveSpeed + 25;
+  }
+
   function enterSafari() {
     if (!(Safari.canAccess() && !player.route() && ['Safari Zone', 'Friend Safari'].includes(player.town().name))) {
       toggleAutoSafari();
@@ -83,7 +89,7 @@ function initAutoSafari() {
     }
     if (modalUtils.observableState.safariModal !== 'show') {
       Safari.openModal();
-      skipTicks = 1;
+      skipTicks = autoSafariFastAnimationsState ? 2 : 1;
     } else if (!Safari.inProgress() && Safari.canPay()) {
       Safari.payEntranceFee();
       forceSkipItems = false;
@@ -95,21 +101,18 @@ function initAutoSafari() {
 
   function processSafari() {
     // Performs actions within the Safari: picking items, moving
-    if (autoSafariPickState && Safari.itemGrid().length > 0 && Safari.balls() == 1 && !forceSkipItems) {
-      console.log('Item time')
+    inBattle = false;
+    if (autoSafariPickItemsState && Safari.itemGrid().length > 0 && Safari.balls() == 1 && !forceSkipItems) {
       if (!gettingItems) {
-        console.log('Clearing cached path ' + cachedPath)
         cachedPath.length = 0;
         gettingItems = true; // trying to pick up items, set to skip fights
       }
       if (!cachedPath.length) {
-        cachedPath = findShortestPathToTiles(Safari.itemGrid().map(({ x, y }) => [y, x]));
-        console.log(cachedPath)
+        cachedPath = findShortestPathToItems();
       }
       if (cachedPath.length) {
         moveCharacter(cachedPath);
       } else {
-        console.log('Force skipping items')
         forceSkipItems = true;
       }
     } else {
@@ -118,8 +121,7 @@ function initAutoSafari() {
         gettingItems = false;
       }
       if (!cachedPath.length) {
-        // TODO seek water for water encounters in next game version
-        cachedPath = findShortestPathToValue(GameConstants.SafariTile.grass);
+        cachedPath = findShortestPathToEncounters();
       }
       if (cachedPath.length) {
         moveCharacter(cachedPath);
@@ -137,13 +139,46 @@ function initAutoSafari() {
     }
   }
 
-  function findShortestPathToValue(target) {
-    // find all tiles of a certain value
-    tiles = findTilesWithValue(target);
-    return findShortestPathToTiles(tiles);
+  function findShortestPathToItems() {
+    const itemLocations = new Set(Safari.itemGrid().map(({ x, y }) => `${y}-${x}`));
+    return findShortestPathToTiles((row, col) => (itemLocations.has(`${row}-${col}`)));
   }
 
-  function isIsolatedTile(row, col, targetValue) {
+  function findShortestPathToEncounters() {
+    // If prioritizing uncaught/contagious, check if water and grass encounters have any
+    function isPriority(mon) {
+      return (autoSafariSeekUncaught && !App.game.party.alreadyCaughtPokemonByName(mon)) ||
+        (autoSafariSeekContagious && App.game.party.getPokemonByName(mon)?.pokerus === GameConstants.Pokerus.Contagious);
+    }
+
+    let needGrass = false;
+    let needWater = false;
+
+    if (autoSafariSeekUncaught || autoSafariSeekContagious) {
+      needGrass = SafariPokemonList.list[player.region]().some((p) => p.environments.includes(SafariEnvironments.Grass) && isPriority(p.name));
+      needWater = SafariPokemonList.list[player.region]().some((p) => p.environments.includes(SafariEnvironments.Water) && isPriority(p.name));
+    }
+    
+    hasPriority = needGrass || needWater;
+
+    let chosenTiles = [];
+    if (needGrass) {
+      chosenTiles.push(GameConstants.SafariTile.grass);
+    }
+    if (needWater) {
+      chosenTiles.push(...GameConstants.SAFARI_WATER_BLOCKS);
+    }
+    if (!needGrass && !needWater) {
+      // No priority, either 
+      chosenTiles.push(GameConstants.SafariTile.grass, ...GameConstants.SAFARI_WATER_BLOCKS);
+    }
+    
+    const encounterTiles = new Set(chosenTiles);
+    return findShortestPathToTiles((row, col) => (encounterTiles.has(Safari.grid[row][col])) && !isIsolatedTile(row, col));
+  }
+
+  function isIsolatedTile(row, col) {
+    const tileType = Safari.grid[row][col];
     const adjacentTiles = [
       [row - 1, col],
       [row + 1, col],
@@ -151,8 +186,21 @@ function initAutoSafari() {
       [row, col + 1],
     ];
 
+    var compareFunc;
+    if (GameConstants.SafariTile.waterUL <= tileType && tileType <= GameConstants.SafariTile.waterDR) {
+      compareFunc = (t) => GameConstants.SAFARI_WATER_BLOCKS.includes(t);
+    } else if (GameConstants.SafariTile.sandUL <= tileType && tileType <= GameConstants.SafariTile.sandULinverted) {
+      compareFunc = (t) => GameConstants.SafariTile.sandUL <= t && t <= GameConstants.SafariTile.sandULinverted;
+    } else if (GameConstants.SafariTile.fenceUL <= tileType && tileType <= GameConstants.SafariTile.fenceDLend) {
+      compareFunc = (t) => GameConstants.SafariTile.fenceUL <= t && t <= GameConstants.SafariTile.fenceDLend;
+    } else if (GameConstants.SafariTile.treeTopL <= tileType && tileType <= GameConstants.SafariTile.treeRootsR) {
+      compareFunc = (t) => GameConstants.SafariTile.treeTopL <= t && t <= GameConstants.SafariTile.treeRootsR;
+    } else {
+      compareFunc = (t) => t === tileType;
+    }
+
     for (const [adjRow, adjCol] of adjacentTiles) {
-      if (isValidPosition(adjRow, adjCol) && Safari.grid[adjRow][adjCol] === targetValue) {
+      if (isValidPosition(adjRow, adjCol) && compareFunc(Safari.grid[row][col], Safari.grid[adjRow][adjCol])) {
         return false; // Found an adjacent tile with the same value
       }
     }
@@ -166,7 +214,8 @@ function initAutoSafari() {
     return row >= 0 && row < numRows && col >= 0 && col < numCols;
   }
 
-  function findShortestPathToTiles(targetPositions) {
+  // Using the given test function, returns a path to the closest tile satisfying it
+  function findShortestPathToTiles(isPositionTarget) {
     const visited = new Set();
     const queue = [[Safari.playerXY.y, Safari.playerXY.x, []]];
 
@@ -174,11 +223,7 @@ function initAutoSafari() {
       const [currentRow, currentCol, currentPath] = queue.shift();
       visited.add(`${currentRow}-${currentCol}`);
 
-      const isCurrentPositionTarget = targetPositions.some(
-        ([targetRow, targetCol]) => currentRow === targetRow && currentCol === targetCol,
-      );
-
-      if (isCurrentPositionTarget && currentPath.length > 0) {
+      if (currentPath.length > 0 && isPositionTarget(currentRow, currentCol)) {
         // Found the closest target, return the path
         return currentPath;
       }
@@ -193,12 +238,10 @@ function initAutoSafari() {
       for (const [nextRow, nextCol, direction] of adjacent) {
         const nextPosStr = `${nextRow}-${nextCol}`;
 
-        if (
-          isValidPosition(nextRow, nextCol)
-          && !visited.has(nextPosStr)
+        // TODO remove SAFARI_WATER_BLOCKS after game update makes it redundant
+        if (isValidPosition(nextRow, nextCol) && !visited.has(nextPosStr)
           && (GameConstants.SAFARI_LEGAL_WALK_BLOCKS.includes(Safari.grid[nextRow][nextCol])
-            || GameConstants.SAFARI_WATER_BLOCKS.includes(Safari.grid[nextRow][nextCol])
-          )
+            || GameConstants.SAFARI_WATER_BLOCKS.includes(Safari.grid[nextRow][nextCol]))
         ) {
           {
             const nextPath = currentPath.concat([direction]);
@@ -211,47 +254,101 @@ function initAutoSafari() {
     return [];
   }
 
-  function findTilesWithValue(targetValue) {
-    // find all positions of tiles based on their id
-    const numRows = Safari.grid.length;
-    const numCols = Safari.grid[0].length;
-    const targetPositions = [];
+  function fightSafariPokemon() {
+    // TODO skip ticks proportional to animation speed
+    const forceRunAway = gettingItems || (Safari.balls() == 1 && Safari.itemGrid().length > 0 && !forceSkipItems);
+    const isPriority = (autoSafariSeekUncaught && !App.game.party.alreadyCaughtPokemon(SafariBattle.enemy.id))
+        || (autoSafariSeekContagious && App.game.party.getPokemon(SafariBattle.enemy.id)?.pokerus === GameConstants.Pokerus.Contagious);
 
-    for (let row = 0; row < numRows; row += 1) {
-      for (let col = 0; col < numCols; col += 1) {
-        if (Safari.grid[row][col] === targetValue) {
-          // If searching for grass tiles, skipping it if isolated 
-          if (!(targetValue == GameConstants.SafariTile.grass && isIsolatedTile(row, col, targetValue))) {
-            targetPositions.push([row, col]);
-          }
+    if (SafariBattle.busy()) {
+      return;
+    } else if (!inBattle) {
+      // Delay first action to reduce animation bugs
+      inBattle = true;
+      if (autoSafariFastAnimationsState) {
+        skipTicks += 1;
+      }
+      return;
+    }
+    
+    // Handle shiny encounters specially
+    if (SafariBattle.enemy.shiny) {
+      let canNanab = App.game.farming.berryList[BerryType.Nanab]() > 5;
+      let canRazz = App.game.farming.berryList[BerryType.Razz]() > 5;
+      // Bait is usually the best approach
+      if (!(SafariBattle.enemy.angry || SafariBattle.enemy.eating || SafariBattle.enemy.eatingBait !== BaitType.Bait)) {
+        // Nanab is highest catch chance, though not highest catch-per-ball efficiency
+        if (canNanab) {
+          SafariBattle.selectedBait(BaitList.Nanab);
+          SafariBattle.throwBait();
+        } 
+        // Razz is second best
+        else if (canRazz) {
+          SafariBattle.selectedBait(BaitList.Razz);
+          SafariBattle.throwBait();
+        } 
+        // Bait is still alright if we have plenty of balls left
+        else if (Safari.balls() > 3) {
+          SafariBattle.selectedBait(BaitList.Bait);
+          SafariBattle.throwBait();
+        }
+        // Throw rock and hope for the best
+        else {
+          SafariBattle.throwRock();
         }
       }
-    }
-
-    return targetPositions;
-  }
-
-  function fightSafariPokemon(forceRunAway = gettingItems) {
-    // TODO skip ticks proportional to animation speed
-    // TODO scale speed with safari level in next game version
-    if (autoSafariThrowBaitsState && App.game.statistics.safariBaitThrown() <= 1000) {
-      SafariBattle.throwBait();
-    } else if (!forceRunAway
-      && ((App.game.party.getPokemon(SafariBattle.enemy.id)?.pokerus !== GameConstants.Pokerus.Uninfected
-        && App.game.party.getPokemon(SafariBattle.enemy.id)?.evs() < 50)
-        || SafariBattle.enemy.shiny
-        || !App.game.party.alreadyCaughtPokemon(SafariBattle.enemy.id)
-        || autoSafariCatchAllState)
-      // to not skip lots of items if we use multiple pokeballs on the last fight
-      && !(Safari.balls() == 1 && Safari.itemGrid().length > 0 && !forceSkipItems)
-    ) {
-      if (SafariBattle.enemy.angry === 0) {
+      // Running low on balls, throw rock (stacks with berry modifiers)
+      else if (!SafariBattle.enemy.angry && Safari.balls() <= 3) {
         SafariBattle.throwRock();
-      } else {
+      }
+      // Catch time, hopefully!
+      else {
         SafariBattle.throwBall();
       }
-    } else {
+    }
+    // Not shiny
+    // Bait when no item in effect and no active berry modifier
+    else if (autoSafariThrowBaitsState && !(SafariBattle.enemy.angry || SafariBattle.enemy.eating || SafariBattle.enemy.eatingBait !== BaitType.Bait)) {
+      SafariBattle.selectedBait(BaitList.Bait);
+      if (isPriority && !forceRunAway) {
+        // Nanab into rock is best combo of catch chance and efficient ball use
+        // Don't waste Nanabs if they won't improve catch rate over just rocks
+        if (App.game.farming.berryList[BerryType.Nanab]() > 25 && SafariBattle.enemy.catchFactor < 100 / (2 + SafariBattle.enemy.levelModifier)) {
+          SafariBattle.selectedBait(BaitList.Nanab);
+        } 
+        // Razz into rock is second best
+        else if (App.game.farming.berryList[BerryType.Razz]() > 25) {
+          SafariBattle.selectedBait(BaitList.Razz);
+        }
+      }
+      SafariBattle.throwBait();
+    }
+    else if (forceRunAway || (hasPriority && !isPriority)) {
       SafariBattle.run();
+    }
+    // Rock time
+    else if (SafariBattle.enemy.angry === 0) {
+      SafariBattle.throwRock();
+    }
+    // Try to catch!
+    else {
+      SafariBattle.throwBall();
+    }
+    // Avoid breaking safari end
+    if (Safari.balls() == 0) {
+      skipTicks += 6 * (autoSafariFastAnimationsState ? 2 : 1);
+    }
+  }
+
+  function autoSafariFastAnimations() {
+    for (const anim of Object.keys(SafariBattle.Speed)) {
+      SafariBattle.Speed[anim] = autoSafariFastAnimationsState ? CACHED_ANIM_SPEEDS[anim] / 2 : CACHED_ANIM_SPEEDS[anim];
+    }
+    Safari.moveSpeed = autoSafariFastAnimationsState ? CACHED_MOVE_SPEED / 2 : CACHED_MOVE_SPEED;
+
+    if (autoSafariState) {
+      clearInterval(autoSafariProcessId);
+      startAutoSafari();
     }
   }
 
@@ -261,22 +358,23 @@ function initAutoSafari() {
 
     const buttonsContainer = document.createElement('div');
 
-    const createButton = (name, state, func) => {
+    const createButton = (name, text, state, func) => {
       var button = document.createElement('button');
       button.setAttribute('id', `auto-${name}-toggle`);
       button.classList.add('btn', 'btn-block', 'btn-' + (state ? 'success' : 'danger'));
       button.setAttribute('style', 'font-size: 8pt; display: flex; align-items: center; justify-content: center; margin: 0px !important;')
-      button.textContent = `Auto ${name[0].toUpperCase() + name.slice(1)}\n[${state ? 'ON' : 'OFF'}]`;
+      button.textContent = `Auto ${text}\n[${state ? 'ON' : 'OFF'}]`;
       button.onclick = function () { func(); };
 
       buttonsContainer.appendChild(button);
     }
 
-    createButton('safari', autoSafariState, toggleAutoSafari)
-    createButton('pick-items', autoSafariPickState, toggleAutoPickItems)
-    createButton('fast-anim', autoSafariFastAnimationsState, toggleFastAnimations)
-    createButton('throw-baits', autoSafariThrowBaitsState, toggleThrowBaits)
-    createButton('catch-all', autoSafariCatchAllState, toggleCatchAll)
+    createButton('safari', 'Safari', autoSafariState, toggleAutoSafari);
+    createButton('pick-items', 'Pick Items', autoSafariPickItemsState, toggleAutoPickItems);
+    createButton('throw-baits', 'Throw Bait', autoSafariThrowBaitsState, toggleThrowBaits);
+    createButton('seek-uncaught', 'Seek New', autoSafariSeekUncaught, toggleSeekUncaught);
+    createButton('seek-contagious', 'Seek PKRS', autoSafariSeekContagious, toggleSeekContagious);
+    createButton('fast-anim', 'Fast Anim', autoSafariFastAnimationsState, toggleFastAnimations);
 
     buttonsContainer.setAttribute('style', 'display: flex; height: 24px;')
     buttonsContainer.style.display = 'flex';
@@ -310,34 +408,12 @@ function initAutoSafari() {
   }
 
   function toggleAutoPickItems() {
-    autoSafariPickState = !autoSafariPickState;
+    autoSafariPickItemsState = !autoSafariPickItemsState;
     const toggleButton = document.getElementById('auto-pick-items-toggle');
-    toggleButton.classList.toggle('btn-danger', !autoSafariPickState);
-    toggleButton.classList.toggle('btn-success', autoSafariPickState);
-    localStorage.setItem('autoSafariPickState', autoSafariPickState);
-    document.getElementById('auto-pick-items-toggle').innerHTML = `Auto Pick-items [${autoSafariPickState ? 'ON' : 'OFF'}]`;
-  }
-
-  function toggleFastAnimations() {
-    autoSafariFastAnimationsState = !autoSafariFastAnimationsState;
-    const toggleButton = document.getElementById('auto-fast-anim-toggle');
-    toggleButton.classList.toggle('btn-danger', !autoSafariFastAnimationsState);
-    toggleButton.classList.toggle('btn-success', autoSafariFastAnimationsState);
-    localStorage.setItem('autoSafariFastAnimationsState', autoSafariFastAnimationsState);
-    document.getElementById('auto-fast-anim-toggle').innerHTML = `Auto Fast-anim [${autoSafariFastAnimationsState ? 'ON' : 'OFF'}]`;
-
-    autoSafariFastAnimations();
-  }
-
-  function autoSafariFastAnimations() {
-    for (const anim of Object.keys(SafariBattle.Speed)) {
-      SafariBattle.Speed[anim] = autoSafariFastAnimationsState ? 0 : CACHED_ANIM_SPEEDS[anim];
-    }
-    Safari.moveSpeed = autoSafariFastAnimationsState ? CACHED_MOVE_SPEED / 2 : CACHED_MOVE_SPEED;
-    if (autoSafariState) {
-      clearInterval(autoSafariProcessId);
-      startAutoSafari();
-    }
+    toggleButton.classList.toggle('btn-danger', !autoSafariPickItemsState);
+    toggleButton.classList.toggle('btn-success', autoSafariPickItemsState);
+    localStorage.setItem('autoSafariPickItemsState', autoSafariPickItemsState);
+    document.getElementById('auto-pick-items-toggle').innerHTML = `Auto Pick Items [${autoSafariPickItemsState ? 'ON' : 'OFF'}]`;
   }
 
   function toggleThrowBaits() {
@@ -346,15 +422,37 @@ function initAutoSafari() {
     toggleButton.classList.toggle('btn-danger', !autoSafariThrowBaitsState);
     toggleButton.classList.toggle('btn-success', autoSafariThrowBaitsState);
     localStorage.setItem('autoSafariThrowBaitsState', autoSafariThrowBaitsState);
-    document.getElementById('auto-throw-baits-toggle').innerHTML = `Auto Throw-baits [${autoSafariThrowBaitsState ? 'ON' : 'OFF'}]`;
+    document.getElementById('auto-throw-baits-toggle').innerHTML = `Auto Throw Bait [${autoSafariThrowBaitsState ? 'ON' : 'OFF'}]`;
   }
-  function toggleCatchAll() {
-    autoSafariCatchAllState = !autoSafariCatchAllState;
-    const toggleButton = document.getElementById('auto-catch-all-toggle');
-    toggleButton.classList.toggle('btn-danger', !autoSafariCatchAllState);
-    toggleButton.classList.toggle('btn-success', autoSafariCatchAllState);
-    localStorage.setItem('autoSafariCatchAllState', autoSafariCatchAllState);
-    document.getElementById('auto-catch-all-toggle').innerHTML = `Auto Catch-all [${autoSafariCatchAllState ? 'ON' : 'OFF'}]`;
+
+  function toggleSeekUncaught() {
+    autoSafariSeekUncaught = !autoSafariSeekUncaught;
+    const toggleButton = document.getElementById('auto-seek-uncaught-toggle');
+    toggleButton.classList.toggle('btn-danger', !autoSafariSeekUncaught);
+    toggleButton.classList.toggle('btn-success', autoSafariSeekUncaught);
+    localStorage.setItem('autoSafariSeekUncaught', autoSafariSeekUncaught);
+    document.getElementById('auto-seek-uncaught-toggle').innerHTML = `Auto Seek New [${autoSafariSeekUncaught ? 'ON' : 'OFF'}]`;
+  }
+
+
+  function toggleSeekContagious() {
+    autoSafariSeekContagious = !autoSafariSeekContagious;
+    const toggleButton = document.getElementById('auto-seek-contagious-toggle');
+    toggleButton.classList.toggle('btn-danger', !autoSafariSeekContagious);
+    toggleButton.classList.toggle('btn-success', autoSafariSeekContagious);
+    localStorage.setItem('autoSafariSeekContagious', autoSafariSeekContagious);
+    document.getElementById('auto-seek-contagious-toggle').innerHTML = `Auto Seek PKRS [${autoSafariSeekContagious ? 'ON' : 'OFF'}]`;
+  }
+
+  function toggleFastAnimations() {
+    autoSafariFastAnimationsState = !autoSafariFastAnimationsState;
+    const toggleButton = document.getElementById('auto-fast-anim-toggle');
+    toggleButton.classList.toggle('btn-danger', !autoSafariFastAnimationsState);
+    toggleButton.classList.toggle('btn-success', autoSafariFastAnimationsState);
+    localStorage.setItem('autoSafariFastAnimationsState', autoSafariFastAnimationsState);
+    document.getElementById('auto-fast-anim-toggle').innerHTML = `Auto Fast Anim [${autoSafariFastAnimationsState ? 'ON' : 'OFF'}]`;
+
+    autoSafariFastAnimations();
   }
 }
 
