@@ -288,7 +288,7 @@ function initAutoSafari() {
           SafariBattle.throwBait();
         } 
         // Bait is still alright if we have plenty of balls left
-        else if (Safari.balls() > 3) {
+        else if (Safari.balls() > 2) {
           SafariBattle.selectedBait(BaitList.Bait);
           SafariBattle.throwBait();
         }
@@ -298,7 +298,7 @@ function initAutoSafari() {
         }
       }
       // Running low on balls, throw rock (stacks with berry modifiers)
-      else if (!SafariBattle.enemy.angry && Safari.balls() <= 3) {
+      else if (!SafariBattle.enemy.angry && Safari.balls() <= 2) {
         SafariBattle.throwRock();
       }
       // Catch time, hopefully!
@@ -307,10 +307,21 @@ function initAutoSafari() {
       }
     }
     // Not shiny
-    // Bait when no item in effect and no active berry modifier
-    else if (autoSafariThrowBaitsState && !(SafariBattle.enemy.angry || SafariBattle.enemy.eating || SafariBattle.enemy.eatingBait !== BaitType.Bait)) {
+    // Throw regular bait to grind achievement
+    else if (autoSafariThrowBaitsState && !isPriority && App.game.statistics.safariBaitThrown() < 1000) {
       SafariBattle.selectedBait(BaitList.Bait);
-      if (isPriority && !forceRunAway) {
+      SafariBattle.throwBait();
+    }
+    // Flee if looking for specific pokemon or gathering items before using the last safari ball
+    else if (forceRunAway || (hasPriority && !isPriority)) {
+      SafariBattle.run();
+    }
+    // Use rock/bait to increase catch chance
+    else if (SafariBattle.enemy.angry === 0) { 
+      // Turn 1, use berry bait on prioritized pokemon to improve catch chance
+      // (SafariBattle.enemy.eatingBait defaults to BaitType.Bait even before feeding)
+      if (autoSafariThrowBaitsState && isPriority && !(SafariBattle.enemy.eating || SafariBattle.enemy.eatingBait !== BaitType.Bait)) {
+        SafariBattle.selectedBait(BaitList.Bait);
         // Nanab into rock is best combo of catch chance and efficient ball use
         // Don't waste Nanabs if they won't improve catch rate over just rocks
         if (App.game.farming.berryList[BerryType.Nanab]() > 25 && SafariBattle.enemy.catchFactor < 100 / (2 + SafariBattle.enemy.levelModifier)) {
@@ -320,23 +331,22 @@ function initAutoSafari() {
         else if (App.game.farming.berryList[BerryType.Razz]() > 25) {
           SafariBattle.selectedBait(BaitList.Razz);
         }
+        // Use berry if one was selected
+        if (SafariBattle.selectedBait() != BaitList.Bait) {
+          SafariBattle.throwBait();
+          return;
+        }
       }
-      SafariBattle.throwBait();
-    }
-    else if (forceRunAway || (hasPriority && !isPriority)) {
-      SafariBattle.run();
-    }
-    // Rock time
-    else if (SafariBattle.enemy.angry === 0) {
+      // Bait not relevant or already used, rock time
       SafariBattle.throwRock();
     }
     // Try to catch!
     else {
+      // If this is the last ball, add some delay to avoid breaking the safari exiting process 
+      if (Safari.balls() == 1) {
+        skipTicks += 6 * (autoSafariFastAnimationsState ? 2 : 1);
+      }
       SafariBattle.throwBall();
-    }
-    // Avoid breaking safari end
-    if (Safari.balls() == 0) {
-      skipTicks += 6 * (autoSafariFastAnimationsState ? 2 : 1);
     }
   }
 
