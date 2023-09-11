@@ -468,7 +468,7 @@ Ephenia scripts loading
 */
 
 // VERY IMPORTANT: update this in desktopupdatechecker.js as well!
-const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.2';
+const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.3';
 
 function logInMainWindow(message, level = 'log') {
   if (message == null) {
@@ -825,7 +825,7 @@ function startEpheniaScripts() {
     });
     const startApp = App.start.bind(App)
     App.start = function start(...args) {
-      allScriptsDone.finally(() => startApp(args));
+      allScriptsDone.finally(() => startApp(...args));
     }
     return externalResolve;
   })();`);
