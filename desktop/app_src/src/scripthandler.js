@@ -20,10 +20,17 @@ class DesktopScriptHandler {
     }
 
     static registerEpheniaScript(name) {
-        const settingContainer = 'settings-scripts-enableScriptsEphenia';
         const enabled = this.isEpheniaScriptEnabled(name);
 
-        this.addScriptEnabledSetting(name, settingContainer, enabled);
+        if (name == 'scriptfixerupper') {
+            // Display scriptfixerupper separately from the normal scripts
+            const settingContainer = 'settings-scripts-desktopSettings';
+            const customText = 'Enable scriptfixerupper (reset script settings)';
+            this.addScriptEnabledSetting(name, settingContainer, enabled, customText, false);
+        } else {
+            const settingContainer = 'settings-scripts-enableScriptsEphenia';
+            this.addScriptEnabledSetting(name, settingContainer, enabled);
+        }
     }
 
     static registerUserScript(name) {
@@ -39,18 +46,22 @@ class DesktopScriptHandler {
         this.addScriptEnabledSetting(name, settingContainer, enabled);
     }
 
-    static addScriptEnabledSetting(name, container, enabled) {
+    static addScriptEnabledSetting(name, container, enabled, customText = null, alphabetical = true) {
         var setting = document.createElement('tr')
         setting.innerHTML =
-        `<td class="p-2 col-md-8"><label class="m-0" for="checkbox-${name}">Enable ${name}</label></td>` + 
+        `<td class="p-2 col-md-8"><label class="m-0" for="checkbox-${name}">${customText || `Enable ${name}`}</label></td>` + 
             `<td class="p-2 col-md-4"><input id="checkbox-${name}" type="checkbox"></td>`;
 
-        // Insert setting in alphabetical order
         container = document.getElementById(container);
-        let settingsList = Array.from(container.children);
-        let insertBefore = settingsList.find(elem => elem.querySelector('input').id > 'checkbox-' + name);
-        if (insertBefore) {
-            insertBefore.before(setting);
+        // Insert setting in alphabetical order
+        if (alphabetical) {
+            let settingsList = Array.from(container.children);
+            let insertBefore = settingsList.find(elem => elem.querySelector('input').id > 'checkbox-' + name);
+            if (insertBefore) {
+                insertBefore.before(setting);
+            } else {
+                container.appendChild(setting);
+            }
         } else {
             container.appendChild(setting);
         }
