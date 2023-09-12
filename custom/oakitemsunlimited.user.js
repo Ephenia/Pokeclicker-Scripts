@@ -32,7 +32,7 @@ function initOakItems() {
 
 function loadScript() {
     const oldInit = Preload.hideSplashScreen;
-    hasInitialized = false;
+    var hasInitialized = false;
 
     Preload.hideSplashScreen = function (...args) {
         var result = oldInit.apply(this, args);
