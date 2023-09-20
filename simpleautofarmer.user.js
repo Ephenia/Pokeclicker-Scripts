@@ -182,6 +182,11 @@ function initAutoFarm() {
             let plot = App.game.farming.plotList[i];
             let berry = plot.berry;
             if (berry >= 0) {
+                // Auto-harvest tiles with surprise mulch
+                if (plot.mulch == MulchType.Surprise_Mulch) {
+                    App.game.farming.harvest(i, false);
+                    continue;
+                }
                 var timeLeft = berryData[berry].growthTime[4] - plot.age;
                 timeLeft /= (App.game.farming.getGrowthMultiplier() * plot.getGrowthMultiplier());
                 if (timeLeft < 10) {
