@@ -51,6 +51,7 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 10. [**Script Handler** (Included in desktop/app.asar)](#script-manager)
 # Custom Scripts
 1. [**Auto Quest Completer** ](#auto-quest-completer)
+9. [**Auto Safari Zone** ](#auto-safari-zone)
 2. [**Catch Speed Adjuster** ](#catch-speed-adjuster)
 3. [**Challenge Mode Changer** ](#challenge-mode-changer)
 4. [**Discord Code Generator** ](#discord-code-generator)
@@ -61,7 +62,6 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 8. [**Perky Pokerus Pandemic** ](#perky-pokerus-pandemic)
 9. [**Simple Weather Changer** ](#simple-weather-changer)
 10. [**Auto Safari Zone** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-auto-safari-zone-auto-safarizoneuserjs-one-click-install)
-
 
 ```diff
 - Note: Please backup your saves before using any and all scripts that would be here!!!
@@ -337,6 +337,21 @@ The script now has settings in the Settings menu that let you customize its beha
 
 <hr>
 
+<h2 id="auto-safari-zone">[Custom] Auto Safari Zone (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autosafarizone.user.js">autosafarizone.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/autosafarizone.user.js">One-Click Install</a>)</h2>
+
+This script automatically explores the Safari Zone and Friend Safari, catching Pokémon and collecting items for you. You can activate the script while in the window for either Safari.
+
+The script also has the following options:
+<strong>• Auto Pick Items</strong> - Pick up items when only one ball is left (enabled by default)
+<strong>• Auto Throw Bait</strong> - Throws berries when seeking uncaught or contagious Pokémon, or regular bait if you need a bait achievement. 
+<strong>• Auto Seek New</strong> - Prioritizes catching uncaught Pokémon.
+<strong>• Auto Seek PKRS</strong> - Prioritizes catching contagious Pokémon (below 50 EVs).
+<strong>• Auto Fast Anim</strong> - Increases the speed of many animations. Stacks with the Safari Level speed bonuses.
+
+The auto bait setting will never use your last berry. The script will always use optimal berries to catch shiny Pokémon, whether or not auto bait is enabled.
+
+<hr>
+
 <h2 id="catch-speed-adjuster">[Custom] Catch Speed Adjuster (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/catchspeedadjuster.user.js">catchspeedadjuster.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/catchspeedadjuster.user.js">One-Click Install</a>)</h2>
 This script adds in a new option found below your Pokéballs:<br>
 
@@ -431,6 +446,8 @@ This script lets you freely edit the weather of the region you are currently in 
 ![image](https://i.imgur.com/2cBIfyH.png)
 
 In addition it will also prevent the weather from changing and will remember you choice when reloading the game
+
+<br>
 
 <hr>
 
