@@ -99,12 +99,16 @@ if (!localStorage.getItem('toggleABItems')) {
 battleItemState = JSON.parse(localStorage.getItem('autoBattleItems'));
 ItemABPrefs = JSON.parse(localStorage.getItem('toggleABItems'));
 
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        initAutoBattleItems()
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args)
+        if (App.game && !hasInitialized) {
+            initAutoBattleItems();
+            hasInitialized = true;
+        }
         return result
     }
 }

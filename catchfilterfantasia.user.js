@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name          [Pokeclicker] Catch Filter Fantasia
 // @namespace     Pokeclicker Scripts
-// @author        Ephenia (Credit: Pastaficionado)
+// @author        Ephenia (Credit: Pastaficionado, umamaistempo)
 // @description   An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.8
+// @version       1.9
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -117,7 +117,7 @@ function initCatchFilter() {
     document.getElementById('catch-filter').addEventListener('click', (event) => { toggleCatchFilter(event); });
     document.getElementById('filter-search').addEventListener('input', (event) => { filterPokeSearch(event); });
 
-    overideDefeatPokemon();
+    overloadPokeballMethod();
     loadFilteredList();
 }
 
@@ -396,142 +396,44 @@ function resetBallFilter(event) {
     localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
 }
 
-function overideDefeatPokemon() {
-    // Normal Battle
-    Battle.defeatPokemon = function() {
-        const enemyPokemon = this.enemyPokemon();
-        const type1 = enemyPokemon.type1;
-        const type2 = enemyPokemon.type2;
-        Battle.route = player.route();
-        enemyPokemon.defeat();
-
-        GameHelper.incrementObservable(App.game.statistics.routeKills[player.region][Battle.route]);
-
-        App.game.breeding.progressEggsBattle(Battle.route, player.region);
-
-        const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
-        const pokeIndex = pokemonList.indexOf(findPoke);
-        let ballPrefN = filterBallPref[pokeIndex].normal -1;
-        ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
-        let ballPrefS = filterBallPref[pokeIndex].shiny - 1;
-        ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
-        const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
-        const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
-
-        const isShiny = enemyPokemon.shiny;
-        let pokeBall;
-        if (ballQuantityS > 0 && filterState & isShiny) {
-            pokeBall = ballPrefS;
-        } else if (ballQuantityN > 0 && filterState) {
-            pokeBall = ballPrefN;
-        } else {
-            pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
-        }
-
-        if (pokeBall !== GameConstants.Pokeball.None && filterState && (catchFilter.includes(enemyPokemon.id) || (filterTypes[type1] || filterTypes[type2]))) {
-            this.prepareCatch(enemyPokemon, pokeBall);
-            setTimeout(
-                () => {
-                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
-                    if (Battle.route != 0) {
-                        this.generateNewEnemy();
-                    }
-                },
-                App.game.pokeballs.calculateCatchTime(pokeBall)
-            )
-            ;
-        } else if (pokeBall !== GameConstants.Pokeball.None && !filterState) {
-            this.prepareCatch(enemyPokemon, pokeBall);
-            setTimeout(
-                () => {
-                    this.attemptCatch(enemyPokemon, Battle.route, player.region);
-                    if (Battle.route != 0) {
-                        this.generateNewEnemy();
-                    }
-                },
-                App.game.pokeballs.calculateCatchTime(pokeBall)
-            )
-            ;
-        } else {
-            this.generateNewEnemy();
-        }
-        this.gainItem();
-        player.lowerItemMultipliers(MultiplierDecreaser.Battle);
+function overloadPokeballMethod() {
+    const hasBall = function(ballId) {
+        return App.game.pokeballs.pokeballs[ballId].quantity() > 0;
     }
 
-    // Dungeon Battle
-    DungeonBattle.defeatPokemon = function() {
-        const enemyPokemon = this.enemyPokemon();
-        const type1 = enemyPokemon.type1;
-        const type2 = enemyPokemon.type2;
+    const newMethod = function(id, isShiny, isShadow, encounterType) {
+        const pokemon = PokemonHelper.getPokemonById(id);
+        const type1 = pokemon.type1;
+        const type2 = pokemon.type2;
 
-        // Handle Trainer Pokemon defeat
-        if (this.trainer()) {
-            this.defeatTrainerPokemon();
-            return;
-        }
+        // FIXME: we could just use a map with the changes we want
+        const pokeIndex = pokemonList.findIndex(p => p.id == pokemon.id);
 
-        DungeonRunner.fighting(false);
-        if (DungeonRunner.fightingBoss()) {
-            DungeonRunner.fightingBoss(false);
-            DungeonRunner.defeatedBoss(true);
-        }
-        enemyPokemon.defeat();
-        App.game.breeding.progressEggsBattle(DungeonRunner.dungeon.difficultyRoute, player.region);
-        player.lowerItemMultipliers(MultiplierDecreaser.Battle);
-
-        // Clearing Dungeon tile
-        DungeonRunner.map.currentTile().type(GameConstants.DungeonTile.empty);
-        DungeonRunner.map.currentTile().calculateCssClass();
-
-        // Attempting to catch Pokemon
-        const findPoke = pokemonList.find(p => p.id == enemyPokemon.id);
-        const pokeIndex = pokemonList.indexOf(findPoke);
-        let ballPrefN = filterBallPref[pokeIndex].normal -1;
-        ballPrefN = Math.sign(ballPrefN) == -1 ? 0 : ballPrefN;
+        // FIXME: the values of pokeballs for the choices on the modal are
+        //   offset by -1
+        let ballPrefN = filterBallPref[pokeIndex].normal - 1;
         let ballPrefS = filterBallPref[pokeIndex].shiny - 1;
-        ballPrefS = Math.sign(ballPrefS) == -1 ? 0 : ballPrefS;
-        const ballQuantityN = App.game.pokeballs.pokeballs[ballPrefN].quantity();
-        const ballQuantityS = App.game.pokeballs.pokeballs[ballPrefS].quantity();
+        const overrideBallN = ballPrefN !== GameConstants.Pokeball.None;
+        const overrideBallS = ballPrefS !== GameConstants.Pokeball.None;
 
-        const isShiny = enemyPokemon.shiny;
+        const isAllowed = catchFilter.includes(id) || filterTypes[type1] || filterTypes[type2]
 
-        let pokeBall;
-        if (ballQuantityS > 0 && filterState & isShiny) {
-            pokeBall = ballPrefS;
-        } else if (ballQuantityN > 0 && filterState) {
-            pokeBall = ballPrefN;
+        if (filterState && isAllowed && isShiny && overrideBallS && hasBall(ballPrefS)) {
+            return ballPrefS;
+        } else if (filterState && isAllowed && !isShiny && overrideBallN && hasBall(ballPrefN)) {
+            return ballPrefN;
+        } else if (filterState && !isAllowed) {
+            return GameConstants.Pokeball.None;
         } else {
-            pokeBall = App.game.pokeballs.calculatePokeballToUse(enemyPokemon.id, isShiny);
-        }
-
-        const route = player.town()?.dungeon?.difficultyRoute || 1;
-        if (pokeBall !== GameConstants.Pokeball.None && filterState && (catchFilter.includes(enemyPokemon.id) || (filterTypes[type1] || filterTypes[type2]))) {
-            this.prepareCatch(enemyPokemon, pokeBall);
-            setTimeout(
-                () => {
-                    this.attemptCatch(enemyPokemon, route, player.region);
-                    if (DungeonRunner.defeatedBoss()) {
-                        DungeonRunner.dungeonWon();
-                    }
-                },
-                App.game.pokeballs.calculateCatchTime(pokeBall)
-            );
-        } else if (pokeBall !== GameConstants.Pokeball.None && !filterState) {
-            this.prepareCatch(enemyPokemon, pokeBall);
-            setTimeout(
-                () => {
-                    this.attemptCatch(enemyPokemon, route, player.region);
-                    if (DungeonRunner.defeatedBoss()) {
-                        DungeonRunner.dungeonWon();
-                    }
-                },
-                App.game.pokeballs.calculateCatchTime(pokeBall)
-            );
-        } else if (DungeonRunner.defeatedBoss()) {
-            DungeonRunner.dungeonWon();
+            return App.game.pokeballs.oldCalculatePokeballToUse(id, isShiny, isShadow, encounterType);
         }
     }
+
+    // HACK: doing this to keep the function inside the pokeballs object
+    //   otherwise it will not have correct access to `this`. Doing this this
+    //   way to just overload the function instead of rewriting it.
+    App.game.pokeballs.oldCalculatePokeballToUse = App.game.pokeballs.calculatePokeballToUse;
+    App.game.pokeballs.calculatePokeballToUse = newMethod;
 }
 
 if (!localStorage.getItem('filterState')) {
@@ -570,12 +472,16 @@ if (fixIt.length != 0) {
     localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
 }
 
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        initCatchFilter()
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initCatchFilter();
+            hasInitialized = true;
+        }
         return result
     }
 }

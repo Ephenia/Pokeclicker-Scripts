@@ -35,24 +35,20 @@ function initBallAdjust() {
     document.getElementById('pokeballSelectorBody').style.maxHeight = "285px";
     document.getElementById('ball-adjust').addEventListener('click', event => changeAdjust(event.target));
 
-    if (ballAdjuster == "true") {
+    if (ballAdjuster) {
         document.getElementById('ball-adjust').checked = true;
         catchDelay();
     }
 
     function changeAdjust(ele) {
-        if (ballAdjuster == "true") {
-            ballAdjuster = "false"
-        } else {
-            ballAdjuster = "true"
-        }
+        ballAdjuster = !ballAdjuster;
         localStorage.setItem("ballAdjuster", ballAdjuster);
         catchDelay();
     }
 
     function catchDelay() {
         for (var i = 0; i < getBalls.length; i++) {
-            if (ballAdjuster == "true") {
+            if (ballAdjuster) {
                 getBalls[i].catchTime = 0;
             } else {
                 getBalls[i].catchTime = defaultTime[i];
@@ -62,17 +58,21 @@ function initBallAdjust() {
 }
 
 if (localStorage.getItem('ballAdjuster') == null) {
-    localStorage.setItem("ballAdjuster", "false");
+    localStorage.setItem('ballAdjuster', 'false');
 }
-ballAdjuster = localStorage.getItem('ballAdjuster');
+ballAdjuster = localStorage.getItem('ballAdjuster') == 'true';
 
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        initBallAdjust()
-        return result
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initBallAdjust();
+            hasInitialized = true;
+        }
+        return result;
     }
 }
 

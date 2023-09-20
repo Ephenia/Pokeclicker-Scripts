@@ -2,10 +2,10 @@
 // @name          [Pokeclicker] Perky Pokerus Pandemic
 // @namespace     Pokeclicker Scripts
 // @author        Ephenia
-// @description   This script makes it so that Pokérus will spread from any Pokémon (egg) that has it to all of the others inside of the Hatchery, instead of just types of Pokémon needing to match while in the Hatchery for this to be done.
+// @description   This script makes it so that Pokérus will spread from any contagious Pokémon (egg) in the Hatchery, regardless of types. It still will not spread from or to eggs with a Hatchery Helper.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.6
+// @version       2.0
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -21,46 +21,37 @@
 var scriptName = 'perkypokeruspandemic';
 
 function initPokerusPandemic() {
-    App.game.breeding.progressEggs = function(amount) {
-        amount *= this.getStepMultiplier();
-
-        amount = Math.round(amount);
-        let index = this.eggList.length;
-        while (index-- > 0) {
-            const helper = this.hatcheryHelpers.hired()[index];
-            if (helper) {
-                continue;
-            }
-            const egg = this.eggList[index]();
-            const partyPokemon = egg.partyPokemon();
-            if (!egg.isNone() && partyPokemon && partyPokemon.canCatchPokerus() && partyPokemon.pokerus == GameConstants.Pokerus.Uninfected) {
-                calculatePokerus(index);
-                function calculatePokerus(number) {
-                    //This will always spread Pokerus and ignore types
-                    for (let i = index; i < App.game.breeding.eggList.length; i++) {
-                        const pokemon = App.game.breeding.eggList[i]().partyPokemon();
-                        if (pokemon && pokemon.pokerus == GameConstants.Pokerus.Uninfected) {
-                            pokemon.pokerus = GameConstants.Pokerus.Infected;
-                        }
+    const progressEggsOld = App.game.breeding.progressEggs;
+    App.game.breeding.progressEggs = function(...args) {
+        // Spread pokerus before applying egg progress
+        if (App.game.keyItems.hasKeyItem(KeyItemType.Pokerus_virus)) {
+            const hasContagious = App.game.breeding.eggList.some((egg, i) => {
+                return !egg()?.isNone() && !egg().canHatch() && egg().partyPokemon()?.pokerus >= GameConstants.Pokerus.Contagious && (i > App.game.breeding.hatcheryHelpers.hired().length - 1);
+            });
+            if (hasContagious) {
+                for (let i = App.game.breeding.hatcheryHelpers.hired().length; i < App.game.breeding.eggList.length; i++) {
+                    let egg = App.game.breeding.eggList[i]();
+                    if (!egg?.isNone() && egg.partyPokemon()?.pokerus == GameConstants.Pokerus.Uninfected) {
+                        egg.partyPokemon().pokerus = GameConstants.Pokerus.Infected;
                     }
                 }
             }
-            egg.addSteps(amount, this.multiplier);
-            if (this._queueList().length && egg.canHatch()) {
-                this.hatchPokemonEgg(index);
-            }
         }
-        this.hatcheryHelpers.addSteps(amount, this.multiplier);
+        return progressEggsOld.apply(this, args);
     }
 }
 
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        initPokerusPandemic()
-        return result
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initPokerusPandemic();
+            hasInitialized = true;
+        }
+        return result;
     }
 }
 

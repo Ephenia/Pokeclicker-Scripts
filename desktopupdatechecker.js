@@ -2,7 +2,7 @@
 
 {
 	// IMPORTANT: Always keep this up to date with the version number in app_src/main.js
-	const LATEST_VERSION = '2.0.1';
+	const LATEST_VERSION = '2.0.3';
 
 	if (App.isUsingClient) {
 		if (typeof POKECLICKER_SCRIPTS_DESKTOP_VERSION !== 'string' 

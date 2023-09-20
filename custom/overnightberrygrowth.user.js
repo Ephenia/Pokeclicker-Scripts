@@ -56,7 +56,7 @@ function initSettings() {
     table.appendChild(settingsBody);
     let settingsElem = document.createElement('tr');
     settingsElem.innerHTML = `<td class="p-2 col-md-8">
-        Game closed berry growth mode
+        Offline berry growth mode
         </td>
         <td class="p-0 col-md-4">
         <select id="select-overnightGrowthMode" class="form-control">
@@ -208,10 +208,14 @@ if (![0, 1, 2].includes(overnightGrowthMode)) {
 
 function loadScript() {
     const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function () {
-        var result = oldInit.apply(this, arguments);
-        initSettings();
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initSettings();
+            hasInitialized = true;
+        }
         return result;
     }
 }

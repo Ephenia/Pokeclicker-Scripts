@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name          [Pokeclicker] Simple Weather Changer
 // @namespace     Pokeclicker Scripts
-// @author        KarmaAlex (Credit: Ephenia)
+// @author        KarmaAlex (Credit: Ephenia, Optimatum)
 // @description   Adds a button to select the weather for the current region, also freezes all weather
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.3
+// @version       1.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -19,69 +19,57 @@
 // ==/UserScript==
 
 var scriptName = 'simpleweatherchanger';
-var weatherFunc;
+var weatherChangerWeather;
 
-function initWeatherChange(){
-    weatherFunc = Weather.generateWeather;
-    //Make button
-    const weatherBtn = document.createElement('button');
-    weatherBtn.textContent = 'Change';
-    weatherBtn.className = 'btn btn-block btn-success';
-    weatherBtn.id = 'change-weather';
-    document.getElementById('townMap').appendChild(weatherBtn);
-    document.getElementById('change-weather').addEventListener('click', changeWeather, false);
-    //Make selectbox
-    const weatherSelect = document.createElement('select');
-    weatherSelect.innerHTML =
-    `<option value="-1">Default</option>
-    <option value="0">Clear</option>
-    <option value="1">Overcast</option>
-    <option value="2">Rain</option>
-    <option value="3">Thunderstorm</option>
-    <option value="4">Snow</option>
-    <option value="5">Hail</option>
-    <option value="6">Blizzard</option>
-    <option value="7">Sunny</option>
-    <option value="8">Sandstorm</option>
-    <option value="9">Fog</option>
-    <option value="10">Windy</option>`
-    weatherSelect.id = 'weather-select'
-    document.getElementById('townMap').appendChild(weatherSelect);
-
-    addGlobalStyle('#change-weather { position: absolute; right: 133px; top: 0px; width: auto; height: 41px; font-size: 11px; margin: 0px; }');
-    addGlobalStyle('#weather-select { position: absolute; right: 50px; top: 10px; width: auto; height: 20px; font-size: 9px; }');
-    //Set weather to last weather option, is broken with new loading
-    if (!isNaN(parseInt(localStorage.getItem('scriptWeather')))) {
-        const getWeather = parseInt(localStorage.getItem('scriptWeather'));
-        document.getElementById('weather-select').value = getWeather;
-        Weather.regionalWeather.forEach((Weather) => { Weather(getWeather); });
-    };
-}
-
-function changeWeather(){
-    const selWeather = +document.getElementById('weather-select').value;
-    if (selWeather != -1) {
-        //Freeze weather
-        Weather.generateWeather = function(){ return true };
-        //Set Weather
-        Weather.regionalWeather.forEach((Weather) => { Weather(selWeather); });
-    } else {
-        //Unfreeze weather
-        Weather.generateWeather = weatherFunc;
-        //Default Weather
-        const now = new Date();
-        Weather.generateWeather(now);
+function initWeatherChange() {
+    // Load selected weather
+    weatherChangerWeather = parseInt(localStorage.getItem('weatherChangerWeather'));
+    if (isNaN(weatherChangerWeather)) {
+        weatherChangerWeather = -1;
     }
-    localStorage.setItem('scriptWeather', selWeather >= 0 ? selWeather : false);
+
+    // Make selectbox
+    const weatherSelect = document.createElement('select');
+    weatherSelect.innerHTML = '<option value="-1">Default Weather</option>\n' + GameHelper.enumSelectOption(WeatherType).map((w) => `<option value="${w.value}">${w.name}</option>`).join('\n');
+    weatherSelect.id = 'change-weather-select';
+    weatherSelect.value = weatherChangerWeather;
+    document.querySelector('#townMap button[data-bind*="DayCycle.color"').before(weatherSelect);
+
+    document.getElementById('change-weather-select').addEventListener('change', (event) => { changeWeather(event); });
+    addGlobalStyle('#change-weather-select { position: absolute; right: 100px; top: 10px; width: auto; height: 20px; font-size: 9px; }');
+
+    overrideGenerateWeather();
+    Weather.generateWeather(new Date());
 }
 
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+function changeWeather(event) {
+    weatherChangerWeather = +event.target.value;
+    Weather.generateWeather(new Date());
+    localStorage.setItem('weatherChangerWeather', weatherChangerWeather);
+}
 
-    Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        initWeatherChange()
-        return result
+function overrideGenerateWeather() {
+    const oldGenerateWeather = Weather.generateWeather;
+    Weather.generateWeather = function(...args) {
+        if (weatherChangerWeather >= 0) {
+            Weather.regionalWeather.forEach((weather) => weather(weatherChangerWeather));
+        } else {
+            return oldGenerateWeather.apply(this, args);
+        }
+    }
+}
+
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
+
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initWeatherChange();
+            hasInitialized = true;
+        }
+        return result;
     }
 }
 

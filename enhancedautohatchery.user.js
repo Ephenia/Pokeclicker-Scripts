@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name          [Pokeclicker] Enhanced Auto Hatchery
 // @namespace     Pokeclicker Scripts
-// @author        Ephenia (Original/Credit: Drak + Ivan Lay)
+// @author        Ephenia (Original/Credit: Drak + Ivan Lay, Optimatum)
 // @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.4.2
+// @version       3.0
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -21,18 +21,13 @@
 var scriptName = 'enhancedautohatchery';
 
 var hatchState;
-var awaitAutoHatch;
-var autoHatchLoop;
-var updateHatchStateLoop;
-var randFossilEgg;
 var eggState;
 var fossilState;
 var shinyFossilState;
-var hatcherySortVal;
-var hatcherySortDir;
-var hatcherySortSync;
 var pkrsState;
-var pkrsStrict;
+var pkrsHatcherySearchTime = 0;
+var numMonsWithPkrsCached;
+var ticksSinceSortedHatchery = 0;
 
 function initAutoHatch() {
     const breedingDisplay = document.getElementById('breedingDisplay');
@@ -42,8 +37,8 @@ function initAutoHatch() {
     Auto Hatch [${hatchState ? 'ON' : 'OFF'}]
     </button>`
 
-    breedingModal.querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="sort-sync" class="btn btn-${hatcherySortSync ? 'success' : 'danger'}" style="margin-left:20px;">
-    Pokemon List Sync [${hatcherySortSync ? 'ON' : 'OFF'}]
+    breedingModal.querySelector('.modal-header').querySelectorAll('button')[1].outerHTML += `<button id="pkrs-mode" class="btn btn-${pkrsState ? 'success' : 'danger'}" style="margin-left:20px;">
+    PKRS Mode [${pkrsState ? 'ON' : 'OFF'}]
     </button>
     <button id="auto-egg" class="btn btn-${eggState ? 'success' : 'danger'}" style="margin-left:20px;">
     Auto Egg [${eggState ? 'ON' : 'OFF'}]
@@ -53,48 +48,41 @@ function initAutoHatch() {
     </button>
     <button id="shiny-fossils" class="btn btn-${shinyFossilState ? 'success' : 'danger'}" style="margin-left:20px;">
     Shiny Fossils [${shinyFossilState ? 'ON' : 'OFF'}]
-    </button>
-    <button id="pkrs-mode" class="btn btn-${pkrsState ? 'success' : 'danger'}" style="margin-left:20px;">
-    PKRS Mode [${pkrsState ? 'ON' : 'OFF'}]
-    </button>
-    <button id="pkrs-strict" class="btn btn-${pkrsStrict ? 'success' : 'danger'}" style="margin-left:20px;">
-    PKRS Strict [${pkrsStrict ? 'ON' : 'OFF'}]
-    </button>`
+    </button>`;
 
     document.getElementById('auto-hatch-start').addEventListener('click', event => { toggleAutoHatch(event); });
-    document.getElementById('sort-sync').addEventListener('click', event => { changesortsync(event); });
     document.getElementById('auto-egg').addEventListener('click', event => { toggleEgg(event); });
     document.getElementById('auto-fossil').addEventListener('click', event => { toggleFossil(event); });
     document.getElementById('shiny-fossils').addEventListener('click', event => { toggleShinyFossil(event); });
     document.getElementById('pkrs-mode').addEventListener('click', event => { togglePKRS(event); });
-    document.getElementById('pkrs-strict').addEventListener('click', event => { togglePKRSStrict(event); });
 
     addGlobalStyle('.eggSlot.disabled { pointer-events: unset !important; }');
 
-    if (hatchState) { autoHatcher(); }
+    // Initialize list since the game won't until the hatchery menu opens
+    PartyController.hatcherySortedList = [...App.game.party.caughtPokemon];
+    const region = App.game.challenges.list.regionalAttackDebuff.active() ? BreedingController.regionalAttackDebuff() : -1;
+    PartyController.hatcherySortedList.sort(PartyController.compareBy(Settings.getSetting('hatcherySort').observableValue(), Settings.getSetting('hatcherySortDirection').observableValue(), region));
+
+    if (hatchState) {
+        autoHatcher();
+    }
 }
 
 function toggleAutoHatch(event) {
     const element = event.target;
     hatchState = !hatchState;
-    hatchState ? autoHatcher() : clearInterval(autoHatchLoop);
-    hatchState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    if (hatchState) {
+        autoHatcher();
+    }
+    element.classList.replace(...(hatchState ? ['btn-danger', 'btn-success'] : ['btn-success', 'btn-danger']));
     element.textContent = `Auto Hatch [${hatchState ? 'ON' : 'OFF'}]`;
     localStorage.setItem('autoHatchState', hatchState);
-}
-
-function changesortsync(event) {
-    const element = event.target;
-    hatcherySortSync = !hatcherySortSync;
-    hatcherySortSync ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
-    element.textContent = `Pokemon List Sync [${hatcherySortSync ? 'ON' : 'OFF'}]`;
-    localStorage.setItem('hatcherySortSync', hatcherySortSync);
 }
 
 function toggleEgg(event) {
     const element = event.target;
     eggState = !eggState;
-    eggState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.classList.replace(...(eggState ? ['btn-danger', 'btn-success'] : ['btn-success', 'btn-danger']));
     element.textContent = `Auto Egg [${eggState ? 'ON' : 'OFF'}]`;
     localStorage.setItem('autoEgg', eggState);
 }
@@ -102,7 +90,7 @@ function toggleEgg(event) {
 function toggleFossil(event) {
     const element = event.target;
     fossilState = !fossilState;
-    fossilState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.classList.replace(...(fossilState ? ['btn-danger', 'btn-success'] : ['btn-success', 'btn-danger']));
     element.textContent = `Auto Fossil [${fossilState ? 'ON' : 'OFF'}]`;
     localStorage.setItem('autoFossil', fossilState);
 }
@@ -110,7 +98,7 @@ function toggleFossil(event) {
 function toggleShinyFossil(event) {
     const element = event.target;
     shinyFossilState = !shinyFossilState;
-    shinyFossilState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.classList.replace(...(shinyFossilState ? ['btn-danger', 'btn-success'] : ['btn-success', 'btn-danger']));
     element.textContent = `Shiny Fossils [${shinyFossilState ? 'ON' : 'OFF'}]`;
     localStorage.setItem('shinyFossil', shinyFossilState);
 }
@@ -118,301 +106,180 @@ function toggleShinyFossil(event) {
 function togglePKRS(event) {
     const element = event.target;
     pkrsState = !pkrsState;
-    pkrsState ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+    element.classList.replace(...(pkrsState ? ['btn-danger', 'btn-success'] : ['btn-success', 'btn-danger']));
     element.textContent = `PKRS Mode [${pkrsState ? 'ON' : 'OFF'}]`;
     localStorage.setItem('pokerusModeState', pkrsState);
 }
 
-function togglePKRSStrict(event) {
-    const element = event.target;
-    pkrsStrict = !pkrsStrict;
-    pkrsStrict ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
-    element.textContent = `PKRS Strict [${pkrsStrict ? 'ON' : 'OFF'}]`;
-    localStorage.setItem('pokerusModeStrict', pkrsStrict);
+function bindAutoHatcher() {
+    const progressEggsOld = Breeding.prototype.progressEggs;
+    Breeding.prototype.progressEggs = function progressEggs(...args) {
+        const result = progressEggsOld.apply(this, args);
+        if (hatchState && App.game.breeding.canAccess()) {
+            autoHatcher();
+        }
+        return result;
+    }
 }
 
 function autoHatcher() {
-    // Update the hatchery sort list every second so getHatcheryStory() is always up to date
-    updateHatchStateLoop = setInterval(function () {
-        let region = App.game.challenges.list.regionalAttackDebuff.active() ? BreedingController.regionalAttackDebuff() : -1;
-        PartyController.hatcherySortedList = [...App.game.party.caughtPokemon];
+    // Sort list if it's been a while
+    ticksSinceSortedHatchery += 1;
+    if (ticksSinceSortedHatchery > 40) {
+        const region = App.game.challenges.list.regionalAttackDebuff.active() ? BreedingController.regionalAttackDebuff() : -1;
         PartyController.hatcherySortedList.sort(PartyController.compareBy(Settings.getSetting('hatcherySort').observableValue(), Settings.getSetting('hatcherySortDirection').observableValue(), region));
-    }, 1000);
-    
-    autoHatchLoop = setInterval(function () {
-        //change daycare sorting
-        if (hatcherySortSync) {
-            const pS = Settings.getSetting('partySort');
-            const hS = Settings.getSetting('hatcherySort');
-            if (pS.observableValue() != hatcherySortVal) {
-                hS.observableValue(pS.observableValue())
-                hatcherySortVal = pS.observableValue()
-                localStorage.setItem("hatcherySortVal", hatcherySortVal);
-            }
-            if (hS.observableValue() != hatcherySortVal) {
-                hatcherySortVal = hS.observableValue()
-                pS.observableValue(hS.observableValue())
-                localStorage.setItem("hatcherySortVal", hatcherySortVal);
-            }
+        ticksSinceSortedHatchery = 0;
+    } 
 
-            const pSD = Settings.getSetting('partySortDirection');
-            const hSD = Settings.getSetting('hatcherySortDirection');
-            if (pSD.observableValue() != hatcherySortDir) {
-                hatcherySortDir = pSD.observableValue()
-                hSD.observableValue(pSD.observableValue())
-                localStorage.setItem("hatcherySortDir", hatcherySortDir);
-            }
-            if (hSD.observableValue() != hatcherySortDir) {
-                hatcherySortDir = hSD.observableValue()
-                pSD.observableValue(hSD.observableValue())
-                localStorage.setItem("hatcherySortDir", hatcherySortDir);
-            }
+    // Attempt to hatch eggs
+    for (let i = App.game.breeding.eggSlots - 1; i >= 0; i--) {
+        App.game.breeding.hatchPokemonEgg(i);
+    }
+
+    while (App.game.breeding.hasFreeEggSlot()) {
+        // Attempts enabled autoHatch methods in order until one succeeds
+        // (subsequent autoHatch methods aren't called due to short-circuiting)
+        let success = pkrsState && autoHatchPkrs();
+        success ||= eggState && autoHatchEgg();
+        success ||= fossilState && autoHatchFossil();
+        success ||= autoHatchMon();
+        if (!success) {
+            break;
         }
-
-        // Attempt to hatch each egg. If the egg is at 100% it will succeed
-        [0, 1, 2, 3].forEach((index) => App.game.breeding.hatchPokemonEgg(index));
-
-        // Now add eggs to empty slots if we can
-        while (
-            App.game.breeding.canAccess() == true && // Can access the Hatchery
-            App.game.party.hasMaxLevelPokemon() && // Don't run if you don't have any level 100 Pokemon
-            App.game.breeding.hasFreeEggSlot() // Has an open egg slot
-        ) {
-            var hasEgg;
-            var hasFossil;
-            if (eggState) {
-                var randEggIndex;
-                var storedEggName = [];
-                const eggTypesLength = GameConstants.EggItemType[0].length;
-                const eggTypes = GameConstants.EggItemType;
-                for (var i = 0; i < eggTypesLength; i++) {
-                    const selEgg = eggTypes[i]
-                    if (player._itemList[selEgg]() > 0) {
-                        storedEggName.push(selEgg)
-                    }
-                }
-                if (storedEggName.length != 0) {
-                    randEggIndex = ((Math.floor(Math.random() * storedEggName.length) + 1) - 1)
-                    hasEgg = true;
-                } else {
-                    hasEgg = false
-                }
-            }
-
-            let randFossilIndex;
-            const storedFossilID = [];
-            if (fossilState) {
-                const storedFossilName = [];
-                const treasureLength = player.mineInventory().length;
-                for (var e = 0; e < treasureLength; e++) {
-                    const valueType = player.mineInventory()[e].valueType;
-                    //valueType 3 equals fossil or old "Mine Egg" type
-                    const itemAmount = player.mineInventory()[e].amount()
-                    if (valueType == 3 && itemAmount > 0) {
-                        const fossilName = player.mineInventory()[e].name;
-                        const fossilID = player.mineInventory()[e].id;
-                        const fossilePoke = GameConstants.FossilToPokemon[fossilName];
-                        // 0 = Not caught yet, 1 = Non-Shiny, 2 = Already Shiny
-                        const checkShiny = PartyController.getCaughtStatusByName(fossilePoke);
-                        const pokeRegion = PokemonHelper.calcNativeRegion(fossilePoke)
-                        const validFossil = pokeRegion <= player.highestRegion();
-                        const shinyFossilize = shinyFossilState && checkShiny != 2;
-                        if (validFossil && shinyFossilize || validFossil && !shinyFossilState) {
-                            storedFossilName.push(fossilName)
-                            storedFossilID.push(fossilID)
-                        }
-                    }
-                }
-                if (storedFossilID.length != 0) {
-                    randFossilIndex = ((Math.floor(Math.random() * storedFossilID.length) + 1) - 1)
-                    hasFossil = true;
-                } else {
-                    hasFossil = false;
-                }
-            }
-
-            if (eggState || fossilState) {
-                if (hasEgg == true && hasFossil == true) {
-                    const isEggFossil = (Math.floor(Math.random() * 2) + 1)
-                    if (isEggFossil == 1) {
-                        ItemList[storedEggName[randEggIndex]].use()
-                        return true;
-                    } else {
-                        Underground.sellMineItem(storedFossilID[randFossilIndex])
-                        return true;
-                    }
-                } else if (hasEgg == true) {
-                    ItemList[storedEggName[randEggIndex]].use()
-                    return true;
-                } else if (hasFossil == true) {
-                    Underground.sellMineItem(+storedFossilID[randFossilIndex])
-                    return true;
-                }
-            }
-            
-            // Filter the sorted list of Pokemon based on the parameters set in the Hatchery screen
-            let filteredEggList = PartyController.hatcherySortedList.filter((partyPokemon) => {
-                // Only breedable Pokemon
-                if (partyPokemon.breeding || partyPokemon.level < 100) {
-                    return false;
-                }
-                // Check based on category
-                if (BreedingFilters.category.value() >= 0) {
-                    if (partyPokemon.category !== BreedingFilters.category.value()) {
-                        return false;
-                    }
-                }
-                // Check based on shiny status
-                if (BreedingFilters.shinyStatus.value() >= 0) {
-                    if (+partyPokemon.shiny !== BreedingFilters.shinyStatus.value()) {
-                        return false;
-                    }
-                }
-                // Check based on pokerus
-                if (BreedingFilters.pokerus.value() >= 0) {
-                    if (+partyPokemon.pokerus !== BreedingFilters.pokerus.value()) {
-                        return false;
-                    }
-                }
-                // Check based on native region
-                const useRegion = BreedingFilters.region.value() == 2 ** (player.highestRegion() + 1) - 1;
-                if (!useRegion) {
-                    const regionVal = [1, 2, 4, 8, 16, 32, 64, 128];
-                    const pokeNatRegion = PokemonHelper.calcNativeRegion(partyPokemon.name);
-                    if (regionVal[pokeNatRegion] !== BreedingFilters.region.value()) {
-                        return false;
-                    }
-                }
-                // Check based on Mega status
-                const uniqueTransformation = BreedingFilters.uniqueTransformation.value();
-                // Only Base Pokémon with Mega available
-                if (uniqueTransformation == 'mega-available' && !PokemonHelper.hasMegaEvolution(partyPokemon.name)) {
-                    return false;
-                }
-                // Only Base Pokémon without Mega Evolution
-                if (uniqueTransformation == 'mega-unobtained' && !(PokemonHelper.hasMegaEvolution(partyPokemon.name) && partyPokemon.evolutions?.some((e) => !App.game.party.alreadyCaughtPokemonByName(e.evolvedPokemon)))) {
-                    return false;
-                }
-                // Only Mega Pokémon
-                if (uniqueTransformation == 'mega-evolution' && !(PokemonHelper.getPokemonPrevolution(partyPokemon.name)?.some((e) => PokemonHelper.hasMegaEvolution(e.basePokemon)))) {
-                    return false;
-                }
-                // Check if either of the types match
-                const type1 = BreedingFilters.type1.value() > -2 ? BreedingFilters.type1.value() : null;
-                const type2 = BreedingFilters.type2.value() > -2 ? BreedingFilters.type2.value() : null;
-                if (type1 !== null || type2 !== null) {
-                    const { type: types } = pokemonMap[partyPokemon.name];
-                    if ([type1, type2].includes(PokemonType.None)) {
-                        const type = type1 == PokemonType.None ? type2 : type1;
-                        if (!BreedingController.isPureType(partyPokemon, type)) {
-                            return false;
-                        }
-                    } else if (
-                        (type1 !== null && !types.includes(type1)) ||
-                        (type2 !== null && !types.includes(type2))
-                    ) {
-                        return false;
-                    }
-                }
-                return true;
-            });
-
-            const hasPKRS = App.game.keyItems.hasKeyItem(KeyItemType.Pokerus_virus);
-            const starterID = GameConstants.RegionalStarters[GameConstants.Region.kanto][player.regionStarters[GameConstants.Region.kanto]()];
-            const starterPKMN = PartyController.getSortedList().filter(p => p.id == starterID)[0];
-            const virusReady = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false && e.pokerus == false);
-            if (pkrsState && hasPKRS && virusReady.length != 0) {
-                if (starterPKMN._level() == 100 && !starterPKMN.breeding) {
-                    App.game.breeding.addPokemonToHatchery(starterPKMN);
-                    return true;
-                } else if (starterPKMN._level() == 100 && starterPKMN.breeding) {
-                    App.game.breeding.addPokemonToHatchery(virusReady[0]);
-                    return true;
-                }
-                if (pkrsStrict) {
-                    return true;
-                } else {
-                    basicHatchery();
-                }
-            } else {
-                basicHatchery();
-            }
-
-            function basicHatchery() {
-                try {
-                    App.game.breeding.addPokemonToHatchery(filteredEggList[0]);
-                } catch (err) {
-                    const canBreed = PartyController.getSortedList().filter(e => e._level() == 100 && e.breeding == false);
-                    const randBreed = getRandomInt(canBreed.length);
-                    App.game.breeding.addPokemonToHatchery(canBreed[randBreed]);
-                }
-            }
-
-        }
-    }, 50); // Runs every game tick
-}
-
-if (!validParse(localStorage.getItem('autoHatchState'))) {
-    localStorage.setItem("autoHatchState", false);
-}
-if (!validParse(localStorage.getItem('autoEgg'))) {
-    localStorage.setItem("autoEgg", false);
-}
-if (!validParse(localStorage.getItem('autoFossil'))) {
-    localStorage.setItem("autoFossil", false);
-}
-if (!validParse(localStorage.getItem('shinyFossil'))) {
-    localStorage.setItem("shinyFossil", false);
-}
-if (!validParse(localStorage.getItem('hatcherySortVal'))) {
-    localStorage.setItem("hatcherySortVal", 0);
-}
-if (!validParse(localStorage.getItem('hatcherySortDir'))) {
-    localStorage.setItem("hatcherySortDir", true);
-}
-if (!validParse(localStorage.getItem('hatcherySortSync'))) {
-    localStorage.setItem("hatcherySortSync", false);
-}
-if (!validParse(localStorage.getItem('pokerusModeState'))) {
-    localStorage.setItem("pokerusModeState", false);
-}
-if (!validParse(localStorage.getItem('pokerusModeStrict'))) {
-    localStorage.setItem("pokerusModeStrict", false);
-}
-hatchState = JSON.parse(localStorage.getItem('autoHatchState'));
-eggState = JSON.parse(localStorage.getItem('autoEgg'));
-fossilState = JSON.parse(localStorage.getItem('autoFossil'));
-shinyFossilState = JSON.parse(localStorage.getItem('shinyFossil'));
-hatcherySortVal = JSON.parse(localStorage.getItem('hatcherySortVal'));
-hatcherySortDir = JSON.parse(localStorage.getItem('hatcherySortDir'));
-hatcherySortSync = JSON.parse(localStorage.getItem('hatcherySortSync'));
-pkrsState = JSON.parse(localStorage.getItem('pokerusModeState'));
-pkrsStrict = JSON.parse(localStorage.getItem('pokerusModeStrict'));
-
-function loadScript() {
-    var oldInit = Preload.hideSplashScreen
-
-    Preload.hideSplashScreen = function () {
-        var result = oldInit.apply(this, arguments)
-        initAutoHatch()
-        return result
     }
 }
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-}
-
-function validParse(key) {
-    try {
-        if (key === null) {
-            throw new Error;
-        }
-        JSON.parse(key);
-        return true;
-    } catch (e) {
+function autoHatchPkrs() {
+    const delayAfterFailure = GameConstants.SECOND * 30;
+    if (!App.game.keyItems.hasKeyItem(KeyItemType.Pokerus_virus)) {
         return false;
     }
+    // No need to search if we already know there aren't party members to infect
+    if (numMonsWithPkrsCached == App.game.party.caughtPokemon.length) {
+        return false;
+    }
+    // If we couldn't find a uninfected/contagious pair, wait a while before trying again
+    if (Date.now() - pkrsHatcherySearchTime < delayAfterFailure) {
+        return false;
+    }
+    let uninfectedMono = {};
+    let uninfectedDual = {};
+    let contagious = {};
+    let foundPair = false;
+    let infectedCount = 0;
+    // Find first uninfected/contagious pair sharing a type
+    // Ideally the uninfected mon is dual-type to accelerate future spreading
+    for (let mon of PartyController.hatcherySortedList) {
+        infectedCount += mon.pokerus > GameConstants.Pokerus.Uninfected;
+        if (mon.breeding || mon.level < 100) {
+            continue;
+        }
+        let checkMatch = false;
+        const { type: types } = pokemonMap[mon.name];
+        if (mon.pokerus == GameConstants.Pokerus.Uninfected) {
+            if (types.length == 2) {
+                uninfectedDual[types[0]] ??= mon;
+                uninfectedDual[types[1]] ??= mon;
+                checkMatch = true;
+            } else {
+                uninfectedMono[types[0]] ??= mon;
+            }
+        } else if (mon.pokerus >= GameConstants.Pokerus.Contagious) {
+            for (let type of types) {
+                contagious[type] ??= mon;
+                checkMatch = true;
+            }
+        }
+        // Stop searching upon finding a infectable dual-type
+        if (checkMatch) {
+            for (let type of types) {
+                if (type in uninfectedDual && type in contagious) {
+                    foundPair = {'uninfected': uninfectedDual[type], 'contagious': contagious[type]};
+                }
+            }
+            if (foundPair) {
+                break;
+            }
+        }
+    }
+    if (!foundPair) {
+        numMonsWithPkrsCached = infectedCount;
+        // No infectable dual-type pokemon found, try a monotype
+        for (let type of GameHelper.enumNumbers(PokemonType)) {
+            if (type in uninfectedMono && type in contagious) {
+                foundPair = {'uninfected': uninfectedMono[type], 'contagious': contagious[type]};
+                break;
+            }
+        }
+    }
+    if (foundPair) {
+        let success = App.game.breeding.addPokemonToHatchery(foundPair.uninfected) && App.game.breeding.addPokemonToHatchery(foundPair.contagious);
+        numMonsWithPkrsCached += success;
+        return success;
+    } else {
+        pkrsHatcherySearchTime = Date.now();
+        return false;
+    }
+}
+
+function autoHatchEgg() {
+    let eggList = GameHelper.enumStrings(GameConstants.EggItemType).filter(e => ItemHandler.hasItem(e));
+    if (eggList.length == 0) {
+        return false;
+    }
+    let eggToUse = eggList[Math.floor(Math.random() * eggList.length)];
+    return ItemList[eggToUse].use();
+}
+
+function autoHatchFossil() {
+    let fossilList = Object.keys(GameConstants.FossilToPokemon);
+    // Fossils in inventory with amount > 0
+    fossilList = fossilList.map(f => player.mineInventory().find(i => i.name == f && i.amount())).filter(f => f != undefined);
+    if (shinyFossilState) {
+        // Fossils where the shiny is not yet obtained
+        fossilList = fossilList.filter(f => PartyController.getCaughtStatusByName(GameConstants.FossilToPokemon[f.name]) != CaughtStatus.CaughtShiny);
+    }
+    if (fossilList.length == 0) {
+        return false;
+    }
+    let fossilToUse = fossilList[Math.floor(Math.random() * fossilList.length)];
+    // Workaround as sellMineItem returns null
+    let before = App.game.breeding.eggList.reduce((count, e) => count + !e().isNone(), 0);
+    Underground.sellMineItem(fossilToUse.id);
+    let after = App.game.breeding.eggList.reduce((count, e) => count + !e().isNone(), 0);
+    return before < after;
+}
+
+function autoHatchMon() {
+    let toHatch = PartyController.hatcherySortedList.find(p => p.isHatchable());
+    if (!toHatch) {
+        // Nothing matches the hatchery filters
+        toHatch = PartyController.hatcherySortedList.find(p => !(p.breeding || p.level < 100));
+    }
+    if (!toHatch) {
+        return false;
+    }
+    return App.game.breeding.addPokemonToHatchery(toHatch);
+}
+
+hatchState = loadSetting('autoHatchState', false);
+eggState = loadSetting('autoEgg', false);
+fossilState = loadSetting('autoFossil', false);
+shinyFossilState = loadSetting('shinyFossil', false);
+pkrsState = loadSetting('pokerusModeState', false);
+
+function loadSetting(key, defaultVal) {
+    var val;
+    try {
+        val = JSON.parse(localStorage.getItem(key));
+        if (val == null || typeof val !== typeof defaultVal) {
+            throw new Error;
+        }
+    } catch {
+        val = defaultVal;
+        localStorage.setItem(key, defaultVal);
+    }
+    return val;
 }
 
 function addGlobalStyle(css) {
@@ -423,6 +290,22 @@ function addGlobalStyle(css) {
     style.type = 'text/css';
     style.innerHTML = css;
     head.appendChild(style);
+}
+
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
+
+    Preload.hideSplashScreen = function(...args) {
+        var result = oldInit.apply(this, arguments);
+        if (App.game && !hasInitialized) {
+            initAutoHatch();
+            hasInitialized = true;
+        }
+        return result;
+    }
+
+    bindAutoHatcher();
 }
 
 if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {

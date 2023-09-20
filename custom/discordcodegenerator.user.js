@@ -23,6 +23,7 @@ var resCodes;
 var validPoke = [];
 
 function initCodeGen() {
+    App.game.discord.codes.forEach(e => validPoke.push(e.name));
     genCodes();
     const saveTab = document.getElementById('saveTab');
     var fragment = new DocumentFragment();
@@ -81,14 +82,17 @@ function randInt() {
     return Math.floor((Math.random() * 65536) + 1);
 }
 
-function loadScript(){
-    var oldInit = Preload.hideSplashScreen
+function loadScript() {
+    const oldInit = Preload.hideSplashScreen;
+    var hasInitialized = false;
 
-    Preload.hideSplashScreen = function(){
-        var result = oldInit.apply(this, arguments)
-        App.game.discord.codes.forEach(e => validPoke.push(e.name));
-        initCodeGen()
-        return result
+    Preload.hideSplashScreen = function (...args) {
+        var result = oldInit.apply(this, args);
+        if (App.game && !hasInitialized) {
+            initCodeGen();
+            hasInitialized = true;
+        }
+        return result;
     }
 }
 
