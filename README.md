@@ -15,7 +15,7 @@ It's very important for the future of the project in general and how things will
 [Using the Script Fixer Upper](https://github.com/Ephenia/Pokeclicker-Scripts/issues/214)<br/>
 [Issue Guidelines](https://github.com/Ephenia/Pokeclicker-Scripts/issues/119)
 
-**Only** use scripts if you have read and understood their descriptions!
+**Only** use scripts if you have read and understood their descriptions! Report issues while using scripts here or on the Discord, **not** to the developers of Pokéclicker.
 
 <hr>
 
@@ -61,7 +61,6 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 7. [**Overnight Berry Growth** ](#overnight-berry-growth)
 8. [**Perky Pokerus Pandemic** ](#perky-pokerus-pandemic)
 9. [**Simple Weather Changer** ](#simple-weather-changer)
-10. [**Auto Safari Zone** ](//github.com/Ephenia/Pokeclicker-Scripts#custom-auto-safari-zone-auto-safarizoneuserjs-one-click-install)
 
 ```diff
 - Note: Please backup your saves before using any and all scripts that would be here!!!
@@ -446,24 +445,6 @@ This script lets you freely edit the weather of the region you are currently in 
 ![image](https://i.imgur.com/2cBIfyH.png)
 
 In addition it will also prevent the weather from changing and will remember you choice when reloading the game
-
-<br>
-
-<hr>
-
-## **[Custom] Auto Safari** ([autosafarizone.user.js](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autosafarizone.user.js)) ([One-Click Install](//github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/autosafarizone.user.js))
-This script automatically explores the Safari Zone and Friend Safari, catching Pokémon and collecting items. You can activate the script while in the menu for either.
-
-The script also has the following options:
-<strong>• Auto Pick Items</strong> - Pick up items when only one ball is left (enabled by default)
-<strong>• Auto Throw Bait</strong> - Throws berries when seeking uncaught or contagious Pokémon, or regular bait if you need a bait achievement. 
-<strong>• Auto Seek New</strong> - Prioritizes catching uncaught Pokémon.
-<strong>• Auto Seek PKRS</strong> - Prioritizes catching contagious Pokémon (below 50 EVs).
-<strong>• Auto Fast Anim</strong> - Increases the speed of many animations. Stacks with the Safari Level speed bonuses.
-
-The auto bait setting will never use your last berry. The script will always use optimal berries to catch shiny Pokémon, whether or not auto bait is enabled.
-
-<br>
 
 <hr>
 
