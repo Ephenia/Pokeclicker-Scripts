@@ -32,25 +32,29 @@ var autoGymSelect;
 var autoDungeonState = ko.observable(false);
 var autoDungeonMode;
 var autoDungeonLootTier;
-var dungeonID = 0;
-var dungeonFloor;
-var dungeonCoords;
-var dungeonBossCoords;
-var dungeonChestCoords;
-var dungeonFloorSize;
-var dungeonFlashDistance;
-var dungeonFlashCols;
+var autoDungeonTracker = {
+    ID: 0,
+    floor: null,
+    floorSize: null,
+    flashDistance: null,
+    flashCols: null,
+    coords: null,
+    bossCoords: null,
+    chestCoords: null,
+};
 // Clicker statistics calculator
-var calculatorLoop;
-var calculatorEfficiencyDisplay;
-var calculatorDamageDisplay
-var calcLastUpdate;
-var calcPlayerState = -1;
-var calcPlayerLocation;
-var calcTicks;
-var calcClicks;
-var calcEnemies;
-var calcAreaHealth;
+var autoClickCalcLoop;
+var autoClickCalcEfficiencyDisplayMode;
+var autoClickCalcDamageDisplayMode
+var autoClickCalcTracker = {
+    lastUpdate: null,
+    playerState: -1,
+    playerLocation: null,
+    ticks: null,
+    clicks: null,
+    enemies: null,
+    areaHealth: null,
+};
 // Visual settings
 var gymGraphicsDisabled = ko.observable(false);
 var dungeonGraphicsDisabled = ko.observable(false);
@@ -154,7 +158,7 @@ function initAutoClicker() {
         Auto Clicker efficiency display mode
         </td>
         <td class="p-0 col-md-4">
-        <select id="select-calculatorEfficiencyDisplay" class="form-control">
+        <select id="select-autoClickCalcEfficiencyDisplayMode" class="form-control">
         <option value="0">Percentage</option>
         <option value="1">Ticks/s</option>
         </select>
@@ -164,7 +168,7 @@ function initAutoClicker() {
         Auto Clicker damage display mode
         </td>
         <td class="p-0 col-md-4">
-        <select id="select-calculatorDamageDisplay" class="form-control">
+        <select id="select-autoClickCalcDamageDisplayMode" class="form-control">
         <option value="0">Click Attacks</option>
         <option value="1">Damage</option>
         </select>
@@ -186,8 +190,8 @@ function initAutoClicker() {
 
     document.getElementById('auto-gym-select').value = autoGymSelect;
     document.getElementById('auto-dungeon-mode').value = autoDungeonMode;
-    document.getElementById('select-calculatorEfficiencyDisplay').value = calculatorEfficiencyDisplay;
-    document.getElementById('select-calculatorDamageDisplay').value = calculatorDamageDisplay;
+    document.getElementById('select-autoClickCalcEfficiencyDisplayMode').value = autoClickCalcEfficiencyDisplayMode;
+    document.getElementById('select-autoClickCalcDamageDisplayMode').value = autoClickCalcDamageDisplayMode;
     document.getElementById('checkbox-gymGraphicsDisabled').checked = gymGraphicsDisabled();
     document.getElementById('checkbox-dungeonGraphicsDisabled').checked = dungeonGraphicsDisabled();
 
@@ -200,8 +204,8 @@ function initAutoClicker() {
     document.getElementById('auto-dungeon-loottier').addEventListener('change', (event) => { changeDungeonLootTier(event); });
     document.getElementById('checkbox-gymGraphicsDisabled').addEventListener('change', (event) => { toggleAutoGymGraphics(event); } );
     document.getElementById('checkbox-dungeonGraphicsDisabled').addEventListener('change', (event) => { toggleAutoDungeonGraphics(event); } );
-    document.getElementById('select-calculatorEfficiencyDisplay').addEventListener('change', (event) => { changeCalcEfficiencyDisplay(event); } );
-    document.getElementById('select-calculatorDamageDisplay').addEventListener('change', (event) => { changeCalcDamageDisplay(event); } );
+    document.getElementById('select-autoClickCalcEfficiencyDisplayMode').addEventListener('change', (event) => { changeCalcEfficiencyDisplayMode(event); } );
+    document.getElementById('select-autoClickCalcDamageDisplayMode').addEventListener('change', (event) => { changeCalcDamageDisplayMode(event); } );
 
     document.querySelectorAll('#auto-dungeon-loottier-dropdown > div').forEach((elem) => {
         elem.addEventListener('click', () => { changeDungeonLootTier(elem.getAttribute('value')); });
@@ -288,7 +292,7 @@ function changeDungeonMode(event) {
     const val = +event.target.value;
     // Extra value-has-changed check to avoid repeat pathfinding
     if (val != autoDungeonMode && [0, 1].includes(val)) {
-        dungeonCoords = null;
+        autoDungeonTracker.coords = null;
         autoDungeonMode = val;
         localStorage.setItem("autoDungeonMode", autoDungeonMode);
     }
@@ -322,20 +326,20 @@ function toggleAutoDungeonGraphics(event) {
     localStorage.setItem('dungeonGraphicsDisabled', dungeonGraphicsDisabled());
 }
 
-function changeCalcEfficiencyDisplay(event) {
+function changeCalcEfficiencyDisplayMode(event) {
     const val = +event.target.value;
-    if (val != calculatorEfficiencyDisplay && [0, 1].includes(val)) {
-        calculatorEfficiencyDisplay = val;
-        localStorage.setItem('calculatorEfficiencyDisplay', calculatorEfficiencyDisplay);
+    if (val != autoClickCalcEfficiencyDisplayMode && [0, 1].includes(val)) {
+        autoClickCalcEfficiencyDisplayMode = val;
+        localStorage.setItem('autoClickCalcEfficiencyDisplayMode', autoClickCalcEfficiencyDisplayMode);
         resetCalculator();
     }
 }
 
-function changeCalcDamageDisplay(event) {
+function changeCalcDamageDisplayMode(event) {
     const val = +event.target.value;
-    if (val != calculatorDamageDisplay && [0, 1].includes(val)) {
-        calculatorDamageDisplay = val;
-        localStorage.setItem('calculatorDamageDisplay', calculatorDamageDisplay);
+    if (val != autoClickCalcDamageDisplayMode && [0, 1].includes(val)) {
+        autoClickCalcDamageDisplayMode = val;
+        localStorage.setItem('autoClickCalcDamageDisplayMode', autoClickCalcDamageDisplayMode);
         resetCalculator();
     }
 }
@@ -381,7 +385,7 @@ function autoClicker() {
             else if (autoGymState()) {
                 autoGym();
             }
-            calcTicks[0]++;
+            autoClickCalcTracker.ticks[0]++;
         }, delay);
     } else {
         if (autoGymState()) {
@@ -501,14 +505,14 @@ function autoDungeon() { // TODO more thoroughly test switching between modes an
             return;
         }
         // Scan each new dungeon floor
-        if (dungeonID !== DungeonRunner.dungeonID || dungeonFloor !== DungeonRunner.map.playerPosition().floor) {
-            dungeonID = DungeonRunner.dungeonID;
-            dungeonCoords = null;
+        if (autoDungeonTracker.ID !== DungeonRunner.dungeonID || autoDungeonTracker.floor !== DungeonRunner.map.playerPosition().floor) {
+            autoDungeonTracker.ID = DungeonRunner.dungeonID;
+            autoDungeonTracker.coords = null;
             scan();
         }
         // Reset pathfinding coordinates to entrance
-        if (dungeonCoords == null) {
-            dungeonCoords = new Point(Math.floor(dungeonFloorSize / 2), dungeonFloorSize - 1);
+        if (autoDungeonTracker.coords == null) {
+            autoDungeonTracker.coords = new Point(Math.floor(autoDungeonTracker.floorSize / 2), autoDungeonTracker.floorSize - 1);
         }
         // Explore using selected mode
         if (autoDungeonMode == 0) {
@@ -537,39 +541,39 @@ function autoDungeon() { // TODO more thoroughly test switching between modes an
  */
 function scan() {
     var dungeonBoard = DungeonRunner.map.board()[DungeonRunner.map.playerPosition().floor];
-    dungeonFloor = DungeonRunner.map.playerPosition().floor;
-    dungeonFloorSize = DungeonRunner.map.floorSizes[DungeonRunner.map.playerPosition().floor];
-    dungeonChestCoords = [];
+    autoDungeonTracker.floor = DungeonRunner.map.playerPosition().floor;
+    autoDungeonTracker.floorSize = DungeonRunner.map.floorSizes[DungeonRunner.map.playerPosition().floor];
+    autoDungeonTracker.chestCoords = [];
     // Scan for chest and boss coordinates
     for (var y = 0; y < dungeonBoard.length; y++) {
         for (var x = 0; x < dungeonBoard[y].length; x++) {
             if (dungeonBoard[y][x].type() == GameConstants.DungeonTile.chest) {
                 let lootTier = Object.keys(baseLootTierChance).indexOf(dungeonBoard[y][x].metadata.tier);
-                dungeonChestCoords.push({'pos': new Point(x, y), 'tier': lootTier});
+                autoDungeonTracker.chestCoords.push({'pos': new Point(x, y), 'tier': lootTier});
             }
             if (dungeonBoard[y][x].type() == GameConstants.DungeonTile.boss || dungeonBoard[y][x].type() == GameConstants.DungeonTile.ladder) {
-                dungeonBossCoords = new Point(x, y);
+                autoDungeonTracker.bossCoords = new Point(x, y);
             }
         }
     }
     // Sort chests by descending rarity
-    dungeonChestCoords.sort((a, b) => b.tier - a.tier);
+    autoDungeonTracker.chestCoords.sort((a, b) => b.tier - a.tier);
     // TODO find a more future-proof way to get flash distance
-    dungeonFlashDistance = DungeonRunner.map.flash?.playerOffset[0] ?? 0;
-    dungeonFlashCols = [];
+    autoDungeonTracker.flashDistance = DungeonRunner.map.flash?.playerOffset[0] ?? 0;
+    autoDungeonTracker.flashCols = [];
     // Calculate minimum columns to fully reveal dungeon with Flash
-    if (dungeonFlashDistance > 0) {
+    if (autoDungeonTracker.flashDistance > 0) {
         var i = 0;
-        var j = dungeonFloorSize - 1;
+        var j = autoDungeonTracker.floorSize - 1;
         while (i <= j) {
-            dungeonFlashCols.push(Math.min(i + dungeonFlashDistance, j));
-            if (i + dungeonFlashDistance < j - dungeonFlashDistance) {
-                dungeonFlashCols.push(j - dungeonFlashDistance);
+            autoDungeonTracker.flashCols.push(Math.min(i + autoDungeonTracker.flashDistance, j));
+            if (i + autoDungeonTracker.flashDistance < j - autoDungeonTracker.flashDistance) {
+                autoDungeonTracker.flashCols.push(j - autoDungeonTracker.flashDistance);
             }
-            i += dungeonFlashDistance * 2 + 1;
-            j -= dungeonFlashDistance * 2 + 1;
+            i += autoDungeonTracker.flashDistance * 2 + 1;
+            j -= autoDungeonTracker.flashDistance * 2 + 1;
         }
-        dungeonFlashCols.sort((a, b) => (a - b));
+        autoDungeonTracker.flashCols.sort((a, b) => (a - b));
     }
 }
 
@@ -582,22 +586,22 @@ function seekBoss() {
     // Seek the boss
     while (!hasMoved) {
         // Boss tile visible
-        if (dungeonBoard[dungeonFloor][dungeonBossCoords.y][dungeonBossCoords.x].isVisible) {
+        if (dungeonBoard[autoDungeonTracker.floor][autoDungeonTracker.bossCoords.y][autoDungeonTracker.bossCoords.x].isVisible) {
             // Boss tile unlocked
-            if (dungeonBoard[dungeonFloor][dungeonBossCoords.y][dungeonBossCoords.x].isVisited) {
+            if (dungeonBoard[autoDungeonTracker.floor][autoDungeonTracker.bossCoords.y][autoDungeonTracker.bossCoords.x].isVisited) {
                 let chestIndex;
                 if (autoDungeonLootTier > -1) {
-                    chestIndex = dungeonChestCoords.findIndex((chest) => 'visibleFrom' in chest && chest.tier >= autoDungeonLootTier);
+                    chestIndex = autoDungeonTracker.chestCoords.findIndex((chest) => 'visibleFrom' in chest && chest.tier >= autoDungeonLootTier);
                 } else {
                     chestIndex = -1;
                 }
                 // Open chests first
                 if (chestIndex > -1) {
-                    let chest = dungeonChestCoords[chestIndex];
+                    let chest = autoDungeonTracker.chestCoords[chestIndex];
                     // Open chest
-                    if (dungeonBoard[dungeonFloor][chest.pos.y][chest.pos.x].isVisited) {
+                    if (dungeonBoard[autoDungeonTracker.floor][chest.pos.y][chest.pos.x].isVisited) {
                         // Remove from list
-                        dungeonChestCoords.splice(chestIndex, 1);
+                        autoDungeonTracker.chestCoords.splice(chestIndex, 1);
                         DungeonRunner.map.moveToCoordinates(chest.pos.x, chest.pos.y);
                         DungeonRunner.openChest();
                         hasMoved = true;
@@ -605,21 +609,21 @@ function seekBoss() {
                     // Proceed to chest
                     else {
                         if (!('movingTowards' in chest)) {
-                            dungeonCoords.x = chest.visibleFrom.x;
-                            dungeonCoords.y = chest.visibleFrom.y;
+                            autoDungeonTracker.coords.x = chest.visibleFrom.x;
+                            autoDungeonTracker.coords.y = chest.visibleFrom.y;
                             chest.movingTowards = true;
                         }
-                        if (dungeonCoords.y != chest.pos.y) {
-                            dungeonCoords.y += (dungeonCoords.y < chest.pos.y ? 1 : -1);
+                        if (autoDungeonTracker.coords.y != chest.pos.y) {
+                            autoDungeonTracker.coords.y += (autoDungeonTracker.coords.y < chest.pos.y ? 1 : -1);
                         }
-                        else if (dungeonCoords.x != chest.pos.x) {
-                            dungeonCoords.x += (dungeonCoords.x < chest.pos.x ? 1 : -1);
+                        else if (autoDungeonTracker.coords.x != chest.pos.x) {
+                            autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x < chest.pos.x ? 1 : -1);
                         }
                     }
                 } 
                 // Start boss / move floors
                 else {
-                    DungeonRunner.map.moveToCoordinates(dungeonBossCoords.x, dungeonBossCoords.y);
+                    DungeonRunner.map.moveToCoordinates(autoDungeonTracker.bossCoords.x, autoDungeonTracker.bossCoords.y);
                     if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
                         DungeonRunner.startBossFight();
                     } else if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.ladder) {
@@ -633,51 +637,51 @@ function seekBoss() {
                 }
             }
             // Boss visible, move towards it
-            else if (dungeonCoords.y != dungeonBossCoords.y) {
-                dungeonCoords.y += (dungeonCoords.y < dungeonBossCoords.y ? 1 : -1);
+            else if (autoDungeonTracker.coords.y != autoDungeonTracker.bossCoords.y) {
+                autoDungeonTracker.coords.y += (autoDungeonTracker.coords.y < autoDungeonTracker.bossCoords.y ? 1 : -1);
             }
-            else if (dungeonCoords.x != dungeonBossCoords.x) {
-                dungeonCoords.x += (dungeonCoords.x < dungeonBossCoords.x ? 1 : -1);
+            else if (autoDungeonTracker.coords.x != autoDungeonTracker.bossCoords.x) {
+                autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x < autoDungeonTracker.bossCoords.x ? 1 : -1);
             }
         }
         // Boss tile not visible, cover ground
         else {
             // End of column, move to new column
-            if (dungeonCoords.y == 0) {
-                dungeonCoords.y = dungeonFloorSize - 1;
-                if (dungeonCoords.x >= (dungeonFloorSize - 1) - dungeonFlashDistance) {
+            if (autoDungeonTracker.coords.y == 0) {
+                autoDungeonTracker.coords.y = autoDungeonTracker.floorSize - 1;
+                if (autoDungeonTracker.coords.x >= (autoDungeonTracker.floorSize - 1) - autoDungeonTracker.flashDistance) {
                     // Done with this side, move to other side of the entrance
-                    dungeonCoords.x = Math.floor(dungeonFloorSize / 2) - 1;
+                    autoDungeonTracker.coords.x = Math.floor(autoDungeonTracker.floorSize / 2) - 1;
                 } else {
                     // Move away from the entrance
-                    dungeonCoords.x += (dungeonCoords.x >= Math.floor(dungeonFloorSize / 2) ? 1 : -1);
+                    autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x >= Math.floor(autoDungeonTracker.floorSize / 2) ? 1 : -1);
                 }
             // Dungeon has Flash unlocked
-            } else if (dungeonCoords.y == (dungeonFloorSize - 1) && dungeonFlashDistance > 0) {
+            } else if (autoDungeonTracker.coords.y == (autoDungeonTracker.floorSize - 1) && autoDungeonTracker.flashDistance > 0) {
                 // Skip columns not in optimal flash pathing
-                if (dungeonFlashCols.includes(dungeonCoords.x)) {
-                    dungeonCoords.y -= 1;
+                if (autoDungeonTracker.flashCols.includes(autoDungeonTracker.coords.x)) {
+                    autoDungeonTracker.coords.y -= 1;
                 } else {
                     // Move away from the entrance
-                    dungeonCoords.x += (dungeonCoords.x >= Math.floor(dungeonFloorSize / 2) ? 1 : -1);
+                    autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x >= Math.floor(autoDungeonTracker.floorSize / 2) ? 1 : -1);
                 }
             }
             // Move through column
             else {
-                dungeonCoords.y -= 1;
+                autoDungeonTracker.coords.y -= 1;
             }
         }
         // One move per tick to look more natural
-        if (!dungeonBoard[dungeonFloor][dungeonCoords.y][dungeonCoords.x].isVisited) {
-            DungeonRunner.map.moveToCoordinates(dungeonCoords.x, dungeonCoords.y);
+        if (!dungeonBoard[autoDungeonTracker.floor][autoDungeonTracker.coords.y][autoDungeonTracker.coords.x].isVisited) {
+            DungeonRunner.map.moveToCoordinates(autoDungeonTracker.coords.x, autoDungeonTracker.coords.y);
             hasMoved = true;
         }
     }
     // Mark nearby chests
-    dungeonChestCoords.filter((chest) => {
-        return !('visibleFrom' in chest) && dungeonBoard[dungeonFloor][chest.pos.y][chest.pos.x].isVisible;
+    autoDungeonTracker.chestCoords.filter((chest) => {
+        return !('visibleFrom' in chest) && dungeonBoard[autoDungeonTracker.floor][chest.pos.y][chest.pos.x].isVisible;
     }).forEach((chest) => {
-        chest.visibleFrom = new Point(dungeonCoords.x, dungeonCoords.y);
+        chest.visibleFrom = new Point(autoDungeonTracker.coords.x, autoDungeonTracker.coords.y);
     });
 }
 
@@ -686,35 +690,35 @@ function seekBoss() {
  */
 function fullClear() {
     // Fully explore floor
-    while (dungeonCoords !== -1) {
+    while (autoDungeonTracker.coords !== -1) {
         // Handles the segment to the right of the entrance
-        if ((dungeonCoords.y == dungeonFloorSize - 1) && dungeonCoords.x >= Math.floor(dungeonFloorSize / 2)) {
-            if (dungeonCoords.x == dungeonFloorSize - 1) {
-                dungeonCoords.x = Math.floor(dungeonFloorSize / 2) - 1;
+        if ((autoDungeonTracker.coords.y == autoDungeonTracker.floorSize - 1) && autoDungeonTracker.coords.x >= Math.floor(autoDungeonTracker.floorSize / 2)) {
+            if (autoDungeonTracker.coords.x == autoDungeonTracker.floorSize - 1) {
+                autoDungeonTracker.coords.x = Math.floor(autoDungeonTracker.floorSize / 2) - 1;
             } else {
-                dungeonCoords.x += 1;
+                autoDungeonTracker.coords.x += 1;
             }
         }
         // Move in one direction until reaching the wall
         else {
-            var direction = (-1) ** (dungeonFloorSize - dungeonCoords.y);
+            var direction = (-1) ** (autoDungeonTracker.floorSize - autoDungeonTracker.coords.y);
             // End of row, move up one
-            if ((dungeonCoords.x == (dungeonFloorSize - 1) && direction > 0) ||
-                (dungeonCoords.x == 0 && direction < 0)) {
-                if (dungeonCoords.y == 0) {
+            if ((autoDungeonTracker.coords.x == (autoDungeonTracker.floorSize - 1) && direction > 0) ||
+                (autoDungeonTracker.coords.x == 0 && direction < 0)) {
+                if (autoDungeonTracker.coords.y == 0) {
                     // Floor fully explored
-                    dungeonCoords = -1;
+                    autoDungeonTracker.coords = -1;
                     break;
                 } else {
-                    dungeonCoords.y -= 1;
+                    autoDungeonTracker.coords.y -= 1;
                 }
             } else {
-                dungeonCoords.x += direction;
+                autoDungeonTracker.coords.x += direction;
             }
         }
         // One move per tick to look more natural
-        if (!DungeonRunner.map.board()[dungeonFloor][dungeonCoords.y][dungeonCoords.x].isVisited) {
-            DungeonRunner.map.moveToCoordinates(dungeonCoords.x, dungeonCoords.y);
+        if (!DungeonRunner.map.board()[autoDungeonTracker.floor][autoDungeonTracker.coords.y][autoDungeonTracker.coords.x].isVisited) {
+            DungeonRunner.map.moveToCoordinates(autoDungeonTracker.coords.x, autoDungeonTracker.coords.y);
             return;
         }
         // Just in case changed to allow multiple moves per tick
@@ -723,14 +727,14 @@ function fullClear() {
         }
     }
     // Floor explored, open chests
-    if (dungeonChestCoords.length > 0 && dungeonChestCoords[0].tier >= autoDungeonLootTier) {
-        var chestPos = dungeonChestCoords.shift().pos;
+    if (autoDungeonTracker.chestCoords.length > 0 && autoDungeonTracker.chestCoords[0].tier >= autoDungeonLootTier) {
+        var chestPos = autoDungeonTracker.chestCoords.shift().pos;
         DungeonRunner.map.moveToCoordinates(chestPos.x, chestPos.y);
         DungeonRunner.openChest();
     }
     // Boss / ladder time
     else {
-        DungeonRunner.map.moveToCoordinates(dungeonBossCoords.x, dungeonBossCoords.y);
+        DungeonRunner.map.moveToCoordinates(autoDungeonTracker.bossCoords.x, autoDungeonTracker.bossCoords.y);
         if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
             DungeonRunner.startBossFight();
         } else if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.ladder) {
@@ -798,21 +802,21 @@ function overrideDungeonRunner() {
  * Statistics are reset when the player changes locations
  */
 function calcClickStats() {
-    clearInterval(calculatorLoop);
+    clearInterval(autoClickCalcLoop);
     resetCalculator();
     if (autoClickState()) {
-        calculatorLoop = setInterval(function () {
+        autoClickCalcLoop = setInterval(function () {
             if (!hasPlayerMoved()) {
                 var elem;
                 var clickDamage = App.game.party.calculateClickAttack(true);
-                var actualElapsed = (Date.now() - calcLastUpdate.at(-1)) / (1000 * calcLastUpdate.length);
+                var actualElapsed = (Date.now() - autoClickCalcTracker.lastUpdate.at(-1)) / (1000 * autoClickCalcTracker.lastUpdate.length);
 
 
                 // Percentage of maximum ticksPerSecond
                 elem = document.getElementById('tick-efficiency');
-                var avgTicks = calcTicks.reduce((a, b) => a + b, 0) / calcTicks.length;
+                var avgTicks = autoClickCalcTracker.ticks.reduce((a, b) => a + b, 0) / autoClickCalcTracker.ticks.length;
                 avgTicks = avgTicks / actualElapsed;
-                if (calculatorEfficiencyDisplay == 1) {
+                if (autoClickCalcEfficiencyDisplayMode == 1) {
                     // display ticks mode
                     elem.innerHTML = avgTicks.toLocaleString('en-US', {maximumFractionDigits: 1} );
                     elem.style.color = 'gold';
@@ -825,9 +829,9 @@ function calcClickStats() {
 
                 // Average clicks/damage per second
                 elem = document.getElementById('clicks-per-second');
-                var avgClicks = (App.game.statistics.clickAttacks() - calcClicks.at(-1)) / calcClicks.length;
+                var avgClicks = (App.game.statistics.clickAttacks() - autoClickCalcTracker.clicks.at(-1)) / autoClickCalcTracker.clicks.length;
                 avgClicks = avgClicks / actualElapsed;
-                if (calculatorDamageDisplay == 1) {
+                if (autoClickCalcDamageDisplayMode == 1) {
                     // display damage mode
                     var avgDPS = avgClicks * clickDamage;
                     elem.innerHTML = avgDPS.toLocaleString('en-US', {maximumFractionDigits: 0});
@@ -840,18 +844,18 @@ function calcClickStats() {
 
                 // Required clicks/click damage
                 elem = document.getElementById('req-clicks');
-                if (calcAreaHealth == 0) {
+                if (autoClickCalcTracker.areaHealth == 0) {
                     // can't meaningfully calculate a value for this area/game state
                     elem.innerHTML = '-';
                     elem.style.removeProperty('color');
-                } else if (calculatorDamageDisplay == 1) {
+                } else if (autoClickCalcDamageDisplayMode == 1) {
                     // display damage mode
-                    var reqDamage = calcAreaHealth;
+                    var reqDamage = autoClickCalcTracker.areaHealth;
                     elem.innerHTML = reqDamage.toLocaleString('en-US');
                     elem.style.color = (clickDamage >= reqDamage ? 'greenyellow' : 'darkred');
                 } else {
                     // display clicks mode
-                    var reqClicks = Math.max((calcAreaHealth / clickDamage), 1);
+                    var reqClicks = Math.max((autoClickCalcTracker.areaHealth / clickDamage), 1);
                     reqClicks = Math.ceil(reqClicks * 10) / 10; // round up to one decimal point
                     elem.innerHTML = reqClicks.toLocaleString('en-US', {maximumFractionDigits: 1});
                     elem.style.color = (reqClicks == 1 ? 'greenyellow' : 'darkred');
@@ -859,28 +863,28 @@ function calcClickStats() {
 
                 // Enemies per second
                 elem = document.getElementById('enemies-per-second')
-                var avgEnemies = (App.game.statistics.totalPokemonDefeated() - calcEnemies.at(-1)) / calcEnemies.length;
+                var avgEnemies = (App.game.statistics.totalPokemonDefeated() - autoClickCalcTracker.enemies.at(-1)) / autoClickCalcTracker.enemies.length;
                 avgEnemies = avgEnemies / actualElapsed;
                 elem.innerHTML = avgEnemies.toLocaleString('en-US', {maximumFractionDigits: 1});
                 elem.style.color = 'gold';
 
                 // Make room for next second's stats tracking
                 // Add new entries to start of array for easier incrementing
-                calcTicks.unshift(0);
-                if (calcTicks.length > 10) {
-                    calcTicks.pop();
+                autoClickCalcTracker.ticks.unshift(0);
+                if (autoClickCalcTracker.ticks.length > 10) {
+                    autoClickCalcTracker.ticks.pop();
                 }
-                calcClicks.unshift(App.game.statistics.clickAttacks());
-                if (calcClicks.length > 10) {
-                    calcClicks.pop();
+                autoClickCalcTracker.clicks.unshift(App.game.statistics.clickAttacks());
+                if (autoClickCalcTracker.clicks.length > 10) {
+                    autoClickCalcTracker.clicks.pop();
                 }
-                calcEnemies.unshift(App.game.statistics.totalPokemonDefeated());
-                if (calcEnemies.length > 10) {
-                    calcEnemies.pop();
+                autoClickCalcTracker.enemies.unshift(App.game.statistics.totalPokemonDefeated());
+                if (autoClickCalcTracker.enemies.length > 10) {
+                    autoClickCalcTracker.enemies.pop();
                 }
-                calcLastUpdate.unshift(Date.now());
-                if (calcLastUpdate.length > 10) {
-                    calcLastUpdate.pop();
+                autoClickCalcTracker.lastUpdate.unshift(Date.now());
+                if (autoClickCalcTracker.lastUpdate.length > 10) {
+                    autoClickCalcTracker.lastUpdate.pop();
                 }
             }
             // Reset statistics on area / game state change
@@ -896,16 +900,16 @@ function calcClickStats() {
  * Resets stats trackers and calculator info display
  */
 function resetCalculator() {
-    calcLastUpdate = [Date.now()];
-    calcTicks = [0];
-    calcClicks = [App.game.statistics.clickAttacks()];
-    calcEnemies = [App.game.statistics.totalPokemonDefeated()];
+    autoClickCalcTracker.lastUpdate = [Date.now()];
+    autoClickCalcTracker.ticks = [0];
+    autoClickCalcTracker.clicks = [App.game.statistics.clickAttacks()];
+    autoClickCalcTracker.enemies = [App.game.statistics.totalPokemonDefeated()];
     playerTown = player.town().name;
     playerRoute = player.route();
     calculateAreaHealth();
-    document.getElementById('auto-click-info').innerHTML = `<div>${calculatorEfficiencyDisplay == 0 ? 'Clicker Efficiency' : 'Ticks/s'}:<br><div id="tick-efficiency" style="font-weight:bold;">-</div></div>
-        <div>${calculatorDamageDisplay == 0 ? 'Click Attacks/s' : 'DPS'}:<br><div id="clicks-per-second" style="font-weight:bold;">-</div></div>
-        <div>Req. ${calculatorDamageDisplay == 0 ? 'Clicks' : 'Click Damage'}:<br><div id="req-clicks" style="font-weight:bold;">-</div></div>
+    document.getElementById('auto-click-info').innerHTML = `<div>${autoClickCalcEfficiencyDisplayMode == 0 ? 'Clicker Efficiency' : 'Ticks/s'}:<br><div id="tick-efficiency" style="font-weight:bold;">-</div></div>
+        <div>${autoClickCalcDamageDisplayMode == 0 ? 'Click Attacks/s' : 'DPS'}:<br><div id="clicks-per-second" style="font-weight:bold;">-</div></div>
+        <div>Req. ${autoClickCalcDamageDisplayMode == 0 ? 'Clicks' : 'Click Damage'}:<br><div id="req-clicks" style="font-weight:bold;">-</div></div>
         <div>Enemies/s:<br><div id="enemies-per-second" style="font-weight:bold;">-</div></div>`;
 }
 
@@ -915,31 +919,31 @@ function resetCalculator() {
  */
 function hasPlayerMoved() {
     var moved = false;
-    if (calcPlayerState != App.game.gameState) {
-        calcPlayerState = App.game.gameState;
+    if (autoClickCalcTracker.playerState != App.game.gameState) {
+        autoClickCalcTracker.playerState = App.game.gameState;
         moved = true;
     }
-    if (calcPlayerState === GameConstants.GameState.gym) {
-        if (calcPlayerLocation != GymRunner.gymObservable().leaderName) {
+    if (autoClickCalcTracker.playerState === GameConstants.GameState.gym) {
+        if (autoClickCalcTracker.playerLocation != GymRunner.gymObservable().leaderName) {
             moved = true;
         }
-        calcPlayerLocation = GymRunner.gymObservable().leaderName;
-    } else if (calcPlayerState === GameConstants.GameState.dungeon) {
-        if (calcPlayerLocation != DungeonRunner.dungeon.name) {
+        autoClickCalcTracker.playerLocation = GymRunner.gymObservable().leaderName;
+    } else if (autoClickCalcTracker.playerState === GameConstants.GameState.dungeon) {
+        if (autoClickCalcTracker.playerLocation != DungeonRunner.dungeon.name) {
             moved = true;
         }
-        calcPlayerLocation = DungeonRunner.dungeon.name;
-    } else if (calcPlayerState === GameConstants.GameState.temporaryBattle) {
-        if (calcPlayerLocation != TemporaryBattleRunner.battleObservable().name) {
+        autoClickCalcTracker.playerLocation = DungeonRunner.dungeon.name;
+    } else if (autoClickCalcTracker.playerState === GameConstants.GameState.temporaryBattle) {
+        if (autoClickCalcTracker.playerLocation != TemporaryBattleRunner.battleObservable().name) {
             moved = true;
         }
-        calcPlayerLocation = TemporaryBattleRunner.battleObservable().name;
+        autoClickCalcTracker.playerLocation = TemporaryBattleRunner.battleObservable().name;
     } else {
         // Conveniently, player.route() = 0 when not on a route
-        if (calcPlayerLocation != (player.route() || player.town().name)) {
+        if (autoClickCalcTracker.playerLocation != (player.route() || player.town().name)) {
             moved = true;
         }
-        calcPlayerLocation = player.route() || player.town().name;
+        autoClickCalcTracker.playerLocation = player.route() || player.town().name;
     }
     return moved;
 }
@@ -951,20 +955,20 @@ function hasPlayerMoved() {
 function calculateAreaHealth() {
     // Calculate area max hp
     if (App.game.gameState === GameConstants.GameState.fighting) {
-        calcAreaHealth = PokemonFactory.routeHealth(player.route(), player.region);
+        autoClickCalcTracker.areaHealth = PokemonFactory.routeHealth(player.route(), player.region);
         // Adjust for route health variation
         // TODO actually calculate the route's maximum health variation
-        calcAreaHealth = Math.round(calcAreaHealth * 1.1);
+        autoClickCalcTracker.areaHealth = Math.round(autoClickCalcTracker.areaHealth * 1.1);
     } else if (App.game.gameState === GameConstants.GameState.gym) {
         // Get highest health gym pokemon
-        calcAreaHealth = GymRunner.gymObservable().getPokemonList().reduce((a, b) => Math.max(a, b.maxHealth), 0);
+        autoClickCalcTracker.areaHealth = GymRunner.gymObservable().getPokemonList().reduce((a, b) => Math.max(a, b.maxHealth), 0);
     } else if (App.game.gameState === GameConstants.GameState.dungeon) {
-        calcAreaHealth = DungeonRunner.dungeon.baseHealth;
+        autoClickCalcTracker.areaHealth = DungeonRunner.dungeon.baseHealth;
     } else if (App.game.gameState === GameConstants.GameState.temporaryBattle) {
         // Get highest health trainer pokemon
-        calcAreaHealth = TemporaryBattleRunner.battleObservable().getPokemonList().reduce((a, b) => Math.max(a, b.maxHealth), 0);
+        autoClickCalcTracker.areaHealth = TemporaryBattleRunner.battleObservable().getPokemonList().reduce((a, b) => Math.max(a, b.maxHealth), 0);
     } else {
-        calcAreaHealth = 0;
+        autoClickCalcTracker.areaHealth = 0;
     }
 }
 
@@ -1061,13 +1065,13 @@ if(![-1, ...Object.keys(baseLootTierChance).keys()].includes(autoDungeonLootTier
 }
 
 // Stats calculator
-calculatorEfficiencyDisplay = validateStorage('calculatorEfficiencyDisplay', 'number') ?? 0;
-if (![0, 1].includes(calculatorEfficiencyDisplay)) {
-    calculatorEfficiencyDisplay = 0;
+autoClickCalcEfficiencyDisplayMode = validateStorage('autoClickCalcEfficiencyDisplayMode', 'number') ?? 0;
+if (![0, 1].includes(autoClickCalcEfficiencyDisplayMode)) {
+    autoClickCalcEfficiencyDisplayMode = 0;
 }
-calculatorDamageDisplay = validateStorage('calculatorDamageDisplay', 'number') ?? 0;
-if (![0, 1].includes(calculatorDamageDisplay)) {
-    calculatorDamageDisplay = 0;
+autoClickCalcDamageDisplayMode = validateStorage('autoClickCalcDamageDisplayMode', 'number') ?? 0;
+if (![0, 1].includes(autoClickCalcDamageDisplayMode)) {
+    autoClickCalcDamageDisplayMode = 0;
 }
 
 // Graphics settings
