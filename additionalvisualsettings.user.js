@@ -5,7 +5,7 @@
 // @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.5
+// @version       2.6
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -203,7 +203,7 @@ function initVisualSettings() {
         const fragment = new DocumentFragment();
         const regionGyms = Object.values(GymList).filter((gym) => gym.parent?.region === player.region);
         for (const gym of regionGyms) {
-            const hasBadgeImage = !BadgeEnums[gym.badgeReward].startsWith('Elite') && BadgeEnums[gym.badgeReward] != 'None';
+            const hasBadgeImage = !(BadgeEnums[gym.badgeReward].startsWith('Elite') || BadgeEnums[gym.badgeReward] == 'None');
             const badgeImage = (hasBadgeImage ? `assets/images/badges/${BadgeEnums[gym.badgeReward]}.png` : '');
             const btn = document.createElement('button');
             btn.setAttribute('style', 'position: relative;');
@@ -215,9 +215,9 @@ function initVisualSettings() {
                 $("#gymsShortcutModal").modal("hide");
                 GymRunner.startGym(gym); 
             });
-            btn.disabled = !(gym.isUnlocked() && MapHelper.calculateTownCssClass(gym.parent.name));
+            btn.disabled = !(gym.isUnlocked() && gym.parent.isUnlocked());
             btn.innerHTML = `<div class="gyms-shortcut-leaders">
-                <img src="assets/images/gymLeaders/${gym.leaderName}.png" onerror="{ this.onerror=null; this.style.display='none'; }">
+                <img src="${gym.imagePath}" onerror="{ this.src='assets/images/npcs/specialNPCs/Mysterious Trainer.png'; }">
                 </div>
                 <div class="gyms-shortcut-badges">
                 <img src="${badgeImage}" onerror="{ this.onerror=null; this.style.display='none'; }">
