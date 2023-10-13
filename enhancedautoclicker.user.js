@@ -2,10 +2,10 @@
 // @name          [Pokeclicker] Enhanced Auto Clicker
 // @namespace     Pokeclicker Scripts
 // @author        Optimatum (Original/Credit: Ephenia, Ivan Lay, Novie53, andrew951, Kaias26, kevingrillet)
-// @description   Clicks through battles, with adjustable speed and a toggle button, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes, now both with settings to disable graphics for performance.
+// @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.3
+// @version       3.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -30,22 +30,32 @@ var autoGymState = ko.observable(false);
 var autoGymSelect;
 // Auto Dungeon
 var autoDungeonState = ko.observable(false);
-var autoDungeonMode;
+var autoDungeonEncounterMode;
+var autoDungeonChestMode;
 var autoDungeonLootTier;
+var autoDungeonAlwaysOpenRareChests;
 var autoDungeonTracker = {
     ID: 0,
     floor: null,
     floorSize: null,
-    flashDistance: null,
+    flashTier: null,
     flashCols: null,
+    flashPatterns: {'-1': [[0, 0]],
+        '0': [[-1, 0], [0, -1], [1, 0]],
+        '1': [[-1, 0], [-1, -1], [0, -1], [1, -1], [1, 0]],
+        '2': [[-2, 0], [-1, -1], [0, -2], [1, -1], [2, 0]],
+    },
     coords: null,
     bossCoords: null,
+    encounterCoords: null,
     chestCoords: null,
+    floorExplored: false,
+    floorFinished: false,
 };
 // Clicker statistics calculator
 var autoClickCalcLoop;
 var autoClickCalcEfficiencyDisplayMode;
-var autoClickCalcDamageDisplayMode
+var autoClickCalcDamageDisplayMode;
 var autoClickCalcTracker = {
     lastUpdate: null,
     playerState: -1,
@@ -65,58 +75,66 @@ function initAutoClicker() {
     const battleView = document.getElementsByClassName('battle-view')[0];
 
     var elemAC = document.createElement("table");
-    elemAC.innerHTML = `<tbody><tr><td colspan="4">
-    <button id="auto-click-start" class="btn btn-${autoClickState() ? 'success' : 'danger'} btn-block" style="font-size:8pt;">
-    Auto Click [${autoClickState() ? 'ON' : 'OFF'}]<br>
-    <div id="auto-click-info">
-    <!-- calculator display will be set by resetCalculator() -->
-    </div>
-    </button>
-    <div id="click-rate-cont">
-    <div id="auto-click-rate-info">Click Attack Rate: ${(ticksPerSecond * autoClickMultiplier).toLocaleString('en-US', {maximumFractionDigits: 2})}/s</div>
-    <input id="auto-click-rate" type="range" min="1" max="${maxClickMultiplier}" value="${autoClickMultiplier}">
-    </div>
-    </td></tr>
-    <tr style="display: flex;">
-    <td style="flex: auto;">
-    <button id="auto-dungeon-start" class="btn btn-block btn-${autoDungeonState() ? 'success' : 'danger'}" style="font-size: 8pt;">
-    Auto Dungeon [${autoDungeonState() ? 'ON' : 'OFF'}]</button>
-    </td>
-    <td style="display: flex; flex-direction: column;">
-  <select id="auto-dungeon-mode" style="flex: auto;">
-    <option value="0">F</option>
-    <option value="1">B</option>
-  </select>
-    </td>
-    <td style="display: flex; flex-direction: column;">
-    <div id="auto-dungeon-loottier" class="dropdown show">
-        <button type="button" class="text-left custom-select col-12 btn btn-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="max-height:30px; display:flex; flex:1; align-items:center;">
-            <div id="auto-dungeon-loottier-text" ${autoDungeonLootTier > -1 ? 'style="display:none;"' : ''}>None</div>
-            <img id="auto-dungeon-loottier-img" src="${autoDungeonLootTier > -1 ? `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[autoDungeonLootTier]}.png` : ''}" style="height:100%; ${autoDungeonLootTier > -1 ? '' : 'display:none;'}">
-        </button>
-        <div id="auto-dungeon-loottier-dropdown" class="border-secondary dropdown-menu col-12">
-        <div class="dropdown-item dropdown-text" value="-1">None</div>
-        ${Object.keys(baseLootTierChance).reduce((options, tier, i) => {
-            return options + `<div class="dropdown-item" value="${i}">`
-                + `<img src="assets/images/dungeons/chest-${tier}.png"></div>\n`;
-        }, '').trim()}
-        </div>
-    </div>
-    </td>
-    <td style="flex: auto;">
-    <button id="auto-gym-start" class="btn btn-block btn-${autoGymState() ? 'success' : 'danger'}" style="font-size: 8pt;">
-    Auto Gym [${autoGymState() ? 'ON' : 'OFF'}]
-    </button>
-    </td>
-    <td style="display: flex; flex-direction: column;">
-  <select id="auto-gym-select" style="flex: auto;">
-    <option value="0">#1</option>
-    <option value="1">#2</option>
-    <option value="2">#3</option>
-    <option value="3">#4</option>
-    <option value="4">#5</option>
-  </select>
-    </td>
+    elemAC.innerHTML = `<tbody>
+    <tr>
+        <td colspan="4">
+            <button id="auto-click-start" class="btn btn-${autoClickState() ? 'success' : 'danger'} btn-block" style="font-size:8pt;">
+                Auto Click [${autoClickState() ? 'ON' : 'OFF'}]<br />
+                <div id="auto-click-info">
+                    <!-- calculator display will be set by resetCalculator() -->
+                </div>
+            </button>
+            <div id="click-rate-cont">
+                <div id="auto-click-rate-info">
+                    Click Attack Rate: ${(ticksPerSecond * autoClickMultiplier).toLocaleString('en-US', {maximumFractionDigits: 2})}/s
+                </div>
+                <input id="auto-click-rate" type="range" min="1" max="${maxClickMultiplier}" value="${autoClickMultiplier}">
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td style="display: flex; column-gap: 2px;">
+            <div style="flex: auto;">
+                <button id="auto-dungeon-start" class="btn btn-block btn-${autoDungeonState() ? 'success' : 'danger'}" style="font-size: 8pt;">
+                    Auto Dungeon [${autoDungeonState() ? 'ON' : 'OFF'}]
+                </button>
+            </div>
+            <div id="auto-dungeon-encounter-mode" style="flex: initial; max-height: 30px; max-width: 30px; padding: 2px;">
+                <img title="Auto Dungeon fights mode" src="assets/images/dungeons/encounter.png" height="100%" style="${autoDungeonEncounterMode ? '' : 'filter: grayscale(100%);'}" />
+            </div>
+            <div id="auto-dungeon-chest-mode" style="flex: initial; max-height: 30px; max-width: 40px; padding: 2px;">
+                <img title="Auto Dungeon chest mode" src="assets/images/dungeons/chest.png" height="100%" style="${autoDungeonChestMode ? '' : 'filter: grayscale(100%)'}" />
+            </div>
+            <div style="flex: initial; display: flex; flex-direction: column;">
+                <div id="auto-dungeon-loottier" class="dropdown show">
+                    <button type="button" class="text-left custom-select col-12 btn btn-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="max-height:30px; display:flex; flex:1; align-items:center;">
+                        <div id="auto-dungeon-loottier-text" ${autoDungeonLootTier > -1 ? 'style="display:none;"' : ''}>None</div>
+                        <img id="auto-dungeon-loottier-img" src="${autoDungeonLootTier > -1 ? `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[autoDungeonLootTier]}.png` : ''}" style="height:100%; ${autoDungeonLootTier > -1 ? '' : 'display:none;'}">
+                    </button>
+                    <div id="auto-dungeon-loottier-dropdown" class="border-secondary dropdown-menu col-12">
+                        <div class="dropdown-item dropdown-text" value="-1">None</div>
+                        ${Object.keys(baseLootTierChance).reduce((options, tier, i) => {
+                            return options + `<div class="dropdown-item" value="${i}">`
+                                + `<img src="assets/images/dungeons/chest-${tier}.png"></div>\n`;
+                        }, '').trim()}
+                    </div>
+                </div>
+            </div>
+            <div style="flex: auto; margin-right: 2px;">
+                <button id="auto-gym-start" class="btn btn-block btn-${autoGymState() ? 'success' : 'danger'}" style="font-size: 8pt;">
+                    Auto Gym [${autoGymState() ? 'ON' : 'OFF'}]
+                </button>
+            </div>
+            <div style="flex: initial; display: flex; flex-direction: column;">
+                <select id="auto-gym-select" style="flex: auto;">
+                    <option value="0">#1</option>
+                    <option value="1">#2</option>
+                    <option value="2">#3</option>
+                    <option value="3">#4</option>
+                    <option value="4">#5</option>
+                </select>
+            </div>
+        </td>
     </tr>
     </tbody>`;
 
@@ -175,48 +193,57 @@ function initAutoClicker() {
         </td>`;
     settingsElems.push(document.createElement('tr'));
     settingsElems.at(-1).innerHTML = `<td class="p-2 col-md-8">
-        <label class="m-0" for="checkbox-gymGraphicsDisabled">Disable Auto Gym graphics</label>
+        <label class="m-0" for="checkbox-autoDungeonAlwaysOpenRareChests">Always open visible chests of set rarity and up</label>
         </td><td class="p-2 col-md-4">
-        <input id="checkbox-gymGraphicsDisabled" type="checkbox">
+        <input id="checkbox-autoDungeonAlwaysOpenRareChests" type="checkbox">
         </td>`;
     settingsElems.push(document.createElement('tr'));
     settingsElems.at(-1).innerHTML = `<td class="p-2 col-md-8">
-        <label class="m-0" for="checkbox-dungeonGraphicsDisabled">Disable Auto Dungeon graphics</label>
+        <label class="m-0" for="checkbox-autoGymGraphicsDisabled">Disable Auto Gym graphics</label>
         </td><td class="p-2 col-md-4">
-        <input id="checkbox-dungeonGraphicsDisabled" type="checkbox">
+        <input id="checkbox-autoGymGraphicsDisabled" type="checkbox">
+        </td>`;
+    settingsElems.push(document.createElement('tr'));
+    settingsElems.at(-1).innerHTML = `<td class="p-2 col-md-8">
+        <label class="m-0" for="checkbox-autoDungeonGraphicsDisabled">Disable Auto Dungeon graphics</label>
+        </td><td class="p-2 col-md-4">
+        <input id="checkbox-autoDungeonGraphicsDisabled" type="checkbox">
         </td>`;
 
     settingsBody.append(...settingsElems);
 
     document.getElementById('auto-gym-select').value = autoGymSelect;
-    document.getElementById('auto-dungeon-mode').value = autoDungeonMode;
+    //document.getElementById('auto-dungeon-encounter-mode').checked = autoDungeonEncounterMode;
+    //document.getElementById('auto-dungeon-chest-mode').checked = autoDungeonChestMode;
+    document.getElementById('checkbox-autoDungeonAlwaysOpenRareChests').checked = autoDungeonAlwaysOpenRareChests;
+    document.getElementById('checkbox-autoGymGraphicsDisabled').checked = gymGraphicsDisabled();
+    document.getElementById('checkbox-autoDungeonGraphicsDisabled').checked = dungeonGraphicsDisabled();
     document.getElementById('select-autoClickCalcEfficiencyDisplayMode').value = autoClickCalcEfficiencyDisplayMode;
     document.getElementById('select-autoClickCalcDamageDisplayMode').value = autoClickCalcDamageDisplayMode;
-    document.getElementById('checkbox-gymGraphicsDisabled').checked = gymGraphicsDisabled();
-    document.getElementById('checkbox-dungeonGraphicsDisabled').checked = dungeonGraphicsDisabled();
 
     document.getElementById('auto-click-start').addEventListener('click', () => { toggleAutoClick(); });
     document.getElementById('auto-click-rate').addEventListener('change', (event) => { changeClickMultiplier(event); });
     document.getElementById('auto-gym-start').addEventListener('click', () => { toggleAutoGym(); });
     document.getElementById('auto-gym-select').addEventListener('change', (event) => { changeSelectedGym(event); });
     document.getElementById('auto-dungeon-start').addEventListener('click', () => { toggleAutoDungeon(); });
-    document.getElementById('auto-dungeon-mode').addEventListener('change', (event) => { changeDungeonMode(event); });
-    document.getElementById('auto-dungeon-loottier').addEventListener('change', (event) => { changeDungeonLootTier(event); });
-    document.getElementById('checkbox-gymGraphicsDisabled').addEventListener('change', (event) => { toggleAutoGymGraphics(event); } );
-    document.getElementById('checkbox-dungeonGraphicsDisabled').addEventListener('change', (event) => { toggleAutoDungeonGraphics(event); } );
-    document.getElementById('select-autoClickCalcEfficiencyDisplayMode').addEventListener('change', (event) => { changeCalcEfficiencyDisplayMode(event); } );
-    document.getElementById('select-autoClickCalcDamageDisplayMode').addEventListener('change', (event) => { changeCalcDamageDisplayMode(event); } );
+    document.getElementById('auto-dungeon-encounter-mode').addEventListener('click', () => { toggleAutoDungeonEncounterMode(); });
+    document.getElementById('auto-dungeon-chest-mode').addEventListener('click', () => { toggleAutoDungeonChestMode(); });
+    document.getElementById('checkbox-autoDungeonAlwaysOpenRareChests').addEventListener('change', () => { toggleAutoDungeonAlwaysOpenRareChests(); });
+    document.getElementById('checkbox-autoGymGraphicsDisabled').addEventListener('change', () => { toggleAutoGymGraphics(); });
+    document.getElementById('checkbox-autoDungeonGraphicsDisabled').addEventListener('change', () => { toggleAutoDungeonGraphics(); });
+    document.getElementById('select-autoClickCalcEfficiencyDisplayMode').addEventListener('change', (event) => { changeCalcEfficiencyDisplayMode(event); });
+    document.getElementById('select-autoClickCalcDamageDisplayMode').addEventListener('change', (event) => { changeCalcDamageDisplayMode(event); });
 
     document.querySelectorAll('#auto-dungeon-loottier-dropdown > div').forEach((elem) => {
-        elem.addEventListener('click', () => { changeDungeonLootTier(elem.getAttribute('value')); });
+        elem.addEventListener('click', () => { changeAutoDungeonLootTier(elem.getAttribute('value')); });
     });
 
-    addGlobalStyle('#auto-click-info { display: flex;flex-direction: row;justify-content: center; }');
+    addGlobalStyle('#auto-click-info { display: flex; flex-direction: row; justify-content: center; }');
     addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
-    addGlobalStyle('#click-rate-cont { display: flex; flex-direction: column; align-items: stretch;}');
-    addGlobalStyle('#auto-dungeon-loottier-dropdown img { max-height: 30px; width: auto; }')
+    addGlobalStyle('#click-rate-cont { display: flex; flex-direction: column; align-items: stretch; }');
+    addGlobalStyle('#auto-dungeon-loottier-dropdown img { max-height: 30px; width: auto; }');
 
-    overrideGymRunner()
+    overrideGymRunner();
     overrideDungeonRunner();
 
     if (autoClickState()) {
@@ -249,7 +276,7 @@ function changeClickMultiplier(event) {
     if (Number.isInteger(multiplier) && multiplier > 0) {
         autoClickMultiplier = multiplier;
         localStorage.setItem("autoClickMultiplier", autoClickMultiplier);
-        var displayNum = (ticksPerSecond * autoClickMultiplier).toLocaleString('en-US', {maximumFractionDigits: 2})
+        var displayNum = (ticksPerSecond * autoClickMultiplier).toLocaleString('en-US', {maximumFractionDigits: 2});
         document.getElementById('auto-click-rate-info').innerText = `Click Attack Rate: ${displayNum}/s`;
         autoClicker();
     }
@@ -286,19 +313,27 @@ function toggleAutoDungeon() {
     localStorage.setItem('autoDungeonState', autoDungeonState());
     autoDungeonState() ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
     element.textContent = `Auto Dungeon [${autoDungeonState() ? 'ON' : 'OFF'}]`;
-}
-
-function changeDungeonMode(event) {
-    const val = +event.target.value;
-    // Extra value-has-changed check to avoid repeat pathfinding
-    if (val != autoDungeonMode && [0, 1].includes(val)) {
-        autoDungeonTracker.coords = null;
-        autoDungeonMode = val;
-        localStorage.setItem("autoDungeonMode", autoDungeonMode);
+    if (autoDungeonState()) {
+        // Trigger a dungeon scan
+        autoDungeonTracker.ID = -1;
     }
 }
 
-function changeDungeonLootTier(tier) {
+function toggleAutoDungeonEncounterMode() {
+    autoDungeonEncounterMode = !autoDungeonEncounterMode;
+    $('#auto-dungeon-encounter-mode img').css('filter', `${autoDungeonEncounterMode ? '' : 'grayscale(100%)' }`);
+    localStorage.setItem('autoDungeonEncounterMode', autoDungeonEncounterMode);
+    autoDungeonTracker.coords = null;
+}
+
+function toggleAutoDungeonChestMode() {
+    autoDungeonChestMode = !autoDungeonChestMode;
+    $('#auto-dungeon-chest-mode img').css('filter', `${autoDungeonChestMode ? '' : 'grayscale(100%)' }`);
+    localStorage.setItem('autoDungeonChestMode', autoDungeonChestMode);
+    autoDungeonTracker.coords = null;
+}
+
+function changeAutoDungeonLootTier(tier) {
     const val = +tier;
     if ([-1, ...Object.keys(baseLootTierChance).keys()].includes(val)) {
         autoDungeonLootTier = val;
@@ -311,18 +346,22 @@ function changeDungeonLootTier(tier) {
             document.getElementById('auto-dungeon-loottier-img').style.setProperty('display', 'none');
             document.getElementById('auto-dungeon-loottier-text').style.removeProperty('display');
         }
-        
         localStorage.setItem("autoDungeonLootTier", autoDungeonLootTier);
     }
 }
 
-function toggleAutoGymGraphics(event) {
-    gymGraphicsDisabled(event.target.checked);
+function toggleAutoDungeonAlwaysOpenRareChests() {
+    autoDungeonAlwaysOpenRareChests = !autoDungeonAlwaysOpenRareChests;
+    localStorage.setItem('autoDungeonAlwaysOpenRareChests', autoDungeonAlwaysOpenRareChests);
+}
+
+function toggleAutoGymGraphics() {
+    gymGraphicsDisabled(!gymGraphicsDisabled());
     localStorage.setItem('gymGraphicsDisabled', gymGraphicsDisabled());
 }
 
-function toggleAutoDungeonGraphics(event) {
-    dungeonGraphicsDisabled(event.target.checked);
+function toggleAutoDungeonGraphics() {
+    dungeonGraphicsDisabled(!dungeonGraphicsDisabled());
     localStorage.setItem('dungeonGraphicsDisabled', dungeonGraphicsDisabled());
 }
 
@@ -501,24 +540,27 @@ function overrideGymRunner() {
 function autoDungeon() { // TODO more thoroughly test switching between modes and enabling/disabling within a dungeon
     // Progress through dungeon
     if (App.game.gameState === GameConstants.GameState.dungeon) {
-        if (DungeonBattle.catching()) {
+        if (DungeonRunner.fighting() || DungeonBattle.catching()) {
             return;
         }
         // Scan each new dungeon floor
         if (autoDungeonTracker.ID !== DungeonRunner.dungeonID || autoDungeonTracker.floor !== DungeonRunner.map.playerPosition().floor) {
-            autoDungeonTracker.ID = DungeonRunner.dungeonID;
-            autoDungeonTracker.coords = null;
-            scan();
+            scanDungeon();
         }
         // Reset pathfinding coordinates to entrance
         if (autoDungeonTracker.coords == null) {
-            autoDungeonTracker.coords = new Point(Math.floor(autoDungeonTracker.floorSize / 2), autoDungeonTracker.floorSize - 1);
+            autoDungeonTracker.coords = new Point(Math.floor(autoDungeonTracker.floorSize / 2), autoDungeonTracker.floorSize - 1, autoDungeonTracker.floor);
         }
-        // Explore using selected mode
-        if (autoDungeonMode == 0) {
-            fullClear();
-        } else if (autoDungeonMode == 1) {
-            seekBoss();
+        const floorMap = DungeonRunner.map.board()[autoDungeonTracker.floor];
+
+        // All targets visible, fight enemies / open chests then finish floor
+        if (floorMap[autoDungeonTracker.bossCoords.y][autoDungeonTracker.bossCoords.x].isVisible &&
+            !((autoDungeonChestMode || autoDungeonEncounterMode) && !autoDungeonTracker.floorExplored)) {
+            clearDungeon();
+        }
+        // Explore dungeon to reveal boss + any target tiles
+        else {
+            exploreDungeon();
         }
     }
     // Begin dungeon
@@ -539,212 +581,216 @@ function autoDungeon() { // TODO more thoroughly test switching between modes an
 /**
  * Scans current dungeon floor for relevant locations and pathfinding data
  */
-function scan() {
-    var dungeonBoard = DungeonRunner.map.board()[DungeonRunner.map.playerPosition().floor];
+function scanDungeon() {
+    // Reset / update tracker values
+    autoDungeonTracker.ID = DungeonRunner.dungeonID;
     autoDungeonTracker.floor = DungeonRunner.map.playerPosition().floor;
     autoDungeonTracker.floorSize = DungeonRunner.map.floorSizes[DungeonRunner.map.playerPosition().floor];
+    autoDungeonTracker.encounterCoords = [];
     autoDungeonTracker.chestCoords = [];
+    autoDungeonTracker.coords = null;
+    autoDungeonTracker.targetCoords = null;
+    autoDungeonTracker.floorExplored = false;
+    autoDungeonTracker.floorFinished = false;
+
     // Scan for chest and boss coordinates
+    var dungeonBoard = DungeonRunner.map.board()[autoDungeonTracker.floor];
     for (var y = 0; y < dungeonBoard.length; y++) {
         for (var x = 0; x < dungeonBoard[y].length; x++) {
-            if (dungeonBoard[y][x].type() == GameConstants.DungeonTile.chest) {
-                let lootTier = Object.keys(baseLootTierChance).indexOf(dungeonBoard[y][x].metadata.tier);
-                autoDungeonTracker.chestCoords.push({'pos': new Point(x, y), 'tier': lootTier});
-            }
-            if (dungeonBoard[y][x].type() == GameConstants.DungeonTile.boss || dungeonBoard[y][x].type() == GameConstants.DungeonTile.ladder) {
-                autoDungeonTracker.bossCoords = new Point(x, y);
+            let tile = dungeonBoard[y][x];
+            if (tile.type() == GameConstants.DungeonTile.enemy) {
+                autoDungeonTracker.encounterCoords.push(new Point(x, y, autoDungeonTracker.floor));
+            } else if (tile.type() == GameConstants.DungeonTile.chest) {
+                let lootTier = Object.keys(baseLootTierChance).indexOf(tile.metadata.tier);
+                autoDungeonTracker.chestCoords.push({'xy': new Point(x, y, autoDungeonTracker.floor), 'tier': lootTier});
+            } else if (tile.type() == GameConstants.DungeonTile.boss || tile.type() == GameConstants.DungeonTile.ladder) {
+                autoDungeonTracker.bossCoords = new Point(x, y, autoDungeonTracker.floor);
             }
         }
     }
     // Sort chests by descending rarity
     autoDungeonTracker.chestCoords.sort((a, b) => b.tier - a.tier);
+
     // TODO find a more future-proof way to get flash distance
-    autoDungeonTracker.flashDistance = DungeonRunner.map.flash?.playerOffset[0] ?? 0;
+    autoDungeonTracker.flashTier = DungeonFlash.tiers.findIndex(tier => tier === DungeonRunner.map.flash);
     autoDungeonTracker.flashCols = [];
+    let flashRadius = DungeonRunner.map.flash?.playerOffset[0] ?? 0;
     // Calculate minimum columns to fully reveal dungeon with Flash
-    if (autoDungeonTracker.flashDistance > 0) {
-        var i = 0;
-        var j = autoDungeonTracker.floorSize - 1;
-        while (i <= j) {
-            autoDungeonTracker.flashCols.push(Math.min(i + autoDungeonTracker.flashDistance, j));
-            if (i + autoDungeonTracker.flashDistance < j - autoDungeonTracker.flashDistance) {
-                autoDungeonTracker.flashCols.push(j - autoDungeonTracker.flashDistance);
-            }
-            i += autoDungeonTracker.flashDistance * 2 + 1;
-            j -= autoDungeonTracker.flashDistance * 2 + 1;
+    if (flashRadius > 0) {
+        let cols = new Set();
+        cols.add(flashRadius);
+        let i = autoDungeonTracker.floorSize - flashRadius - 1;
+        while (i > flashRadius) {
+            cols.add(i);
+            i -= flashRadius * 2 + 1;
         }
-        autoDungeonTracker.flashCols.sort((a, b) => (a - b));
+        autoDungeonTracker.flashCols = [...cols].sort();
     }
 }
 
 /**
- * Navigate to the boss and fight it as quickly as possible, using only info visible to the player
+ * Explores dungeon to reveal tiles, skipping columns that can be efficiently revealed by Flash
  */
-function seekBoss() {
-    const dungeonBoard = DungeonRunner.map.board();
+function exploreDungeon() {
+    const dungeonBoard = DungeonRunner.map.board()[autoDungeonTracker.floor];
     var hasMoved = false;
-    // Seek the boss
     while (!hasMoved) {
-        // Boss tile visible
-        if (dungeonBoard[autoDungeonTracker.floor][autoDungeonTracker.bossCoords.y][autoDungeonTracker.bossCoords.x].isVisible) {
-            // Boss tile unlocked
-            if (dungeonBoard[autoDungeonTracker.floor][autoDungeonTracker.bossCoords.y][autoDungeonTracker.bossCoords.x].isVisited) {
-                let chestIndex;
-                if (autoDungeonLootTier > -1) {
-                    chestIndex = autoDungeonTracker.chestCoords.findIndex((chest) => 'visibleFrom' in chest && chest.tier >= autoDungeonLootTier);
-                } else {
-                    chestIndex = -1;
-                }
-                // Open chests first
-                if (chestIndex > -1) {
-                    let chest = autoDungeonTracker.chestCoords[chestIndex];
-                    // Open chest
-                    if (dungeonBoard[autoDungeonTracker.floor][chest.pos.y][chest.pos.x].isVisited) {
-                        // Remove from list
-                        autoDungeonTracker.chestCoords.splice(chestIndex, 1);
-                        DungeonRunner.map.moveToCoordinates(chest.pos.x, chest.pos.y);
-                        DungeonRunner.openChest();
-                        hasMoved = true;
-                    } 
-                    // Proceed to chest
-                    else {
-                        if (!('movingTowards' in chest)) {
-                            autoDungeonTracker.coords.x = chest.visibleFrom.x;
-                            autoDungeonTracker.coords.y = chest.visibleFrom.y;
-                            chest.movingTowards = true;
-                        }
-                        if (autoDungeonTracker.coords.y != chest.pos.y) {
-                            autoDungeonTracker.coords.y += (autoDungeonTracker.coords.y < chest.pos.y ? 1 : -1);
-                        }
-                        else if (autoDungeonTracker.coords.x != chest.pos.x) {
-                            autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x < chest.pos.x ? 1 : -1);
-                        }
-                    }
-                } 
-                // Start boss / move floors
-                else {
-                    DungeonRunner.map.moveToCoordinates(autoDungeonTracker.bossCoords.x, autoDungeonTracker.bossCoords.y);
-                    if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
-                        DungeonRunner.startBossFight();
-                    } else if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.ladder) {
-                        DungeonRunner.nextFloor();
-                    } else {
-                        // Just in case
-                        console.warn('Auto Dungeon failed to recognize boss tile!');
-                        toggleAutoDungeon();
-                    }
-                    return;
-                }
+        // End of column, move to start of new column
+        if (autoDungeonTracker.coords.y == 0) {
+            autoDungeonTracker.coords.y = autoDungeonTracker.floorSize - 1;
+            if (autoDungeonTracker.coords.x >= autoDungeonTracker.floorSize - 1 || autoDungeonTracker.coords.x === autoDungeonTracker.flashCols.at(-1)) {
+                // Done with this side, move to other side of the entrance
+                autoDungeonTracker.coords.x = Math.floor(autoDungeonTracker.floorSize / 2) - 1;
+            } else if (autoDungeonTracker.coords.x == 0 || autoDungeonTracker.coords.x === autoDungeonTracker.flashCols[0]) {
+                // Done exploring, clearDungeon() will take over from here
+                autoDungeonTracker.floorExplored = true;
+                return;
+            } else {
+                // Move away from the entrance
+                autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x >= Math.floor(autoDungeonTracker.floorSize / 2) ? 1 : -1);
             }
-            // Boss visible, move towards it
-            else if (autoDungeonTracker.coords.y != autoDungeonTracker.bossCoords.y) {
-                autoDungeonTracker.coords.y += (autoDungeonTracker.coords.y < autoDungeonTracker.bossCoords.y ? 1 : -1);
-            }
-            else if (autoDungeonTracker.coords.x != autoDungeonTracker.bossCoords.x) {
-                autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x < autoDungeonTracker.bossCoords.x ? 1 : -1);
-            }
+        // Dungeon has Flash unlocked, skip columns not in optimal flash pathing
+        } else if (autoDungeonTracker.flashTier > -1
+            && autoDungeonTracker.coords.y == (autoDungeonTracker.floorSize - 1)
+            && !autoDungeonTracker.flashCols.includes(autoDungeonTracker.coords.x)) {
+            // Move one column further from the entrance
+            autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x >= Math.floor(autoDungeonTracker.floorSize / 2) ? 1 : -1);
         }
-        // Boss tile not visible, cover ground
+        // Move through current column
         else {
-            // End of column, move to new column
-            if (autoDungeonTracker.coords.y == 0) {
-                autoDungeonTracker.coords.y = autoDungeonTracker.floorSize - 1;
-                if (autoDungeonTracker.coords.x >= (autoDungeonTracker.floorSize - 1) - autoDungeonTracker.flashDistance) {
-                    // Done with this side, move to other side of the entrance
-                    autoDungeonTracker.coords.x = Math.floor(autoDungeonTracker.floorSize / 2) - 1;
-                } else {
-                    // Move away from the entrance
-                    autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x >= Math.floor(autoDungeonTracker.floorSize / 2) ? 1 : -1);
-                }
-            // Dungeon has Flash unlocked
-            } else if (autoDungeonTracker.coords.y == (autoDungeonTracker.floorSize - 1) && autoDungeonTracker.flashDistance > 0) {
-                // Skip columns not in optimal flash pathing
-                if (autoDungeonTracker.flashCols.includes(autoDungeonTracker.coords.x)) {
-                    autoDungeonTracker.coords.y -= 1;
-                } else {
-                    // Move away from the entrance
-                    autoDungeonTracker.coords.x += (autoDungeonTracker.coords.x >= Math.floor(autoDungeonTracker.floorSize / 2) ? 1 : -1);
-                }
-            }
-            // Move through column
-            else {
-                autoDungeonTracker.coords.y -= 1;
-            }
+            autoDungeonTracker.coords.y -= 1;
         }
         // One move per tick to look more natural
-        if (!dungeonBoard[autoDungeonTracker.floor][autoDungeonTracker.coords.y][autoDungeonTracker.coords.x].isVisited) {
+        if (!dungeonBoard[autoDungeonTracker.coords.y][autoDungeonTracker.coords.x].isVisited) {
             DungeonRunner.map.moveToCoordinates(autoDungeonTracker.coords.x, autoDungeonTracker.coords.y);
             hasMoved = true;
         }
     }
-    // Mark nearby chests
-    autoDungeonTracker.chestCoords.filter((chest) => {
-        return !('visibleFrom' in chest) && dungeonBoard[autoDungeonTracker.floor][chest.pos.y][chest.pos.x].isVisible;
-    }).forEach((chest) => {
-        chest.visibleFrom = new Point(autoDungeonTracker.coords.x, autoDungeonTracker.coords.y);
-    });
 }
 
 /**
- * Fully explores dungeon, opening all chests at end of each floor
+ * Clears dungeon, visiting all desired tile types. Assumes dungeon has already been explored to reveal desired tiles.
  */
-function fullClear() {
-    // Fully explore floor
-    while (autoDungeonTracker.coords !== -1) {
-        // Handles the segment to the right of the entrance
-        if ((autoDungeonTracker.coords.y == autoDungeonTracker.floorSize - 1) && autoDungeonTracker.coords.x >= Math.floor(autoDungeonTracker.floorSize / 2)) {
-            if (autoDungeonTracker.coords.x == autoDungeonTracker.floorSize - 1) {
-                autoDungeonTracker.coords.x = Math.floor(autoDungeonTracker.floorSize / 2) - 1;
-            } else {
-                autoDungeonTracker.coords.x += 1;
-            }
+function clearDungeon() {
+    const dungeonBoard = DungeonRunner.map.board()[autoDungeonTracker.floor];
+    var hasMoved = false;
+    var stuckInLoopCounter = 0;
+    while (!hasMoved) {
+        // Choose a tile to move towards
+        if (!autoDungeonTracker.targetCoords) {
+            autoDungeonTracker.targetCoords = chooseDungeonTargetTile();
         }
-        // Move in one direction until reaching the wall
-        else {
-            var direction = (-1) ** (autoDungeonTracker.floorSize - autoDungeonTracker.coords.y);
-            // End of row, move up one
-            if ((autoDungeonTracker.coords.x == (autoDungeonTracker.floorSize - 1) && direction > 0) ||
-                (autoDungeonTracker.coords.x == 0 && direction < 0)) {
-                if (autoDungeonTracker.coords.y == 0) {
-                    // Floor fully explored
-                    autoDungeonTracker.coords = -1;
-                    break;
-                } else {
-                    autoDungeonTracker.coords.y -= 1;
-                }
-            } else {
-                autoDungeonTracker.coords.x += direction;
-            }
+        autoDungeonTracker.coords = pathfindTowardDungeonTarget();
+        if (!autoDungeonTracker.coords) {
+            console.warn(`Auto Dungeon could not find path to target tile \'${GameConstants.DungeonTile[dungeonBoard[autoDungeonTracker.targetCoords.y][autoDungeonTracker.targetCoords.x].type()]}\' (${autoDungeonTracker.targetCoords.x}, ${autoDungeonTracker.targetCoords.y})`);
+            toggleAutoDungeon();
+            return;
         }
         // One move per tick to look more natural
-        if (!DungeonRunner.map.board()[autoDungeonTracker.floor][autoDungeonTracker.coords.y][autoDungeonTracker.coords.x].isVisited) {
+        if (!(dungeonBoard[autoDungeonTracker.coords.y][autoDungeonTracker.coords.x] === DungeonRunner.map.currentTile())) {
             DungeonRunner.map.moveToCoordinates(autoDungeonTracker.coords.x, autoDungeonTracker.coords.y);
-            return;
+            hasMoved = true;
         }
-        // Just in case changed to allow multiple moves per tick
-        else if (DungeonRunner.fighting() || DungeonBattle.catching()) {
-            return;
+        // Target tile reached
+        if (autoDungeonTracker.coords.x === autoDungeonTracker.targetCoords.x && autoDungeonTracker.coords.y === autoDungeonTracker.targetCoords.y) {
+            autoDungeonTracker.targetCoords = null;
+            hasMoved = true;
+            // Take corresponding action
+            const tileType = DungeonRunner.map.currentTile().type();
+            if (tileType === GameConstants.DungeonTile.enemy) {
+                // Do nothing, fights begin automatically
+            } else if (tileType === GameConstants.DungeonTile.chest) {
+                DungeonRunner.openChest();
+            } else if (tileType === GameConstants.DungeonTile.boss) {
+                if (autoDungeonTracker.floorFinished) {
+                    DungeonRunner.startBossFight();
+                }
+            } else if (tileType === GameConstants.DungeonTile.ladder) {
+                if (autoDungeonTracker.floorFinished) {
+                    DungeonRunner.nextFloor();
+                }
+            } else {
+                console.warn(`Auto Dungeon targeted tile type ${GameConstants.DungeonTile[tileType]}`);
+            }
         }
-    }
-    // Floor explored, open chests
-    if (autoDungeonTracker.chestCoords.length > 0 && autoDungeonTracker.chestCoords[0].tier >= autoDungeonLootTier) {
-        var chestPos = autoDungeonTracker.chestCoords.shift().pos;
-        DungeonRunner.map.moveToCoordinates(chestPos.x, chestPos.y);
-        DungeonRunner.openChest();
-    }
-    // Boss / ladder time
-    else {
-        DungeonRunner.map.moveToCoordinates(autoDungeonTracker.bossCoords.x, autoDungeonTracker.bossCoords.y);
-        if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.boss) {
-            DungeonRunner.startBossFight();
-        } else if (DungeonRunner.map.currentTile().type() == GameConstants.DungeonTile.ladder) {
-            DungeonRunner.nextFloor();
+        stuckInLoopCounter++;
+        if (stuckInLoopCounter > 5) {
+            console.warn(`Auto Dungeon got stuck in a loop while moving to tile \'${GameConstants.DungeonTile[dungeonBoard[autoDungeonTracker.targetCoords.y][autoDungeonTracker.targetCoords.x].type()]}\' (${autoDungeonTracker.targetCoords.x}, ${autoDungeonTracker.targetCoords.y})`);
+            toggleAutoDungeon();
+            return;
         }
     }
 }
 
+function chooseDungeonTargetTile() {
+    const dungeonBoard = DungeonRunner.map.board()[autoDungeonTracker.floor];
+    let target = null;
+    while (!target) {
+        // Boss tile not yet unlocked
+        if (!dungeonBoard[autoDungeonTracker.bossCoords.y][autoDungeonTracker.bossCoords.x].isVisited) {
+            target = autoDungeonTracker.bossCoords;
+        }
+        // Encounters to fight
+        else if (autoDungeonEncounterMode && autoDungeonTracker.encounterCoords.length) {
+            // Skip already-fought encounters
+            let encounter = autoDungeonTracker.encounterCoords.pop();
+            if (dungeonBoard[encounter.y][encounter.x].type() == GameConstants.DungeonTile.enemy) {
+                target = encounter;
+            } else {
+                continue;
+            }
+        }
+        // Chests to open
+        else if (autoDungeonChestMode && autoDungeonTracker.chestCoords.length && autoDungeonTracker.chestCoords[0].tier >= autoDungeonLootTier) {
+            target = autoDungeonTracker.chestCoords.shift().xy;
+        }
+        // Open visible chests of sufficient rarity
+        else if (autoDungeonAlwaysOpenRareChests && autoDungeonTracker.chestCoords.some((c) => c.tier >= autoDungeonLootTier && dungeonBoard[c.xy.y][c.xy.x].isVisible)) {
+            let index = autoDungeonTracker.chestCoords.findIndex((c) => c.tier >= autoDungeonLootTier && dungeonBoard[c.xy.y][c.xy.x].isVisible);
+            target = autoDungeonTracker.chestCoords[index].xy;
+            autoDungeonTracker.chestCoords.splice(index, 1);
+        }
+        // Time to fight the boss
+        else {
+            target = autoDungeonTracker.bossCoords;
+            autoDungeonTracker.floorFinished = true;
+        }
+    }
+    return target;
+}
+
+/** 
+ * Find next tile on the shortest path towards target via breadth-first search
+ */
+function pathfindTowardDungeonTarget() {
+    const target = autoDungeonTracker.targetCoords;
+    let result = null;
+    if (!target) {
+        return result;
+    }
+    const queue = [target];
+    const visited = new Set(`${target.x}-${target.y}`);
+    while (queue.length) {
+        const p = queue.shift();
+        if (DungeonRunner.map.hasAccessToTile(p)) {
+            result = p;
+            break;
+        }
+        const adjTiles = [[p.x - 1, p.y], [p.x + 1, p.y], [p.x, p.y - 1], [p.x, p.y + 1]];
+        for (let [nx, ny] of adjTiles) {
+            // Enqueue valid tiles not yet considered
+            let xy = `${nx}-${ny}`;
+            if (0 <= nx && nx < autoDungeonTracker.floorSize && 0 <= ny && ny < autoDungeonTracker.floorSize && !visited.has(xy)) {
+                queue.push(new Point(nx, ny, target.floor));
+                visited.add(xy);
+            }
+        }
+    }
+    return result;
+}
+
 /**
- * Override DungeonRunner built-in functions:
+ * Override DungeonRunner built-in functions*:
  * -Add dungeon ID tracking to initializeDungeon() for easier mapping
  * -Add auto dungeon equivalent of dungeonWon() to save on performance by restarting without loading town
  */
@@ -852,17 +898,17 @@ function calcClickStats() {
                     // display damage mode
                     var reqDamage = autoClickCalcTracker.areaHealth;
                     elem.innerHTML = reqDamage.toLocaleString('en-US');
-                    elem.style.color = (clickDamage >= reqDamage ? 'greenyellow' : 'darkred');
+                    elem.style.color = (clickDamage * autoClickMultiplier >= reqDamage ? 'greenyellow' : 'darkred');
                 } else {
                     // display clicks mode
                     var reqClicks = Math.max((autoClickCalcTracker.areaHealth / clickDamage), 1);
                     reqClicks = Math.ceil(reqClicks * 10) / 10; // round up to one decimal point
                     elem.innerHTML = reqClicks.toLocaleString('en-US', {maximumFractionDigits: 1});
-                    elem.style.color = (reqClicks == 1 ? 'greenyellow' : 'darkred');
+                    elem.style.color = (reqClicks <= autoClickMultiplier ? 'greenyellow' : 'darkred');
                 }
 
                 // Enemies per second
-                elem = document.getElementById('enemies-per-second')
+                elem = document.getElementById('enemies-per-second');
                 var avgEnemies = (App.game.statistics.totalPokemonDefeated() - autoClickCalcTracker.enemies.at(-1)) / autoClickCalcTracker.enemies.length;
                 avgEnemies = avgEnemies / actualElapsed;
                 elem.innerHTML = avgEnemies.toLocaleString('en-US', {maximumFractionDigits: 1});
@@ -956,9 +1002,11 @@ function calculateAreaHealth() {
     // Calculate area max hp
     if (App.game.gameState === GameConstants.GameState.fighting) {
         autoClickCalcTracker.areaHealth = PokemonFactory.routeHealth(player.route(), player.region);
-        // Adjust for route health variation
-        // TODO actually calculate the route's maximum health variation
-        autoClickCalcTracker.areaHealth = Math.round(autoClickCalcTracker.areaHealth * 1.1);
+        // Adjust for route health variation (adapted from PokemonFactory.generateWildPokemon)
+        const pokeHP = [...new Set(Object.values(Routes.getRoute(player.region, player.route()).pokemon).flat().flatMap(p => p.pokemon ?? p))].map(p => pokemonMap[p].base.hitpoints);
+        const averageHP = pokeHP.reduce((s, a) => s + a, 0) / pokeHP.length;
+        const highestHP = pokeHP.reduce((m, a) => Math.max(m, a), 0);
+        autoClickCalcTracker.areaHealth = Math.round(autoClickCalcTracker.areaHealth * (0.9 + (highestHP / averageHP) / 10));
     } else if (App.game.gameState === GameConstants.GameState.gym) {
         // Get highest health gym pokemon
         autoClickCalcTracker.areaHealth = GymRunner.gymObservable().getPokemonList().reduce((a, b) => Math.max(a, b.maxHealth), 0);
@@ -1002,7 +1050,7 @@ function addGraphicsBindings() {
         var elem = gymContainer.querySelector(query);
         if (elem) {
             elem.before(new Comment("ko ifnot: GymRunner.disableAutoGymGraphics()"));
-            elem.after(new Comment("/ko"))
+            elem.after(new Comment("/ko"));
         }
     });
     // Always hide stop button during autoGym, even with graphics enabled
@@ -1055,10 +1103,9 @@ if (![0, 1, 2, 3, 4].includes(autoGymSelect)) {
 
 // Auto Dungeon
 autoDungeonState(validateStorage('autoDungeonState', 'boolean') ?? false);
-autoDungeonMode = validateStorage('autoDungeonMode', 'number') ?? 0;
-if (![0, 1].includes(autoDungeonMode)) {
-    autoDungeonMode = 0;
-}
+autoDungeonEncounterMode = validateStorage('autoDungeonEncounterMode', 'boolean') ?? false;
+autoDungeonChestMode = validateStorage('autoDungeonEncounterMode', 'boolean') ?? false;
+autoDungeonAlwaysOpenRareChests = validateStorage('autoDungeonAlwaysOpenRareChests', 'boolean') ?? false;
 autoDungeonLootTier = validateStorage('autoDungeonLootTier', 'number') ?? -1;
 if(![-1, ...Object.keys(baseLootTierChance).keys()].includes(autoDungeonLootTier)) {
     autoDungeonLootTier = -1;
