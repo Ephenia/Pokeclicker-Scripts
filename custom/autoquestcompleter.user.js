@@ -65,37 +65,9 @@ function initAutoQuest() {
         questResetBtn.textContent = `${questResetTimer} minute Reset Timer [${questResetState ? 'ON' : 'OFF'}]`;
         questResetBtn.addEventListener('click', () => { toggleQuestResetState(); });
         document.getElementById('questDisplayContainer').appendChild(questResetBtn);
-        
-        // Settings tab options
-        var scriptSettings = document.getElementById('settings-scripts');
-        // Create scripts settings tab if it doesn't exist yet
-        if (!scriptSettings) {
-            // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
-            document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
-            // Create and attach script settings tab link
-            const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
-            let li = document.createElement('li');
-            li.classList.add('nav-item');
-            li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
-            settingTabs.appendChild(li);
-            // Create and attach script settings tab contents
-            const tabContent = document.querySelector('#settingsModal .tab-content');
-            scriptSettings = document.createElement('div');
-            scriptSettings.classList.add('tab-pane');
-            scriptSettings.setAttribute('id', 'settings-scripts');
-            tabContent.appendChild(scriptSettings);
-        }
 
         // Add settings to scripts tab
-        let table = document.createElement('table');
-        table.classList.add('table', 'table-striped', 'table-hover', 'm-0');
-        scriptSettings.prepend(table);
-        let header = document.createElement('thead');
-        header.innerHTML = '<tr><th colspan="2">Auto Quest Completer</th></tr>';
-        table.appendChild(header);
-        let settingsBody = document.createElement('tbody');
-        settingsBody.setAttribute('id', 'settings-scripts-autoquestcompleter');
-        table.appendChild(settingsBody);
+        const settingsBody = createScriptSettingsContainer('Auto Quest Completer');
         let maxQuestsElem = document.createElement('tr');
         maxQuestsElem.innerHTML = `<td class="p-2 col-md-8">Max quest slots</td><td class="p-0 col-md-4"><select id="select-autoQuestMaxQuests" class="form-control">` +
             [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => `<option value="${i}">${i}</option>`).join('\n') + `</select></td>`;
@@ -296,7 +268,57 @@ function loadSetting(key, defaultVal) {
     return val;
 }
 
-function loadScript(){
+/**
+ * Creates container for scripts settings in the settings menu, adding scripts tab if it doesn't exist yet
+ */
+function createScriptSettingsContainer(name) {
+    const settingsID = name.replaceAll(/s/g, '').toLowerCase();
+    var settingsContainer = document.getElementById('settings-scripts-container');
+
+    // Create scripts settings tab if it doesn't exist yet
+    if (!settingsContainer) {
+        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
+        document.querySelector('#settingsModal div').style.maxWidth = '850px';
+        // Create and attach script settings tab link
+        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
+        const li = document.createElement('li');
+        li.classList.add('nav-item');
+        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
+        settingTabs.appendChild(li);
+        // Create and attach script settings tab contents
+        const tabContent = document.querySelector('#settingsModal .tab-content');
+        scriptSettings = document.createElement('div');
+        scriptSettings.classList.add('tab-pane');
+        scriptSettings.setAttribute('id', 'settings-scripts');
+        tabContent.appendChild(scriptSettings);
+        settingsContainer = document.createElement('div');
+        settingsContainer.setAttribute('id', 'settings-scripts-container');
+        scriptSettings.appendChild(settingsContainer);
+    }
+
+    // Create settings container
+    const settingsTable = document.createElement('table');
+    settingsTable.classList.add('table', 'table-striped', 'table-hover', 'm-0');
+    const header = document.createElement('thead');
+    header.innerHTML = `<tr><th colspan="2">${name}</th></tr>`;
+    settingsTable.appendChild(header);
+    const settingsBody = document.createElement('tbody');
+    settingsBody.setAttribute('id', `settings-scripts-${settingsID}`);
+    settingsTable.appendChild(settingsBody);
+
+    // Insert settings container in alphabetical order
+    let settingsList = Array.from(settingsContainer.children);
+    let insertBefore = settingsList.find(elem => elem.querySelector('tbody').id > `settings-scripts-${settingsID}`);
+    if (insertBefore) {
+        insertBefore.before(settingsTable);
+    } else {
+        settingsContainer.appendChild(settingsTable);
+    }
+
+    return settingsBody;
+}
+
+function loadScript() {
     const oldInit = Preload.hideSplashScreen;
     var hasInitialized = false;
 

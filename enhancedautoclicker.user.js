@@ -82,6 +82,10 @@ class EnhancedAutoClicker {
     static initOverrides() {
         // Add data bindings immediately, before the game initializes Knockout
         this.addGraphicsBindings();
+
+        // Override static class methods
+        this.overrideGymRunner();
+        this.overrideDungeonRunner();
     }
 
     static initAutoClicker() {
@@ -151,46 +155,17 @@ class EnhancedAutoClicker {
         battleView.before(elemAC);
         this.resetCalculator(); // initializes calculator display
 
-        var scriptSettings = document.getElementById('settings-scripts');
-        // Create scripts settings tab if it doesn't exist yet
-        if (!scriptSettings) {
-            // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
-            document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
-            // Create and attach script settings tab link
-            const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
-            let li = document.createElement('li');
-            li.classList.add('nav-item');
-            li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
-            settingTabs.appendChild(li);
-            // Create and attach script settings tab contents
-            const tabContent = document.querySelector('#settingsModal .tab-content');
-            scriptSettings = document.createElement('div');
-            scriptSettings.classList.add('tab-pane');
-            scriptSettings.setAttribute('id', 'settings-scripts');
-            tabContent.appendChild(scriptSettings);
-        }
+        const settingsBody = createScriptSettingsContainer('Enhanced Auto Clicker');
+        const settingsToAdd = [];
 
-        // Add settings to scripts tab
-
-        let table = document.createElement('table');
-        table.classList.add('table', 'table-striped', 'table-hover', 'm-0');
-        scriptSettings.prepend(table);
-        let header = document.createElement('thead');
-        header.innerHTML = '<tr><th colspan="2">Enhanced Auto Clicker</th></tr>';
-        table.appendChild(header);
-        let settingsBody = document.createElement('tbody');
-        settingsBody.setAttribute('id', 'settings-scripts-enhancedautoclicker');
-        table.appendChild(settingsBody);
-
-        var settingsElems = [];
         // Dropdowns
         let dropdownsToAdd = [
             ['autoClickCalcEfficiencyDisplayMode', 'Auto Clicker efficiency display mode', this.autoClickCalcEfficiencyDisplayMode, [[0, 'Percentage'], [1, 'Ticks/s']]],
             ['autoClickCalcDamageDisplayMode', 'Auto Clicker damage display mode', this.autoClickCalcDamageDisplayMode, [[0, 'Click Attacks'], [1, 'Damage']]]
         ];
         dropdownsToAdd.forEach(([name, text, value, options]) => {
-            settingsElems.push(document.createElement('tr'));
-            settingsElems.at(-1).innerHTML = `<td class="p-2 col-md-8">
+            settingsToAdd.push(document.createElement('tr'));
+            settingsToAdd.at(-1).innerHTML = `<td class="p-2 col-md-8">
                 ${text}
                 </td>
                 <td class="p-0 col-md-4">
@@ -206,15 +181,15 @@ class EnhancedAutoClicker {
             ['autoDungeonGraphicsDisabled', 'Disable Auto Dungeon graphics', this.dungeonGraphicsDisabled()]
         ];
         checkboxesToAdd.forEach(([name, text, isChecked]) => {
-            settingsElems.push(document.createElement('tr'));
-            settingsElems.at(-1).innerHTML = `<td class="p-2 col-md-8">
+            settingsToAdd.push(document.createElement('tr'));
+            settingsToAdd.at(-1).innerHTML = `<td class="p-2 col-md-8">
                 <label class="m-0" for="checkbox-${name}">${text}</label>
                 </td><td class="p-2 col-md-4">
                 <input id="checkbox-${name}" type="checkbox" checked="${isChecked}">
                 </td>`;
         });
 
-        settingsBody.append(...settingsElems);
+        settingsBody.append(...settingsToAdd);
 
         document.getElementById('auto-gym-select').value = this.autoGymSelect;
 
@@ -239,9 +214,6 @@ class EnhancedAutoClicker {
         addGlobalStyle('#auto-click-info > div { width: 33.3%; }');
         addGlobalStyle('#click-rate-cont { display: flex; flex-direction: column; align-items: stretch; }');
         addGlobalStyle('#auto-dungeon-loottier-dropdown img { max-height: 30px; width: auto; }');
-
-        this.overrideGymRunner();
-        this.overrideDungeonRunner();
 
         if (this.autoClickState()) {
             this.toggleAutoClickerLoop();
@@ -1051,8 +1023,8 @@ class EnhancedAutoClicker {
 
 /**
  * Loads variable from localStorage
- * -Returns value from localStorage if it exists and is correct type
- * -Otherwise returns null
+ * -Returns value from localStorage if it exists, is correct type, and matches additional validation if provided
+ * -Otherwise returns default value
  */
 function validateStorage(key, defaultVal, allowed) {
     try {
@@ -1073,6 +1045,56 @@ function validateStorage(key, defaultVal, allowed) {
     } catch {
         return defaultVal;
     }
+}
+
+/**
+ * Creates container for scripts settings in the settings menu, adding scripts tab if it doesn't exist yet
+ */
+function createScriptSettingsContainer(name) {
+    const settingsID = name.replaceAll(/s/g, '').toLowerCase();
+    var settingsContainer = document.getElementById('settings-scripts-container');
+
+    // Create scripts settings tab if it doesn't exist yet
+    if (!settingsContainer) {
+        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
+        document.querySelector('#settingsModal div').style.maxWidth = '850px';
+        // Create and attach script settings tab link
+        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
+        const li = document.createElement('li');
+        li.classList.add('nav-item');
+        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
+        settingTabs.appendChild(li);
+        // Create and attach script settings tab contents
+        const tabContent = document.querySelector('#settingsModal .tab-content');
+        scriptSettings = document.createElement('div');
+        scriptSettings.classList.add('tab-pane');
+        scriptSettings.setAttribute('id', 'settings-scripts');
+        tabContent.appendChild(scriptSettings);
+        settingsContainer = document.createElement('div');
+        settingsContainer.setAttribute('id', 'settings-scripts-container');
+        scriptSettings.appendChild(settingsContainer);
+    }
+
+    // Create settings container
+    const settingsTable = document.createElement('table');
+    settingsTable.classList.add('table', 'table-striped', 'table-hover', 'm-0');
+    const header = document.createElement('thead');
+    header.innerHTML = `<tr><th colspan="2">${name}</th></tr>`;
+    settingsTable.appendChild(header);
+    const settingsBody = document.createElement('tbody');
+    settingsBody.setAttribute('id', `settings-scripts-${settingsID}`);
+    settingsTable.appendChild(settingsBody);
+
+    // Insert settings container in alphabetical order
+    let settingsList = Array.from(settingsContainer.children);
+    let insertBefore = settingsList.find(elem => elem.querySelector('tbody').id > `settings-scripts-${settingsID}`);
+    if (insertBefore) {
+        insertBefore.before(settingsTable);
+    } else {
+        settingsContainer.appendChild(settingsTable);
+    }
+
+    return settingsBody;
 }
 
 function addGlobalStyle(css) {

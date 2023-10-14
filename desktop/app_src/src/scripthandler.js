@@ -110,13 +110,18 @@ class DesktopScriptHandler {
         const tabContent = document.querySelector('#settingsModal .tab-content');
 
         // Create and append the content for the script tab to Settings
-        let div = document.createElement('div');
-        div.classList.add('tab-pane');
-        div.setAttribute('id', 'settings-scripts');
+        const scriptSettings = document.createElement('div');
+        scriptSettings.classList.add('tab-pane');
+        scriptSettings.setAttribute('id', 'settings-scripts');
+        tabContent.appendChild(scriptSettings);
+
+        let settingsContainer = document.createElement('div');
+        settingsContainer.setAttribute('id', 'settings-scripts-container');
+        scriptSettings.appendChild(settingsContainer);
 
         let table = document.createElement('table');
         table.classList.add('table', 'table-striped', 'table-hover', 'm-0');
-        div.appendChild(table);
+        scriptSettings.appendChild(table);
 
         let tableSections = [['desktopSettings', 'Pokéclicker Scripts desktop settings'],
             ['enableScriptsEphenia', 'Downloaded scripts'],
@@ -130,8 +135,6 @@ class DesktopScriptHandler {
             elem.setAttribute('id', 'settings-scripts-' + id);
             table.appendChild(elem);
         });
-
-        tabContent.appendChild(div);
 
         // Add info about restarting to the top
         let info = document.createElement('tr');

@@ -44,35 +44,8 @@ function initVisualSettings() {
         getMenu.prepend(quickElem);
     });
 
-    var scriptSettings = document.getElementById('settings-scripts');
-    // Create scripts settings tab if it doesn't exist yet
-    if (!scriptSettings) {
-        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
-        document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
-        // Create and attach script settings tab link
-        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
-        let li = document.createElement('li');
-        li.classList.add('nav-item');
-        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
-        settingTabs.appendChild(li);
-        // Create and attach script settings tab contents
-        const tabContent = document.querySelector('#settingsModal .tab-content');
-        scriptSettings = document.createElement('div');
-        scriptSettings.classList.add('tab-pane');
-        scriptSettings.setAttribute('id', 'settings-scripts');
-        tabContent.appendChild(scriptSettings);
-    }
-
     // Add AVS settings options to scripts tab
-    let table = document.createElement('table');
-    table.classList.add('table', 'table-striped', 'table-hover', 'm-0');
-    scriptSettings.prepend(table);
-    let header = document.createElement('thead');
-    header.innerHTML = '<tr><th colspan="2">Additional Visual Settings</th></tr>';
-    table.appendChild(header);
-    let settingsBody = document.createElement('tbody');
-    settingsBody.setAttribute('id', 'settings-scripts-additionalvisualsettings');
-    table.appendChild(settingsBody);
+    const settingsBody = createScriptSettingsContainer('Additional Visual Settings');
     let settingsToAdd = [['poke-name', 'Show wild Pokémon Name'],
         ['poke-defeat', 'Show wild Pokémon Defeated'],
         ['poke-image', 'Show wild Pokémon Image'],
@@ -375,6 +348,56 @@ function loadSetting(key, defaultVal) {
         localStorage.setItem(key, defaultVal);
     }
     return val;
+}
+
+/**
+ * Creates container for scripts settings in the settings menu, adding scripts tab if it doesn't exist yet
+ */
+function createScriptSettingsContainer(name) {
+    const settingsID = name.replaceAll(/s/g, '').toLowerCase();
+    var settingsContainer = document.getElementById('settings-scripts-container');
+
+    // Create scripts settings tab if it doesn't exist yet
+    if (!settingsContainer) {
+        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
+        document.querySelector('#settingsModal div').style.maxWidth = '850px';
+        // Create and attach script settings tab link
+        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
+        const li = document.createElement('li');
+        li.classList.add('nav-item');
+        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
+        settingTabs.appendChild(li);
+        // Create and attach script settings tab contents
+        const tabContent = document.querySelector('#settingsModal .tab-content');
+        scriptSettings = document.createElement('div');
+        scriptSettings.classList.add('tab-pane');
+        scriptSettings.setAttribute('id', 'settings-scripts');
+        tabContent.appendChild(scriptSettings);
+        settingsContainer = document.createElement('div');
+        settingsContainer.setAttribute('id', 'settings-scripts-container');
+        scriptSettings.appendChild(settingsContainer);
+    }
+
+    // Create settings container
+    const settingsTable = document.createElement('table');
+    settingsTable.classList.add('table', 'table-striped', 'table-hover', 'm-0');
+    const header = document.createElement('thead');
+    header.innerHTML = `<tr><th colspan="2">${name}</th></tr>`;
+    settingsTable.appendChild(header);
+    const settingsBody = document.createElement('tbody');
+    settingsBody.setAttribute('id', `settings-scripts-${settingsID}`);
+    settingsTable.appendChild(settingsBody);
+
+    // Insert settings container in alphabetical order
+    let settingsList = Array.from(settingsContainer.children);
+    let insertBefore = settingsList.find(elem => elem.querySelector('tbody').id > `settings-scripts-${settingsID}`);
+    if (insertBefore) {
+        insertBefore.before(settingsTable);
+    } else {
+        settingsContainer.appendChild(settingsTable);
+    }
+
+    return settingsBody;
 }
 
 function loadScript(){
