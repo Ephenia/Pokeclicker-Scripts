@@ -115,6 +115,10 @@ function initVisualSettings() {
         document.getElementById('townMap').appendChild(button);
     });
 
+    // Prevent ship modal sequence-breaking
+    document.getElementById('dock-button').setAttribute('data-bind', 'enabled: TownList[GameConstants.DockTowns[player.region]].isUnlocked()');
+    ko.applyBindings(App.game, document.getElementById('dock-button'));
+
     // Create gym and dungeon shortcut modals
     const modalNames = ['gyms', 'dungeons'];
     const fragment = new DocumentFragment();
