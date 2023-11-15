@@ -35,7 +35,7 @@ class EnhancedAutoClicker {
     static autoDungeonState = ko.observable(validateStorage('autoDungeonState', false));
     static autoDungeonEncounterMode = validateStorage('autoDungeonEncounterMode', false);
     static autoDungeonChestMode = validateStorage('autoDungeonEncounterMode', false);
-    static autoDungeonLootTier = validateStorage('autoDungeonLootTier', -1, [-1, ...Object.keys(baseLootTierChance).keys()]);
+    static autoDungeonLootTier = validateStorage('autoDungeonLootTier', 0, Object.keys(baseLootTierChance).keys());
     static autoDungeonAlwaysOpenRareChests = validateStorage('autoDungeonAlwaysOpenRareChests', false);
     static autoDungeonTracker = {
         ID: 0,
@@ -125,11 +125,9 @@ class EnhancedAutoClicker {
                 <div style="flex: initial; display: flex; flex-direction: column;">
                     <div id="auto-dungeon-loottier" class="dropdown show">
                         <button type="button" class="text-left custom-select col-12 btn btn-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="max-height:30px; display:flex; flex:1; align-items:center;">
-                            <div id="auto-dungeon-loottier-text" ${this.autoDungeonLootTier > -1 ? 'style="display:none;"' : ''}>None</div>
-                            <img id="auto-dungeon-loottier-img" src="${this.autoDungeonLootTier > -1 ? `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[this.autoDungeonLootTier]}.png` : ''}" style="height:100%; ${this.autoDungeonLootTier > -1 ? '' : 'display:none;'}">
+                            <img id="auto-dungeon-loottier-img" src="assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[this.autoDungeonLootTier]}.png" style="height:100%;">
                         </button>
                         <div id="auto-dungeon-loottier-dropdown" class="border-secondary dropdown-menu col-12">
-                            <div class="dropdown-item dropdown-text" value="-1">None</div>
                             ${Object.keys(baseLootTierChance).map((tier, i) => `<div class="dropdown-item" value="${i}"><img src="assets/images/dungeons/chest-${tier}.png"></div>` ).join('\n')}
                         </div>
                     </div>
@@ -337,17 +335,9 @@ class EnhancedAutoClicker {
 
     static changeAutoDungeonLootTier(tier) {
         const val = +tier;
-        if ([-1, ...Object.keys(baseLootTierChance).keys()].includes(val)) {
+        if (Object.keys(baseLootTierChance).keys().includes(val)) {
             this.autoDungeonLootTier = val;
-            if (val > -1) {
-                document.getElementById('auto-dungeon-loottier-img').setAttribute('src', `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[val]}.png`);
-                document.getElementById('auto-dungeon-loottier-img').style.removeProperty('display');
-                document.getElementById('auto-dungeon-loottier-text').style.setProperty('display', 'none');
-            } else {
-                document.getElementById('auto-dungeon-loottier-img').setAttribute('src', '');
-                document.getElementById('auto-dungeon-loottier-img').style.setProperty('display', 'none');
-                document.getElementById('auto-dungeon-loottier-text').style.removeProperty('display');
-            }
+            document.getElementById('auto-dungeon-loottier-img').setAttribute('src', `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[val]}.png`);
             localStorage.setItem("autoDungeonLootTier", this.autoDungeonLootTier);
         }
     }
