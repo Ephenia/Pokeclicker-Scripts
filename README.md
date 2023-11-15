@@ -71,7 +71,8 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 
 <hr>
 
-<h2 id="additional-visual-settings">Additional Visual Settings (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/additionalvisualsettings.user.js">additionalvisualsettings.user.js</a>) (<a href="//github.com/Ephenia/Pokeclicker-Scripts/raw/master/additionalvisualsettings.user.js">One-Click Install</a>)</h2>
+<a name="additional-visual-settings"></a>
+## Additional Visual Settings (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/additionalvisualsettings.user.js">additionalvisualsettings.user.js</a>) (<a href="//github.com/Ephenia/Pokeclicker-Scripts/raw/master/additionalvisualsettings.user.js">One-Click Install</a>)
 This script adds new options to customize the game's graphics alongside a handful of other quality of life features.
 
 ### **Visual Settings**
@@ -94,7 +95,8 @@ The script adds various buttons for quicker navigation and quality of life.
 
 <hr>
 
-<h2 id="auto-battle-frontier">Auto Battle Frontier (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/autobattlefrontier.user.js">autobattlefrontier.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/autobattlefrontier.user.js">One-Click Install</a>)</h2>
+<a name="auto-battle-frontier"></a>
+## Auto Battle Frontier (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/autobattlefrontier.user.js">autobattlefrontier.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/autobattlefrontier.user.js">One-Click Install</a>)
 This script adds in a stage resetter to the Battle Frontier.<br>
 
 ![](https://github.com/Ephenia/Pokeclicker-Scripts/assets/12092270/3e2200c4-294d-4a9f-9351-b03ff0d2bd96)
@@ -105,7 +107,8 @@ The Max Attacks mode restarts the Battle Frontier when you reach a stage with ba
 
 <hr>
 
-<h2 id="auto-battle-items">Auto Battle Items (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/autobattleitems.user.js">autobattleitems.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/autobattleitems.user.js">One-Click Install</a>)</h2>
+<a name="auto-battle-items"></a>
+## Auto Battle Items (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/autobattleitems.user.js">autobattleitems.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/autobattleitems.user.js">One-Click Install</a>)
 This script adds in automation for Battle Items:<br>
 
 ![image](https://user-images.githubusercontent.com/26987203/178172097-3f733731-a15d-4ed9-b82a-f8476a39a4ff.png)
@@ -120,7 +123,8 @@ Battle Items will automatically be used when you have at least 1 available, as y
 
 <hr>
 
-<h2 id="catch-filter-fantasia">Catch Filter Fantasia (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/catchfilterfantasia.user.js">catchfilterfantasia.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/catchfilterfantasia.user.js">One-Click Install</a>)</h2>
+<a name="catch-filter-fantasia"></a>
+## Catch Filter Fantasia (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/catchfilterfantasia.user.js">catchfilterfantasia.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/catchfilterfantasia.user.js">One-Click Install</a>)
 So, this script would be adding a Filter button to the Pokeballs section:
 
 ![image](https://user-images.githubusercontent.com/26987203/170853489-de1f9304-9a91-45d1-aa0e-904f5c1709ed.png)
@@ -185,7 +189,8 @@ I think the rest of the buttons there are self-explanatory, and you guys can hav
 
 <hr>
 
-<h2 id="enhanced-auto-clicker">Enhanced Auto Clicker (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautoclicker.user.js">enhancedautoclicker.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautoclicker.user.js">One-Click Install</a>)</h2>
+<a name="enhanced-auto-clicker"></a>
+## Enhanced Auto Clicker (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautoclicker.user.js">enhancedautoclicker.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautoclicker.user.js">One-Click Install</a>)
 
 This script is based on one originally created by <b>Ivan Lay</b>, which [can be found here](https://github.com/ivanlay/pokeclicker-automator). 
 
@@ -237,7 +242,8 @@ The Auto Clicker now includes graphics settings for Auto Gym and Auto Dungeon to
 
 <hr>
 
-<h2 id="enhanced-auto-hatchery">Enhanced Auto Hatchery (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautohatchery.user.js">enhancedautohatchery.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautohatchery.user.js">One-Click Install</a>)</h2>
+<a name="enhanced-auto-hatchery"></a>
+## Enhanced Auto Hatchery (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautohatchery.user.js">enhancedautohatchery.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautohatchery.user.js">One-Click Install</a>)
 This script is based on one created by <b>Ivan Lay & Drak</b> which [can be found over here](//greasyfork.org/en/scripts/432768-auto-hatchery-edit-pokeclicker-com).
 
 The Auto Hatchery automatically hatches eggs and places new eggs/fossils in the hatchery. 
@@ -258,7 +264,8 @@ If none of the above modes are enabled or have targets, the Auto Hatchery will s
 
 <hr>
 
-<h2 id="enhanced-auto-mine">Enhanced Auto Mine (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautomine.user.js">enhancedautomine.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautomine.user.js">One-Click Install</a>)</h2>
+<a name="enhanced-auto-mine"></a>
+## Enhanced Auto Mine (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/enhancedautomine.user.js">enhancedautomine.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/enhancedautomine.user.js">One-Click Install</a>)
 This script was originally created by <b>Ivan Lay</b> and [can be found over here](//github.com/ivanlay/pokeclicker-automator).
 
 This I had worked quite a bit on, and I'm quite happy with what it's capable of doing. This is far bigger and does a lot more than Ivan Lay's script. However, since I was using it and was inspired, I decided to make an auto miner that's as efficient as possible instead.
@@ -288,7 +295,8 @@ As of 1.1 this also includes 2 more additional features into the Treasures tab o
 
 <hr>
   
-<h2 id="simple-auto-farmer">Simple Auto Farmer (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.user.js">simpleautofarmer.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/simpleautofarmer.user.js">One-Click Install</a>)</h2>
+<a name="simple-auto-farmer"></a>
+## Simple Auto Farmer (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/main/simpleautofarmer.user.js">simpleautofarmer.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/simpleautofarmer.user.js">One-Click Install</a>)
 This script is a simple Auto Farmer which adds 4 new buttons below the Plant and Harvest all buttons as shown:<br>
 
 ![](https://i.imgur.com/ei7lR95.png)
@@ -307,7 +315,8 @@ The Auto Farmer runs even while the farm window is closed. It also now saves you
 
 <hr>
 
-<h2 id="script-fixer-upper">Script Fixer Upper (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/scriptfixerupper.user.js">scriptfixerupper.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/scriptfixerupper.user.js">One-Click Install</a>)</h2>
+<a name="script-fixer-upper"></a>
+## Script Fixer Upper (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/scriptfixerupper.user.js">scriptfixerupper.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/scriptfixerupper.user.js">One-Click Install</a>)
 
 This script resets the settings of all your other installed scripts. It is intended **only** for troubleshooting and fixing buggy behavior, as described [here](//github.com/Ephenia/Pokeclicker-Scripts/issues/214).
 
@@ -317,7 +326,8 @@ This script should be your first step if you are experiencing bugs, especially a
 
 <hr>
 
-<h2 id="script-manager">Script manager (Exclusive to the desktop client) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/desktop/">app.asar</a>)</h2>
+<a name="script-manager"></a>
+## Script manager (Exclusive to the desktop client) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/desktop/">app.asar</a>)
 
 This script provides desktop client support for userscripts, allowing you to run or disable userscripts like a userscript manager browser extension does. All the scripts in this repository are supported and are by default automatically downloaded and updated. It can also run other userscripts that you install. Options are located in the <strong>Scripts</strong> tab in the game's settings menu. 
 
@@ -327,7 +337,8 @@ This script is only compatible with the desktop client. For detailed instruction
 
 <hr>
 
-<h2 id="auto-quest-completer">[Custom] Auto Quest Completer (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autoquestcompleter.user.js">autoquestcompleter.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/autoquestcompleter.user.js">One-Click Install</a>)</h2>
+<a name="auto-quest-completer"></a>
+## [Custom] Auto Quest Completer (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autoquestcompleter.user.js">autoquestcompleter.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/autoquestcompleter.user.js">One-Click Install</a>)
 This script automatically completes and starts quests and can be toggled with this button:<br>
 
 ![image](https://i.imgur.com/3AYaNes.png)
@@ -340,7 +351,8 @@ The script now has settings in the Settings menu that let you customize its beha
 
 <hr>
 
-<h2 id="auto-safari-zone">[Custom] Auto Safari Zone (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autosafarizone.user.js">autosafarizone.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/autosafarizone.user.js">One-Click Install</a>)</h2>
+<a name="auto-safari-zone"></a>
+## [Custom] Auto Safari Zone (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autosafarizone.user.js">autosafarizone.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/autosafarizone.user.js">One-Click Install</a>)
 
 This script automatically explores the Safari Zone and Friend Safari, catching Pokémon and collecting items for you. You can activate the script while in the window for either Safari.
 
@@ -355,7 +367,8 @@ The auto bait setting will never use your last berry. The script will always use
 
 <hr>
 
-<h2 id="catch-speed-adjuster">[Custom] Catch Speed Adjuster (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/catchspeedadjuster.user.js">catchspeedadjuster.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/catchspeedadjuster.user.js">One-Click Install</a>)</h2>
+<a name="catch-speed-adjuster"></a>
+## [Custom] Catch Speed Adjuster (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/catchspeedadjuster.user.js">catchspeedadjuster.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/catchspeedadjuster.user.js">One-Click Install</a>)
 This script adds in a new option found below your Pokéballs:<br>
 
 ![image](https://i.imgur.com/C6aVzND.png)
@@ -364,7 +377,8 @@ This currently will make all of your Pokéballs catch Pokémon at 0 delay (basic
 
 <hr>
 
-<h2 id="challenge-mode-changer">[Custom] Challenge Mode Changer (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/challengemodechanger.user.js">challengemodechanger.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/challengemodechanger.user.js">One-Click Install</a>)</h2>
+<a name="challenge-mode-changer"></a>
+## [Custom] Challenge Mode Changer (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/challengemodechanger.user.js">challengemodechanger.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/challengemodechanger.user.js">One-Click Install</a>)
 This script changes how Challenges work:<br>
 
 ![image](https://i.imgur.com/zsPsiSg.png)
@@ -377,7 +391,8 @@ Also, yes, changing these will give you the respective Challenge ribbons on your
 
 <hr>
   
-<h2 id="discord-code-generator">[Custom] Discord Code Generator (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/discordcodegenerator.user.js">discordcodegenerator.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/discordcodegenerator.user.js">One-Click Install</a>)</h2>
+<a name="discord-code-generator"></a>
+## [Custom] Discord Code Generator (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/discordcodegenerator.user.js">discordcodegenerator.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/discordcodegenerator.user.js">One-Click Install</a>)
 This script will let you generate infinite amounts of Discord codes for all of the exclusive Pokémon locked behind Pokéclicker's Discord bot:<br>
 
 ![image](https://i.imgur.com/5Agit4Q.png)
@@ -390,7 +405,8 @@ This script also works while offline.
 
 <hr>
   
-<h2 id="infinite-seasonal-events">[Custom] Infinite Seasonal Events (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/infiniteseasonalevents.user.js">infiniteseasonalevents.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/infiniteseasonalevents.user.js">One-Click Install</a>)</h2>
+<a name="infinite-seasonal-events"></a>
+## [Custom] Infinite Seasonal Events (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/infiniteseasonalevents.user.js">infiniteseasonalevents.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/infiniteseasonalevents.user.js">One-Click Install</a>)
 This script adds in a new settings option to the top of the Start Menu:<br>
 
 ![image](https://user-images.githubusercontent.com/26987203/139570136-78e45d86-97ce-4fec-aa31-3459fbf19e04.png)
@@ -407,7 +423,8 @@ There may be some other cool or neat custom events added in with this as well.
 
 <hr>
 
-<h2 id="oak-items-unlimited">[Custom] Oak Items Unlimited (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/oakitemsunlimited.user.js">oakitemsunlimited.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/oakitemsunlimited.user.js">One-Click Install</a>)</h2>
+<a name="oak-items-unlimited"></a>
+## [Custom] Oak Items Unlimited (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/oakitemsunlimited.user.js">oakitemsunlimited.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/oakitemsunlimited.user.js">One-Click Install</a>)
 This script removes the limit for the amount of Oak Items that you're able to equip:<br>
 
 ![image](https://i.imgur.com/0Peh94W.png)
@@ -418,7 +435,8 @@ This also removes any requirements needed to unlock any Oak Item slots, meaning 
 
 <hr>
 
-<h2 id="omega-protein-gains">[Custom] Omega Protein Gains (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/omegaproteingains.user.js">omegaproteingains.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/omegaproteingains.user.js">One-Click Install</a>)</h2>
+<a name="omega-protein-gains"></a>
+## [Custom] Omega Protein Gains (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/omegaproteingains.user.js">omegaproteingains.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/omegaproteingains.user.js">One-Click Install</a>)
 This script removes the limit for the amount of Proteins that you're able to use on Pokémon:<br>
 
 ![image](https://i.imgur.com/2kXCzUA.png)
@@ -427,7 +445,8 @@ I haven't tested the limits of how many Proteins you can give, but it should pra
 
 <hr>
 
-<h2 id="overnight-berry-growth">[Custom] Overnight Berry Growth (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/overnightberrygrowth.user.js">overnightberrygrowth.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/overnightberrygrowth.user.js">One-Click Install</a>)</h2>
+<a name="overnight-berry-growth"></a>
+## [Custom] Overnight Berry Growth (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/overnightberrygrowth.user.js">overnightberrygrowth.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/overnightberrygrowth.user.js">One-Click Install</a>)
 This script allows berries to grow while the game is closed, simulating their growth when the game loads. No mutations occur, aside from Kebia replanting, and Farm Hands are not active. Withered berries can replant as normal, but the script will ignore replanted berries to avoid lag. You can choose between three modes in the settings: 
 
 - Until ripe: Berries will only grow until they are ripe and no time will pass for already-ripe berries. The default mode.
@@ -436,14 +455,16 @@ This script allows berries to grow while the game is closed, simulating their gr
 
 <hr>
 
-<h2 id="perky-pokerus-pandemic">[Custom] Perky Pokerus Pandemic (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/perkypokeruspandemic.user.js">perkypokeruspandemic.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/perkypokeruspandemic.user.js">One-Click Install</a>)</h2>
+<a name="perky-pokerus-pandemic"></a>
+## [Custom] Perky Pokerus Pandemic (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/perkypokeruspandemic.user.js">perkypokeruspandemic.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/perkypokeruspandemic.user.js">One-Click Install</a>)
 This script makes Pokérus spread inside the Hatchery without needing your Starter Pokémon inside for this to be accomplished.
 
 This script will run and work automatically without needing to do anything else.
 
 <hr>
 
-<h2 id="simple-weather-changer">[Custom] Simple Weather Changer (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/simpleweatherchanger.user.js">simpleweatherchanger.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/simpleweatherchanger.user.js">One-Click Install</a>)</h2>
+<a name="simple-weather-changer"></a>
+## [Custom] Simple Weather Changer (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/simpleweatherchanger.user.js">simpleweatherchanger.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/simpleweatherchanger.user.js">One-Click Install</a>)
 This script lets you freely edit the weather of the region you are currently in with this button:<br>
 
 ![image](https://i.imgur.com/2cBIfyH.png)
