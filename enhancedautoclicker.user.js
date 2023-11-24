@@ -34,7 +34,7 @@ class EnhancedAutoClicker {
     // Auto Dungeon
     static autoDungeonState = ko.observable(validateStorage('autoDungeonState', false));
     static autoDungeonEncounterMode = validateStorage('autoDungeonEncounterMode', false);
-    static autoDungeonChestMode = validateStorage('autoDungeonEncounterMode', false);
+    static autoDungeonChestMode = validateStorage('autoDungeonChestMode', false);
     static autoDungeonLootTier = validateStorage('autoDungeonLootTier', 0, Object.keys(baseLootTierChance).keys());
     static autoDungeonAlwaysOpenRareChests = validateStorage('autoDungeonAlwaysOpenRareChests', false);
     static autoDungeonTracker = {
@@ -632,17 +632,20 @@ class EnhancedAutoClicker {
     static exploreDungeon() {
         const dungeonBoard = DungeonRunner.map.board()[this.autoDungeonTracker.floor];
         var hasMoved = false;
+        var stuckInLoopCounter = 0;
         while (!hasMoved) {
-            // End of column, move to start of new column
+            // End of column
             if (this.autoDungeonTracker.coords.y == 0) {
+                if (this.autoDungeonTracker.coords.x <= 0 || this.autoDungeonTracker.coords.x === this.autoDungeonTracker.flashCols[0]) {
+                    // Done exploring, clearDungeon() will take over from here
+                    this.autoDungeonTracker.floorExplored = true;
+                    return;
+                }
+                // Move to start of next column
                 this.autoDungeonTracker.coords.y = this.autoDungeonTracker.floorSize - 1;
                 if (this.autoDungeonTracker.coords.x >= this.autoDungeonTracker.floorSize - 1 || this.autoDungeonTracker.coords.x === this.autoDungeonTracker.flashCols.at(-1)) {
                     // Done with this side, move to other side of the entrance
                     this.autoDungeonTracker.coords.x = Math.floor(this.autoDungeonTracker.floorSize / 2) - 1;
-                } else if (this.autoDungeonTracker.coords.x == 0 || this.autoDungeonTracker.coords.x === this.autoDungeonTracker.flashCols[0]) {
-                    // Done exploring, clearDungeon() will take over from here
-                    this.autoDungeonTracker.floorExplored = true;
-                    return;
                 } else {
                     // Move away from the entrance
                     this.autoDungeonTracker.coords.x += (this.autoDungeonTracker.coords.x >= Math.floor(this.autoDungeonTracker.floorSize / 2) ? 1 : -1);
@@ -662,6 +665,12 @@ class EnhancedAutoClicker {
             if (!dungeonBoard[this.autoDungeonTracker.coords.y][this.autoDungeonTracker.coords.x].isVisited) {
                 DungeonRunner.map.moveToCoordinates(this.autoDungeonTracker.coords.x, this.autoDungeonTracker.coords.y);
                 hasMoved = true;
+            }
+            stuckInLoopCounter++;
+            if (stuckInLoopCounter > 100) {
+                console.warn(`Auto Dungeon got stuck in a loop while moving to tile \'${GameConstants.DungeonTile[dungeonBoard[this.autoDungeonTracker.targetCoords.y][this.autoDungeonTracker.targetCoords.x].type()]}\' (${this.autoDungeonTracker.targetCoords.x}, ${this.autoDungeonTracker.targetCoords.y})`);
+                this.toggleAutoDungeon();
+                return;
             }
         }
     }
@@ -1097,6 +1106,11 @@ function addGlobalStyle(css) {
 }
 
 function loadScript() {
+    if (!App.isUsingClient) {
+        // Necessary for userscript managers
+        unsafeWindow.EnhancedAutoClicker = EnhancedAutoClicker;
+    }
+
     const oldInit = Preload.hideSplashScreen;
     var hasInitialized = false;
 
