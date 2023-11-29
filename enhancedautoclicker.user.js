@@ -35,7 +35,7 @@ class EnhancedAutoClicker {
     static autoDungeonState = ko.observable(validateStorage('autoDungeonState', false));
     static autoDungeonEncounterMode = validateStorage('autoDungeonEncounterMode', false);
     static autoDungeonChestMode = validateStorage('autoDungeonChestMode', false);
-    static autoDungeonLootTier = validateStorage('autoDungeonLootTier', 0, Object.keys(baseLootTierChance).keys());
+    static autoDungeonLootTier = validateStorage('autoDungeonLootTier', 0, [...Object.keys(baseLootTierChance).keys()]);
     static autoDungeonAlwaysOpenRareChests = validateStorage('autoDungeonAlwaysOpenRareChests', false);
     static autoDungeonTracker = {
         ID: 0,
@@ -335,7 +335,7 @@ class EnhancedAutoClicker {
 
     static changeAutoDungeonLootTier(tier) {
         const val = +tier;
-        if (Object.keys(baseLootTierChance).keys().includes(val)) {
+        if ([...Object.keys(baseLootTierChance).keys()].includes(val)) {
             this.autoDungeonLootTier = val;
             document.getElementById('auto-dungeon-loottier-img').setAttribute('src', `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[val]}.png`);
             localStorage.setItem("autoDungeonLootTier", this.autoDungeonLootTier);
