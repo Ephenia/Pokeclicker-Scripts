@@ -47,7 +47,8 @@ function createWindow() {
 
   if (fs.existsSync(settingsFile)) {
     getConfig();
-  } else {
+  }
+  if (!(config?.Sizing && +config.Sizing.Width && +config.Sizing.Height && typeof config.Sizing.Maximized === 'boolean')) {
     config = { Sizing: { Width: "800", Height: "600", Maximized: false } };
     fs.writeFile(
       settingsFile,
