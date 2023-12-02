@@ -174,7 +174,7 @@ class EnhancedAutoClicker {
         });
         // Checkboxes
         let checkboxesToAdd = [
-            ['autoDungeonAlwaysOpenRareChests', 'Always open visible chests of set rarity and up', this.autoDungeonAlwaysOpenRareChests],
+            ['autoDungeonAlwaysOpenRareChests', 'Always open visible targeted chests', this.autoDungeonAlwaysOpenRareChests],
             ['autoGymGraphicsDisabled', 'Disable Auto Gym graphics', this.gymGraphicsDisabled()],
             ['autoDungeonGraphicsDisabled', 'Disable Auto Dungeon graphics', this.dungeonGraphicsDisabled()]
         ];
