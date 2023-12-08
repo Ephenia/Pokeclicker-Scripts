@@ -120,7 +120,7 @@ function initAutoSafari() {
   }
 
   function enterSafari() {
-    if (!(Safari.canAccess() && !player.route() && ['Safari Zone', 'National Park', 'Great Marsh', 'Friend Safari'].includes(player.town().name))) {
+    if (!(Safari.canAccess() && !player.route() && player.town().content.some(c => c.constructor.name === 'SafariTownContent'))) {
       // Safari inaccessible from here
       toggleAutoSafari();
       return;
