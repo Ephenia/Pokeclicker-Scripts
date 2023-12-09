@@ -8,7 +8,7 @@
 // @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
-// @version       1.1
+// @version       1.1.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -230,7 +230,7 @@ function initAutoSafari() {
         let grassDisjointPriority = false;
         let waterDisjointPriority = false;
 
-        SafariPokemonList.list[player.region]().forEach((p) => {
+        SafariPokemonList.list[player.region]().filter((p) => p.isAvailable()).forEach((p) => {
           let isGrass = p.environments.includes(SafariEnvironments.Grass);
           let isWater = p.environments.includes(SafariEnvironments.Water);
           grassTotalWeight += isGrass * p.weight;
