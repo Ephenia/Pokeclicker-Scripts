@@ -99,7 +99,7 @@ function initAutoSafari() {
   }
 
   function enterSafari() {
-    if (!(Safari.canAccess() && !player.route() && ['Safari Zone', 'Friend Safari'].includes(player.town().name))) {
+    if (!(Safari.canAccess() && !player.route() && ['Safari Zone', 'Friend Safari', 'National Park'].includes(player.town().name))) {
       // Safari inaccessible from here
       toggleAutoSafari();
       return;
