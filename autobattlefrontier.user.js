@@ -14,7 +14,7 @@
 
 // @match         https://www.pokeclicker.com/
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
-// @grant         none
+// @grant         unsafeWindow
 // @run-at        document-idle
 // ==/UserScript==
 
@@ -42,9 +42,6 @@ class AutoBattleFrontier {
     }
 
     static initAutoBattleFrontier() {
-        // Necessary for userscript managers
-        window.AutoBattleFrontier = AutoBattleFrontier;
-
         AutoBattleFrontier.overrideGameMethods();
 
         const bfStart = document.querySelector('#battleFrontierInformation a[onclick="BattleFrontierRunner.start(false)"]');
@@ -157,6 +154,10 @@ class AutoBattleFrontier {
 }
 
 function loadScript() {
+    if (!App.isUsingClient) {
+        // Necessary for userscript managers
+        unsafeWindow.AutoBattleFrontier = AutoBattleFrontier;
+    }
     AutoBattleFrontier.initAutoBattleFrontier();
 }
 

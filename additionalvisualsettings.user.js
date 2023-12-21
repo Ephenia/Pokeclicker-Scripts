@@ -5,7 +5,7 @@
 // @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.5
+// @version       2.6
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -44,35 +44,8 @@ function initVisualSettings() {
         getMenu.prepend(quickElem);
     });
 
-    var scriptSettings = document.getElementById('settings-scripts');
-    // Create scripts settings tab if it doesn't exist yet
-    if (!scriptSettings) {
-        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
-        document.getElementById('settingsModal').querySelector('div').style.maxWidth = '850px';
-        // Create and attach script settings tab link
-        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
-        let li = document.createElement('li');
-        li.classList.add('nav-item');
-        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
-        settingTabs.appendChild(li);
-        // Create and attach script settings tab contents
-        const tabContent = document.querySelector('#settingsModal .tab-content');
-        scriptSettings = document.createElement('div');
-        scriptSettings.classList.add('tab-pane');
-        scriptSettings.setAttribute('id', 'settings-scripts');
-        tabContent.appendChild(scriptSettings);
-    }
-
     // Add AVS settings options to scripts tab
-    let table = document.createElement('table');
-    table.classList.add('table', 'table-striped', 'table-hover', 'm-0');
-    scriptSettings.prepend(table);
-    let header = document.createElement('thead');
-    header.innerHTML = '<tr><th colspan="2">Additional Visual Settings</th></tr>';
-    table.appendChild(header);
-    let settingsBody = document.createElement('tbody');
-    settingsBody.setAttribute('id', 'settings-scripts-additionalvisualsettings');
-    table.appendChild(settingsBody);
+    const settingsBody = createScriptSettingsContainer('Additional Visual Settings');
     let settingsToAdd = [['poke-name', 'Show wild Pokémon Name'],
         ['poke-defeat', 'Show wild Pokémon Defeated'],
         ['poke-image', 'Show wild Pokémon Image'],
@@ -142,6 +115,10 @@ function initVisualSettings() {
         document.getElementById('townMap').appendChild(button);
     });
 
+    // Prevent ship modal sequence-breaking
+    document.getElementById('dock-button').setAttribute('data-bind', 'enabled: TownList[GameConstants.DockTowns[player.region]].isUnlocked()');
+    ko.applyBindings(App.game, document.getElementById('dock-button'));
+
     // Create gym and dungeon shortcut modals
     const modalNames = ['gyms', 'dungeons'];
     const fragment = new DocumentFragment();
@@ -203,7 +180,7 @@ function initVisualSettings() {
         const fragment = new DocumentFragment();
         const regionGyms = Object.values(GymList).filter((gym) => gym.parent?.region === player.region);
         for (const gym of regionGyms) {
-            const hasBadgeImage = !BadgeEnums[gym.badgeReward].startsWith('Elite') && BadgeEnums[gym.badgeReward] != 'None';
+            const hasBadgeImage = !(BadgeEnums[gym.badgeReward].startsWith('Elite') || BadgeEnums[gym.badgeReward] == 'None');
             const badgeImage = (hasBadgeImage ? `assets/images/badges/${BadgeEnums[gym.badgeReward]}.png` : '');
             const btn = document.createElement('button');
             btn.setAttribute('style', 'position: relative;');
@@ -215,9 +192,9 @@ function initVisualSettings() {
                 $("#gymsShortcutModal").modal("hide");
                 GymRunner.startGym(gym); 
             });
-            btn.disabled = !(gym.isUnlocked() && MapHelper.calculateTownCssClass(gym.parent.name));
+            btn.disabled = !(gym.isUnlocked() && gym.parent.isUnlocked());
             btn.innerHTML = `<div class="gyms-shortcut-leaders">
-                <img src="assets/images/gymLeaders/${gym.leaderName}.png" onerror="{ this.onerror=null; this.style.display='none'; }">
+                <img src="${gym.imagePath}" onerror="{ this.src='assets/images/npcs/specialNPCs/Mysterious Trainer.png'; }">
                 </div>
                 <div class="gyms-shortcut-badges">
                 <img src="${badgeImage}" onerror="{ this.onerror=null; this.style.display='none'; }">
@@ -375,6 +352,56 @@ function loadSetting(key, defaultVal) {
         localStorage.setItem(key, defaultVal);
     }
     return val;
+}
+
+/**
+ * Creates container for scripts settings in the settings menu, adding scripts tab if it doesn't exist yet
+ */
+function createScriptSettingsContainer(name) {
+    const settingsID = name.replaceAll(/s/g, '').toLowerCase();
+    var settingsContainer = document.getElementById('settings-scripts-container');
+
+    // Create scripts settings tab if it doesn't exist yet
+    if (!settingsContainer) {
+        // Fixes the Scripts nav item getting wrapped to the bottom by increasing the max width of the window
+        document.querySelector('#settingsModal div').style.maxWidth = '850px';
+        // Create and attach script settings tab link
+        const settingTabs = document.querySelector('#settingsModal ul.nav-tabs');
+        const li = document.createElement('li');
+        li.classList.add('nav-item');
+        li.innerHTML = `<a class="nav-link" href="#settings-scripts" data-toggle="tab">Scripts</a>`;
+        settingTabs.appendChild(li);
+        // Create and attach script settings tab contents
+        const tabContent = document.querySelector('#settingsModal .tab-content');
+        scriptSettings = document.createElement('div');
+        scriptSettings.classList.add('tab-pane');
+        scriptSettings.setAttribute('id', 'settings-scripts');
+        tabContent.appendChild(scriptSettings);
+        settingsContainer = document.createElement('div');
+        settingsContainer.setAttribute('id', 'settings-scripts-container');
+        scriptSettings.appendChild(settingsContainer);
+    }
+
+    // Create settings container
+    const settingsTable = document.createElement('table');
+    settingsTable.classList.add('table', 'table-striped', 'table-hover', 'm-0');
+    const header = document.createElement('thead');
+    header.innerHTML = `<tr><th colspan="2">${name}</th></tr>`;
+    settingsTable.appendChild(header);
+    const settingsBody = document.createElement('tbody');
+    settingsBody.setAttribute('id', `settings-scripts-${settingsID}`);
+    settingsTable.appendChild(settingsBody);
+
+    // Insert settings container in alphabetical order
+    let settingsList = Array.from(settingsContainer.children);
+    let insertBefore = settingsList.find(elem => elem.querySelector('tbody').id > `settings-scripts-${settingsID}`);
+    if (insertBefore) {
+        insertBefore.before(settingsTable);
+    } else {
+        settingsContainer.appendChild(settingsTable);
+    }
+
+    return settingsBody;
 }
 
 function loadScript(){

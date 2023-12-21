@@ -80,9 +80,12 @@ function initAutoMine() {
     addGlobalStyle('#item-threshold { width:75px; }');
 
     if (mineState) {
-        autoMineTimer = setInterval(function () {
-            doAutoMine();
-        }, 1000);
+        // Wait a few seconds to not mine before underground is fully loaded
+        setTimeout(() => {
+            autoMineTimer = setInterval(function () {
+                doAutoMine();
+            }, 1000);
+        }, 5000);
     }
 }
 

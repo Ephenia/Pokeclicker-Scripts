@@ -8,7 +8,7 @@
 // @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
-// @version       1.0
+// @version       1.1.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -68,6 +68,27 @@ function initAutoSafari() {
     seekingShiny: 3,
   };
 
+  const optimalBugContestByHighestRegion = GameHelper.enumNumbers(GameConstants.Region)
+    .filter(r => r !== GameConstants.Region.final && r !== GameConstants.Region.none)
+    .map(region => {
+      let [grassVal, waterVal, grassWeights, waterWeights] = [0, 0, 0, 0];
+      for (const encounter of SafariPokemonList.list[GameConstants.Region.johto]()) {
+          if (PokemonHelper.calcNativeRegion(encounter.name) > region) {
+              continue;
+          }
+          const reward = Math.floor(App.game.party.getPokemonByName(encounter.name).baseAttack / 5);
+          if (encounter.environments.includes(SafariEnvironments.Grass)) {
+              grassVal += reward;
+              grassWeights += encounter.weight;
+          }
+          if (encounter.environments.includes(SafariEnvironments.Water)) {
+              waterVal += reward;
+              waterWeights += encounter.weight;
+          }
+      }
+      return (grassVal / grassWeights) > (waterVal / waterWeights) ? SafariEnvironments.Grass : SafariEnvironments.Water;
+    });
+
   createHTML();
 
   function startAutoSafari() {
@@ -99,7 +120,7 @@ function initAutoSafari() {
   }
 
   function enterSafari() {
-    if (!(Safari.canAccess() && !player.route() && ['Safari Zone', 'Friend Safari'].includes(player.town().name))) {
+    if (!(Safari.canAccess() && !player.route() && player.town().content.some(c => c.constructor.name === 'SafariTownContent'))) {
       // Safari inaccessible from here
       toggleAutoSafari();
       return;
@@ -197,44 +218,53 @@ function initAutoSafari() {
 
     var chosenTiles;
 
-    // When prioritizing certain spawns, seek the tile type with the highest chance of priority spawns
+    // When prioritizing certain spawns, seek encounter tiles based on what will complete our goal fastest, i.e.:
+    //   - if environments either share all priority spawns or both have unique priority spawns, seek the one with highest priority chance
+    //   - if one environment's priority spawns are a proper subset of the other, seek the one with more spawns
     if ((autoSafariSeekUncaught || autoSafariSeekContagious) && hasPrioritySpawns > -1) {
       if (hasPrioritySpawns == 0) {
         let grassPriorityWeight = 0;
         let waterPriorityWeight = 0;
         let grassTotalWeight = 0;
         let waterTotalWeight = 0;
+        let grassDisjointPriority = false;
+        let waterDisjointPriority = false;
 
-        SafariPokemonList.list[player.region]().forEach((p) => {
-          if (p.environments.includes(SafariEnvironments.Grass)) {
-            grassTotalWeight += p.weight;
-          }
-          if (p.environments.includes(SafariEnvironments.Water)) {
-            waterTotalWeight += p.weight;
-          }
+        SafariPokemonList.list[player.region]().filter((p) => p.isAvailable()).forEach((p) => {
+          let isGrass = p.environments.includes(SafariEnvironments.Grass);
+          let isWater = p.environments.includes(SafariEnvironments.Water);
+          grassTotalWeight += isGrass * p.weight;
+          waterTotalWeight += isWater * p.weight;
           if (isPriority(p.name)) {
-            if (p.environments.includes(SafariEnvironments.Grass)) {
-              grassPriorityWeight += p.weight;
-            }
-            if (p.environments.includes(SafariEnvironments.Water)) {
-              waterPriorityWeight += p.weight;
+            grassPriorityWeight += isGrass * p.weight;
+            waterPriorityWeight += isWater * p.weight;
+            if (!(isGrass && isWater)) {
+              grassDisjointPriority ||= isGrass;
+              waterDisjointPriority ||= isWater;
             }
           }
         });
 
-        let grassPriorityChance = grassPriorityWeight / grassTotalWeight;
-        let waterPriorityChance = waterPriorityWeight / waterTotalWeight;
-        if (grassPriorityChance == waterPriorityChance) {
-          cachedPriorityEnvironments = [GameConstants.SafariTile.grass, ...GameConstants.SAFARI_WATER_BLOCKS];
-        } else if (grassPriorityChance > waterPriorityChance) {
-          cachedPriorityEnvironments = [GameConstants.SafariTile.grass];
-        } else {
-          cachedPriorityEnvironments = [...GameConstants.SAFARI_WATER_BLOCKS];
+        // Identical priority pools or unique priority spawns, decide by priotity spawn chance
+        if (grassDisjointPriority == waterDisjointPriority) {
+          let grassPriorityChance = grassPriorityWeight / grassTotalWeight;
+          let waterPriorityChance = waterPriorityWeight / waterTotalWeight;
+          if (grassPriorityChance == waterPriorityChance) {
+            cachedPriorityEnvironments = [GameConstants.SafariTile.grass, ...GameConstants.SAFARI_WATER_BLOCKS];
+          } else {
+            cachedPriorityEnvironments = grassPriorityChance > waterPriorityChance ? [GameConstants.SafariTile.grass] : [...GameConstants.SAFARI_WATER_BLOCKS];
+          }
+        }
+        // One priority pool contains the other, go there
+        else {
+          cachedPriorityEnvironments = grassDisjointPriority ? [GameConstants.SafariTile.grass] : [...GameConstants.SAFARI_WATER_BLOCKS];
         }
 
         hasPrioritySpawns = (grassPriorityWeight == 0 && waterPriorityWeight == 0) ? -1 : 1;
       }
       chosenTiles = cachedPriorityEnvironments;
+    } else if (player.town().name === 'National Park') {
+      chosenTiles = optimalBugContestByHighestRegion[player.highestRegion()] == SafariEnvironments.Grass ? [GameConstants.SafariTile.grass] : [...GameConstants.SAFARI_WATER_BLOCKS];
     } else {
       chosenTiles = [GameConstants.SafariTile.grass, ...GameConstants.SAFARI_WATER_BLOCKS];
     }
@@ -306,8 +336,7 @@ function initAutoSafari() {
 
         // TODO remove SAFARI_WATER_BLOCKS after game update makes it redundant
         if (isValidPosition(nextRow, nextCol) && !visited.has(nextPosStr)
-          && (GameConstants.SAFARI_LEGAL_WALK_BLOCKS.includes(Safari.grid[nextRow][nextCol])
-            || GameConstants.SAFARI_WATER_BLOCKS.includes(Safari.grid[nextRow][nextCol]))
+          && (GameConstants.SAFARI_LEGAL_WALK_BLOCKS.includes(Safari.grid[nextRow][nextCol]))
         ) {
           {
             const nextPath = currentPath.concat([direction]);

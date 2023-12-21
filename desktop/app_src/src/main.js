@@ -47,7 +47,8 @@ function createWindow() {
 
   if (fs.existsSync(settingsFile)) {
     getConfig();
-  } else {
+  }
+  if (!(config?.Sizing && +config.Sizing.Width && +config.Sizing.Height && typeof config.Sizing.Maximized === 'boolean')) {
     config = { Sizing: { Width: "800", Height: "600", Maximized: false } };
     fs.writeFile(
       settingsFile,
@@ -468,7 +469,7 @@ Ephenia scripts loading
 */
 
 // VERY IMPORTANT: update this in desktopupdatechecker.js as well!
-const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.3';
+const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.4';
 
 function logInMainWindow(message, level = 'log') {
   if (message == null) {
@@ -486,7 +487,7 @@ function runScript(scriptFilePath) {
     if (fs.existsSync(scriptFilePath)) {
       logInMainWindow(`Running ${scriptFilePath}`, 'debug');
       mainWindow.webContents
-        .executeJavaScript(fs.readFileSync(scriptFilePath, 'utf-8'))
+        .executeJavaScript(fs.readFileSync(scriptFilePath, 'utf-8') + ';0')
         .catch((err) => {
           logInMainWindow(`Issue running script '${scriptFilePath}':\n${err}`, 'error');
         })

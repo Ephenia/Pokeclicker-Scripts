@@ -23,7 +23,7 @@ A version of the PokéClicker desktop client modified to manage and run userscr
 
 Optionally, you can add custom scripts from outside this project. This mod creates two new folders in the app's application data directory, `scripts` and `custom-scripts`. JavaScript (`.js`) files placed in the `custom-scripts` folder will run when the app is launched, and like other scripts can be disabled/enabled in the settings. The application data location depends on operating system:
 
-- Windows: `%APPDATA%/pokeclicker-desktop`
+- Windows: `%appdata%/pokeclicker-desktop` or `%localappdata%/pokeclicker-desktop`
 - macOS: `~/Library/Application Support/pokeclicker-desktop`
 - Linux: either `$XDG_CONFIG_HOME/pokeclicker-desktop` or `~/.config/pokeclicker-desktop`
 
