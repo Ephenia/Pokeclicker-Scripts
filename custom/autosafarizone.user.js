@@ -76,7 +76,7 @@ function initAutoSafari() {
           if (PokemonHelper.calcNativeRegion(encounter.name) > region) {
               continue;
           }
-          const reward = Math.floor(App.game.party.getPokemonByName(encounter.name).baseAttack / 5);
+          const reward = Math.floor(pokemonMap[encounter.name].attack / 5);
           if (encounter.environments.includes(SafariEnvironments.Grass)) {
               grassVal += reward;
               grassWeights += encounter.weight;
