@@ -8,7 +8,7 @@
 // @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
-// @version       1.1.1
+// @version       1.1.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -76,7 +76,7 @@ function initAutoSafari() {
           if (PokemonHelper.calcNativeRegion(encounter.name) > region) {
               continue;
           }
-          const reward = Math.floor(App.game.party.getPokemonByName(encounter.name).baseAttack / 5);
+          const reward = Math.floor(pokemonMap[encounter.name].attack / 5);
           if (encounter.environments.includes(SafariEnvironments.Grass)) {
               grassVal += reward;
               grassWeights += encounter.weight;
@@ -351,7 +351,8 @@ function initAutoSafari() {
 
   function fightSafariPokemon() {
     // TODO skip ticks proportional to animation speed
-    const forceRunAway = (scriptState !== SCRIPT_STATES.encounters || (Safari.balls() == 1 && Safari.itemGrid().length > 0 && !forceSkipItems)) && !SafariBattle.enemy.shiny;
+    const forceRunAway = !SafariBattle.enemy.shiny && (scriptState !== SCRIPT_STATES.encounters
+        || (Safari.balls() == 1 && autoSafariPickItemsState && Safari.itemGrid().length > 0 && !forceSkipItems));
     const isPriority = (autoSafariSeekUncaught && !App.game.party.alreadyCaughtPokemon(SafariBattle.enemy.id))
         || (autoSafariSeekContagious && App.game.party.getPokemon(SafariBattle.enemy.id)?.pokerus === GameConstants.Pokerus.Contagious);
     let threwBall = false;

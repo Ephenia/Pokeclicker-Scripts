@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.4
+// @version       3.4.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -158,17 +158,18 @@ class EnhancedAutoClicker {
 
         // Dropdowns
         let dropdownsToAdd = [
-            ['autoClickCalcEfficiencyDisplayMode', 'Auto Clicker efficiency display mode', this.autoClickCalcEfficiencyDisplayMode, [[0, 'Percentage'], [1, 'Ticks/s']]],
-            ['autoClickCalcDamageDisplayMode', 'Auto Clicker damage display mode', this.autoClickCalcDamageDisplayMode, [[0, 'Click Attacks'], [1, 'Damage']]]
+            ['autoClickCalcEfficiencyDisplayMode', 'Auto Clicker efficiency display mode', this.autoClickCalcEfficiencyDisplayMode, ['Percentage', 'Ticks/s']],
+            ['autoClickCalcDamageDisplayMode', 'Auto Clicker damage display mode', this.autoClickCalcDamageDisplayMode, ['Click Attacks', 'Damage']]
         ];
         dropdownsToAdd.forEach(([name, text, value, options]) => {
-            settingsToAdd.push(document.createElement('tr'));
-            settingsToAdd.at(-1).innerHTML = `<td class="p-2 col-md-8">
+            const newSetting = document.createElement('tr')
+            settingsToAdd.push(newSetting);
+            newSetting.innerHTML = `<td class="p-2 col-md-8">
                 ${text}
                 </td>
                 <td class="p-0 col-md-4">
                 <select id="select-${name}" class="form-control" value="${value}">
-                ${options.map(([val, desc]) => `<option value="${val}">${desc}</option>`).join('\n')}
+                ${options.map((desc, val) => `<option value="${val}">${desc}</option>`).join('\n')}
                 </select>
                 </td>`;
         });
@@ -179,12 +180,14 @@ class EnhancedAutoClicker {
             ['autoDungeonGraphicsDisabled', 'Disable Auto Dungeon graphics', this.dungeonGraphicsDisabled()]
         ];
         checkboxesToAdd.forEach(([name, text, isChecked]) => {
-            settingsToAdd.push(document.createElement('tr'));
-            settingsToAdd.at(-1).innerHTML = `<td class="p-2 col-md-8">
+            const newSetting = document.createElement('tr')
+            settingsToAdd.push(newSetting);
+            newSetting.innerHTML = `<td class="p-2 col-md-8">
                 <label class="m-0" for="checkbox-${name}">${text}</label>
                 </td><td class="p-2 col-md-4">
-                <input id="checkbox-${name}" type="checkbox" checked="${isChecked}">
+                <input id="checkbox-${name}" type="checkbox">
                 </td>`;
+            newSetting.querySelector(`#checkbox-${name}`).checked = isChecked;
         });
 
         settingsBody.append(...settingsToAdd);
@@ -1123,7 +1126,9 @@ function loadScript() {
         return result;
     }
 
-    EnhancedAutoClicker.initOverrides();
+    $(document).ready(() => {
+        EnhancedAutoClicker.initOverrides();
+    });
 }
 
 if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
