@@ -5,7 +5,7 @@
 // @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.6
+// @version       2.6.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -307,6 +307,7 @@ function addOptimizeVitamins() {
         const totalVitamins = (player.highestRegion() + 1) * 5;
         const carbosUnlocked = player.highestRegion() >= GameConstants.Region.unova;
         const calciumUnlocked = player.highestRegion() >= GameConstants.Region.hoenn;
+        const prices = GameHelper.enumStrings(GameConstants.VitaminType).map(v => ItemList[v].basePrice);
         // Add our initial starting efficiency here
         let optimalVitamins = [0, 0, 0];
         let eff = this.calcBreedingEfficiency(optimalVitamins);
@@ -315,9 +316,18 @@ function addOptimizeVitamins() {
             for (let calcium = calciumUnlocked * (totalVitamins - carbos); calcium >= 0; calcium--) {
                 let protein = totalVitamins - (carbos + calcium);
                 let newEff = this.calcBreedingEfficiency([protein, calcium, carbos]);
-                if (newEff > eff) {
+                if (newEff >= eff) {
+                    const newVitamins = [protein, calcium, carbos];
+                    if (newEff == eff) {
+                        // Choose cheaper version
+                        const oldPrice = optimalVitamins.reduce((sum, v, i) => (sum + v * prices[i]), 0);
+                        const newPrice = newVitamins.reduce((sum, v, i) => (sum + v * prices[i]), 0);
+                        if (oldPrice <= newPrice) {
+                           continue;
+                        }
+                    }
                     eff = newEff;
-                    optimalVitamins = [protein, calcium, carbos];
+                    optimalVitamins = newVitamins;
                 }
             }
         }
@@ -326,6 +336,8 @@ function addOptimizeVitamins() {
             if (this.vitaminsUsed[v]()) {
                 this.removeVitamin(v, Infinity);
             }
+        });
+        GameHelper.enumNumbers(GameConstants.VitaminType).forEach((v) => {
             if (v < optimalVitamins.length && optimalVitamins[v] > 0) {
                 this.useVitamin(v, optimalVitamins[v]);
             }
