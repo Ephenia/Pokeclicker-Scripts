@@ -16,7 +16,7 @@
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
 // @grant         none
 // @run-at        document-idle
-// ==/UserScript==//
+// ==/UserScript==
 
 var scriptName = 'simpleautofarmer';
 
