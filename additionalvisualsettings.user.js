@@ -181,7 +181,7 @@ function initVisualSettings() {
         const regionGyms = Object.values(GymList).filter((gym) => gym.parent?.region === player.region);
         for (const gym of regionGyms) {
             const hasBadgeImage = !(BadgeEnums[gym.badgeReward].startsWith('Elite') || BadgeEnums[gym.badgeReward] == 'None');
-            const badgeImage = (hasBadgeImage ? `assets/images/badges/${BadgeEnums[gym.badgeReward]}.png` : '');
+            const badgeImage = (hasBadgeImage ? `assets/images/badges/${BadgeEnums[gym.badgeReward]}.svg` : '');
             const btn = document.createElement('button');
             btn.setAttribute('style', 'position: relative;');
             btn.setAttribute('class', 'btn btn-block btn-success');
