@@ -5,7 +5,7 @@
 // @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.1
+// @version       3.1.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -28,7 +28,7 @@ var pkrsState;
 var pkrsHatcherySearchTime = 0;
 var numMonsWithPkrsCached;
 var autoHatcheryCachedList = [];
-var ticksSinceFilteredHatchery = 0;
+var hatchesSinceFilteredHatchery = 0;
 
 function initAutoHatch() {
     const breedingDisplay = document.getElementById('breedingDisplay');
@@ -62,11 +62,11 @@ function initAutoHatch() {
     // Initialize list since the game won't until the hatchery menu opens
     autoHatcheryCachedList = BreedingController.hatcherySortedFilteredList();
 
-    modalUtils.observableState.breedingModalObservable.subscribe((state) => {
-        if (state === 'hide') {
-            autoHatcheryCachedList = BreedingController.hatcherySortedFilteredList();
-        }
-    });
+    // Immediately refresh the cached list when the filtered list or sort settings change
+    const listUpdateObservables = [BreedingController.hatcheryFilteredList, Settings.getSetting('hatcherySort').observableValue, Settings.getSetting('hatcherySortDirection').observableValue];
+    listUpdateObservables.forEach(observable => observable.subscribe(() => {
+        autoHatcheryCachedList = BreedingController.hatcherySortedFilteredList();
+    }));
 
     if (hatchState) {
         autoHatcher();
@@ -135,10 +135,10 @@ function autoHatcher() {
 
     if (App.game.breeding.hasFreeEggSlot()) {
         // Sort list if it's been a while
-        ticksSinceFilteredHatchery += 1;
-        if (ticksSinceFilteredHatchery > (modalUtils.observableState.breedingModal === 'show' ? 5 : 50)) {
+        hatchesSinceFilteredHatchery += 1;
+        if (hatchesSinceFilteredHatchery > 10) {
             autoHatcheryCachedList = BreedingController.hatcherySortedFilteredList();
-            ticksSinceFilteredHatchery = 0;
+            hatchesSinceFilteredHatchery = 0;
         }
     }
 
@@ -238,22 +238,24 @@ function autoHatchEgg() {
 }
 
 function autoHatchFossil() {
-    let fossilList = Object.keys(GameConstants.FossilToPokemon);
-    // Fossils in inventory with amount > 0
-    fossilList = fossilList.map(f => player.mineInventory().find(i => i.name == f && i.amount())).filter(f => f != undefined);
-    if (shinyFossilState) {
-        // Fossils where the shiny is not yet obtained
-        fossilList = fossilList.filter(f => PartyController.getCaughtStatusByName(GameConstants.FossilToPokemon[f.name]) != CaughtStatus.CaughtShiny);
-    }
+    // Fossils in inventory with amount > 0 
+    let fossilList = UndergroundItems.list.filter(it => it.valueType === UndergroundItemValueType.Fossil && player.itemList[it.itemName]() > 0);
     if (fossilList.length == 0) {
         return false;
     }
+    let priorityList = fossilList.filter(f => { 
+        const caughtStatus = PartyController.getCaughtStatusByName(GameConstants.FossilToPokemon[f.name]);
+        return caughtStatus == CaughtStatus.NotCaught || (shinyFossilState && caughtStatus == CaughtStatus.Caught);
+    });
+    if (priorityList.length) {
+        fossilList = priorityList;
+    }
     let fossilToUse = fossilList[Math.floor(Math.random() * fossilList.length)];
     // Workaround as sellMineItem returns null
-    let before = App.game.breeding.eggList.reduce((count, e) => count + !e().isNone(), 0);
-    Underground.sellMineItem(fossilToUse.id);
-    let after = App.game.breeding.eggList.reduce((count, e) => count + !e().isNone(), 0);
-    return before < after;
+    let before = player.amountOfItem(fossilToUse.itemName)
+    Underground.sellMineItem(fossilToUse);
+    let after = player.amountOfItem(fossilToUse.itemName);
+    return before > after;
 }
 
 function autoHatchMon() {
