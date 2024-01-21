@@ -5,7 +5,7 @@
 // @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.0
+// @version       3.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -27,7 +27,8 @@ var shinyFossilState;
 var pkrsState;
 var pkrsHatcherySearchTime = 0;
 var numMonsWithPkrsCached;
-var ticksSinceSortedHatchery = 0;
+var autoHatcheryCachedList = [];
+var ticksSinceFilteredHatchery = 0;
 
 function initAutoHatch() {
     const breedingDisplay = document.getElementById('breedingDisplay');
@@ -59,9 +60,13 @@ function initAutoHatch() {
     addGlobalStyle('.eggSlot.disabled { pointer-events: unset !important; }');
 
     // Initialize list since the game won't until the hatchery menu opens
-    PartyController.hatcherySortedList = [...App.game.party.caughtPokemon];
-    const region = App.game.challenges.list.regionalAttackDebuff.active() ? BreedingController.regionalAttackDebuff() : -1;
-    PartyController.hatcherySortedList.sort(PartyController.compareBy(Settings.getSetting('hatcherySort').observableValue(), Settings.getSetting('hatcherySortDirection').observableValue(), region));
+    autoHatcheryCachedList = BreedingController.hatcherySortedFilteredList();
+
+    modalUtils.observableState.breedingModalObservable.subscribe((state) => {
+        if (state === 'hide') {
+            autoHatcheryCachedList = BreedingController.hatcherySortedFilteredList();
+        }
+    });
 
     if (hatchState) {
         autoHatcher();
@@ -123,17 +128,18 @@ function bindAutoHatcher() {
 }
 
 function autoHatcher() {
-    // Sort list if it's been a while
-    ticksSinceSortedHatchery += 1;
-    if (ticksSinceSortedHatchery > 40) {
-        const region = App.game.challenges.list.regionalAttackDebuff.active() ? BreedingController.regionalAttackDebuff() : -1;
-        PartyController.hatcherySortedList.sort(PartyController.compareBy(Settings.getSetting('hatcherySort').observableValue(), Settings.getSetting('hatcherySortDirection').observableValue(), region));
-        ticksSinceSortedHatchery = 0;
-    } 
-
     // Attempt to hatch eggs
     for (let i = App.game.breeding.eggSlots - 1; i >= 0; i--) {
         App.game.breeding.hatchPokemonEgg(i);
+    }
+
+    if (App.game.breeding.hasFreeEggSlot()) {
+        // Sort list if it's been a while
+        ticksSinceFilteredHatchery += 1;
+        if (ticksSinceFilteredHatchery > (modalUtils.observableState.breedingModal === 'show' ? 5 : 50)) {
+            autoHatcheryCachedList = BreedingController.hatcherySortedFilteredList();
+            ticksSinceFilteredHatchery = 0;
+        }
     }
 
     while (App.game.breeding.hasFreeEggSlot()) {
@@ -169,7 +175,7 @@ function autoHatchPkrs() {
     let infectedCount = 0;
     // Find first uninfected/contagious pair sharing a type
     // Ideally the uninfected mon is dual-type to accelerate future spreading
-    for (let mon of PartyController.hatcherySortedList) {
+    for (let mon of App.game.party.caughtPokemon) {
         infectedCount += mon.pokerus > GameConstants.Pokerus.Uninfected;
         if (mon.breeding || mon.level < 100) {
             continue;
@@ -250,10 +256,10 @@ function autoHatchFossil() {
 }
 
 function autoHatchMon() {
-    let toHatch = PartyController.hatcherySortedList.find(p => p.isHatchable());
+    let toHatch = autoHatcheryCachedList.find(p => p.isHatchable());
     if (!toHatch) {
         // Nothing matches the hatchery filters
-        toHatch = PartyController.hatcherySortedList.find(p => !(p.breeding || p.level < 100));
+        toHatch = App.game.party.caughtPokemon.find(p => p.isHatchable());
     }
     if (!toHatch) {
         return false;
