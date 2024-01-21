@@ -232,9 +232,8 @@ function autoHatchEgg() {
 }
 
 function autoHatchFossil() {
-    let fossilList = Object.keys(GameConstants.FossilToPokemon);
     // Fossils in inventory with amount > 0
-    fossilList = fossilList.map(f => player.mineInventory().find(i => i.name == f && i.amount())).filter(f => f != undefined);
+    let fossilList = UndergroundItems.list.filter(it => it.valueType === UndergroundItemValueType.Fossil && player.itemList[it.itemName]() > 0);
     if (shinyFossilState) {
         // Fossils where the shiny is not yet obtained
         fossilList = fossilList.filter(f => PartyController.getCaughtStatusByName(GameConstants.FossilToPokemon[f.name]) != CaughtStatus.CaughtShiny);
@@ -245,7 +244,7 @@ function autoHatchFossil() {
     let fossilToUse = fossilList[Math.floor(Math.random() * fossilList.length)];
     // Workaround as sellMineItem returns null
     let before = App.game.breeding.eggList.reduce((count, e) => count + !e().isNone(), 0);
-    Underground.sellMineItem(fossilToUse.id);
+    Underground.sellMineItem(fossilToUse);
     let after = App.game.breeding.eggList.reduce((count, e) => count + !e().isNone(), 0);
     return before < after;
 }
