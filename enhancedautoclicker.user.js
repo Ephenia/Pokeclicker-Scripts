@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.4.1
+// @version       3.4.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -443,30 +443,24 @@ class EnhancedAutoClicker {
         // Set delay based on the autoclicker's tick rate
         // (lower to give setInterval some wiggle room)
         const delay = Math.min(Math.ceil(1000 / this.ticksPerSecond) - 10, 50);
-        Battle.clickAttackCached = 0;
-        Battle.clickAttackLastCached = 0;
         Battle.clickAttack = function () {
             // click attacks disabled and we already beat the starter
             if (App.game.challenges.list.disableClickAttack.active() && player.regionStarters[GameConstants.Region.kanto]() != GameConstants.Starter.None) {
                 return;
             }
             const now = Date.now();
-            if (now - this.lastClickAttack < delay) {
+            if (this.lastClickAttack > now - delay) {
                 return;
             }
             if (!this.enemyPokemon()?.isAlive()) {
                 return;
             }
             this.lastClickAttack = now;
-            // Avoid recalculating damage 20 times per second
-            if (now - this.clickAttackLastCached > 1000) {
-                this.clickAttackCached = App.game.party.calculateClickAttack(true);
-                this.clickAttackLastCached = now;
-            }
             // Don't autoclick more than needed for lethal
-            var clicks = Math.min(clickMultiplier, Math.ceil(this.enemyPokemon().health() / this.clickAttackCached));
+            const clickDamage = App.game.party.calculateClickAttack(true);
+            var clicks = Math.min(clickMultiplier, Math.ceil(this.enemyPokemon().health() / clickDamage));
             GameHelper.incrementObservable(App.game.statistics.clickAttacks, clicks);
-            this.enemyPokemon().damage(this.clickAttackCached * clicks);
+            this.enemyPokemon().damage(clickDamage * clicks);
             if (!this.enemyPokemon().isAlive()) {
                 this.defeatPokemon();
             }
