@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.4.2
+// @version       3.4.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -49,6 +49,7 @@ class EnhancedAutoClicker {
         chestCoords: null,
         floorExplored: false,
         floorFinished: false,
+        dungeonFinished: false,
     };
     // Clicker statistics calculator
     static autoClickCalcLoop;
@@ -536,6 +537,11 @@ class EnhancedAutoClicker {
         // Progress through dungeon
         if (App.game.gameState === GameConstants.GameState.dungeon) {
             if (DungeonRunner.fighting() || DungeonBattle.catching()) {
+                // Can't do anything while in a battle
+                return;
+            } else if (this.autoDungeonTracker.dungeonFinished) {
+                // Boss has been defeated, we just needed to wait until the next tick so quests have time to update
+                this.restartDungeon();
                 return;
             }
             // Scan each new dungeon floor
@@ -587,6 +593,7 @@ class EnhancedAutoClicker {
         this.autoDungeonTracker.targetCoords = null;
         this.autoDungeonTracker.floorExplored = false;
         this.autoDungeonTracker.floorFinished = false;
+        this.autoDungeonTracker.dungeonFinished = false;
 
         // Scan for chest and boss coordinates
         var dungeonBoard = DungeonRunner.map.board()[this.autoDungeonTracker.floor];
@@ -726,6 +733,9 @@ class EnhancedAutoClicker {
         }
     }
 
+    /**
+     * Chooses a target tile based on auto dungeon modes and dungeon progress
+     */
     static chooseDungeonTargetTile() {
         const dungeonBoard = DungeonRunner.map.board()[this.autoDungeonTracker.floor];
         let target = null;
@@ -794,7 +804,23 @@ class EnhancedAutoClicker {
     }
 
     /**
-     * Override DungeonRunner built-in functions*:
+     * Restart dungeon, separate from dungeonWon function so it can be called with a delay
+     */
+    static restartDungeon() {
+        if (DungeonRunner.hasEnoughTokens()) {
+            // Clear old board to force map visuals refresh
+            DungeonRunner.map.board([]);
+            DungeonRunner.initializeDungeon(DungeonRunner.dungeon);
+            this.autoDungeonTracker.dungeonFinished = false;
+            return;
+        }
+        // Can't continue, exit auto dungeon mode
+        this.toggleAutoDungeon();
+        MapHelper.moveToTown(DungeonRunner.dungeon.name);
+    }
+
+    /**
+     * Override DungeonRunner built-in functions:
      * -Add dungeon ID tracking to initializeDungeon() for easier mapping
      * -Add auto dungeon equivalent of dungeonWon() to save on performance by restarting without loading town
      */
@@ -818,15 +844,9 @@ class EnhancedAutoClicker {
                 }
                 GameHelper.incrementObservable(App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(DungeonRunner.dungeon.name)]);
 
-                // Auto restart dungeon
-                if (DungeonRunner.hasEnoughTokens()) {
-                    // Clear old board to force map visuals refresh
-                    DungeonRunner.map.board([]);
-                    DungeonRunner.initializeDungeon(DungeonRunner.dungeon);
-                    return;
-                }
-
-                MapHelper.moveToTown(DungeonRunner.dungeon.name);
+                // The script will restart the dungeon next tick
+                // The delay gives Defeat Dungeon Boss quests time to update
+                EnhancedAutoClicker.autoDungeonTracker.dungeonFinished = true;
             }
         }
         // Only use our version when auto dungeon is running
