@@ -618,7 +618,7 @@ function downloadScript(url, file) {
     request.on('error', (err) => {
       reject(`Failed to download file '${file}' from repository:\n ${err.message}`);
     });
-    request.setTimeout(5000, () => {
+    request.setTimeout(10000, () => {
       reject(`Timed out while trying to download file '${file}' from repository`);
     });
     request.end();
@@ -821,11 +821,23 @@ function startEpheniaScripts() {
   // Delay game load until all scripts have been loaded
   mainWindow.webContents.executeJavaScript(`const resolveDesktopScriptsDone = (() => {
     var externalResolve;
+    var waitingForScripts = true;
     const allScriptsDone = new Promise((resolve, reject) => {
       externalResolve = resolve;
     });
+    allScriptsDone.then(() => {
+      waitingForScripts = false;
+    });
     const startApp = App.start.bind(App)
     App.start = function start(...args) {
+      if (waitingForScripts) {
+        Notifier.notify({
+          type: NotificationConstants.NotificationOption.info,
+          title: 'Pokéclicker Scripts Desktop',
+          message: 'Checking for userscript updates...',
+          timeout: GameConstants.SECOND * 10,
+        });
+      }
       allScriptsDone.finally(() => startApp(...args));
     }
     return externalResolve;
