@@ -469,7 +469,7 @@ Ephenia scripts loading
 */
 
 // VERY IMPORTANT: update this in desktopupdatechecker.js as well!
-const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.4';
+const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.5';
 
 function logInMainWindow(message, level = 'log') {
   if (message == null) {
@@ -597,7 +597,7 @@ function getRepoContents(url) {
   });
 }
 
-function downloadScript(url) {
+function downloadScript(url, file) {
   // TODO download files directly to temp file?
   logInMainWindow(`Trying to download '${url}'`, 'debug')
   return new Promise((resolve, reject) => {
@@ -665,7 +665,7 @@ function downloadAndRunScript(fileinfo, delay, checksumOld, installUpdate) {
 
     // Download file
     try {
-      dataNew = await downloadScript(url);
+      dataNew = await downloadScript(url, file);
       checksumNew = createHash('md5').update(dataNew).digest('hex');
     } catch (err) {
       logInMainWindow(err, 'error');
