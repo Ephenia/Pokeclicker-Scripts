@@ -18,8 +18,6 @@
 // @run-at        document-idle
 // ==/UserScript==
 
-var scriptName = 'enhancedautoclicker';
-
 class EnhancedAutoClicker {
     // Constants
     static ticksPerSecond = 20;
@@ -1122,29 +1120,64 @@ function addGlobalStyle(css) {
     head.appendChild(style);
 }
 
-function loadScript() {
+function loadEpheniaScript(scriptName, initFunction) {
+    const windowObject = !App.isUsingClient ? unsafeWindow : window;
+    // Inject handlers if they don't exist yet
+    if (windowObject.epheniaScriptInitializers === undefined) {
+        windowObject.epheniaScriptInitializers = {};
+        const oldInit = Preload.hideSplashScreen;
+        var hasInitialized = false;
+
+        // Initializes scripts once enough of the game has loaded
+        Preload.hideSplashScreen = function (...args) {
+            var result = oldInit.apply(this, args);
+            if (App.game && !hasInitialized) {
+                // Initialize all attached userscripts
+                Object.entries(windowObject.epheniaScriptInitializers).forEach(([scriptName, initFunction]) => {
+                    try {
+                        initFunction();
+                    } catch (e) {
+                        console.error(`Error while initializing '${scriptName}' userscript:\n${e}`);
+                        Notifier.notify({
+                            type: NotificationConstants.NotificationOption.warning,
+                            title: scriptName,
+                            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
+                            timeout: GameConstants.DAY,
+                        });
+                    }
+                });
+                hasInitialized = true;
+            }
+            return result;
+        }
+    }
+
+    // Prevent issues with duplicate script names
+    if (windowObject.epheniaScriptInitializers[scriptName] !== undefined) {
+        console.warn(`Duplicate '${scriptName}' userscripts found!`);
+        Notifier.notify({
+            type: NotificationConstants.NotificationOption.warning,
+            title: scriptName,
+            message: `Duplicate '${scriptName}' userscripts detected. This could cause unpredictable behavior and is not recommended.`,
+            timeout: GameConstants.DAY,
+        });
+        let number = 2;
+        while (windowObject.epheniaScriptInitializers[`${scriptName} ${number}`] !== undefined) {
+            number++;
+        }
+        scriptName = `${scriptName} ${number}`;
+    }
+    // Add initializer for this particular script
+    windowObject.epheniaScriptInitializers[scriptName] = initFunction;
+}
+
+if (!App.isUsingClient || localStorage.getItem('enhancedautoclicker') === 'true') {
     if (!App.isUsingClient) {
         // Necessary for userscript managers
         unsafeWindow.EnhancedAutoClicker = EnhancedAutoClicker;
     }
-
-    const oldInit = Preload.hideSplashScreen;
-    var hasInitialized = false;
-
-    Preload.hideSplashScreen = function (...args) {
-        var result = oldInit.apply(this, args);
-        if (App.game && !hasInitialized) {
-            EnhancedAutoClicker.initAutoClicker();
-            hasInitialized = true;
-        }
-        return result;
-    }
-
+    loadEpheniaScript('enhancedautoclicker', EnhancedAutoClicker.initAutoClicker.bind(EnhancedAutoClicker));
     $(document).ready(() => {
         EnhancedAutoClicker.initOverrides();
     });
-}
-
-if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
-    loadScript();
 }

@@ -5,7 +5,7 @@
 // @description   Allows berres to grow while the game is closed.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.1.1
+// @version       1.1.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -18,13 +18,12 @@
 // @run-at        document-idle
 // ==/UserScript==
 
-var scriptName = "overnightberrygrowth";
 const stageMargin = 2; // buffer in seconds around stage changes
 var overnightGrowthMode;
 
 // handle settings
 
-function initSettings() {
+function initOvernightBerrySettings() {
     // Add overnightberrygrowth settings
     const settingsBody = createScriptSettingsContainer('Overnight Berry Growth');
     let settingsElem = document.createElement('tr');
@@ -230,23 +229,59 @@ function createScriptSettingsContainer(name) {
 
 // load script
 
-function loadScript() {
-    const oldInit = Preload.hideSplashScreen;
-    var hasInitialized = false;
+function loadEpheniaScript(scriptName, initFunction) {
+    const windowObject = !App.isUsingClient ? unsafeWindow : window;
+    // Inject handlers if they don't exist yet
+    if (windowObject.epheniaScriptInitializers === undefined) {
+        windowObject.epheniaScriptInitializers = {};
+        const oldInit = Preload.hideSplashScreen;
+        var hasInitialized = false;
 
-    Preload.hideSplashScreen = function (...args) {
-        var result = oldInit.apply(this, args);
-        if (App.game && !hasInitialized) {
-            initSettings();
-            hasInitialized = true;
+        // Initializes scripts once enough of the game has loaded
+        Preload.hideSplashScreen = function (...args) {
+            var result = oldInit.apply(this, args);
+            if (App.game && !hasInitialized) {
+                // Initialize all attached userscripts
+                Object.entries(windowObject.epheniaScriptInitializers).forEach(([scriptName, initFunction]) => {
+                    try {
+                        initFunction();
+                    } catch (e) {
+                        console.error(`Error while initializing '${scriptName}' userscript:\n${e}`);
+                        Notifier.notify({
+                            type: NotificationConstants.NotificationOption.warning,
+                            title: scriptName,
+                            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
+                            timeout: GameConstants.DAY,
+                        });
+                    }
+                });
+                hasInitialized = true;
+            }
+            return result;
         }
-        return result;
     }
 
-    // Runs at a different time than typical script initialization
-    initOfflineGrowth();
+    // Prevent issues with duplicate script names
+    if (windowObject.epheniaScriptInitializers[scriptName] !== undefined) {
+        console.warn(`Duplicate '${scriptName}' userscripts found!`);
+        Notifier.notify({
+            type: NotificationConstants.NotificationOption.warning,
+            title: scriptName,
+            message: `Duplicate '${scriptName}' userscripts detected. This could cause unpredictable behavior and is not recommended.`,
+            timeout: GameConstants.DAY,
+        });
+        let number = 2;
+        while (windowObject.epheniaScriptInitializers[`${scriptName} ${number}`] !== undefined) {
+            number++;
+        }
+        scriptName = `${scriptName} ${number}`;
+    }
+    // Add initializer for this particular script
+    windowObject.epheniaScriptInitializers[scriptName] = initFunction;
 }
 
-if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
-    loadScript();
+if (!App.isUsingClient || localStorage.getItem('overnightberrygrowth') === 'true') {
+    loadEpheniaScript('overnightberrygrowth', initOvernightBerrySettings);
+    // Runs at a different time than typical script initialization
+    initOfflineGrowth();
 }

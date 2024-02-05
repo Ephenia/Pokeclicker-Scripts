@@ -5,7 +5,7 @@
 // @description   A script solely for clearing out localStorage without saves being affected. Meant to be a user friendly solution for this and or for users who aren't as tech literate.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.1
+// @version       2.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -18,8 +18,6 @@
 // @run-at        document-idle
 // ==/UserScript==
 
-var scriptName = 'scriptfixerupper';
-
 function initFixerUpper(resolve) {
     function clearLocalStorage() {
         setTimeout(() => {
@@ -29,7 +27,11 @@ function initFixerUpper(resolve) {
                     localStorage.removeItem(key);
                 }
             }
-            localStorage.setItem('scriptfixerupper', false);
+            if (App.isUsingClient) {
+                localStorage.setItem('scriptfixerupper', false);
+            } else {
+                localStorage.setItem('scriptfixerupper_browsernotification', true);
+            }
             location.reload(); 
         }, 1000);
     }
@@ -41,23 +43,21 @@ function initFixerUpper(resolve) {
     }
 }
 
-function loadScript() {
-    var externalResolve;
+
+if (localStorage.getItem('scriptfixerupper_browsernotification') === 'true') {
+    // Special in-browser behavior after resets
+    localStorage.removeItem('scriptfixerupper_browsernotification');
+    alert('Script Fixer Upper:\n\nAll script settings have been reset. Disable this script and reload the game.');
+} else if (!App.isUsingClient || localStorage.getItem('scriptfixerupper') === 'true') {
+    // Load fixer upper
     const fixerUpperDone = new Promise((resolve, reject) => {
-        externalResolve = resolve;
+        setTimeout(() => {
+            initFixerUpper(resolve);
+        }, 1000);
     });
+    // Won't load game until fixer upper is cancelled
     const loadApp = Preload.load.bind(Preload);
     Preload.load = function load(...args) {
         return fixerUpperDone.finally(() => loadApp(...args));
     }
-    setTimeout(() => {
-        initFixerUpper(externalResolve);
-    }, 1000);
-}
-
-if (!App.isUsingClient && localStorage.getItem(scriptName) === 'false') {
-    // Special in-browser behavior after resets 
-    localStorage.removeItem(scriptName);
-} else if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
-    loadScript();
 }

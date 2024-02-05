@@ -5,7 +5,7 @@
 // @description   Adds options to automatically plant, harvest, replant, and remulch. Unlike harvesting, replanting only harvests berries right before they wither, to maximize any auras. Make sure the correct berry is selected before auto planting; the script will save your selection across restarts. Auto replant and mulch maintain the berry/mulch already in each plot.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.7
+// @version       1.7.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -17,8 +17,6 @@
 // @grant         none
 // @run-at        document-idle
 // ==/UserScript==//
-
-var scriptName = 'simpleautofarmer';
 
 function initAutoFarm() {
     var autoFarmLoop;
@@ -239,22 +237,6 @@ function initSelectedBerryTracking() {
     }
 }
 
-function loadScript() {
-    const oldInit = Preload.hideSplashScreen;
-    var hasInitialized = false;
-
-    Preload.hideSplashScreen = function (...args) {
-        var result = oldInit.apply(this, args);
-        if (App.game && !hasInitialized) {
-            initAutoFarm();
-            hasInitialized = true;
-        }
-        return result;
-    }
-
-    initSelectedBerryTracking();
-}
-
 function initLocalStorage(param, value) {
     let curVal = localStorage.getItem(param);
     try {
@@ -273,7 +255,58 @@ initLocalStorage("autoReplantState", false);
 initLocalStorage("autoMulchState", false);
 initLocalStorage("autoPlantSelected", 0);
 
+function loadEpheniaScript(scriptName, initFunction) {
+    const windowObject = !App.isUsingClient ? unsafeWindow : window;
+    // Inject handlers if they don't exist yet
+    if (windowObject.epheniaScriptInitializers === undefined) {
+        windowObject.epheniaScriptInitializers = {};
+        const oldInit = Preload.hideSplashScreen;
+        var hasInitialized = false;
 
-if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
-    loadScript();
+        // Initializes scripts once enough of the game has loaded
+        Preload.hideSplashScreen = function (...args) {
+            var result = oldInit.apply(this, args);
+            if (App.game && !hasInitialized) {
+                // Initialize all attached userscripts
+                Object.entries(windowObject.epheniaScriptInitializers).forEach(([scriptName, initFunction]) => {
+                    try {
+                        initFunction();
+                    } catch (e) {
+                        console.error(`Error while initializing '${scriptName}' userscript:\n${e}`);
+                        Notifier.notify({
+                            type: NotificationConstants.NotificationOption.warning,
+                            title: scriptName,
+                            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
+                            timeout: GameConstants.DAY,
+                        });
+                    }
+                });
+                hasInitialized = true;
+            }
+            return result;
+        }
+    }
+
+    // Prevent issues with duplicate script names
+    if (windowObject.epheniaScriptInitializers[scriptName] !== undefined) {
+        console.warn(`Duplicate '${scriptName}' userscripts found!`);
+        Notifier.notify({
+            type: NotificationConstants.NotificationOption.warning,
+            title: scriptName,
+            message: `Duplicate '${scriptName}' userscripts detected. This could cause unpredictable behavior and is highly not recommended.`,
+            timeout: GameConstants.DAY,
+        });
+        let number = 2;
+        while (windowObject.epheniaScriptInitializers[`${scriptName} ${number}`] !== undefined) {
+            number++;
+        }
+        scriptName = `${scriptName} ${number}`;
+    }
+    // Add initializer for this particular script
+    windowObject.epheniaScriptInitializers[scriptName] = initFunction;
+}
+
+if (!App.isUsingClient || localStorage.getItem('simpleautofarmer') === 'true') {
+    loadEpheniaScript('simpleautofarmer', initAutoFarm);
+    initSelectedBerryTracking();
 }
