@@ -748,7 +748,6 @@ function handleScripts(files) {
 
     var downloadResults = await Promise.allSettled(downloads);
     logInMainWindow('Finished downloading Ephenia scripts from repository');
-    resolve(); // code will continue executing
 
     // Save checksum data for script update checking
     var updatedChecksums = {};
@@ -797,6 +796,9 @@ function handleScripts(files) {
         timeout: GameConstants.HOUR,
       });`);
     }
+
+    // True if any download/update messages were displayed
+    resolve((failedDownloads.length || message.length) > 0);
   });
 }
 
@@ -822,6 +824,7 @@ function startEpheniaScripts() {
   mainWindow.webContents.executeJavaScript(`const resolveDesktopScriptsDone = (() => {
     var externalResolve;
     var waitingForScripts = true;
+    var notifiedWaiting = false;
     const allScriptsDone = new Promise((resolve, reject) => {
       externalResolve = resolve;
     });
@@ -837,8 +840,19 @@ function startEpheniaScripts() {
           message: 'Checking for userscript updates...',
           timeout: GameConstants.SECOND * 10,
         });
+        notifiedWaiting = true;
       }
-      allScriptsDone.finally(() => startApp(...args));
+      allScriptsDone.then((res) => {
+        if (notifiedWaiting && res != 'silent') {
+          Notifier.notify({
+            type: NotificationConstants.NotificationOption[res === 'online' ? 'info' : 'warning'],
+            title: 'Pokéclicker Scripts Desktop',
+            message: (res === 'online' ? 'Done checking for updates.' : 'Unable to connect to GitHub, running offline'),
+            timeout: GameConstants.SECOND * 10,
+          });
+        }
+        return startApp(...args);
+      });
     }
     return externalResolve;
   })();`);
@@ -849,6 +863,7 @@ function startEpheniaScripts() {
   const repoUrl = 'https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/';
   var repoFiles;
   var localFiles;
+  var runningOffline = false;
 
   try {
     localFiles = fs.readdirSync(defaultScriptsDir);
@@ -882,6 +897,7 @@ function startEpheniaScripts() {
       disableExtraneousScripts(localFiles, repoFilenames);
       return scriptsExecuted;
     }, (err) => { 
+      runningOffline = true;
       logInMainWindow(err, 'warn');
       logInMainWindow('Could not connect to Ephenia GitHub repository, running scripts offline');
       let scriptsExecutedOffline = [];
@@ -896,8 +912,9 @@ function startEpheniaScripts() {
 
   // Allow game to load
   Promise.allSettled([epheniaScriptsDone, customScriptsDone])
-    .then((res) => {
-      mainWindow.webContents.executeJavaScript(`resolveDesktopScriptsDone();`);
+    .then(async (res) => {
+      const notifyResult = runningOffline ? 'offline' : (await epheniaScriptsDone ? 'silent' : 'online');
+      mainWindow.webContents.executeJavaScript(`resolveDesktopScriptsDone('${notifyResult}');`);
     });
 }
 
