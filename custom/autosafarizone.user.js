@@ -409,7 +409,7 @@ function initAutoSafari() {
     }
     // Not shiny
     // Throw regular bait to grind achievement
-    else if (autoSafariThrowBaitsState && !isPriority && App.game.statistics.safariBaitThrown() < 1000) {
+    else if (autoSafariThrowBaitsState && !isPriority && !(SafariBattle.enemy.eating || SafariBattle.enemy.angry) && App.game.statistics.safariBaitThrown() < 1000) {
       SafariBattle.selectedBait(BaitList.Bait);
       SafariBattle.throwBait();
     }
