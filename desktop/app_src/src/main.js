@@ -28,6 +28,10 @@ const defaultScriptsDir = path.join(dataDir, "scripts");
 const customScriptsDir = path.join(dataDir, "custom-scripts");
 // Script checksums file for update checking
 const checksumsFile = path.join(defaultScriptsDir, "fileVersions.json");
+// Client's Electron version when this desktop scripts version was made
+const MOD_EXPECTED_CLIENT_VERSION = '1.2.0';
+// Used for update checking as the real client version gets overridden by the mod
+const MOD_EXPECTED_ELECTRON_VERSION = '21.4.4';
 
 console.info("Data directory:", dataDir);
 
@@ -820,7 +824,32 @@ function startEpheniaScripts() {
   logInMainWindow(`Pokéclicker Scripts Desktop v${POKECLICKER_SCRIPTS_DESKTOP_VERSION} initializing!`);
   mainWindow.webContents.executeJavaScript(`const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '${POKECLICKER_SCRIPTS_DESKTOP_VERSION}';`);
 
-  // Delay game load until all scripts have been loaded
+  // Warn user if desktop client is the wrong version
+  // This isn't a perfect solution as the client could update without changing Electron versions, but it's the best we can do for now
+  if (process.versions.electron !== MOD_EXPECTED_ELECTRON_VERSION) {
+    // Client doesn't come with semver module so have to use an approximation, major-minor-patch
+    const regex = /^\d+\.\d+\.\d+/;
+    const expectedVersions = MOD_EXPECTED_ELECTRON_VERSION.match(regex)[0].split('.');
+    const actualVersions = process.versions.electron.match(regex)[0].split('.');
+    const clientNewer = expectedVersions.reduce((result, v, i) => {
+      if (result == null && v !== actualVersions[i]) {
+        return +v < +actualVersions[i];
+      }
+      return result;
+    }, null);
+    console.log(expectedVersions);
+    console.log(actualVersions);
+    console.log(clientNewer);
+    mainWindow.webContents.executeJavaScript(`Notifier.notify({
+      type: NotificationConstants.NotificationOption.warning,
+      title: 'Pokéclicker Scripts Desktop',
+      message: '${clientNewer ? 'WARNING: You are using a newer desktop client version than Pokéclicker Scripts Desktop expects. This may cause bugs and unexpected behavior.'
+        : `You are using an outdated desktop client version. Please install version ${MOD_EXPECTED_CLIENT_VERSION} to ensure all scripts work correctly.`}',
+      timeout: GameConstants.DAY,
+    });`);
+  }
+
+  // Prevent game load until all scripts have been loaded, and notify the user if this causes a delay 
   mainWindow.webContents.executeJavaScript(`const resolveDesktopScriptsDone = (() => {
     var externalResolve;
     var waitingForScripts = true;
