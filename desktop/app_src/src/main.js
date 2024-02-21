@@ -28,6 +28,10 @@ const defaultScriptsDir = path.join(dataDir, "scripts");
 const customScriptsDir = path.join(dataDir, "custom-scripts");
 // Script checksums file for update checking
 const checksumsFile = path.join(defaultScriptsDir, "fileVersions.json");
+// Client's Electron version when this desktop scripts version was made
+const MOD_EXPECTED_CLIENT_VERSION = '1.2.0';
+// Used for update checking as the real client version gets overridden by the mod
+const MOD_EXPECTED_ELECTRON_VERSION = '21.4.4';
 
 console.info("Data directory:", dataDir);
 
@@ -469,7 +473,7 @@ Ephenia scripts loading
 */
 
 // VERY IMPORTANT: update this in desktopupdatechecker.js as well!
-const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.4';
+const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.5';
 
 function logInMainWindow(message, level = 'log') {
   if (message == null) {
@@ -597,7 +601,7 @@ function getRepoContents(url) {
   });
 }
 
-function downloadScript(url) {
+function downloadScript(url, file) {
   // TODO download files directly to temp file?
   logInMainWindow(`Trying to download '${url}'`, 'debug')
   return new Promise((resolve, reject) => {
@@ -618,7 +622,7 @@ function downloadScript(url) {
     request.on('error', (err) => {
       reject(`Failed to download file '${file}' from repository:\n ${err.message}`);
     });
-    request.setTimeout(5000, () => {
+    request.setTimeout(10000, () => {
       reject(`Timed out while trying to download file '${file}' from repository`);
     });
     request.end();
@@ -665,7 +669,7 @@ function downloadAndRunScript(fileinfo, delay, checksumOld, installUpdate) {
 
     // Download file
     try {
-      dataNew = await downloadScript(url);
+      dataNew = await downloadScript(url, file);
       checksumNew = createHash('md5').update(dataNew).digest('hex');
     } catch (err) {
       logInMainWindow(err, 'error');
@@ -748,7 +752,6 @@ function handleScripts(files) {
 
     var downloadResults = await Promise.allSettled(downloads);
     logInMainWindow('Finished downloading Ephenia scripts from repository');
-    resolve(); // code will continue executing
 
     // Save checksum data for script update checking
     var updatedChecksums = {};
@@ -797,6 +800,9 @@ function handleScripts(files) {
         timeout: GameConstants.HOUR,
       });`);
     }
+
+    // True if any download/update messages were displayed
+    resolve((failedDownloads.length || message.length) > 0);
   });
 }
 
@@ -818,15 +824,64 @@ function startEpheniaScripts() {
   logInMainWindow(`Pokéclicker Scripts Desktop v${POKECLICKER_SCRIPTS_DESKTOP_VERSION} initializing!`);
   mainWindow.webContents.executeJavaScript(`const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '${POKECLICKER_SCRIPTS_DESKTOP_VERSION}';`);
 
-  // Delay game load until all scripts have been loaded
+  // Warn user if desktop client is the wrong version
+  // This isn't a perfect solution as the client could update without changing Electron versions, but it's the best we can do for now
+  if (process.versions.electron !== MOD_EXPECTED_ELECTRON_VERSION) {
+    // Client doesn't come with semver module so have to use an approximation, major-minor-patch
+    const regex = /^\d+\.\d+\.\d+/;
+    const expectedVersions = MOD_EXPECTED_ELECTRON_VERSION.match(regex)[0].split('.');
+    const actualVersions = process.versions.electron.match(regex)[0].split('.');
+    const clientNewer = expectedVersions.reduce((result, v, i) => {
+      if (result == null && v !== actualVersions[i]) {
+        return +v < +actualVersions[i];
+      }
+      return result;
+    }, null);
+    console.log(expectedVersions);
+    console.log(actualVersions);
+    console.log(clientNewer);
+    mainWindow.webContents.executeJavaScript(`Notifier.notify({
+      type: NotificationConstants.NotificationOption.warning,
+      title: 'Pokéclicker Scripts Desktop',
+      message: '${clientNewer ? 'WARNING: You are using a newer desktop client version than Pokéclicker Scripts Desktop expects. This may cause bugs and unexpected behavior.'
+        : `You are using an outdated desktop client version. Please install version ${MOD_EXPECTED_CLIENT_VERSION} to ensure all scripts work correctly.`}',
+      timeout: GameConstants.DAY,
+    });`);
+  }
+
+  // Prevent game load until all scripts have been loaded, and notify the user if this causes a delay 
   mainWindow.webContents.executeJavaScript(`const resolveDesktopScriptsDone = (() => {
     var externalResolve;
+    var waitingForScripts = true;
+    var notifiedWaiting = false;
     const allScriptsDone = new Promise((resolve, reject) => {
       externalResolve = resolve;
     });
+    allScriptsDone.then(() => {
+      waitingForScripts = false;
+    });
     const startApp = App.start.bind(App)
     App.start = function start(...args) {
-      allScriptsDone.finally(() => startApp(...args));
+      if (waitingForScripts) {
+        Notifier.notify({
+          type: NotificationConstants.NotificationOption.info,
+          title: 'Pokéclicker Scripts Desktop',
+          message: 'Checking for userscript updates...',
+          timeout: GameConstants.SECOND * 10,
+        });
+        notifiedWaiting = true;
+      }
+      allScriptsDone.then((res) => {
+        if (notifiedWaiting && res != 'silent') {
+          Notifier.notify({
+            type: NotificationConstants.NotificationOption[res === 'online' ? 'info' : 'warning'],
+            title: 'Pokéclicker Scripts Desktop',
+            message: (res === 'online' ? 'Done checking for updates.' : 'Unable to connect to GitHub, running offline'),
+            timeout: GameConstants.SECOND * 10,
+          });
+        }
+        return startApp(...args);
+      });
     }
     return externalResolve;
   })();`);
@@ -837,6 +892,7 @@ function startEpheniaScripts() {
   const repoUrl = 'https://api.github.com/repos/Ephenia/Pokeclicker-Scripts/contents/';
   var repoFiles;
   var localFiles;
+  var runningOffline = false;
 
   try {
     localFiles = fs.readdirSync(defaultScriptsDir);
@@ -870,6 +926,7 @@ function startEpheniaScripts() {
       disableExtraneousScripts(localFiles, repoFilenames);
       return scriptsExecuted;
     }, (err) => { 
+      runningOffline = true;
       logInMainWindow(err, 'warn');
       logInMainWindow('Could not connect to Ephenia GitHub repository, running scripts offline');
       let scriptsExecutedOffline = [];
@@ -884,8 +941,9 @@ function startEpheniaScripts() {
 
   // Allow game to load
   Promise.allSettled([epheniaScriptsDone, customScriptsDone])
-    .then((res) => {
-      mainWindow.webContents.executeJavaScript(`resolveDesktopScriptsDone();`);
+    .then(async (res) => {
+      const notifyResult = runningOffline ? 'offline' : (await epheniaScriptsDone ? 'silent' : 'online');
+      mainWindow.webContents.executeJavaScript(`resolveDesktopScriptsDone('${notifyResult}');`);
     });
 }
 
