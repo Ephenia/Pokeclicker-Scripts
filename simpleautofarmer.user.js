@@ -5,7 +5,7 @@
 // @description   Adds options to automatically plant, harvest, replant, and remulch. Unlike harvesting, replanting only harvests berries right before they wither, to maximize any auras. Make sure the correct berry is selected before auto planting; the script will save your selection across restarts. Auto replant and mulch maintain the berry/mulch already in each plot.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.7
+// @version       1.8
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -16,7 +16,7 @@
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
 // @grant         none
 // @run-at        document-idle
-// ==/UserScript==//
+// ==/UserScript==
 
 var scriptName = 'simpleautofarmer';
 
@@ -27,11 +27,13 @@ function initAutoFarm() {
     var harvestState;
     var replantState;
     var mulchState;
+    var smartMulchState;
 
     plantState = JSON.parse(localStorage.getItem('autoPlantState'));
     harvestState = JSON.parse(localStorage.getItem('autoHarvestState'));
     replantState = JSON.parse(localStorage.getItem('autoReplantState'));
     mulchState = JSON.parse(localStorage.getItem('autoMulchState'));
+    smartMulchState = JSON.parse(localStorage.getItem('autoSmartMulchState'));
 
     let plantSelected = JSON.parse(localStorage.getItem('autoPlantSelected'));
     FarmController.selectedBerry(plantSelected);
@@ -79,6 +81,7 @@ function initAutoFarm() {
         createButton('harvest', harvestState, autoHarvestToggle, 'l', true);
         createButton('replant', replantState, autoReplantToggle, 'r', false);
         createButton('mulch', mulchState, autoMulchToggle, 'l', false);
+        createButton('smart-mulch', smartMulchState, autoSmartMulchToggle, 'r', false);
     }
 
     function toggleFarmLoop() {
@@ -150,6 +153,10 @@ function initAutoFarm() {
     }
 
     function doHarvest() {
+        if (smartMulchState){
+            //Applies rich mulch to all ripe plots
+            doSmartMulch()
+        }
         App.game.farming.harvestAll();
     }
 
@@ -190,6 +197,10 @@ function initAutoFarm() {
                 var timeLeft = berryData[berry].growthTime[4] - plot.age;
                 timeLeft /= (App.game.farming.getGrowthMultiplier() * plot.getGrowthMultiplier());
                 if (timeLeft < 10) {
+                    if (smartMulchState){
+                        // Applies rich mulch to the current plot
+                        doRipeMulch(plot)
+                    }
                     App.game.farming.harvest(i, false);
                     App.game.farming.plant(i, berry, false);
                 }
@@ -201,6 +212,9 @@ function initAutoFarm() {
         mulchState = !mulchState;
         localStorage.setItem("autoMulchState", mulchState);
         toggleFarmLoop();
+        if (smartMulchState) {
+            autoSmartMulchToggle();
+        }
         let elt = document.getElementById('auto-mulch-toggle');
         if (mulchState) {
             elt.innerText = "Auto Mulch\n[ON]";
@@ -220,6 +234,41 @@ function initAutoFarm() {
             if (plot.mulch != MulchType.None && plot.mulchTimeLeft < 15) {
                 App.game.farming.addMulch(i, plot.mulch);
             }
+        }
+    }
+
+    function autoSmartMulchToggle() {
+        smartMulchState = !smartMulchState;
+        localStorage.setItem("autoHarvestState", smartMulchState);
+        toggleFarmLoop();
+        if (mulchState) {
+            autoMulchToggle();
+        }
+        let elt = document.getElementById('auto-smart-mulch-toggle');
+        if (smartMulchState) {
+            // No \n because it causes clipping issues with the shovel button. "Auto Smart Mulch" takes up two lines
+            elt.innerText = "Auto Smart Mulch [ON]";
+            elt.classList.remove('btn-danger');
+            elt.classList.add('btn-success');
+        } else {
+            elt.innerText = "Auto Smart Mulch [OFF]";
+            elt.classList.remove('btn-success');
+            elt.classList.add('btn-danger');
+        }
+    }
+    // Checks each plot to see if it's ripe, then calls the function to apply rich mulch to that plot if it is ripe
+    function doSmartMulch(){
+        for (let i = 0; i < 25; i++) {
+            let plot = App.game.farming.plotList[i];
+            if (plot.berry >= 0 && plot.stage() == 4) {
+                doRipeMulch(plot)
+            }
+        }
+    }
+    // Checks if the given plot has no mulch, and if it doesn't, applies rich mulch
+    function doRipeMulch(plot){
+        if (plot.mulch == MulchType.None) {
+                App.game.farming.addMulch(plot.index, 1);
         }
     }
 }
@@ -276,6 +325,7 @@ initLocalStorage("autoPlantState", false);
 initLocalStorage("autoHarvestState", false);
 initLocalStorage("autoReplantState", false);
 initLocalStorage("autoMulchState", false);
+initLocalStorage("autoSmartMulchState", false);
 initLocalStorage("autoPlantSelected", 0);
 
 
