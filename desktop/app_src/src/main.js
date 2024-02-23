@@ -19,6 +19,7 @@ const url = require("url");
 const ini = require("ini");
 const { XMLHttpRequest } = require("xmlhttprequest");
 const { createHash } = require('crypto');
+const semver = require('semver');
 
 
 const settingsFile = path.join(dataDir, "settings.ini");
@@ -31,7 +32,9 @@ const checksumsFile = path.join(defaultScriptsDir, "fileVersions.json");
 // Client's Electron version when this desktop scripts version was made
 const MOD_EXPECTED_CLIENT_VERSION = '1.2.0';
 // Used for update checking as the real client version gets overridden by the mod
-const MOD_EXPECTED_ELECTRON_VERSION = '21.4.4';
+const MOD_EXPECTED_ELECTRON_VERSION = '^21.3.1';
+// VERY IMPORTANT: update this in desktopupdatechecker.js as well!
+const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.6';
 
 console.info("Data directory:", dataDir);
 
@@ -472,9 +475,6 @@ if (!isMainInstance) {
 Ephenia scripts loading
 */
 
-// VERY IMPORTANT: update this in desktopupdatechecker.js as well!
-const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.5';
-
 function logInMainWindow(message, level = 'log') {
   if (message == null) {
     return;
@@ -825,21 +825,9 @@ function startEpheniaScripts() {
   mainWindow.webContents.executeJavaScript(`const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '${POKECLICKER_SCRIPTS_DESKTOP_VERSION}';`);
 
   // Warn user if desktop client is the wrong version
-  // This isn't a perfect solution as the client could update without changing Electron versions, but it's the best we can do for now
-  if (process.versions.electron !== MOD_EXPECTED_ELECTRON_VERSION) {
-    // Client doesn't come with semver module so have to use an approximation, major-minor-patch
-    const regex = /^\d+\.\d+\.\d+/;
-    const expectedVersions = MOD_EXPECTED_ELECTRON_VERSION.match(regex)[0].split('.');
-    const actualVersions = process.versions.electron.match(regex)[0].split('.');
-    const clientNewer = expectedVersions.reduce((result, v, i) => {
-      if (result == null && v !== actualVersions[i]) {
-        return +v < +actualVersions[i];
-      }
-      return result;
-    }, null);
-    console.log(expectedVersions);
-    console.log(actualVersions);
-    console.log(clientNewer);
+  // This isn't a perfect solution as a client update could leave the Electron version unchanged, but it's the best we can do for now
+  if (!semver.satisfies(process.versions.electron, MOD_EXPECTED_ELECTRON_VERSION)) {
+    const clientNewer = semver.gtr(process.versions.electron, MOD_EXPECTED_ELECTRON_VERSION);
     mainWindow.webContents.executeJavaScript(`Notifier.notify({
       type: NotificationConstants.NotificationOption.warning,
       title: 'Pokéclicker Scripts Desktop',
