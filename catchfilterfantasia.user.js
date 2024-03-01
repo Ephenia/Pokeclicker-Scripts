@@ -5,7 +5,7 @@
 // @description   An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.9
+// @version       1.9.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -17,8 +17,6 @@
 // @grant         none
 // @run-at        document-idle
 // ==/UserScript==
-
-var scriptName = 'catchfilterfantasia';
 
 const ballNames = ['None', 'Pokeball', 'Greatball', 'Ultraball', 'Masterball', 'Fastball', 'Quickball', 'Timerball', 'Duskball', 'Luxuryball', 'Diveball', 'Lureball', 'Nestball', 'Repeatball', 'Beastball'];
 var filterState;
@@ -472,20 +470,6 @@ if (fixIt.length != 0) {
     localStorage.setItem('filterBallPref', JSON.stringify(filterBallPref));
 }
 
-function loadScript() {
-    const oldInit = Preload.hideSplashScreen;
-    var hasInitialized = false;
-
-    Preload.hideSplashScreen = function (...args) {
-        var result = oldInit.apply(this, args);
-        if (App.game && !hasInitialized) {
-            initCatchFilter();
-            hasInitialized = true;
-        }
-        return result
-    }
-}
-
 function addGlobalStyle(css) {
     var head, style;
     head = document.getElementsByTagName('head')[0];
@@ -496,6 +480,57 @@ function addGlobalStyle(css) {
     head.appendChild(style);
 }
 
-if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
-    loadScript();
+function loadEpheniaScript(scriptName, initFunction) {
+    const windowObject = !App.isUsingClient ? unsafeWindow : window;
+    // Inject handlers if they don't exist yet
+    if (windowObject.epheniaScriptInitializers === undefined) {
+        windowObject.epheniaScriptInitializers = {};
+        const oldInit = Preload.hideSplashScreen;
+        var hasInitialized = false;
+
+        // Initializes scripts once enough of the game has loaded
+        Preload.hideSplashScreen = function (...args) {
+            var result = oldInit.apply(this, args);
+            if (App.game && !hasInitialized) {
+                // Initialize all attached userscripts
+                Object.entries(windowObject.epheniaScriptInitializers).forEach(([scriptName, initFunction]) => {
+                    try {
+                        initFunction();
+                    } catch (e) {
+                        console.error(`Error while initializing '${scriptName}' userscript:\n${e}`);
+                        Notifier.notify({
+                            type: NotificationConstants.NotificationOption.warning,
+                            title: scriptName,
+                            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
+                            timeout: GameConstants.DAY,
+                        });
+                    }
+                });
+                hasInitialized = true;
+            }
+            return result;
+        }
+    }
+
+    // Prevent issues with duplicate script names
+    if (windowObject.epheniaScriptInitializers[scriptName] !== undefined) {
+        console.warn(`Duplicate '${scriptName}' userscripts found!`);
+        Notifier.notify({
+            type: NotificationConstants.NotificationOption.warning,
+            title: scriptName,
+            message: `Duplicate '${scriptName}' userscripts detected. This could cause unpredictable behavior and is not recommended.`,
+            timeout: GameConstants.DAY,
+        });
+        let number = 2;
+        while (windowObject.epheniaScriptInitializers[`${scriptName} ${number}`] !== undefined) {
+            number++;
+        }
+        scriptName = `${scriptName} ${number}`;
+    }
+    // Add initializer for this particular script
+    windowObject.epheniaScriptInitializers[scriptName] = initFunction;
+}
+
+if (!App.isUsingClient || localStorage.getItem('catchfilterfantasia') === 'true') {
+    loadEpheniaScript('catchfilterfantasia', initCatchFilter);
 }

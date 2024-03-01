@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.4.2
+// @version       3.4.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -17,8 +17,6 @@
 // @grant         unsafeWindow
 // @run-at        document-idle
 // ==/UserScript==
-
-var scriptName = 'enhancedautoclicker';
 
 class EnhancedAutoClicker {
     // Constants
@@ -49,6 +47,7 @@ class EnhancedAutoClicker {
         chestCoords: null,
         floorExplored: false,
         floorFinished: false,
+        dungeonFinished: false,
     };
     // Clicker statistics calculator
     static autoClickCalcLoop;
@@ -536,6 +535,11 @@ class EnhancedAutoClicker {
         // Progress through dungeon
         if (App.game.gameState === GameConstants.GameState.dungeon) {
             if (DungeonRunner.fighting() || DungeonBattle.catching()) {
+                // Can't do anything while in a battle
+                return;
+            } else if (this.autoDungeonTracker.dungeonFinished) {
+                // Boss has been defeated, we just needed to wait until the next tick so quests have time to update
+                this.restartDungeon();
                 return;
             }
             // Scan each new dungeon floor
@@ -587,6 +591,7 @@ class EnhancedAutoClicker {
         this.autoDungeonTracker.targetCoords = null;
         this.autoDungeonTracker.floorExplored = false;
         this.autoDungeonTracker.floorFinished = false;
+        this.autoDungeonTracker.dungeonFinished = false;
 
         // Scan for chest and boss coordinates
         var dungeonBoard = DungeonRunner.map.board()[this.autoDungeonTracker.floor];
@@ -726,6 +731,9 @@ class EnhancedAutoClicker {
         }
     }
 
+    /**
+     * Chooses a target tile based on auto dungeon modes and dungeon progress
+     */
     static chooseDungeonTargetTile() {
         const dungeonBoard = DungeonRunner.map.board()[this.autoDungeonTracker.floor];
         let target = null;
@@ -794,7 +802,23 @@ class EnhancedAutoClicker {
     }
 
     /**
-     * Override DungeonRunner built-in functions*:
+     * Restart dungeon, separate from dungeonWon function so it can be called with a delay
+     */
+    static restartDungeon() {
+        if (DungeonRunner.hasEnoughTokens()) {
+            // Clear old board to force map visuals refresh
+            DungeonRunner.map.board([]);
+            DungeonRunner.initializeDungeon(DungeonRunner.dungeon);
+            this.autoDungeonTracker.dungeonFinished = false;
+            return;
+        }
+        // Can't continue, exit auto dungeon mode
+        this.toggleAutoDungeon();
+        MapHelper.moveToTown(DungeonRunner.dungeon.name);
+    }
+
+    /**
+     * Override DungeonRunner built-in functions:
      * -Add dungeon ID tracking to initializeDungeon() for easier mapping
      * -Add auto dungeon equivalent of dungeonWon() to save on performance by restarting without loading town
      */
@@ -818,15 +842,9 @@ class EnhancedAutoClicker {
                 }
                 GameHelper.incrementObservable(App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(DungeonRunner.dungeon.name)]);
 
-                // Auto restart dungeon
-                if (DungeonRunner.hasEnoughTokens()) {
-                    // Clear old board to force map visuals refresh
-                    DungeonRunner.map.board([]);
-                    DungeonRunner.initializeDungeon(DungeonRunner.dungeon);
-                    return;
-                }
-
-                MapHelper.moveToTown(DungeonRunner.dungeon.name);
+                // The script will restart the dungeon next tick
+                // The delay gives Defeat Dungeon Boss quests time to update
+                EnhancedAutoClicker.autoDungeonTracker.dungeonFinished = true;
             }
         }
         // Only use our version when auto dungeon is running
@@ -1102,29 +1120,64 @@ function addGlobalStyle(css) {
     head.appendChild(style);
 }
 
-function loadScript() {
+function loadEpheniaScript(scriptName, initFunction) {
+    const windowObject = !App.isUsingClient ? unsafeWindow : window;
+    // Inject handlers if they don't exist yet
+    if (windowObject.epheniaScriptInitializers === undefined) {
+        windowObject.epheniaScriptInitializers = {};
+        const oldInit = Preload.hideSplashScreen;
+        var hasInitialized = false;
+
+        // Initializes scripts once enough of the game has loaded
+        Preload.hideSplashScreen = function (...args) {
+            var result = oldInit.apply(this, args);
+            if (App.game && !hasInitialized) {
+                // Initialize all attached userscripts
+                Object.entries(windowObject.epheniaScriptInitializers).forEach(([scriptName, initFunction]) => {
+                    try {
+                        initFunction();
+                    } catch (e) {
+                        console.error(`Error while initializing '${scriptName}' userscript:\n${e}`);
+                        Notifier.notify({
+                            type: NotificationConstants.NotificationOption.warning,
+                            title: scriptName,
+                            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
+                            timeout: GameConstants.DAY,
+                        });
+                    }
+                });
+                hasInitialized = true;
+            }
+            return result;
+        }
+    }
+
+    // Prevent issues with duplicate script names
+    if (windowObject.epheniaScriptInitializers[scriptName] !== undefined) {
+        console.warn(`Duplicate '${scriptName}' userscripts found!`);
+        Notifier.notify({
+            type: NotificationConstants.NotificationOption.warning,
+            title: scriptName,
+            message: `Duplicate '${scriptName}' userscripts detected. This could cause unpredictable behavior and is not recommended.`,
+            timeout: GameConstants.DAY,
+        });
+        let number = 2;
+        while (windowObject.epheniaScriptInitializers[`${scriptName} ${number}`] !== undefined) {
+            number++;
+        }
+        scriptName = `${scriptName} ${number}`;
+    }
+    // Add initializer for this particular script
+    windowObject.epheniaScriptInitializers[scriptName] = initFunction;
+}
+
+if (!App.isUsingClient || localStorage.getItem('enhancedautoclicker') === 'true') {
     if (!App.isUsingClient) {
         // Necessary for userscript managers
         unsafeWindow.EnhancedAutoClicker = EnhancedAutoClicker;
     }
-
-    const oldInit = Preload.hideSplashScreen;
-    var hasInitialized = false;
-
-    Preload.hideSplashScreen = function (...args) {
-        var result = oldInit.apply(this, args);
-        if (App.game && !hasInitialized) {
-            EnhancedAutoClicker.initAutoClicker();
-            hasInitialized = true;
-        }
-        return result;
-    }
-
+    loadEpheniaScript('enhancedautoclicker', EnhancedAutoClicker.initAutoClicker.bind(EnhancedAutoClicker));
     $(document).ready(() => {
         EnhancedAutoClicker.initOverrides();
     });
-}
-
-if (!App.isUsingClient || localStorage.getItem(scriptName) === 'true') {
-    loadScript();
 }
