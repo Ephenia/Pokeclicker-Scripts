@@ -8,7 +8,7 @@
 // @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
-// @version       1.1.3
+// @version       1.1.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -17,7 +17,7 @@
 
 // @match         https://www.pokeclicker.com/
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
-// @grant         none
+// @grant         unsafeWindow
 // @run-at        document-idle
 // ==/UserScript==
 

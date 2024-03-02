@@ -5,7 +5,7 @@
 // @description   Adds options to automatically plant, harvest, replant, and remulch. Unlike harvesting, replanting only harvests berries right before they wither, to maximize any auras. Make sure the correct berry is selected before auto planting; the script will save your selection across restarts. Auto replant and mulch maintain the berry/mulch already in each plot.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.7.1
+// @version       1.7.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -14,7 +14,7 @@
 
 // @match         https://www.pokeclicker.com/
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
-// @grant         none
+// @grant         unsafeWindow
 // @run-at        document-idle
 // ==/UserScript==//
 

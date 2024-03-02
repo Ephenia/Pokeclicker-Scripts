@@ -5,7 +5,7 @@
 // @description   Removes the limit for the number of quests you can do at once and auto completes/starts new ones.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.0.1
+// @version       2.0.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -14,7 +14,7 @@
 
 // @match         https://www.pokeclicker.com/
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
-// @grant         none
+// @grant         unsafeWindow
 // @run-at        document-idle
 // ==/UserScript==
 
