@@ -21,7 +21,7 @@ It's very important for the future of the project in general and how things will
 
 Various scripts & enhancements for the game [Pokéclicker](https://www.pokeclicker.com/).
 
-These are originally created and intended for the use of the browser extension known as [Tampermonkey](https://www.tampermonkey.net/). These should be compatible with any Script Manager, however. If you have a Script Manager installed, such as Tampermonkey, you can click on the One-Click install to easily install any scripts here.
+These scripts were created for use with Script Manager browser extensions such as [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/). They should be compatible with most other Script Managers as well. If you have a Script Manager installed, you can click on the One-Click install links to easily install any scripts here.
 
 If you are looking to use these scripts on the client version of Pokéclicker ([Pokéclicker Desktop](//github.com/RedSparr0w/Pokeclicker-desktop)), replace the <strong>app.asar</strong> file in the client with the [modified version from this repository](//github.com/Ephenia/Pokeclicker-Scripts/tree/master/desktop). For detailed instructions, see [here](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/desktop/README.md).
 

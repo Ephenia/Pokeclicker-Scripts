@@ -5,7 +5,7 @@
 // @description   Adds a button to select the weather for the current region, also freezes all weather
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.4.1
+// @version       1.4.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -14,7 +14,7 @@
 
 // @match         https://www.pokeclicker.com/
 // @icon          https://www.google.com/s2/favicons?domain=pokeclicker.com
-// @grant         none
+// @grant         unsafeWindow
 // @run-at        document-idle
 // ==/UserScript==
 
