@@ -17,6 +17,7 @@
     "discord-rpc": "^4.0.1",
     "electron-updater": "^5.3.0",
     "ini": "^3.0.1",
-    "xmlhttprequest": "^1.8.0"
+    "xmlhttprequest": "^1.8.0",
+    "semver": "^7.6.0"
   }
 }
