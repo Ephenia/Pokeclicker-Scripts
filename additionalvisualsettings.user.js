@@ -5,7 +5,7 @@
 // @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.6.3
+// @version       2.6.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -245,7 +245,7 @@ function addGraphicsBindings() {
     // Must execute before game loads and applies knockout bindings
 
     // Make variables accessible for compatibility with userscript extensions
-    window.AVSObservables = {
+    (!App.isUsingClient ? unsafeWindow : window).AVSObservables = {
         'wildPokeNameDisabled': wildPokeNameDisabled,
         'wildPokeDefeatDisabled': wildPokeDefeatDisabled,
         'wildPokeImgDisabled': wildPokeImgDisabled,
