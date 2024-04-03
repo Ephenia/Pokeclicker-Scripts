@@ -34,7 +34,7 @@ const MOD_EXPECTED_CLIENT_VERSION = '1.2.0';
 // Used for update checking as the real client version gets overridden by the mod
 const MOD_EXPECTED_ELECTRON_VERSION = '^21.3.1';
 // VERY IMPORTANT: update this in desktopupdatechecker.js as well!
-const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.0.6';
+const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '2.1.0';
 
 console.info("Data directory:", dataDir);
 
@@ -44,7 +44,30 @@ let currentVersion = "0.0.0";
 let windowClosed = false;
 
 let mainWindow;
+
+/* DESKTOP SCRIPTS ADDITION */
+
 let config;
+let minWindowWidth = 300;
+let minWindowHeight = 200;
+
+if (fs.existsSync(settingsFile)) {
+  config = ini.parse(fs.readFileSync(settingsFile, "utf-8"));
+} 
+if (!(config?.Sizing 
+    && +config.Sizing.Width > minWindowWidth
+    && +config.Sizing.Height > minWindowHeight
+    && typeof config.Sizing.Maximized === 'boolean'
+  )) {
+  config = { Sizing: { Width: "800", Height: "600", Maximized: false } };
+  fs.writeFile(
+    settingsFile,
+    "[Sizing]\r\nWidth=800\r\nHeight=600\r\nMaximized=false",
+    () => {},
+  );
+}
+
+/* END DESKTOP SCRIPTS ADDITION */
 
 function createWindow() {
   // Set the Application for Desktop notifications (windows only)
@@ -52,29 +75,13 @@ function createWindow() {
     app.setAppUserModelId("PokéClicker");
   } catch (e) {}
 
-  if (fs.existsSync(settingsFile)) {
-    getConfig();
-  }
-  if (!(config?.Sizing && +config.Sizing.Width && +config.Sizing.Height && typeof config.Sizing.Maximized === 'boolean')) {
-    config = { Sizing: { Width: "800", Height: "600", Maximized: false } };
-    fs.writeFile(
-      settingsFile,
-      "[Sizing]\r\nWidth=800\r\nHeight=600\r\nMaximized=false",
-      function () {}
-    );
-  }
-
-  function getConfig() {
-    config = ini.parse(fs.readFileSync(settingsFile, "utf-8"));
-  }
-
   mainWindow = new BrowserWindow({
     icon: __dirname + "/icon.png",
-    minWidth: 300,
-    minHeight: 200,
-    width: +config.Sizing.Width,
-    height: +config.Sizing.Height,
-    resizable: true,
+    minWidth: minWindowWidth,
+    minHeight: minWindowHeight,
+    width: +config.Sizing.Width,    // DESKTOP SCRIPTS ADDITION
+    height: +config.Sizing.Height,  // DESKTOP SCRIPTS ADDITION
+    resizable: true,                // DESKTOP SCRIPTS ADDITION
     webPreferences: {
       webSecurity: false,
       backgroundThrottling: false,
@@ -87,8 +94,6 @@ function createWindow() {
         `(() => { DiscordRichPresence.clientVersion = '${clientVersion}' })()`
       )
       .catch((e) => {});
-
-      startEpheniaScripts();
   });
 
   mainWindow.setMenuBarVisibility(false);
@@ -103,15 +108,8 @@ function createWindow() {
     );
   }
 
-  mainWindow.on("resize", function () {
-    const size = mainWindow.getSize();
-    const width = size[0];
-    const height = size[1];
-    config.Sizing.Width = width;
-    config.Sizing.Height = height;
-    config.Sizing.Maximized = mainWindow.isMaximized();
-    fs.writeFileSync(settingsFile, ini.stringify(config));
-  });
+  injectDesktopScriptsModifications(mainWindow); // DESKTOP SCRIPTS ADDITION
+
   mainWindow.on("close", (event) => {
     windowClosed = true;
   });
@@ -121,14 +119,16 @@ function createWindow() {
   mainWindow.on("page-title-updated", function (e) {
     e.preventDefault();
   });
-  if (config.Sizing.Maximized) mainWindow.maximize();
 }
 
 function createSecondaryWindow() {
   let newWindow = new BrowserWindow({
     icon: __dirname + "/icon.png",
-    minWidth: 300,
-    minHeight: 200,
+    minWidth: minWindowWidth,
+    minHeight: minWindowHeight,
+    width: +config.Sizing.Width,    // DESKTOP SCRIPTS ADDITION
+    height: +config.Sizing.Height,   // DESKTOP SCRIPTS ADDITION
+    resizable: true,                // DESKTOP SCRIPTS ADDITION
     webPreferences: {
       webSecurity: false,
       backgroundThrottling: false,
@@ -144,6 +144,8 @@ function createSecondaryWindow() {
   } else {
     newWindow.loadURL(`file://${__dirname}/pokeclicker-master/docs/index.html`);
   }
+
+  injectDesktopScriptsModifications(newWindow); // DESKTOP SCRIPTS ADDITION
 
   newWindow.on("close", (event) => {
     newWindow = true;
@@ -820,6 +822,66 @@ function disableExtraneousScripts(localFiles, repoFilenames) {
   });
 }
 
+function delayGameLoadUntilScriptsReady() {
+  // Prevent game loading before all scripts have been loaded, and notify the user if this causes a delay 
+  mainWindow.webContents.executeJavaScript(`const resolveDesktopScriptsDone = (() => {
+    // Promise for script downloads and execution finished
+    var resolveScriptsDone;
+    var waitingForScripts = true;
+    var notifiedWaiting = false;
+    const allScriptsDone = new Promise((resolve, reject) => {
+      resolveScriptsDone = resolve;
+    });
+    allScriptsDone.then((res) => {
+      if (notifiedWaiting && res != 'silent') {
+        notifyScriptsDone(res);
+      }
+      waitingForScripts = false;
+    });
+    // Promise for player starting to load the game
+    var resolveAppStartCalled;
+    const appStartCalled = new Promise((resolve, reject) => {
+      resolveAppStartCalled = resolve;
+    });
+    // Status notifications for the player in case there's a long delay
+    const notifyScriptsDelay = () => {
+      Notifier.notify({
+        type: NotificationConstants.NotificationOption.info,
+        title: 'Pokéclicker Scripts Desktop',
+        message: 'Checking for userscript updates...',
+        timeout: GameConstants.SECOND * 10,
+      });
+      notifiedWaiting = true;
+    };
+    const notifyScriptsDone = (res) => {
+      Notifier.notify({
+        type: NotificationConstants.NotificationOption[res === 'online' ? 'info' : 'warning'],
+        title: 'Pokéclicker Scripts Desktop',
+        message: (res === 'online' ? 'Done checking for updates.' : 'Unable to connect to GitHub, running offline'),
+        timeout: GameConstants.SECOND * 10,
+      });
+    };
+    // Intercept App.start()
+    const startApp = App.start.bind(App);
+    App.start = function start(...args) {
+      if (waitingForScripts) {
+        setTimeout(() => {
+          if (waitingForScripts) {
+            notifyScriptsDelay();
+          }
+        }, 200);
+      }
+      resolveAppStartCalled(args);
+    }
+    // Start app for real once scripts and player are both ready
+    Promise.allSettled([appStartCalled, allScriptsDone]).then((res) => {
+      startApp(...res[0].value); // res[0].value is the args passed to App.start()
+    });
+    // Lets the script loader resolve the promise externally 
+    return resolveScriptsDone;
+  })();`);
+}
+
 function startEpheniaScripts() {
   logInMainWindow(`Pokéclicker Scripts Desktop v${POKECLICKER_SCRIPTS_DESKTOP_VERSION} initializing!`);
   mainWindow.webContents.executeJavaScript(`const POKECLICKER_SCRIPTS_DESKTOP_VERSION = '${POKECLICKER_SCRIPTS_DESKTOP_VERSION}';`);
@@ -836,43 +898,6 @@ function startEpheniaScripts() {
       timeout: GameConstants.DAY,
     });`);
   }
-
-  // Prevent game load until all scripts have been loaded, and notify the user if this causes a delay 
-  mainWindow.webContents.executeJavaScript(`const resolveDesktopScriptsDone = (() => {
-    var externalResolve;
-    var waitingForScripts = true;
-    var notifiedWaiting = false;
-    const allScriptsDone = new Promise((resolve, reject) => {
-      externalResolve = resolve;
-    });
-    allScriptsDone.then(() => {
-      waitingForScripts = false;
-    });
-    const startApp = App.start.bind(App)
-    App.start = function start(...args) {
-      if (waitingForScripts) {
-        Notifier.notify({
-          type: NotificationConstants.NotificationOption.info,
-          title: 'Pokéclicker Scripts Desktop',
-          message: 'Checking for userscript updates...',
-          timeout: GameConstants.SECOND * 10,
-        });
-        notifiedWaiting = true;
-      }
-      allScriptsDone.then((res) => {
-        if (notifiedWaiting && res != 'silent') {
-          Notifier.notify({
-            type: NotificationConstants.NotificationOption[res === 'online' ? 'info' : 'warning'],
-            title: 'Pokéclicker Scripts Desktop',
-            message: (res === 'online' ? 'Done checking for updates.' : 'Unable to connect to GitHub, running offline'),
-            timeout: GameConstants.SECOND * 10,
-          });
-        }
-        return startApp(...args);
-      });
-    }
-    return externalResolve;
-  })();`);
 
   runScript(`${__dirname}/scripthandler.js`);
   ensureScriptsDirsExist();
@@ -935,3 +960,25 @@ function startEpheniaScripts() {
     });
 }
 
+function injectDesktopScriptsModifications(gameWindow) {
+  gameWindow.webContents.on('dom-ready', () => {
+    delayGameLoadUntilScriptsReady();
+  });
+
+  gameWindow.webContents.on('did-finish-load', () => {
+    startEpheniaScripts();
+  });
+
+  gameWindow.on('resize', function () {
+    const size = gameWindow.getSize();
+    const width = size[0];
+    const height = size[1];
+    config.Sizing.Width = width;
+    config.Sizing.Height = height;
+    config.Sizing.Maximized = gameWindow.isMaximized();
+    fs.writeFileSync(settingsFile, ini.stringify(config));
+  });
+  if (config.Sizing.Maximized) {
+    gameWindow.maximize();
+  }
+}
