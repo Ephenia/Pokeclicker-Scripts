@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.4.3
+// @version       3.4.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -537,14 +537,14 @@ class EnhancedAutoClicker {
             if (DungeonRunner.fighting() || DungeonBattle.catching()) {
                 // Can't do anything while in a battle
                 return;
-            } else if (this.autoDungeonTracker.dungeonFinished) {
-                // Boss has been defeated, we just needed to wait until the next tick so quests have time to update
-                this.restartDungeon();
-                return;
             }
             // Scan each new dungeon floor
             if (this.autoDungeonTracker.ID !== DungeonRunner.dungeonID || this.autoDungeonTracker.floor !== DungeonRunner.map.playerPosition().floor) {
                 this.scanDungeon();
+            }
+            // If boss has been defeated, wait for the dungeon restart (delayed to allow quest updates)
+            if (this.autoDungeonTracker.dungeonFinished) {
+                return;
             }
             // Reset pathfinding coordinates to entrance
             if (this.autoDungeonTracker.coords == null) {
@@ -805,16 +805,28 @@ class EnhancedAutoClicker {
      * Restart dungeon, separate from dungeonWon function so it can be called with a delay
      */
     static restartDungeon() {
-        if (DungeonRunner.hasEnoughTokens()) {
+        if (App.game.gameState !== GameConstants.GameState.dungeon) {
+            return;
+        }
+        this.autoDungeonTracker.dungeonFinished = false;
+        if (this.autoDungeonState() && DungeonRunner.hasEnoughTokens()) {
             // Clear old board to force map visuals refresh
             DungeonRunner.map.board([]);
             DungeonRunner.initializeDungeon(DungeonRunner.dungeon);
-            this.autoDungeonTracker.dungeonFinished = false;
-            return;
+        } else {
+            if (!DungeonRunner.hasEnoughTokens()) {
+                // Notify player if they've run out of tokens
+                this.toggleAutoDungeon();
+                Notifier.notify({
+                    type: NotificationConstants.NotificationOption.warning,
+                    title: 'Enhanced Auto Clicker',
+                    message: `Auto Dungeon mode ran out of dungeon tokens.`,
+                    timeout: GameConstants.DAY,
+                });
+            }
+            // Can't continue, exit auto dungeon mode
+            MapHelper.moveToTown(DungeonRunner.dungeon.name);
         }
-        // Can't continue, exit auto dungeon mode
-        this.toggleAutoDungeon();
-        MapHelper.moveToTown(DungeonRunner.dungeon.name);
     }
 
     /**
@@ -842,9 +854,9 @@ class EnhancedAutoClicker {
                 }
                 GameHelper.incrementObservable(App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(DungeonRunner.dungeon.name)]);
 
-                // The script will restart the dungeon next tick
-                // The delay gives Defeat Dungeon Boss quests time to update
+                // Restart the dungeon with a delay, giving Defeat Dungeon Boss quests time to update
                 EnhancedAutoClicker.autoDungeonTracker.dungeonFinished = true;
+                setTimeout(() => EnhancedAutoClicker.restartDungeon(), 50);
             }
         }
         // Only use our version when auto dungeon is running
@@ -981,10 +993,7 @@ class EnhancedAutoClicker {
     static hasPlayerMoved() {
         var moved = false;
         let newState = App.game.gameState;
-        // Special case: between dungeon instances while Auto Dungeon is running 
-        if (this.autoDungeonState() && App.game.gameState === GameConstants.GameState.town && player.town() instanceof DungeonTown) {
-            newState = GameConstants.GameState.dungeon;
-        }
+
         if (this.autoClickCalcTracker.playerState != newState) {
             this.autoClickCalcTracker.playerState = newState;
             moved = true;
