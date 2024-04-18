@@ -223,13 +223,14 @@ The Auto Dungeon feature is found below the Auto Click button. Some notes about 
 
 • Auto Dungeon will only work while the Auto Clicker is active.<br>
 • Auto Dungeon when activated will automatically explore the current dungeon, or begin exploring a dungeon whose entrance you are at.<br>
-• If Flash is unlocked for a dungeon, Auto Dungeon will use it to explore more efficiently.
+• If Flash is unlocked for a dungeon, Auto Dungeon will use it to explore more efficiently.<br>
+• If the settings menu option "Auto Dungeon finishes dungeons before turning off" is enabled (as is default), Auto Dungeon will not immediately stop when toggled off. It will finish exploring the current dungeon and stop after defeating the boss. Clicking the Auto Dungeon button a second time will stop it immediately without finishing the dungeon.<br>
 • The two buttons to the right of the Auto Dungeon button control its modes.<br>
-&emsp;• When fights mode is on, Auto Dungeon will find and fight every enemy on the floor.
-&emsp;• When chests mode is on, Auto Dungeon will find every chest on the floor and open them before fighting the boss.
-&emsp;• When neither mode is on (both buttons are greyed out), Auto Dungeon will just find and fight the boss as quickly as possible.
-• The dropdown menu determines which chests Auto Dungeon will open. It will only open chests of the selected rarity or higher.
-&emsp;• If the settings menu option "Always open visible chests..." is enabled, Auto Dungeon will open chests of sufficient rarity even when chests mode is off. It will open any visible chests right before fighting the boss but not explore the floor to reveal potential other chests.
+&emsp;&emsp;• When fights mode is on, Auto Dungeon will find and fight every enemy on the floor.<br>
+&emsp;&emsp;• When chests mode is on, Auto Dungeon will find every chest on the floor and open them before fighting the boss.<br>
+&emsp;&emsp;• When neither mode is on (both buttons are greyed out), Auto Dungeon will just find and fight the boss as quickly as possible.<br>
+• The dropdown menu determines which chests Auto Dungeon will open. It will only open chests of the selected rarity or higher.<br>
+&emsp;&emsp;• If the settings menu option "Always open visible targeted chests" is enabled, Auto Dungeon will open chests of sufficient rarity even when chests mode is off. It will open any visible chests right before fighting the boss but not explore the floor to reveal potential other chests.<br>
 
 ### **Graphics settings**
 
