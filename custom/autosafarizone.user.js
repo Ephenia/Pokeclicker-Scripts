@@ -8,7 +8,7 @@
 // @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
-// @version       1.1.4
+// @version       1.2.0
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -32,6 +32,7 @@ function initAutoSafari() {
   var scriptState = -1;
   var targetCoords = [];
   var cachedPath = [];
+  var stopAfterGameOver = false;
   // To skip targets generated in buggy sections of the grid (theoretically can't happen anymore)
   var forceSkipItems = false;
   var forceSkipShinies = [];
@@ -97,6 +98,7 @@ function initAutoSafari() {
     forceSkipShinies.length = 0;
     hasPrioritySpawns = 0;
     inBattle = false;
+    stopAfterGameOver = false;
     // Interval slightly longer than movement speed (0.25s by default) to avoid graphical glitches
     autoSafariProcessId = setInterval(doSafariTick, tickSpeed());
   }
@@ -448,8 +450,13 @@ function initAutoSafari() {
     if (threwBall) {
       // Handle Safari game over
       if (Safari.balls() <= 0) {
-        // Add some delay to avoid breaking the safari exiting process
-        skipTicks += Math.ceil(40 * (autoSafariFastAnimationsState ? 2 : 1) * SafariBattle.tierMultiplier(Safari.safariLevel()));
+        if (stopAfterGameOver) {
+          // Exit auto safari mode
+          toggleAutoSafari();
+        } else {
+          // Add some delay to avoid breaking the safari exiting process
+          skipTicks += Math.ceil(40 * (autoSafariFastAnimationsState ? 2 : 1) * SafariBattle.tierMultiplier(Safari.safariLevel()));
+        }
         // Just in case the negative balls glitch returns
         if (Safari.balls() < 0) {
           SafariBattle.gameOver();
@@ -491,7 +498,7 @@ function initAutoSafari() {
       buttonsContainer.appendChild(button);
     };
 
-    createButton('safari', 'Safari', autoSafariState, toggleAutoSafari);
+    createButton('safari', 'Safari', autoSafariState, () => toggleAutoSafari(true));
     createButton('pick-items', 'Pick Items', autoSafariPickItemsState, toggleAutoPickItems);
     createButton('throw-baits', 'Throw Bait', autoSafariThrowBaitsState, toggleThrowBaits);
     createButton('seek-uncaught', 'Seek New', autoSafariSeekUncaught, toggleSeekUncaught);
@@ -514,17 +521,20 @@ function initAutoSafari() {
     }
   }
 
-  function toggleAutoSafari() {
-    autoSafariState = !autoSafariState;
+  function toggleAutoSafari(allowDelayedStop = false) {
+    const futureState = !autoSafariState;
+    stopAfterGameOver = allowDelayedStop && !(futureState || stopAfterGameOver);
+    autoSafariState = futureState || stopAfterGameOver;
+    
+    localStorage.setItem('autoSafariState', futureState);
     const toggleButton = document.getElementById('auto-safari-toggle');
-    toggleButton.classList.toggle('btn-danger', !autoSafariState);
-    toggleButton.classList.toggle('btn-success', autoSafariState);
-    localStorage.setItem('autoSafariState', autoSafariState);
-    document.getElementById('auto-safari-toggle').innerHTML = `Auto Safari [${autoSafariState ? 'ON' : 'OFF'}]`;
+    toggleButton.classList.remove('btn-success', 'btn-danger', 'btn-warning');
+    toggleButton.classList.add(stopAfterGameOver ? 'btn-warning' : (futureState ? 'btn-success' : 'btn-danger'));
+    document.getElementById('auto-safari-toggle').innerHTML = `Auto Safari [${futureState ? 'ON' : 'OFF'}]`;
 
-    if (autoSafariState) {
+    if (autoSafariState && !stopAfterGameOver) {
       startAutoSafari();
-    } else {
+    } else if (!autoSafariState) {
       clearInterval(autoSafariProcessId);
     }
   }
