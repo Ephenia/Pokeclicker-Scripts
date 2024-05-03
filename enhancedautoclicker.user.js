@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.4.4
+// @version       3.5.0
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -31,6 +31,7 @@ class EnhancedAutoClicker {
     static autoGymSelect = validateStorage('autoGymSelect', 0, [0, 1, 2, 3, 4]);
     // Auto Dungeon
     static autoDungeonState = ko.observable(validateStorage('autoDungeonState', false));
+    static autoDungeonFinishBeforeStopping = validateStorage('autoDungeonFinishBeforeStopping', true);
     static autoDungeonEncounterMode = validateStorage('autoDungeonEncounterMode', false);
     static autoDungeonChestMode = validateStorage('autoDungeonChestMode', false);
     static autoDungeonLootTier = validateStorage('autoDungeonLootTier', 0, [...Object.keys(baseLootTierChance).keys()]);
@@ -48,6 +49,7 @@ class EnhancedAutoClicker {
         floorExplored: false,
         floorFinished: false,
         dungeonFinished: false,
+        stopAfterFinishing: false,
     };
     // Clicker statistics calculator
     static autoClickCalcLoop;
@@ -174,6 +176,7 @@ class EnhancedAutoClicker {
         });
         // Checkboxes
         let checkboxesToAdd = [
+            ['autoDungeonFinishBeforeStopping', 'Auto Dungeon finishes dungeons before turning off', this.autoDungeonFinishBeforeStopping],
             ['autoDungeonAlwaysOpenRareChests', 'Always open visible targeted chests', this.autoDungeonAlwaysOpenRareChests],
             ['autoGymGraphicsDisabled', 'Disable Auto Gym graphics', this.gymGraphicsDisabled()],
             ['autoDungeonGraphicsDisabled', 'Disable Auto Dungeon graphics', this.dungeonGraphicsDisabled()]
@@ -200,6 +203,7 @@ class EnhancedAutoClicker {
         document.getElementById('auto-dungeon-start').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoDungeon(); });
         document.getElementById('auto-dungeon-encounter-mode').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoDungeonEncounterMode(); });
         document.getElementById('auto-dungeon-chest-mode').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoDungeonChestMode(); });
+        document.getElementById('checkbox-autoDungeonFinishBeforeStopping').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonFinishBeforeStopping(); });
         document.getElementById('checkbox-autoDungeonAlwaysOpenRareChests').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonAlwaysOpenRareChests(); });
         document.getElementById('checkbox-autoGymGraphicsDisabled').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoGymGraphics(); });
         document.getElementById('checkbox-autoDungeonGraphicsDisabled').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonGraphics(); });
@@ -261,6 +265,15 @@ class EnhancedAutoClicker {
         this.autoClickState(!this.autoClickState());
         localStorage.setItem('autoClickState', this.autoClickState());
         this.autoClickState() ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
+        if (!this.autoClickState()) {
+            if (this.autoGymState()) {
+                this.toggleAutoGym();
+            }
+            if (this.autoDungeonState()) {
+                this.toggleAutoDungeon(true);
+            }
+        }
+
         this.toggleAutoClickerLoop();
     }
 
@@ -278,17 +291,26 @@ class EnhancedAutoClicker {
 
     static toggleAutoGym() {
         const element = document.getElementById('auto-gym-start');
-        this.autoGymState(!this.autoGymState());
+        const newState = !this.autoGymState();
+        if (newState && !this.canStartAutoGym()) {
+            // Don't turn on if there's no gym here
+            return;
+        } else if (newState && this.autoDungeonState()) {
+            // Only one mode may be active at a time
+            return;
+        }
+        this.autoGymState(newState);
         localStorage.setItem('autoGymState', this.autoGymState());
         this.autoGymState() ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
         element.textContent = `Auto Gym [${this.autoGymState() ? 'ON' : 'OFF'}]`;
-        if (this.autoClickState() && !this.autoGymState()) {
-            // Only break out of this script's auto restart, not the built-in one
+        if (this.autoGymState()) {
+            if (!this.autoClickState()) {
+                // Turn on the auto clicker if necessary
+                this.toggleAutoClick();
+            }
+        } else {
+            // Assume we can't reach this point with only the built-in auto restart running, so it's safe to stop it
             GymRunner.autoRestart(false);
-        }
-        if (this.autoGymState() && this.autoDungeonState()) {
-            // Only one mode may be active at a time
-            this.toggleAutoDungeon();
         }
     }
 
@@ -305,19 +327,38 @@ class EnhancedAutoClicker {
         }
     }
 
-    static toggleAutoDungeon() {
+    static toggleAutoDungeon(forceStop = false) {
         const element = document.getElementById('auto-dungeon-start');
-        this.autoDungeonState(!this.autoDungeonState());
-        localStorage.setItem('autoDungeonState', this.autoDungeonState());
-        this.autoDungeonState() ? element.classList.replace('btn-danger', 'btn-success') : element.classList.replace('btn-success', 'btn-danger');
-        element.textContent = `Auto Dungeon [${this.autoDungeonState() ? 'ON' : 'OFF'}]`;
-        if (this.autoDungeonState()) {
+        const newState = !this.autoDungeonState()
+        if (newState && !this.canStartAutoDungeon()) {
+            // Don't turn on if there's no dungeon here
+            return;
+        } else if (newState && this.autoGymState()) {
+            // Only one mode may be active at a time
+            return;
+        }
+
+        localStorage.setItem('autoDungeonState', newState);
+        
+        if (this.autoDungeonFinishBeforeStopping && App.game.gameState === GameConstants.GameState.dungeon && 
+            !(newState || forceStop || this.autoDungeonTracker.stopAfterFinishing)) {
+            // Instead of stopping immediately, wait and exit after beating this dungeon
+            this.autoDungeonTracker.stopAfterFinishing = true;
+        } else {
+            this.autoDungeonState(newState);
+            this.autoDungeonTracker.stopAfterFinishing = false;
+        }
+        element.classList.remove('btn-success', 'btn-danger', 'btn-warning');
+        element.classList.add(this.autoDungeonTracker.stopAfterFinishing ? 'btn-warning' : (newState ? 'btn-success' : 'btn-danger'));
+        element.textContent = `Auto Dungeon [${newState ? 'ON' : 'OFF'}]`;
+
+        if (newState) {
             // Trigger a dungeon scan
             this.autoDungeonTracker.ID = -1;
-        }
-        if (this.autoDungeonState() && this.autoGymState()) {
-            // Only one mode may be active at a time
-            this.toggleAutoGym();
+            if (!this.autoClickState()) {
+                // Turn on the auto clicker if necessary
+                this.toggleAutoClick();
+            }
         }
     }
 
@@ -342,6 +383,14 @@ class EnhancedAutoClicker {
             document.getElementById('auto-dungeon-loottier-img').setAttribute('src', `assets/images/dungeons/chest-${Object.keys(baseLootTierChance)[val]}.png`);
             localStorage.setItem("autoDungeonLootTier", this.autoDungeonLootTier);
         }
+    }
+
+    static toggleAutoDungeonFinishBeforeStopping() {
+        this.autoDungeonFinishBeforeStopping = !this.autoDungeonFinishBeforeStopping;
+        if (this.autoDungeonTracker.stopAfterFinishing) {
+            this.toggleAutoDungeon();
+        }
+        localStorage.setItem('autoDungeonFinishBeforeStopping', this.autoDungeonFinishBeforeStopping);
     }
 
     static toggleAutoDungeonAlwaysOpenRareChests() {
@@ -473,7 +522,7 @@ class EnhancedAutoClicker {
      * Starts selected gym with auto restart enabled
      */
     static autoGym() {
-        if (App.game.gameState === GameConstants.GameState.town) {
+        if (this.canStartAutoGym()) {
             // Find all unlocked gyms in the current town
             var gymList = player.town().content.filter((c) => (c.constructor.name == "Gym" && c.isUnlocked()));
             if (gymList.length > 0) {
@@ -485,6 +534,12 @@ class EnhancedAutoClicker {
         }
         // Disable if we aren't in a location with unlocked gyms
         this.toggleAutoGym();
+    }
+
+    static canStartAutoGym() {
+        return App.game.gameState === GameConstants.GameState.gym || (App.game.gameState === GameConstants.GameState.town &&
+            player.town().content.some((c) => c.constructor.name == "Gym" && c.isUnlocked())
+        );
     }
 
     /**
@@ -563,18 +618,21 @@ class EnhancedAutoClicker {
             }
         }
         // Begin dungeon
-        else {
-            if (App.game.gameState === GameConstants.GameState.town && player.town() instanceof DungeonTown) {
-                const dungeon = player.town().dungeon;
-                // Enter dungeon if unlocked and affordable
-                if (dungeon?.isUnlocked() && App.game.wallet.hasAmount(new Amount(dungeon.tokenCost, GameConstants.Currency.dungeonToken))) {
-                    DungeonRunner.initializeDungeon(dungeon);
-                    return;
-                }
-            }
+        else if (this.canStartAutoDungeon()) {
+            // Enter dungeon if unlocked and affordable
+            DungeonRunner.initializeDungeon(player.town().dungeon);
+        } else {
             // Disable if locked, can't afford entry cost, or there's no dungeon here
             this.toggleAutoDungeon();
         }
+    }
+
+    static canStartAutoDungeon() {
+        if (!(App.game.gameState === GameConstants.GameState.dungeon || (App.game.gameState === GameConstants.GameState.town && player.town() instanceof DungeonTown))) {
+            return false;
+        }
+        const dungeon = player.town().dungeon;
+        return dungeon?.isUnlocked() && App.game.wallet.hasAmount(new Amount(dungeon.tokenCost, GameConstants.Currency.dungeonToken));
     }
 
     /**
@@ -809,24 +867,10 @@ class EnhancedAutoClicker {
             return;
         }
         this.autoDungeonTracker.dungeonFinished = false;
-        if (this.autoDungeonState() && DungeonRunner.hasEnoughTokens()) {
-            // Clear old board to force map visuals refresh
-            DungeonRunner.map.board([]);
-            DungeonRunner.initializeDungeon(DungeonRunner.dungeon);
-        } else {
-            if (!DungeonRunner.hasEnoughTokens()) {
-                // Notify player if they've run out of tokens
-                this.toggleAutoDungeon();
-                Notifier.notify({
-                    type: NotificationConstants.NotificationOption.warning,
-                    title: 'Enhanced Auto Clicker',
-                    message: `Auto Dungeon mode ran out of dungeon tokens.`,
-                    timeout: GameConstants.DAY,
-                });
-            }
-            // Can't continue, exit auto dungeon mode
-            MapHelper.moveToTown(DungeonRunner.dungeon.name);
-        }
+
+        // Clear old board to force map visuals refresh
+        DungeonRunner.map.board([]);
+        DungeonRunner.initializeDungeon(DungeonRunner.dungeon);
     }
 
     /**
@@ -854,9 +898,30 @@ class EnhancedAutoClicker {
                 }
                 GameHelper.incrementObservable(App.game.statistics.dungeonsCleared[GameConstants.getDungeonIndex(DungeonRunner.dungeon.name)]);
 
-                // Restart the dungeon with a delay, giving Defeat Dungeon Boss quests time to update
-                EnhancedAutoClicker.autoDungeonTracker.dungeonFinished = true;
-                setTimeout(() => EnhancedAutoClicker.restartDungeon(), 50);
+                if (EnhancedAutoClicker.autoDungeonTracker.stopAfterFinishing) {
+                    EnhancedAutoClicker.toggleAutoDungeon();
+                }
+
+                if (EnhancedAutoClicker.autoDungeonState() && DungeonRunner.hasEnoughTokens()) {
+                    // Restart the dungeon with a delay, giving Defeat Dungeon Boss quests time to update
+                    EnhancedAutoClicker.autoDungeonTracker.dungeonFinished = true;
+                    setTimeout(() => EnhancedAutoClicker.restartDungeon(), 50);
+                } else {
+                    if (!DungeonRunner.hasEnoughTokens()) {
+                        // Notify player if they've run out of tokens
+                        Notifier.notify({
+                            type: NotificationConstants.NotificationOption.warning,
+                            title: 'Enhanced Auto Clicker',
+                            message: `Auto Dungeon mode ran out of dungeon tokens.`,
+                            timeout: GameConstants.DAY,
+                        });
+                    }
+                    if (EnhancedAutoClicker.autoDungeonState()) {
+                        EnhancedAutoClicker.toggleAutoDungeon();
+                    }
+                    // Can't continue, exit auto dungeon mode
+                    MapHelper.moveToTown(DungeonRunner.dungeon.name);
+                }
             }
         }
         // Only use our version when auto dungeon is running
