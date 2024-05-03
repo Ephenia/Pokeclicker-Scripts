@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.5.0
+// @version       3.5.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -200,7 +200,7 @@ class EnhancedAutoClicker {
         document.getElementById('auto-click-rate').addEventListener('change', (event) => { EnhancedAutoClicker.changeClickMultiplier(event); });
         document.getElementById('auto-gym-start').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoGym(); });
         document.getElementById('auto-gym-select').addEventListener('change', (event) => { EnhancedAutoClicker.changeSelectedGym(event); });
-        document.getElementById('auto-dungeon-start').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoDungeon(); });
+        document.getElementById('auto-dungeon-start').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoDungeon(true); });
         document.getElementById('auto-dungeon-encounter-mode').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoDungeonEncounterMode(); });
         document.getElementById('auto-dungeon-chest-mode').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoDungeonChestMode(); });
         document.getElementById('checkbox-autoDungeonFinishBeforeStopping').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonFinishBeforeStopping(); });
@@ -270,7 +270,7 @@ class EnhancedAutoClicker {
                 this.toggleAutoGym();
             }
             if (this.autoDungeonState()) {
-                this.toggleAutoDungeon(true);
+                this.toggleAutoDungeon();
             }
         }
 
@@ -327,9 +327,10 @@ class EnhancedAutoClicker {
         }
     }
 
-    static toggleAutoDungeon(forceStop = false) {
+    static toggleAutoDungeon(allowSlowStop = false) {
         const element = document.getElementById('auto-dungeon-start');
-        const newState = !this.autoDungeonState()
+        const newState = !this.autoDungeonState();
+
         if (newState && !this.canStartAutoDungeon()) {
             // Don't turn on if there's no dungeon here
             return;
@@ -340,8 +341,8 @@ class EnhancedAutoClicker {
 
         localStorage.setItem('autoDungeonState', newState);
         
-        if (this.autoDungeonFinishBeforeStopping && App.game.gameState === GameConstants.GameState.dungeon && 
-            !(newState || forceStop || this.autoDungeonTracker.stopAfterFinishing)) {
+        if (allowSlowStop && this.autoDungeonFinishBeforeStopping && App.game.gameState === GameConstants.GameState.dungeon && 
+            (!newState && !this.autoDungeonTracker.stopAfterFinishing)) {
             // Instead of stopping immediately, wait and exit after beating this dungeon
             this.autoDungeonTracker.stopAfterFinishing = true;
         } else {
@@ -387,7 +388,7 @@ class EnhancedAutoClicker {
 
     static toggleAutoDungeonFinishBeforeStopping() {
         this.autoDungeonFinishBeforeStopping = !this.autoDungeonFinishBeforeStopping;
-        if (this.autoDungeonTracker.stopAfterFinishing) {
+        if (!this.autoDungeonFinishBeforeStopping && this.autoDungeonTracker.stopAfterFinishing) {
             this.toggleAutoDungeon();
         }
         localStorage.setItem('autoDungeonFinishBeforeStopping', this.autoDungeonFinishBeforeStopping);
