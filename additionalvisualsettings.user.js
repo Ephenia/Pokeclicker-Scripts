@@ -284,7 +284,7 @@ function addOptimizeVitamins() {
     btn.setAttribute('style', 'line-height: 0.6; font-size: 1rem; float: right;');
     btn.setAttribute('data-bind', `click: () => { if ($data) { $data.optimizeVitamins() } }, class: (!$data.breeding ? 'text-success' : 'text-muted')`);
     btn.innerHTML = '⚖';
-    document.querySelector('#pokemonVitaminExpandedModal tbody[data-bind*="PartyController.getvitaminSortedList"] td').appendChild(btn);
+    document.querySelector('#pokemonVitaminExpandedModal tbody[data-bind*="PartyController.getVitaminSortedList"] td').appendChild(btn);
 
     // Add optimize-vitamin functions for party pokemon (adapted from wiki)
     PartyPokemon.prototype.calcBreedingEfficiency = function(vitaminsUsed) {
