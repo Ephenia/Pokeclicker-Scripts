@@ -5,7 +5,7 @@
 // @description   An experimental catch filter that aims to help you have much better control and will completely change how you capture Pokémon.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.9.2
+// @version       1.9.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -161,7 +161,7 @@ function filterPokemonRoute(event) {
     const elem = event.target;
     document.getElementById('filter-results').innerHTML = '';
     let routePoke;
-    try {routePoke = Routes.getRoute(player.region, player.route()).pokemon
+    try {routePoke = Routes.getRoute(player.region, player.route).pokemon
          const frag = new DocumentFragment();
          //Using a side array to ensure adding pokemons only once in results (multiple occurences can occur with special)
          let routePokesList = [];
