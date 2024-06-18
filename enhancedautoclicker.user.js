@@ -879,6 +879,9 @@ class EnhancedAutoClicker {
     static restartDungeon() {
         if (App.game.gameState !== GameConstants.GameState.dungeon) {
             return;
+        } else if (!EnhancedAutoClicker.canStartAutoDungeon()) {
+            MapHelper.moveToTown(DungeonRunner.dungeon.name);
+            return;
         }
         this.autoDungeonTracker.dungeonFinished = false;
 
