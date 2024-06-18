@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.5.2
+// @version       3.5.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -329,9 +329,19 @@ class EnhancedAutoClicker {
 
     static toggleAutoDungeon(allowSlowStop = false) {
         const element = document.getElementById('auto-dungeon-start');
-        const newState = !this.autoDungeonState();
+        let newState = !this.autoDungeonState();
 
-        if (newState && !this.canStartAutoDungeon()) {
+        if (DungeonGuides.hired()) {
+            // Auto Dungeon can't run alongside dungeon guides, force stop
+            newState = false;
+            allowSlowStop = false;
+            Notifier.notify({
+                type: NotificationConstants.NotificationOption.warning,
+                title: 'Enhanced Auto Clicker',
+                message: `Auto Dungeon mode is not compatible with Dungeon Guides.`,
+                timeout: GameConstants.SECOND * 15,
+            });
+        } else if (newState && !this.canStartAutoDungeon()) {
             // Don't turn on if there's no dungeon here
             return;
         } else if (newState && this.autoGymState()) {
@@ -632,6 +642,9 @@ class EnhancedAutoClicker {
         if (!(App.game.gameState === GameConstants.GameState.dungeon || (App.game.gameState === GameConstants.GameState.town && player.town instanceof DungeonTown))) {
             return false;
         }
+        if (DungeonGuides.hired()) {
+            return false;
+        }
         const dungeon = player.town.dungeon;
         return dungeon?.isUnlocked() && App.game.wallet.hasAmount(new Amount(dungeon.tokenCost, GameConstants.Currency.dungeonToken));
     }
@@ -866,6 +879,9 @@ class EnhancedAutoClicker {
     static restartDungeon() {
         if (App.game.gameState !== GameConstants.GameState.dungeon) {
             return;
+        } else if (!EnhancedAutoClicker.canStartAutoDungeon()) {
+            MapHelper.moveToTown(DungeonRunner.dungeon.name);
+            return;
         }
         this.autoDungeonTracker.dungeonFinished = false;
 
@@ -903,7 +919,7 @@ class EnhancedAutoClicker {
                     EnhancedAutoClicker.toggleAutoDungeon();
                 }
 
-                if (EnhancedAutoClicker.autoDungeonState() && DungeonRunner.hasEnoughTokens()) {
+                if (EnhancedAutoClicker.autoDungeonState() && EnhancedAutoClicker.canStartAutoDungeon()) {
                     // Restart the dungeon with a delay, giving Defeat Dungeon Boss quests time to update
                     EnhancedAutoClicker.autoDungeonTracker.dungeonFinished = true;
                     setTimeout(() => EnhancedAutoClicker.restartDungeon(), 50);
