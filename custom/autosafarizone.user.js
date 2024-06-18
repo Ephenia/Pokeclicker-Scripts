@@ -8,7 +8,7 @@
 // @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
-// @version       1.2.0
+// @version       1.2.1
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -106,7 +106,7 @@ function initAutoSafari() {
   function doSafariTick() {
     if (skipTicks) {
       skipTicks--;
-    } else if (!Safari.inProgress() || Safari.activeRegion() !== player.region || modalUtils.observableState.safariModal !== 'show') {
+    } else if (!Safari.inProgress() || Safari.activeRegion() !== player.region || DisplayObservables.modalState.safariModal !== 'show') {
       enterSafari();
     } else if (Safari.inBattle()) {
       fightSafariPokemon();
@@ -120,7 +120,7 @@ function initAutoSafari() {
   }
 
   function enterSafari() {
-    if (!(Safari.canAccess() && !player.route() && player.town().content.some(c => c.constructor.name === 'SafariTownContent'))) {
+    if (!(Safari.canAccess() && !player.route && player.town.content.some(c => c.constructor.name === 'SafariTownContent'))) {
       // Safari inaccessible from here
       toggleAutoSafari();
       return;
@@ -130,7 +130,7 @@ function initAutoSafari() {
       return;
     }
 
-    if (modalUtils.observableState.safariModal !== 'show') {
+    if (DisplayObservables.modalState.safariModal !== 'show') {
       Safari.openModal();
       skipTicks = autoSafariFastAnimationsState ? 2 : 1;
     } else if (!Safari.inProgress() && Safari.canPay()) {
@@ -263,7 +263,7 @@ function initAutoSafari() {
         hasPrioritySpawns = (grassPriorityWeight == 0 && waterPriorityWeight == 0) ? -1 : 1;
       }
       chosenTiles = cachedPriorityEnvironments;
-    } else if (player.town().name === 'National Park') {
+    } else if (player.town.name === 'National Park') {
       chosenTiles = optimalBugContestByHighestRegion[player.highestRegion()] == SafariEnvironments.Grass ? [GameConstants.SafariTile.grass] : [...GameConstants.SAFARI_WATER_BLOCKS];
     } else {
       chosenTiles = [GameConstants.SafariTile.grass, ...GameConstants.SAFARI_WATER_BLOCKS];

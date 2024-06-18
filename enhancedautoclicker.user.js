@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.5.1
+// @version       3.5.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -525,7 +525,7 @@ class EnhancedAutoClicker {
     static autoGym() {
         if (this.canStartAutoGym()) {
             // Find all unlocked gyms in the current town
-            var gymList = player.town().content.filter((c) => (c.constructor.name == "Gym" && c.isUnlocked()));
+            var gymList = player.town.content.filter((c) => (c.constructor.name == "Gym" && c.isUnlocked()));
             if (gymList.length > 0) {
                 var gymIndex = Math.min(this.autoGymSelect, gymList.length - 1);
                 // Start in auto restart mode
@@ -539,7 +539,7 @@ class EnhancedAutoClicker {
 
     static canStartAutoGym() {
         return App.game.gameState === GameConstants.GameState.gym || (App.game.gameState === GameConstants.GameState.town &&
-            player.town().content.some((c) => c.constructor.name == "Gym" && c.isUnlocked())
+            player.town.content.some((c) => c.constructor.name == "Gym" && c.isUnlocked())
         );
     }
 
@@ -621,7 +621,7 @@ class EnhancedAutoClicker {
         // Begin dungeon
         else if (this.canStartAutoDungeon()) {
             // Enter dungeon if unlocked and affordable
-            DungeonRunner.initializeDungeon(player.town().dungeon);
+            DungeonRunner.initializeDungeon(player.town.dungeon);
         } else {
             // Disable if locked, can't afford entry cost, or there's no dungeon here
             this.toggleAutoDungeon();
@@ -629,10 +629,10 @@ class EnhancedAutoClicker {
     }
 
     static canStartAutoDungeon() {
-        if (!(App.game.gameState === GameConstants.GameState.dungeon || (App.game.gameState === GameConstants.GameState.town && player.town() instanceof DungeonTown))) {
+        if (!(App.game.gameState === GameConstants.GameState.dungeon || (App.game.gameState === GameConstants.GameState.town && player.town instanceof DungeonTown))) {
             return false;
         }
-        const dungeon = player.town().dungeon;
+        const dungeon = player.town.dungeon;
         return dungeon?.isUnlocked() && App.game.wallet.hasAmount(new Amount(dungeon.tokenCost, GameConstants.Currency.dungeonToken));
     }
 
@@ -657,12 +657,12 @@ class EnhancedAutoClicker {
         for (var y = 0; y < dungeonBoard.length; y++) {
             for (var x = 0; x < dungeonBoard[y].length; x++) {
                 let tile = dungeonBoard[y][x];
-                if (tile.type() == GameConstants.DungeonTile.enemy) {
+                if (tile.type() == GameConstants.DungeonTileType.enemy) {
                     this.autoDungeonTracker.encounterCoords.push(new Point(x, y, this.autoDungeonTracker.floor));
-                } else if (tile.type() == GameConstants.DungeonTile.chest) {
+                } else if (tile.type() == GameConstants.DungeonTileType.chest) {
                     let lootTier = Object.keys(baseLootTierChance).indexOf(tile.metadata.tier);
                     this.autoDungeonTracker.chestCoords.push({'xy': new Point(x, y, this.autoDungeonTracker.floor), 'tier': lootTier});
-                } else if (tile.type() == GameConstants.DungeonTile.boss || tile.type() == GameConstants.DungeonTile.ladder) {
+                } else if (tile.type() == GameConstants.DungeonTileType.boss || tile.type() == GameConstants.DungeonTileType.ladder) {
                     this.autoDungeonTracker.bossCoords = new Point(x, y, this.autoDungeonTracker.floor);
                 }
             }
@@ -729,7 +729,7 @@ class EnhancedAutoClicker {
             }
             stuckInLoopCounter++;
             if (stuckInLoopCounter > 100) {
-                console.warn(`Auto Dungeon got stuck in a loop while moving to tile \'${GameConstants.DungeonTile[dungeonBoard[this.autoDungeonTracker.targetCoords.y][this.autoDungeonTracker.targetCoords.x].type()]}\' (${this.autoDungeonTracker.targetCoords.x}, ${this.autoDungeonTracker.targetCoords.y})`);
+                console.warn(`Auto Dungeon got stuck in a loop while moving to tile \'${GameConstants.DungeonTileType[dungeonBoard[this.autoDungeonTracker.targetCoords.y][this.autoDungeonTracker.targetCoords.x].type()]}\' (${this.autoDungeonTracker.targetCoords.x}, ${this.autoDungeonTracker.targetCoords.y})`);
                 this.toggleAutoDungeon();
                 return;
             }
@@ -750,7 +750,7 @@ class EnhancedAutoClicker {
             }
             this.autoDungeonTracker.coords = this.pathfindTowardDungeonTarget();
             if (!this.autoDungeonTracker.coords) {
-                console.warn(`Auto Dungeon could not find path to target tile \'${GameConstants.DungeonTile[dungeonBoard[this.autoDungeonTracker.targetCoords.y][this.autoDungeonTracker.targetCoords.x].type()]}\' (${this.autoDungeonTracker.targetCoords.x}, ${this.autoDungeonTracker.targetCoords.y})`);
+                console.warn(`Auto Dungeon could not find path to target tile \'${GameConstants.DungeonTileType[dungeonBoard[this.autoDungeonTracker.targetCoords.y][this.autoDungeonTracker.targetCoords.x].type()]}\' (${this.autoDungeonTracker.targetCoords.x}, ${this.autoDungeonTracker.targetCoords.y})`);
                 this.toggleAutoDungeon();
                 return;
             }
@@ -765,25 +765,25 @@ class EnhancedAutoClicker {
                 hasMoved = true;
                 // Take corresponding action
                 const tileType = DungeonRunner.map.currentTile().type();
-                if (tileType === GameConstants.DungeonTile.enemy) {
+                if (tileType === GameConstants.DungeonTileType.enemy) {
                     // Do nothing, fights begin automatically
-                } else if (tileType === GameConstants.DungeonTile.chest) {
+                } else if (tileType === GameConstants.DungeonTileType.chest) {
                     DungeonRunner.openChest();
-                } else if (tileType === GameConstants.DungeonTile.boss) {
+                } else if (tileType === GameConstants.DungeonTileType.boss) {
                     if (this.autoDungeonTracker.floorFinished) {
                         DungeonRunner.startBossFight();
                     }
-                } else if (tileType === GameConstants.DungeonTile.ladder) {
+                } else if (tileType === GameConstants.DungeonTileType.ladder) {
                     if (this.autoDungeonTracker.floorFinished) {
                         DungeonRunner.nextFloor();
                     }
                 } else {
-                    console.warn(`Auto Dungeon targeted tile type ${GameConstants.DungeonTile[tileType]}`);
+                    console.warn(`Auto Dungeon targeted tile type ${GameConstants.DungeonTileType[tileType]}`);
                 }
             }
             stuckInLoopCounter++;
             if (stuckInLoopCounter > 5) {
-                console.warn(`Auto Dungeon got stuck in a loop while moving to tile \'${GameConstants.DungeonTile[dungeonBoard[this.autoDungeonTracker.targetCoords.y][this.autoDungeonTracker.targetCoords.x].type()]}\' (${this.autoDungeonTracker.targetCoords.x}, ${this.autoDungeonTracker.targetCoords.y})`);
+                console.warn(`Auto Dungeon got stuck in a loop while moving to tile \'${GameConstants.DungeonTileType[dungeonBoard[this.autoDungeonTracker.targetCoords.y][this.autoDungeonTracker.targetCoords.x].type()]}\' (${this.autoDungeonTracker.targetCoords.x}, ${this.autoDungeonTracker.targetCoords.y})`);
                 this.toggleAutoDungeon();
                 return;
             }
@@ -805,7 +805,7 @@ class EnhancedAutoClicker {
             else if (this.autoDungeonEncounterMode && this.autoDungeonTracker.encounterCoords.length) {
                 // Skip already-fought encounters
                 let encounter = this.autoDungeonTracker.encounterCoords.pop();
-                if (dungeonBoard[encounter.y][encounter.x].type() == GameConstants.DungeonTile.enemy) {
+                if (dungeonBoard[encounter.y][encounter.x].type() == GameConstants.DungeonTileType.enemy) {
                     target = encounter;
                 } else {
                     continue;
@@ -1072,8 +1072,8 @@ class EnhancedAutoClicker {
         } else if (App.game.gameState === GameConstants.GameState.temporaryBattle) {
             newLocation = TemporaryBattleRunner.battleObservable().name;
         } else {
-            // Conveniently, player.route() = 0 when not on a route
-            newLocation = player.route() || player.town().name;
+            // Conveniently, player.route = 0 when not on a route
+            newLocation = player.route || player.town.name;
         }
         if (this.autoClickCalcTracker.playerLocation != newLocation) {
             this.autoClickCalcTracker.playerLocation = newLocation;
@@ -1090,9 +1090,9 @@ class EnhancedAutoClicker {
     static calculateAreaHealth() {
         // Calculate area max hp
         if (App.game.gameState === GameConstants.GameState.fighting) {
-            this.autoClickCalcTracker.areaHealth = PokemonFactory.routeHealth(player.route(), player.region);
+            this.autoClickCalcTracker.areaHealth = PokemonFactory.routeHealth(player.route, player.region);
             // Adjust for route health variation (adapted from PokemonFactory.generateWildPokemon)
-            const pokeHP = [...new Set(Object.values(Routes.getRoute(player.region, player.route()).pokemon).flat().flatMap(p => p.pokemon ?? p))].map(p => pokemonMap[p].base.hitpoints);
+            const pokeHP = [...new Set(Object.values(Routes.getRoute(player.region, player.route).pokemon).flat().flatMap(p => p.pokemon ?? p))].map(p => pokemonMap[p].base.hitpoints);
             const averageHP = pokeHP.reduce((s, a) => s + a, 0) / pokeHP.length;
             const highestHP = pokeHP.reduce((m, a) => Math.max(m, a), 0);
             this.autoClickCalcTracker.areaHealth = Math.round(this.autoClickCalcTracker.areaHealth * (0.9 + (highestHP / averageHP) / 10));
