@@ -568,7 +568,7 @@ class EnhancedAutoClicker {
                 }
 
                 // Send the player back to the town they were in
-                player.town(gym.parent);
+                player.town = gym.parent;
                 App.game.gameState = GameConstants.GameState.town;
             }
         }
