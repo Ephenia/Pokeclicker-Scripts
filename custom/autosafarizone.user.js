@@ -101,9 +101,7 @@ function initAutoSafari() {
     hasPrioritySpawns = 0;
     inBattle = false;
     stopAfterGameOver = false;
-    Safari.grid.forEach(row => row.forEach(tile => {
-      mapHasTileType[tile] = true;
-    }));
+    mapHasTileType = {};
     // Interval slightly longer than movement speed (0.25s by default) to avoid graphical glitches
     autoSafariProcessId = setInterval(doSafariTick, tickSpeed());
   }
@@ -143,6 +141,7 @@ function initAutoSafari() {
       forceSkipItems = false;
       cachedPath.length = 0;
       hasPrioritySpawns = 0;
+      
     } else {
       toggleAutoSafari();
     }
@@ -151,6 +150,13 @@ function initAutoSafari() {
   function processSafari() {
     // Performs actions within the Safari: picking items, moving
     inBattle = false;
+
+    // Scan map if hasn't happened yet
+    if (Object.keys(mapHasTileType).length === 0) {
+      Safari.grid.forEach(row => row.forEach(tile => {
+        mapHasTileType[tile] = true;
+      }));
+    }
 
     // Seek visible shiny spawns
     if (Safari.pokemonGrid().some((p) => p.shiny && !forceSkipShinies.includes(p))) {
