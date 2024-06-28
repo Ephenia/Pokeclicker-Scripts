@@ -8,7 +8,7 @@
 // @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
-// @version       1.2.1
+// @version       1.2.2
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -40,6 +40,8 @@ function initAutoSafari() {
   var hasPrioritySpawns = 0;
   // Cached encounter tile(s) with highest priority spawn chance
   var cachedPriorityEnvironments = [SafariEnvironments.Grass];
+  var mapHasTileType = {};
+  GameHelper.enumNumbers(GameConstants.SafariTile).forEach((tile) => mapHasTileType[tile] = false);
   // To add delay to start of battles to avoid animation issues
   var inBattle = false;
 
@@ -99,6 +101,7 @@ function initAutoSafari() {
     hasPrioritySpawns = 0;
     inBattle = false;
     stopAfterGameOver = false;
+    mapHasTileType = {};
     // Interval slightly longer than movement speed (0.25s by default) to avoid graphical glitches
     autoSafariProcessId = setInterval(doSafariTick, tickSpeed());
   }
@@ -138,6 +141,7 @@ function initAutoSafari() {
       forceSkipItems = false;
       cachedPath.length = 0;
       hasPrioritySpawns = 0;
+      
     } else {
       toggleAutoSafari();
     }
@@ -146,6 +150,13 @@ function initAutoSafari() {
   function processSafari() {
     // Performs actions within the Safari: picking items, moving
     inBattle = false;
+
+    // Scan map if hasn't happened yet
+    if (Object.keys(mapHasTileType).length === 0) {
+      Safari.grid.forEach(row => row.forEach(tile => {
+        mapHasTileType[tile] = true;
+      }));
+    }
 
     // Seek visible shiny spawns
     if (Safari.pokemonGrid().some((p) => p.shiny && !forceSkipShinies.includes(p))) {
@@ -218,10 +229,13 @@ function initAutoSafari() {
 
     var chosenTiles;
 
-    // When prioritizing certain spawns, seek encounter tiles based on what will complete our goal fastest, i.e.:
-    //   - if environments either share all priority spawns or both have unique priority spawns, seek the one with highest priority chance
-    //   - if one environment's priority spawns are a proper subset of the other, seek the one with more spawns
-    if ((autoSafariSeekUncaught || autoSafariSeekContagious) && hasPrioritySpawns > -1) {
+    if (player.town.name === 'Hoppy Town Fishing Pond' && !mapHasTileType[GameConstants.SafariTile.grass]) {
+      // Magikarp Jump safari can only have water encounters
+      chosenTiles = [...GameConstants.SAFARI_WATER_BLOCKS];
+    } else if ((autoSafariSeekUncaught || autoSafariSeekContagious) && hasPrioritySpawns > -1) {
+      // When prioritizing certain spawns, seek encounter tiles based on what will complete our goal fastest, i.e.:
+      //   - if environments either share all priority spawns or both have unique priority spawns, seek the one with highest priority chance
+      //   - if one environment's priority spawns are a proper subset of the other, seek the one with more spawns
       if (hasPrioritySpawns == 0) {
         let grassPriorityWeight = 0;
         let waterPriorityWeight = 0;
