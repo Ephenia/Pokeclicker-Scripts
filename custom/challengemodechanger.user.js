@@ -5,7 +5,7 @@
 // @description   Lets you enable/disable any of the Challenges at any given point in time. This is compatiable with any save and will work on pre-existing saves. It's best to backup your save before using this.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.2.2
+// @version       1.2.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -54,7 +54,16 @@ function initChallenger() {
     }
 }
 
-function loadEpheniaScript(scriptName, initFunction) {
+function loadEpheniaScript(scriptName, initFunction, priorityFunction) {
+    function reportScriptError(scriptName, error) {
+        console.error(`Error while initializing '${scriptName}' userscript:\n${error}`);
+        Notifier.notify({
+            type: NotificationConstants.NotificationOption.warning,
+            title: scriptName,
+            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
+            timeout: GameConstants.DAY,
+        });
+    }
     const windowObject = !App.isUsingClient ? unsafeWindow : window;
     // Inject handlers if they don't exist yet
     if (windowObject.epheniaScriptInitializers === undefined) {
@@ -71,13 +80,7 @@ function loadEpheniaScript(scriptName, initFunction) {
                     try {
                         initFunction();
                     } catch (e) {
-                        console.error(`Error while initializing '${scriptName}' userscript:\n${e}`);
-                        Notifier.notify({
-                            type: NotificationConstants.NotificationOption.warning,
-                            title: scriptName,
-                            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
-                            timeout: GameConstants.DAY,
-                        });
+                        reportScriptError(scriptName, e);
                     }
                 });
                 hasInitialized = true;
@@ -103,6 +106,18 @@ function loadEpheniaScript(scriptName, initFunction) {
     }
     // Add initializer for this particular script
     windowObject.epheniaScriptInitializers[scriptName] = initFunction;
+    // Run any functions that need to execute before the game starts
+    if (priorityFunction) {
+        $(document).ready(() => {
+            try {
+                priorityFunction();
+            } catch (e) {
+                reportScriptError(scriptName, e);
+                // Remove main initialization function  
+                windowObject.epheniaScriptInitializers[scriptName] = () => null;
+            }
+        });
+    }
 }
 
 if (!App.isUsingClient || localStorage.getItem('challengemodechanger') === 'true') {
