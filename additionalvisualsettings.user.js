@@ -23,7 +23,6 @@ var wildPokeDefeatDisabled = ko.observable(false);
 var wildPokeImgDisabled = ko.observable(false);
 var wildPokeHealthDisabled = ko.observable(false);
 var wildPokeCatchDisabled = ko.observable(false);
-var avsDisableNotifications;
 
 function initVisualSettings() {
     // Add shortcut menu icons
@@ -49,7 +48,6 @@ function initVisualSettings() {
         ['poke-image', 'Show wild Pokémon Image'],
         ['poke-health', 'Show Pokémon Health'],
         ['poke-catch', 'Show Catch Icon'],
-        ['all-notify', 'Disable all Notifications']];
     settingsToAdd.forEach(([id, desc]) => {
         let elem = document.createElement('tr');
         elem.innerHTML = `<td class="p-2"><label class="m-0 col-md-8" for="checkbox-${id}">${desc}</label></td>` + 
@@ -62,7 +60,6 @@ function initVisualSettings() {
     document.getElementById('checkbox-poke-image').checked = !wildPokeImgDisabled();
     document.getElementById('checkbox-poke-health').checked = !wildPokeHealthDisabled();
     document.getElementById('checkbox-poke-catch').checked = !wildPokeCatchDisabled();
-    document.getElementById('checkbox-all-notify').checked = avsDisableNotifications;
 
     document.getElementById('checkbox-poke-name').addEventListener('change', event => {
         wildPokeNameDisabled(!event.target.checked);
@@ -88,13 +85,6 @@ function initVisualSettings() {
         wildPokeCatchDisabled(!event.target.checked);
         localStorage.setItem("wildPokeCatchDisabled", wildPokeCatchDisabled());
     });
-
-    document.getElementById('checkbox-all-notify').addEventListener('change', event => {
-        avsDisableNotifications = event.target.checked;
-        localStorage.setItem("avsDisableNotifications", avsDisableNotifications);
-    });
-
-    overrideNotifications();
 
     // Create travel shortcut buttons on town map
     const travelShortcutsToAdd = [
@@ -156,19 +146,6 @@ function initVisualSettings() {
     addGlobalStyle('#dungeons-shortcut-buttons > button * { z-index: 2 }');
     addGlobalStyle('.dungeons-shortcut-overlay { width: 100%; height: 100%; position: absolute; background-color: rgba(0,0,0,0.45); margin-top: -6px; margin-left: -8px; z-index: 1 !important }');
     addGlobalStyle('.dungeons-shortcut-info { position: relative; font-weight: bold }');
-
-    function overrideNotifications() {
-        Notifier.oldNotifyAVS = Notifier.notify;
-        Notifier.notify = function(...args) {
-            if (avsDisableNotifications) {
-                if (args.length && args[0].sound) {
-                    args[0].sound.play();
-                }
-            } else {
-                return Notifier.oldNotifyAVS(...args);
-            }
-        }
-    }
 
     function generateRegionGymsList() {
         const gymsBtns = document.getElementById('gyms-shortcut-buttons');
@@ -348,7 +325,6 @@ wildPokeDefeatDisabled(loadSetting('wildPokeDefeatDisabled', false));
 wildPokeImgDisabled(loadSetting('wildPokeImgDisabled', false));
 wildPokeHealthDisabled(loadSetting('wildPokeHealthDisabled', false));
 wildPokeCatchDisabled(loadSetting('wildPokeCatchDisabled', false));
-avsDisableNotifications = loadSetting('avsDisableNotifications', false);
 
 function loadSetting(key, defaultVal) {
     var val;
