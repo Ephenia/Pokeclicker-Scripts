@@ -249,7 +249,11 @@ function autoHatchFossil() {
         fossilList = priorityList;
     }
     let fossilToUse = fossilList[Math.floor(Math.random() * fossilList.length)];
-    return UndergroundController.gainProfit(fossilToUse, 1);
+    // Workaround as sellMineItem returns null
+    let before = player.amountOfItem(fossilToUse.itemName)
+    UndergroundController.sellMineItem(fossilToUse);
+    let after = player.amountOfItem(fossilToUse.itemName);
+    return before > after;
 }
 
 function autoHatchMon() {
