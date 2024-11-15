@@ -5,7 +5,7 @@
 // @description   Automatically hatches eggs at 100% completion. Adds an On/Off button for auto hatching as well as an option for automatically hatching store bought eggs and dug up fossils.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.1.3
+// @version       3.1.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -251,7 +251,7 @@ function autoHatchFossil() {
     let fossilToUse = fossilList[Math.floor(Math.random() * fossilList.length)];
     // Workaround as sellMineItem returns null
     let before = player.amountOfItem(fossilToUse.itemName)
-    Underground.sellMineItem(fossilToUse);
+    UndergroundController.sellMineItem(fossilToUse);
     let after = player.amountOfItem(fossilToUse.itemName);
     return before > after;
 }
