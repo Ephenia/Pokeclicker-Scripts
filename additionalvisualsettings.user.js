@@ -27,19 +27,20 @@ class AdditionalVisualSettings {
             pokemon: ko.observable(false),
             catchIcon: ko.observable(false),
             healthbar: ko.observable(false),
+            attack: ko.observable(false),
         },
         gym: {
             header: ko.observable(false),
             timer: ko.observable(false),
             pokemon: ko.observable(false),
             healthbar: ko.observable(false),
-            
+            attack: ko.observable(false),
         },
         dungeon: {
             header: ko.observable(false),
             timer: ko.observable(false),
             images: ko.observable(false),
-            
+            attack: ko.observable(false),
         },
         battleFrontier: {
             header: ko.observable(false),
@@ -288,6 +289,7 @@ class AdditionalVisualSettings {
                 pokemon: 'div:has(> knockout[data-bind*="pokemonSpriteTemplate"])',
                 catchIcon: 'div.catchChance',
                 healthbar: 'div.progress.hitpoints',
+                attack: '.pageItemFooter knockout[data-bind*="pokemonAttackTemplate"]',
             },
             gym: {
                 container: '#battleContainer div[data-bind="if: App.game.gameState === GameConstants.GameState.gym"]',
@@ -298,6 +300,7 @@ class AdditionalVisualSettings {
                 timer: 'h2.pageItemTitle .timer',
                 pokemon: 'div:has(> knockout[data-bind*="pokemonSpriteTemplate"])',
                 healthbar: 'div.progress.hitpoints',
+                attack: '.pageItemFooter knockout[data-bind*="pokemonAttackTemplate"]',
             },
             dungeon: {
                 container: '#battleContainer div[data-bind="if: App.game.gameState === GameConstants.GameState.dungeon"]',
@@ -310,6 +313,7 @@ class AdditionalVisualSettings {
                     ['h2.pageItemTitle', 'after'],
                     ['h2.pageItemFooter', 'before']
                 ],
+                attack: '.pageItemFooter knockout[data-bind*="pokemonAttackTemplate"]',
             },
             battleFrontier: {
                 container: '#battleContainer div[data-bind="if: App.game.gameState == GameConstants.GameState.battleFrontier"]',
@@ -334,7 +338,8 @@ class AdditionalVisualSettings {
                     return;
                 }
                 const selector = selectors[state][setting];
-                const binding = `ko ifnot: AdditionalVisualSettings.graphicsDisabledSettings.${state}.${setting}() && AdditionalVisualSettings.graphicsSettingsActive`;
+                const binding = `ko ifnot: AdditionalVisualSettings.graphicsDisabledSettings.${state}.${setting}() && AdditionalVisualSettings.graphicsSettingsActive()`;
+                // Add binding for this setting
                 if (Array.isArray(selector)) {
                     // For binding multiple elements at once, which requires more complicated selecting
                     selector.forEach(([query, order], i) => {
@@ -348,6 +353,14 @@ class AdditionalVisualSettings {
                     });
                 } else {
                     const elem = container.querySelector(selector);
+                    // Special case: insert a backup attack-disabled element so formatting doesn't look weird
+                    // Do this before applying the main binding to put it outside the binding comments
+                    if (setting == 'attack') {
+                        const replacementAttack = document.createElement('span');
+                        elem.after(replacementAttack);
+                        replacementAttack.outerHTML = `<span style="display: inline;" data-bind="${binding.replace('ko ifnot:', 'if:')}">Pokémon Attack: <span>-----</span></span>`;
+                    }
+                    // Insert the binding
                     elem.before(new Comment(binding));
                     elem.after(new Comment('/ko'));
                 }
