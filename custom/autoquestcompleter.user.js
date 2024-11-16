@@ -90,7 +90,7 @@ function initAutoQuest() {
         settingsBody.appendChild(info);
         Object.keys(QuestHelper.quests).forEach((type) => {
             let elem = document.createElement('tr');
-            elem.innerHTML = `<td class="p-2"><label class="m-0 col-md-8" for="checkbox-autoQuestTypes-${type}">${type}</label></td>` + 
+            elem.innerHTML = `<td class="p-2"><label class="m-0 col-md-8" for="checkbox-autoQuestTypes-${type}">${GameConstants.camelCaseToString(type)}</label></td>` + 
                 `<td class="p-2 col-md-4"><input id="checkbox-autoQuestTypes-${type}" type="checkbox"></td>`;
             let checkbox = elem.querySelector(`#checkbox-autoQuestTypes-${type}`);
             checkbox.checked = !ignoredQuestTypes.includes(type);
