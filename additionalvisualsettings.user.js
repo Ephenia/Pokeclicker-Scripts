@@ -18,15 +18,63 @@
 // @run-at        document-idle
 // ==/UserScript==
 
-class AdditionalVisualSettings {
-    //static SETTING_KEYS = ['name', 'image', 'health', 'catch'];
-    //static STATE_KEYS = ['fighting', 'gym', 'dungeon', 'battleFrontier'];
+// TODO disable party attack number + tooltip
 
-    static wildPokeNameDisabled = ko.observable(this.loadSetting('wildPokeNameDisabled', false));
-    static wildPokeDefeatDisabled = ko.observable(this.loadSetting('wildPokeDefeatDisabled', false));
-    static wildPokeImgDisabled = ko.observable(this.loadSetting('wildPokeImgDisabled', false));
-    static wildPokeHealthDisabled = ko.observable(this.loadSetting('wildPokeHealthDisabled', false));
-    static wildPokeCatchDisabled = ko.observable(this.loadSetting('wildPokeCatchDisabled', false));
+class AdditionalVisualSettings {
+    static graphicsDisabledSettings = {
+        route: {
+            header: ko.observable(false),
+            pokemon: ko.observable(false),
+            catchIcon: ko.observable(false),
+            healthbar: ko.observable(false),
+        },
+        gym: {
+            header: ko.observable(false),
+            timer: ko.observable(false),
+            pokemon: ko.observable(false),
+            healthbar: ko.observable(false),
+            
+        },
+        dungeon: {
+            header: ko.observable(false),
+            timer: ko.observable(false),
+            images: ko.observable(false),
+            
+        },
+        battleFrontier: {
+            header: ko.observable(false),
+            timer: ko.observable(false),
+            pokemon: ko.observable(false),
+            healthbar: ko.observable(false),
+        },
+    };
+
+    static loadSettings() {
+        try {
+            const savedSettings = JSON.parse(localStorage.getItem('AVSgraphicsDisabledSettings') || '{}');
+            Object.keys(this.graphicsDisabledSettings).forEach(state => {
+                Object.keys(this.graphicsDisabledSettings[state]).forEach(setting => {
+                    if (savedSettings[state]?.[setting] != undefined) {
+                        const val = !!savedSettings[state][setting];
+                        this.graphicsDisabledSettings[state][setting](val);
+                    }
+                });
+            });
+        } catch {
+            this.saveSettings();
+        }
+    }
+
+    static saveSettings() {
+        const settingsToSave = {};
+        Object.keys(this.graphicsDisabledSettings).forEach(state => {
+            settingsToSave[state] = {};
+            Object.keys(this.graphicsDisabledSettings[state]).forEach(setting => {
+                settingsToSave[state][setting] = this.graphicsDisabledSettings[state][setting]();
+            });
+        });
+        localStorage.setItem('AVSgraphicsDisabledSettings', JSON.stringify(settingsToSave));
+    }
 
     static initOnLoad() {
         this.addGraphicsBindings();
@@ -34,6 +82,8 @@ class AdditionalVisualSettings {
     }
 
     static initVisualSettings() {
+        this.loadSettings();
+
         // Add shortcut menu icons
         const getMenu = document.getElementById('startMenu');
         const shortcutsToAdd = [
@@ -52,50 +102,28 @@ class AdditionalVisualSettings {
 
         // Add AVS settings options to scripts tab
         const settingsBody = createScriptSettingsContainer('Additional Visual Settings');
-        let settingsToAdd = [
-            ['poke-name', 'Show wild Pokémon Name', 'wildPokeNameDisabled'],
-            ['poke-defeat', 'Hide wild Pokémon Defeated', 'wildPokeDefeatDisabled'],
-            ['poke-image', 'Hide wild Pokémon Image', 'wildPokeImgDisabled'],
-            ['poke-health', 'Hide Pokémon Health', 'wildPokeHealthDisabled'],
-            ['poke-attack', 'Hide party attack', 'wildPokeAttackDisabled'],
-            ['poke-catch', 'Hide Catch Icon', 'wildPokeCatchDisabled'],
-        ];
-        settingsToAdd.forEach(([id, desc]) => {
-            let elem = document.createElement('tr');
-            elem.innerHTML = `<td class="p-2"><label class="m-0 col-md-8" for="checkbox-${id}">${desc}</label></td>` + 
-                `<td class="p-2 col-md-4"><input id="checkbox-${id}" type="checkbox"></td>`;
+
+        let elem = document.createElement('tr');
+        elem.innerHTML = `<td class="p-2" colspan="2"><label class="m-0">Disable battle visuals</label></td>`;
+        settingsBody.appendChild(elem);
+
+        Object.keys(this.graphicsDisabledSettings).forEach(state => {
+            elem = document.createElement('tr');
+            elem.innerHTML = `<th class="p-2 col-md-5" scope="row">${GameConstants.camelCaseToString(state)}</th><td class="p-2" style="display:flex;"></td>`;
+            let innerElem = elem.querySelector('td');
+            Object.keys(this.graphicsDisabledSettings[state]).forEach(setting => {
+                const container = document.createElement('div');
+                container.className = 'px-3'
+                container.innerHTML = `${GameConstants.camelCaseToString(setting)} <input id="checkbox-AVS-${state}-${setting}" type="checkbox"></td>`;
+                const checkbox = container.querySelector('input');
+                checkbox.checked = this.graphicsDisabledSettings[state][setting]();
+                checkbox.addEventListener('change', event => {
+                    this.graphicsDisabledSettings[state][setting](event.target.checked);
+                    this.saveSettings();
+                });
+                innerElem.appendChild(container);
+            });
             settingsBody.appendChild(elem);
-        });
-
-        document.getElementById('checkbox-poke-name').checked = !this.wildPokeNameDisabled();
-        document.getElementById('checkbox-poke-defeat').checked = !this.wildPokeDefeatDisabled();
-        document.getElementById('checkbox-poke-image').checked = !this.wildPokeImgDisabled();
-        document.getElementById('checkbox-poke-health').checked = !this.wildPokeHealthDisabled();
-        document.getElementById('checkbox-poke-catch').checked = !this.wildPokeCatchDisabled();
-
-        document.getElementById('checkbox-poke-name').addEventListener('change', event => {
-            this.wildPokeNameDisabled(!event.target.checked);
-            localStorage.setItem("wildPokeNameDisabled", this.wildPokeNameDisabled());
-        });
-
-        document.getElementById('checkbox-poke-defeat').addEventListener('change', event => {
-            this.wildPokeDefeatDisabled(!event.target.checked);
-            localStorage.setItem("wildPokeDefeatDisabled", this.wildPokeDefeatDisabled());
-        });
-
-        document.getElementById('checkbox-poke-image').addEventListener('change', event => {
-            this.wildPokeImgDisabled(!event.target.checked);
-            localStorage.setItem("wildPokeImgDisabled", this.wildPokeImgDisabled());
-        });
-
-        document.getElementById('checkbox-poke-health').addEventListener('change', event => {
-            this.wildPokeHealthDisabled(!event.target.checked);
-            localStorage.setItem("wildPokeHealthDisabled", this.wildPokeHealthDisabled());
-        });
-
-        document.getElementById('checkbox-poke-catch').addEventListener('change', event => {
-            this.wildPokeCatchDisabled(!event.target.checked);
-            localStorage.setItem("wildPokeCatchDisabled", this.wildPokeCatchDisabled());
         });
 
         // Create travel shortcut buttons on town map
@@ -230,28 +258,80 @@ class AdditionalVisualSettings {
         dungeonsBtns.appendChild(fragment);
     }
 
+    // Must execute before game loads and applies knockout bindings
     static addGraphicsBindings() {
-        // Must execute before game loads and applies knockout bindings
-        const routeBattleView = document.getElementById('routeBattleContainer');
+        const selectors = {
+            route: {
+                container: '#routeBattleContainer',
+                header: '.pageItemTitle > div:has(> knockout)',
+                pokemon: 'div:has(> knockout[data-bind*="pokemonSpriteTemplate"])',
+                catchIcon: 'div.catchChance',
+                healthbar: 'div.progress.hitpoints',
+            },
+            gym: {
+                container: '#battleContainer div[data-bind="if: App.game.gameState === GameConstants.GameState.gym"]',
+                header: [
+                    ['h2.pageItemTitle > knockout:has(knockout[data-bind*="pokemonNameTemplate"])', 'before'],
+                    ['h2.pageItemTitle > knockout:has(span[data-bind*="pokemonsDefeatedComputable"])', 'after']
+                ],
+                timer: 'h2.pageItemTitle .timer',
+                pokemon: 'div:has(> knockout[data-bind*="pokemonSpriteTemplate"])',
+                healthbar: 'div.progress.hitpoints',
+            },
+            dungeon: {
+                container: '#battleContainer div[data-bind="if: App.game.gameState === GameConstants.GameState.dungeon"]',
+                header: [
+                    ['h2.pageItemTitle > knockout:has(knockout[data-bind*="pokemonNameTemplate"])', 'before'],
+                    ['h2.pageItemTitle > knockout:has(span[data-bind*="defeatedTrainerPokemon"])', 'after']
+                ],
+                timer: 'h2.pageItemTitle .timer',
+                images: [
+                    ['h2.pageItemTitle', 'after'],
+                    ['h2.pageItemFooter', 'before']
+                ],
+            },
+            battleFrontier: {
+                container: '#battleContainer div[data-bind="if: App.game.gameState == GameConstants.GameState.battleFrontier"]',
+                header: [
+                    ['h2.pageItemTitle > knockout:has(knockout[data-bind*="pokemonNameTemplate"])', 'before'],
+                    ['h2.pageItemTitle > knockout[data-bind*="pokemonLeftImages"]', 'after']
+                ],
+                timer: 'h2.pageItemTitle .timer',
+                pokemon: 'div:has(> knockout[data-bind*="pokemonSpriteTemplate"])',
+                healthbar: 'div.progress.hitpoints',                
+            },
+        };
 
-        // Remove pokemon name
-        routeBattleView.querySelector('.pageItemTitle > div:has(knockout)').setAttribute('data-bind', 'ifnot: AdditionalVisualSettings.wildPokeNameDisabled');
-        // Remove pokemon defeated count
-        const pokeDefeat = routeBattleView.querySelector('.pageItemFooter knockout[data-bind*="App.game.statistics.routeKills"]');
-        pokeDefeat.before(new Comment('ko ifnot: AdditionalVisualSettings.wildPokeDefeatDisabled'));
-        pokeDefeat.after(new Comment('/ko'));
-        // Remove pokemon images
-        const pokeImg = routeBattleView.querySelector('div:has(> knockout[data-bind*="pokemonSpriteTemplate"])');
-        pokeImg.before(new Comment('ko ifnot: AdditionalVisualSettings.wildPokeImgDisabled'));
-        pokeImg.after(new Comment('/ko'));
-        // Remove pokemon healthbar
-        const pokeHealth = routeBattleView.querySelector('div.progress.hitpoints');
-        pokeHealth.before(new Comment('ko ifnot: AdditionalVisualSettings.wildPokeHealthDisabled'));
-        pokeHealth.after(new Comment('/ko'));
-        // Remove catch animation
-        const pokeCatch = routeBattleView.querySelector('div.catchChance');
-        pokeCatch.before(new Comment('ko ifnot: AdditionalVisualSettings.wildPokeCatchDisabled'));
-        pokeCatch.after(new Comment('/ko'));
+        Object.keys(this.graphicsDisabledSettings).forEach(state => {
+            const container = document.querySelector(selectors[state]?.container)
+            if (!container) {
+                console.error(`AVS: could not find ${state} container`);
+                return;
+            }
+            Object.keys(this.graphicsDisabledSettings[state]).forEach(setting => {
+                if (!selectors[state]?.[setting]) {
+                    return;
+                }
+                const selector = selectors[state][setting];
+                const binding = `ko ifnot: AdditionalVisualSettings.graphicsDisabledSettings.${state}.${setting}`;
+                if (Array.isArray(selector)) {
+                    // For binding multiple elements at once, which requires more complicated selecting
+                    selector.forEach(([query, order], i) => {
+                        const elem = container.querySelector(query);
+                        const commentBinding = i % 2 == 0 ? binding : '/ko';
+                        if (order == 'before') {
+                            elem.before(new Comment(commentBinding));
+                        } else {
+                            elem.after(new Comment(commentBinding));
+                        }
+                    });
+                } else {
+                    const elem = container.querySelector(selector);
+                    elem.before(new Comment(binding));
+                    elem.after(new Comment('/ko'));
+                }
+            });
+        });
     }
 
 
@@ -320,20 +400,6 @@ class AdditionalVisualSettings {
                 }
             });
         }
-    }
-
-    static loadSetting(key, defaultVal) {
-        var val;
-        try {
-            val = JSON.parse(localStorage.getItem(key));
-            if (val == null || typeof val !== typeof defaultVal) {
-                throw new Error;
-            }
-        } catch {
-            val = defaultVal;
-            localStorage.setItem(key, defaultVal);
-        }
-        return val;
     }
 }
 
