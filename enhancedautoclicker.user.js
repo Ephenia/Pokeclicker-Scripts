@@ -64,18 +64,9 @@ class EnhancedAutoClicker {
         enemies: null,
         areaHealth: null,
     };
-    // Visual settings
-    static gymGraphicsDisabled = ko.observable(validateStorage('gymGraphicsDisabled', false));
-    static dungeonGraphicsDisabled = ko.observable(validateStorage('dungeonGraphicsDisabled', false));
-    // Computed observables for visual settings
+    // Computed observables for visual bindings
     static autoGymOn = ko.pureComputed(() => {
         return this.autoClickState() && this.autoGymState();
-    });
-    static disableAutoGymGraphics = ko.pureComputed(() => {
-        return this.gymGraphicsDisabled() && this.autoGymOn();
-    });
-    static disableAutoDungeonGraphics = ko.pureComputed(() => {
-        return this.dungeonGraphicsDisabled() && this.autoClickState() && this.autoDungeonState();
     });
 
     /* Initialization */
@@ -178,8 +169,6 @@ class EnhancedAutoClicker {
         let checkboxesToAdd = [
             ['autoDungeonFinishBeforeStopping', 'Auto Dungeon finishes dungeons before turning off', this.autoDungeonFinishBeforeStopping],
             ['autoDungeonAlwaysOpenRareChests', 'Always open visible targeted chests', this.autoDungeonAlwaysOpenRareChests],
-            ['autoGymGraphicsDisabled', 'Disable Auto Gym graphics', this.gymGraphicsDisabled()],
-            ['autoDungeonGraphicsDisabled', 'Disable Auto Dungeon graphics', this.dungeonGraphicsDisabled()]
         ];
         checkboxesToAdd.forEach(([name, text, isChecked]) => {
             const newSetting = document.createElement('tr')
@@ -205,8 +194,6 @@ class EnhancedAutoClicker {
         document.getElementById('auto-dungeon-chest-mode').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoDungeonChestMode(); });
         document.getElementById('checkbox-autoDungeonFinishBeforeStopping').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonFinishBeforeStopping(); });
         document.getElementById('checkbox-autoDungeonAlwaysOpenRareChests').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonAlwaysOpenRareChests(); });
-        document.getElementById('checkbox-autoGymGraphicsDisabled').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoGymGraphics(); });
-        document.getElementById('checkbox-autoDungeonGraphicsDisabled').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonGraphics(); });
         document.getElementById('select-autoClickCalcEfficiencyDisplayMode').addEventListener('change', (event) => { EnhancedAutoClicker.changeCalcEfficiencyDisplayMode(event); });
         document.getElementById('select-autoClickCalcDamageDisplayMode').addEventListener('change', (event) => { EnhancedAutoClicker.changeCalcDamageDisplayMode(event); });
 
@@ -230,32 +217,9 @@ class EnhancedAutoClicker {
     static addGraphicsBindings() {
         // Add gymView data bindings
         var gymContainer = document.querySelector('div[data-bind="if: App.game.gameState === GameConstants.GameState.gym"]');
-        var elemsToBind = ['knockout[data-bind*="pokemonNameTemplate"]', // Pokemon name
-            'span[data-bind*="pokemonsDefeatedComputable"]', // Gym Pokemon counter (pt 1)
-            'span[data-bind*="pokemonsUndefeatedComputable"]', // Gym Pokemon counter (pt 2)
-            'knockout[data-bind*="pokemonSpriteTemplate"]', // Pokemon sprite
-            'div.progress.hitpoints', // Pokemon healthbar
-            'div.progress.timer' // Gym timer
-            ];
-        elemsToBind.forEach((query) => {
-            var elem = gymContainer.querySelector(query);
-            if (elem) {
-                elem.before(new Comment("ko ifnot: EnhancedAutoClicker.disableAutoGymGraphics()"));
-                elem.after(new Comment("/ko"));
-            }
-        });
         // Always hide stop button during autoGym, even with graphics enabled
         var restartButton = gymContainer.querySelector('button[data-bind="visible: GymRunner.autoRestart()"]');
         restartButton.setAttribute('data-bind', 'visible: GymRunner.autoRestart() && !EnhancedAutoClicker.autoGymOn()');
-
-        // Add dungeonView data bindings
-        var dungeonContainer = document.querySelector('div[data-bind="if: App.game.gameState === GameConstants.GameState.dungeon"]');
-        // Title bar contents
-        dungeonContainer.querySelector('h2.pageItemTitle')?.prepend(new Comment("ko ifnot: EnhancedAutoClicker.disableAutoDungeonGraphics()"));
-        dungeonContainer.querySelector('h2.pageItemTitle')?.append(new Comment("/ko"));
-        // Main container sprites etc
-        dungeonContainer.querySelector('h2.pageItemTitle')?.after(new Comment("ko ifnot: EnhancedAutoClicker.disableAutoDungeonGraphics()"));
-        dungeonContainer.querySelector('h2.pageItemFooter')?.before(new Comment("/ko"));
     }
 
     /* Settings event handlers */
@@ -407,16 +371,6 @@ class EnhancedAutoClicker {
     static toggleAutoDungeonAlwaysOpenRareChests() {
         this.autoDungeonAlwaysOpenRareChests = !this.autoDungeonAlwaysOpenRareChests;
         localStorage.setItem('autoDungeonAlwaysOpenRareChests', this.autoDungeonAlwaysOpenRareChests);
-    }
-
-    static toggleAutoGymGraphics() {
-        this.gymGraphicsDisabled(!this.gymGraphicsDisabled());
-        localStorage.setItem('gymGraphicsDisabled', this.gymGraphicsDisabled());
-    }
-
-    static toggleAutoDungeonGraphics() {
-        this.dungeonGraphicsDisabled(!this.dungeonGraphicsDisabled());
-        localStorage.setItem('dungeonGraphicsDisabled', this.dungeonGraphicsDisabled());
     }
 
     static changeCalcEfficiencyDisplayMode(event) {
