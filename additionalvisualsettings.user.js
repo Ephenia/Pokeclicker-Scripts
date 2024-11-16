@@ -5,7 +5,7 @@
 // @description   Adds additional settings for hiding some visual things to help out with performance. Also, includes various features that help with ease of accessibility.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       2.6.4
+// @version       3.0
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -48,8 +48,14 @@ class AdditionalVisualSettings {
             healthbar: ko.observable(false),
         },
     };
+    static autoClickerIntegration = ko.observable(JSON.parse(localStorage.getItem('AVSautoClickerIntegration') || 'false'));
+    // Disable graphics unless autoclicker integration is on and autoclicker is not running
+    static graphicsSettingsActive = ko.computed({
+        read: () => !(typeof EnhancedAutoClicker === 'function' && this.autoClickerIntegration() && !EnhancedAutoClicker.autoClickState()),
+        deferEvaluation: true
+    });
 
-    static loadSettings() {
+    static loadGraphicsSettings() {
         try {
             const savedSettings = JSON.parse(localStorage.getItem('AVSgraphicsDisabledSettings') || '{}');
             Object.keys(this.graphicsDisabledSettings).forEach(state => {
@@ -61,11 +67,11 @@ class AdditionalVisualSettings {
                 });
             });
         } catch {
-            this.saveSettings();
+            this.saveGraphicsSettings();
         }
     }
 
-    static saveSettings() {
+    static saveGraphicsSettings() {
         const settingsToSave = {};
         Object.keys(this.graphicsDisabledSettings).forEach(state => {
             settingsToSave[state] = {};
@@ -82,7 +88,7 @@ class AdditionalVisualSettings {
     }
 
     static initVisualSettings() {
-        this.loadSettings();
+        this.loadGraphicsSettings();
 
         // Add shortcut menu icons
         const getMenu = document.getElementById('startMenu');
@@ -107,6 +113,7 @@ class AdditionalVisualSettings {
         elem.innerHTML = `<td class="p-2" colspan="2"><label class="m-0">Disable battle visuals</label></td>`;
         settingsBody.appendChild(elem);
 
+        // Graphics-disabling settings
         Object.keys(this.graphicsDisabledSettings).forEach(state => {
             elem = document.createElement('tr');
             elem.innerHTML = `<th class="p-2 col-md-5" scope="row">${GameConstants.camelCaseToString(state)}</th><td class="p-2" style="display:flex;"></td>`;
@@ -114,17 +121,31 @@ class AdditionalVisualSettings {
             Object.keys(this.graphicsDisabledSettings[state]).forEach(setting => {
                 const container = document.createElement('div');
                 container.className = 'px-3'
-                container.innerHTML = `${GameConstants.camelCaseToString(setting)} <input id="checkbox-AVS-${state}-${setting}" type="checkbox"></td>`;
+                container.innerHTML = `${GameConstants.camelCaseToString(setting)} <input id="checkbox-AVS-${state}-${setting}" type="checkbox" class="mx-1"></td>`;
                 const checkbox = container.querySelector('input');
                 checkbox.checked = this.graphicsDisabledSettings[state][setting]();
                 checkbox.addEventListener('change', event => {
                     this.graphicsDisabledSettings[state][setting](event.target.checked);
-                    this.saveSettings();
+                    this.saveGraphicsSettings();
                 });
                 innerElem.appendChild(container);
             });
             settingsBody.appendChild(elem);
         });
+
+        // EnhancedAutoClicker integration setting, if the script is present
+        if (typeof EnhancedAutoClicker === 'function') {
+            elem = document.createElement('tr');
+            elem.innerHTML = `<td class="p-2" colspan="2"><label class="m-0" for="checkbox-AVS-autoClickerIntegration">Disable graphics only when EnhancedAutoClicker is on</label>` + 
+                `<input id="checkbox-AVS-autoClickerIntegration" type="checkbox" class="mx-2"></td>`;
+            settingsBody.appendChild(elem);
+            const checkbox = elem.querySelector('input');
+            checkbox.checked = this.autoClickerIntegration();
+            checkbox.addEventListener('change', event => {
+                this.autoClickerIntegration(event.target.checked);
+                localStorage.setItem('AVSautoClickerIntegration', this.autoClickerIntegration());
+            });
+        }
 
         // Create travel shortcut buttons on town map
         const travelShortcutsToAdd = [
@@ -313,7 +334,7 @@ class AdditionalVisualSettings {
                     return;
                 }
                 const selector = selectors[state][setting];
-                const binding = `ko ifnot: AdditionalVisualSettings.graphicsDisabledSettings.${state}.${setting}`;
+                const binding = `ko ifnot: AdditionalVisualSettings.graphicsDisabledSettings.${state}.${setting}() && AdditionalVisualSettings.graphicsSettingsActive`;
                 if (Array.isArray(selector)) {
                     // For binding multiple elements at once, which requires more complicated selecting
                     selector.forEach(([query, order], i) => {
