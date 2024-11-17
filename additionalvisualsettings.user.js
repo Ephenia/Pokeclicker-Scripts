@@ -282,6 +282,16 @@ class AdditionalVisualSettings {
 
     // Must execute before game loads and applies knockout bindings
     static addGraphicsBindings() {
+        function selectorWorkaround(element, selector) {
+            try {
+                return element.querySelector(selector);
+            } catch {
+                const [, outer, inner] = selector.match(/(.+):has\((.+)\)/);
+                const innerElem = element.querySelector(`${outer} ${inner}`);
+                return Array.from(element.querySelectorAll(outer)).find(e => e.contains(innerElem));
+            }
+        }
+
         const selectors = {
             route: {
                 container: '#routeBattleContainer',
@@ -343,7 +353,7 @@ class AdditionalVisualSettings {
                 if (Array.isArray(selector)) {
                     // For binding multiple elements at once, which requires more complicated selecting
                     selector.forEach(([query, order], i) => {
-                        const elem = container.querySelector(query);
+                        const elem = selectorWorkaround(container, query);
                         const commentBinding = i % 2 == 0 ? binding : '/ko';
                         if (order == 'before') {
                             elem.before(new Comment(commentBinding));
@@ -352,7 +362,7 @@ class AdditionalVisualSettings {
                         }
                     });
                 } else {
-                    const elem = container.querySelector(selector);
+                    const elem = selectorWorkaround(container, selector);
                     // Special case: insert a backup attack-disabled element so formatting doesn't look weird
                     // Do this before applying the main binding to put it outside the binding comments
                     if (setting == 'attack') {
