@@ -5,7 +5,7 @@
 // @description   Adds a button to select the weather for the current region, also freezes all weather
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       1.4.2
+// @version       1.4.3
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -68,7 +68,16 @@ function addGlobalStyle(css) {
     head.appendChild(style);
 }
 
-function loadEpheniaScript(scriptName, initFunction) {
+function loadEpheniaScript(scriptName, initFunction, priorityFunction) {
+    function reportScriptError(scriptName, error) {
+        console.error(`Error while initializing '${scriptName}' userscript:\n${error}`);
+        Notifier.notify({
+            type: NotificationConstants.NotificationOption.warning,
+            title: scriptName,
+            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
+            timeout: GameConstants.DAY,
+        });
+    }
     const windowObject = !App.isUsingClient ? unsafeWindow : window;
     // Inject handlers if they don't exist yet
     if (windowObject.epheniaScriptInitializers === undefined) {
@@ -85,13 +94,7 @@ function loadEpheniaScript(scriptName, initFunction) {
                     try {
                         initFunction();
                     } catch (e) {
-                        console.error(`Error while initializing '${scriptName}' userscript:\n${e}`);
-                        Notifier.notify({
-                            type: NotificationConstants.NotificationOption.warning,
-                            title: scriptName,
-                            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
-                            timeout: GameConstants.DAY,
-                        });
+                        reportScriptError(scriptName, e);
                     }
                 });
                 hasInitialized = true;
@@ -117,6 +120,18 @@ function loadEpheniaScript(scriptName, initFunction) {
     }
     // Add initializer for this particular script
     windowObject.epheniaScriptInitializers[scriptName] = initFunction;
+    // Run any functions that need to execute before the game starts
+    if (priorityFunction) {
+        $(document).ready(() => {
+            try {
+                priorityFunction();
+            } catch (e) {
+                reportScriptError(scriptName, e);
+                // Remove main initialization function  
+                windowObject.epheniaScriptInitializers[scriptName] = () => null;
+            }
+        });
+    }
 }
 
 if (!App.isUsingClient || localStorage.getItem('simpleweatherchanger') === 'true') {

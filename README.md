@@ -77,13 +77,9 @@ This script adds new options to customize the game's graphics alongside a handfu
 
 ### **Visual Settings**
 
-The added visual settings are found in the Scripts settings tab. Several of these new options are shown here:<br>
+The script's visual settings save on performance by disabling parts of the HTML that can change rapidly. There are settings for route battles, gym battles, dungeons, and the battle frontier. All of them can be found in the Scripts settings tab.
 
-![](https://i.imgur.com/sWlhKlx.png)
-
-I made these options as a hacky way to help save on some performance, especially when you are idling and leaving the game open for longer periods of time. This ends up removing these HTML elements that are constantly getting updated, so that the DOM is less flooded. After enabling any of these options, you will have to change routes for these settings to take effect. When disabling, you will have to go to something like a Town/Dungeon then back to a route for these to start working again.
-
-As of 1.3 there is now an option for disabling all notifications, this may be especially helpful if you are using Enhanced Auto Mine. This may also cause some popups and other things to not appear (such as trying to manually Skip layers in the Underground). You can still hear when you get shinies using this, but you won't be able to see what shiny you received. I have not fully tested this, so feel free to experiment with this setting.
+If the Enhanced Auto Clicker script is installed, an additional setting is available to only apply the above visual settings when the autoclicker is running. This lets you improve performance when grinding but still experience the game's graphics the rest of the time.
 
 ### **Convenience features**
 
@@ -231,15 +227,6 @@ The Auto Dungeon feature is found below the Auto Click button. Some notes about 
 &emsp;&emsp;• When neither mode is on (both buttons are greyed out), Auto Dungeon will just find and fight the boss as quickly as possible.<br>
 • The dropdown menu determines which chests Auto Dungeon will open. It will only open chests of the selected rarity or higher.<br>
 &emsp;&emsp;• If the settings menu option "Always open visible targeted chests" is enabled, Auto Dungeon will open chests of sufficient rarity even when chests mode is off. It will open any visible chests right before fighting the boss but not explore the floor to reveal potential other chests.<br>
-
-### **Graphics settings**
-
-The Auto Clicker now includes graphics settings for Auto Gym and Auto Dungeon to save on performance, similar to those in the Additional Visual Settings script. These settings are located along with the statistics display mode setting in the Visual Settings tab of the settings menu. These disable most gym graphics while Auto Gym is running and most dungeon graphics while Auto Dungeon is running, respectively.
-
-```diff
-- Note: the Auto Clicker runs every 0.05 seconds.
-- Note: statistics are checked and updated every 1 second while the Auto Clicker is active.
-```
 
 <hr>
 

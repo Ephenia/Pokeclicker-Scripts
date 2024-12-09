@@ -5,7 +5,7 @@
 // @description   Clicks through battles, with adjustable speed, and provides various insightful statistics. Also includes an automatic gym battler and automatic dungeon explorer with multiple pathfinding modes.
 // @copyright     https://github.com/Ephenia
 // @license       GPL-3.0 License
-// @version       3.5.3
+// @version       3.5.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -64,18 +64,9 @@ class EnhancedAutoClicker {
         enemies: null,
         areaHealth: null,
     };
-    // Visual settings
-    static gymGraphicsDisabled = ko.observable(validateStorage('gymGraphicsDisabled', false));
-    static dungeonGraphicsDisabled = ko.observable(validateStorage('dungeonGraphicsDisabled', false));
-    // Computed observables for visual settings
+    // Computed observables for visual bindings
     static autoGymOn = ko.pureComputed(() => {
         return this.autoClickState() && this.autoGymState();
-    });
-    static disableAutoGymGraphics = ko.pureComputed(() => {
-        return this.gymGraphicsDisabled() && this.autoGymOn();
-    });
-    static disableAutoDungeonGraphics = ko.pureComputed(() => {
-        return this.dungeonGraphicsDisabled() && this.autoClickState() && this.autoDungeonState();
     });
 
     /* Initialization */
@@ -178,8 +169,6 @@ class EnhancedAutoClicker {
         let checkboxesToAdd = [
             ['autoDungeonFinishBeforeStopping', 'Auto Dungeon finishes dungeons before turning off', this.autoDungeonFinishBeforeStopping],
             ['autoDungeonAlwaysOpenRareChests', 'Always open visible targeted chests', this.autoDungeonAlwaysOpenRareChests],
-            ['autoGymGraphicsDisabled', 'Disable Auto Gym graphics', this.gymGraphicsDisabled()],
-            ['autoDungeonGraphicsDisabled', 'Disable Auto Dungeon graphics', this.dungeonGraphicsDisabled()]
         ];
         checkboxesToAdd.forEach(([name, text, isChecked]) => {
             const newSetting = document.createElement('tr')
@@ -205,8 +194,6 @@ class EnhancedAutoClicker {
         document.getElementById('auto-dungeon-chest-mode').addEventListener('click', () => { EnhancedAutoClicker.toggleAutoDungeonChestMode(); });
         document.getElementById('checkbox-autoDungeonFinishBeforeStopping').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonFinishBeforeStopping(); });
         document.getElementById('checkbox-autoDungeonAlwaysOpenRareChests').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonAlwaysOpenRareChests(); });
-        document.getElementById('checkbox-autoGymGraphicsDisabled').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoGymGraphics(); });
-        document.getElementById('checkbox-autoDungeonGraphicsDisabled').addEventListener('change', () => { EnhancedAutoClicker.toggleAutoDungeonGraphics(); });
         document.getElementById('select-autoClickCalcEfficiencyDisplayMode').addEventListener('change', (event) => { EnhancedAutoClicker.changeCalcEfficiencyDisplayMode(event); });
         document.getElementById('select-autoClickCalcDamageDisplayMode').addEventListener('change', (event) => { EnhancedAutoClicker.changeCalcDamageDisplayMode(event); });
 
@@ -230,32 +217,9 @@ class EnhancedAutoClicker {
     static addGraphicsBindings() {
         // Add gymView data bindings
         var gymContainer = document.querySelector('div[data-bind="if: App.game.gameState === GameConstants.GameState.gym"]');
-        var elemsToBind = ['knockout[data-bind*="pokemonNameTemplate"]', // Pokemon name
-            'span[data-bind*="pokemonsDefeatedComputable"]', // Gym Pokemon counter (pt 1)
-            'span[data-bind*="pokemonsUndefeatedComputable"]', // Gym Pokemon counter (pt 2)
-            'knockout[data-bind*="pokemonSpriteTemplate"]', // Pokemon sprite
-            'div.progress.hitpoints', // Pokemon healthbar
-            'div.progress.timer' // Gym timer
-            ];
-        elemsToBind.forEach((query) => {
-            var elem = gymContainer.querySelector(query);
-            if (elem) {
-                elem.before(new Comment("ko ifnot: EnhancedAutoClicker.disableAutoGymGraphics()"));
-                elem.after(new Comment("/ko"));
-            }
-        });
         // Always hide stop button during autoGym, even with graphics enabled
         var restartButton = gymContainer.querySelector('button[data-bind="visible: GymRunner.autoRestart()"]');
         restartButton.setAttribute('data-bind', 'visible: GymRunner.autoRestart() && !EnhancedAutoClicker.autoGymOn()');
-
-        // Add dungeonView data bindings
-        var dungeonContainer = document.querySelector('div[data-bind="if: App.game.gameState === GameConstants.GameState.dungeon"]');
-        // Title bar contents
-        dungeonContainer.querySelector('h2.pageItemTitle')?.prepend(new Comment("ko ifnot: EnhancedAutoClicker.disableAutoDungeonGraphics()"));
-        dungeonContainer.querySelector('h2.pageItemTitle')?.append(new Comment("/ko"));
-        // Main container sprites etc
-        dungeonContainer.querySelector('h2.pageItemTitle')?.after(new Comment("ko ifnot: EnhancedAutoClicker.disableAutoDungeonGraphics()"));
-        dungeonContainer.querySelector('h2.pageItemFooter')?.before(new Comment("/ko"));
     }
 
     /* Settings event handlers */
@@ -409,16 +373,6 @@ class EnhancedAutoClicker {
         localStorage.setItem('autoDungeonAlwaysOpenRareChests', this.autoDungeonAlwaysOpenRareChests);
     }
 
-    static toggleAutoGymGraphics() {
-        this.gymGraphicsDisabled(!this.gymGraphicsDisabled());
-        localStorage.setItem('gymGraphicsDisabled', this.gymGraphicsDisabled());
-    }
-
-    static toggleAutoDungeonGraphics() {
-        this.dungeonGraphicsDisabled(!this.dungeonGraphicsDisabled());
-        localStorage.setItem('dungeonGraphicsDisabled', this.dungeonGraphicsDisabled());
-    }
-
     static changeCalcEfficiencyDisplayMode(event) {
         const val = +event.target.value;
         if (val != this.autoClickCalcEfficiencyDisplayMode && [0, 1].includes(val)) {
@@ -489,6 +443,10 @@ class EnhancedAutoClicker {
         // If not battling gym, start battling
         else if (this.autoGymState()) {
             this.autoGym();
+        }
+        // Turn off autoclicker in certain game states to avoid lag
+        else if (App.game.gameState === GameConstants.GameState.battleFrontier || App.game.gameState === GameConstants.GameState.safari) {
+            this.toggleAutoClick();
         }
         this.autoClickCalcTracker.ticks[0]++;
     }
@@ -1211,7 +1169,16 @@ function addGlobalStyle(css) {
     head.appendChild(style);
 }
 
-function loadEpheniaScript(scriptName, initFunction) {
+function loadEpheniaScript(scriptName, initFunction, priorityFunction) {
+    function reportScriptError(scriptName, error) {
+        console.error(`Error while initializing '${scriptName}' userscript:\n${error}`);
+        Notifier.notify({
+            type: NotificationConstants.NotificationOption.warning,
+            title: scriptName,
+            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
+            timeout: GameConstants.DAY,
+        });
+    }
     const windowObject = !App.isUsingClient ? unsafeWindow : window;
     // Inject handlers if they don't exist yet
     if (windowObject.epheniaScriptInitializers === undefined) {
@@ -1228,13 +1195,7 @@ function loadEpheniaScript(scriptName, initFunction) {
                     try {
                         initFunction();
                     } catch (e) {
-                        console.error(`Error while initializing '${scriptName}' userscript:\n${e}`);
-                        Notifier.notify({
-                            type: NotificationConstants.NotificationOption.warning,
-                            title: scriptName,
-                            message: `The '${scriptName}' userscript crashed while loading. Check for updates or disable the script, then restart the game.\n\nReport script issues to the script developer, not to the Pokéclicker team.`,
-                            timeout: GameConstants.DAY,
-                        });
+                        reportScriptError(scriptName, e);
                     }
                 });
                 hasInitialized = true;
@@ -1260,6 +1221,18 @@ function loadEpheniaScript(scriptName, initFunction) {
     }
     // Add initializer for this particular script
     windowObject.epheniaScriptInitializers[scriptName] = initFunction;
+    // Run any functions that need to execute before the game starts
+    if (priorityFunction) {
+        $(document).ready(() => {
+            try {
+                priorityFunction();
+            } catch (e) {
+                reportScriptError(scriptName, e);
+                // Remove main initialization function  
+                windowObject.epheniaScriptInitializers[scriptName] = () => null;
+            }
+        });
+    }
 }
 
 if (!App.isUsingClient || localStorage.getItem('enhancedautoclicker') === 'true') {
@@ -1267,8 +1240,5 @@ if (!App.isUsingClient || localStorage.getItem('enhancedautoclicker') === 'true'
         // Necessary for userscript managers
         unsafeWindow.EnhancedAutoClicker = EnhancedAutoClicker;
     }
-    loadEpheniaScript('enhancedautoclicker', EnhancedAutoClicker.initAutoClicker.bind(EnhancedAutoClicker));
-    $(document).ready(() => {
-        EnhancedAutoClicker.initOverrides();
-    });
+    loadEpheniaScript('enhancedautoclicker', () => EnhancedAutoClicker.initAutoClicker(), () => EnhancedAutoClicker.initOverrides());
 }
