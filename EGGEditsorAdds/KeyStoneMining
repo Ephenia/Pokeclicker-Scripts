@@ -1,0 +1,68 @@
+(function () {
+    console.log("🔍 Checking dependencies before injecting Key Stone...");
+
+    const dependencies = {
+        App,
+        UndergroundItems,
+        UndergroundItem,
+        GameConstants,
+        UndergroundItemValueType,
+        StoneType: (typeof StoneType !== 'undefined') ? StoneType : "🚨 MISSING!"
+    };
+
+    for (const [key, value] of Object.entries(dependencies)) {
+        console.log(value === "🚨 MISSING!" ? `❌ ERROR: ${key} is missing!` : `✅ ${key} is loaded.`);
+    }
+
+    if (dependencies.StoneType === "🚨 MISSING!") {
+        console.error("🚨 StoneType is missing! Attempting to load manually...");
+        try {
+            StoneType = GameConstants.StoneType; // Try to assign it manually
+            console.log(`✅ Manually assigned StoneType: `, StoneType);
+        } catch (error) {
+            console.error("❌ Failed to assign StoneType! Aborting script.", error);
+            return;
+        }
+    }
+
+    console.log("✅ All dependencies are loaded! Proceeding with injection...");
+})();
+(function () {
+    if (typeof App === 'undefined' || typeof UndergroundItems === 'undefined' || typeof UndergroundItem === 'undefined' || typeof GameConstants === 'undefined' || typeof UndergroundItemValueType === 'undefined' || typeof StoneType === 'undefined') {
+        console.error("❌ PokeClicker game or required modules not detected.");
+        return;
+    }
+
+    console.log("Injecting Corrected Key Stone into Underground Mining Pool...");
+
+    // Create Key Stone Item with Correct Type Mapping
+    const keyStoneItem = new UndergroundItem(
+        999, // Unique ID (should not conflict)
+        'Key_stone', // Must match existing game data
+        [[1, 1, 1], [1, 1, 1], [1, 1, 1]], // 3x3 Shape for Round Object
+        200, // Mining value
+        UndergroundItemValueType.EvolutionItem, // Set as Evolution Item
+        undefined, // No requirement, always unlocked
+        0.01 // Lower weight = Rarer appearance
+    );
+
+    // Manually set type to ensure proper image path resolution
+    keyStoneItem.type = StoneType.Key_stone;
+
+    // 🔥 Override the Underground Image Path to Prevent Errors
+    Object.defineProperty(keyStoneItem, 'undergroundImage', {
+        get() {
+            return `assets/images/items/evolution/key_stone.png`; // Forces Evolution Item Image
+        }
+    });
+
+    // Prevent Duplicate Injection
+    if (!UndergroundItems.list.some(item => item.itemName === 'Key_stone')) {
+        UndergroundItems.list.push(keyStoneItem);
+        console.log("✅ Key Stone successfully added with proper underground image, increased size & rarity!");
+    } else {
+        console.log("⚠️ Key Stone already exists in Underground Items. Skipping injection.");
+    }
+
+})();
+
