@@ -19,17 +19,17 @@
 // ==/UserScript==//
 
 function initAutoFarm() {
-    var autoFarmLoop;
-
     var plantState;
     var harvestState;
     var replantState;
     var mulchState;
+    var autoFarmLoop;
+    var farmTimer;
 
-    plantState = JSON.parse(localStorage.getItem('autoPlantState'));
-    harvestState = JSON.parse(localStorage.getItem('autoHarvestState'));
-    replantState = JSON.parse(localStorage.getItem('autoReplantState'));
-    mulchState = JSON.parse(localStorage.getItem('autoMulchState'));
+    var plantState = JSON.parse(localStorage.getItem('autoPlantState'));
+    var harvestState = JSON.parse(localStorage.getItem('autoHarvestState'));
+    var replantState = JSON.parse(localStorage.getItem('autoReplantState'));
+    var mulchState = JSON.parse(localStorage.getItem('autoMulchState'));
 
     let plantSelected = JSON.parse(localStorage.getItem('autoPlantSelected'));
     FarmController.selectedBerry(plantSelected);
@@ -44,13 +44,13 @@ function initAutoFarm() {
         var elemAF = document.createElement("div");
         var divMenu1 = document.createElement("div");
         var divMenu2 = document.createElement("div");
-        const shovelList = document.getElementById('shovelList');
-
         divMenu1.className = "row justify-content-center py-0";
         divMenu2.className = "row justify-content-center py-0";
 
         elemAF.appendChild(divMenu1);
         elemAF.appendChild(divMenu2);
+
+        const shovelList = document.getElementById('shovelList');
         shovelList.before(elemAF);
 
         const createButton = (name, state, func, rl, top) => {
@@ -62,21 +62,84 @@ function initAutoFarm() {
             button.className = 'btn btn-block btn-' + (state ? 'success' : 'danger');
             button.style.height = '50px';
             button.style.fontSize = '9pt';
-            button.textContent = `Auto ${name[0].toUpperCase() + name.slice(1)}\n[${plantState ? 'ON' : 'OFF'}]`;
-            button.onclick = function() { func(); };
+            button.textContent = `Auto ${name[0].toUpperCase() + name.slice(1)}\n[${state ? 'ON' : 'OFF'}]`;
+            button.onclick = func;
 
             buttonDiv.appendChild(button);
-            if (top) {
-                divMenu1.appendChild(buttonDiv);
-            } else {
-                divMenu2.appendChild(buttonDiv);
-            }
+            (top ? divMenu1 : divMenu2).appendChild(buttonDiv);
         }
 
         createButton('plant', plantState, autoPlantToggle, 'r', true);
         createButton('harvest', harvestState, autoHarvestToggle, 'l', true);
         createButton('replant', replantState, autoReplantToggle, 'r', false);
         createButton('mulch', mulchState, autoMulchToggle, 'l', false);
+
+        createTimerUI(elemAF);  // <- Move this to the bottom for better UX
+    }
+
+    function createTimerUI(parent) {
+        var timerDiv = document.createElement('div');
+        timerDiv.className = 'row justify-content-center py-0 mt-2';
+
+        var timerInput = document.createElement('input');
+        timerInput.id = 'autoFarmTimer';
+        timerInput.type = 'number';
+        timerInput.min = '1';
+        timerInput.placeholder = 'Minutes';
+        timerInput.style.width = '80px';
+        timerInput.className = 'form-control text-center';
+
+        var timerButton = document.createElement('button');
+        timerButton.innerText = 'Start Timer';
+        timerButton.className = 'btn btn-warning ml-2';
+        timerButton.onclick = startAutoFarmTimer;
+
+        var timerStatus = document.createElement('span');
+        timerStatus.id = 'autoFarmTimerStatus';
+        timerStatus.style.marginLeft = '10px';
+
+        timerDiv.appendChild(timerInput);
+        timerDiv.appendChild(timerButton);
+        timerDiv.appendChild(timerStatus);
+        parent.appendChild(timerDiv);
+    }
+
+    function startAutoFarmTimer() {
+        clearInterval(farmTimer);
+
+        const minutes = parseInt(document.getElementById('autoFarmTimer').value);
+        if (isNaN(minutes) || minutes <= 0) {
+            alert('Please enter a valid number of minutes.');
+            return;
+        }
+
+        const endTime = Date.now() + minutes * 60 * 1000;
+        updateTimerDisplay(endTime);
+
+        farmTimer = setInterval(() => {
+            const timeLeft = endTime - Date.now();
+            if (timeLeft <= 0) {
+                clearInterval(farmTimer);
+                disableAllFunctions();
+                document.getElementById('autoFarmTimerStatus').innerText = 'Timer expired!';
+            } else {
+                updateTimerDisplay(endTime);
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay(endTime) {
+        const timeLeft = endTime - Date.now();
+        const minutesLeft = Math.floor(timeLeft / 60000);
+        const secondsLeft = Math.floor((timeLeft % 60000) / 1000);
+        document.getElementById('autoFarmTimerStatus').innerText = `Time left: ${minutesLeft}:${secondsLeft.toString().padStart(2, '0')}`;
+    }
+
+    function disableAllFunctions() {
+        if (plantState) autoPlantToggle();
+        if (harvestState) autoHarvestToggle();
+        if (replantState) autoReplantToggle();
+        if (mulchState) autoMulchToggle();
     }
 
     function toggleFarmLoop() {
@@ -326,6 +389,4 @@ function loadEpheniaScript(scriptName, initFunction, priorityFunction) {
     }
 }
 
-if (!App.isUsingClient || localStorage.getItem('simpleautofarmer') === 'true') {
     loadEpheniaScript('simpleautofarmer', initAutoFarm, initSelectedBerryTracking);
-}
