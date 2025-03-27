@@ -141,9 +141,18 @@ function initAutoSafari() {
       forceSkipItems = false;
       cachedPath.length = 0;
       hasPrioritySpawns = 0;
-      
     } else {
       toggleAutoSafari();
+    }
+  }
+
+  // Quick fix following update 0.10.22 which broke the script.
+  Safari.openModal = function () {
+    if (Safari.inProgress() && Safari.activeRegion() !== player.region) {
+      Safari.safariReset();
+    } else {
+      App.game.gameState = GameConstants.GameState.safari;
+      $('#safariModal').modal({backdrop: 'static', keyboard: false});
     }
   }
 
