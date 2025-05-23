@@ -8,7 +8,7 @@
 // @description   Adds in toggable options to move/catch pokemons/pick up items and have fast animations on both safari zones
 // @copyright     https://github.com/Kanzen01
 // @license       GPL-3.0 License
-// @version       1.2.3
+// @version       1.2.4
 
 // @homepageURL   https://github.com/Ephenia/Pokeclicker-Scripts/
 // @supportURL    https://github.com/Ephenia/Pokeclicker-Scripts/issues
@@ -47,6 +47,7 @@ function initAutoSafari() {
 
   var autoSafariProcessId;
   var skipTicks = 0;
+  var awaiting = false;
 
   const CACHED_ANIM_SPEEDS = Object.assign({}, SafariBattle.Speed);
   const CACHED_MOVE_SPEED = Safari.moveSpeed;
@@ -90,6 +91,9 @@ function initAutoSafari() {
       return (grassVal / grassWeights) > (waterVal / waterWeights) ? SafariEnvironments.Grass : SafariEnvironments.Water;
     });
 
+  // Temporary workaround for modal initialization wonkiness, TODO remove when fixed in base game
+  DisplayObservables.modalState.safariModal;
+
   createHTML();
 
   function startAutoSafari() {
@@ -107,8 +111,11 @@ function initAutoSafari() {
   }
 
   function doSafariTick() {
-    if (skipTicks) {
-      skipTicks--;
+    if (skipTicks || awaiting) {
+      if (skipTicks > 0) {
+        skipTicks--;
+      }
+      return;
     } else if (!Safari.inProgress() || Safari.activeRegion() !== player.region || DisplayObservables.modalState.safariModal !== 'show') {
       enterSafari();
     } else if (Safari.inBattle()) {
@@ -133,18 +140,25 @@ function initAutoSafari() {
       return;
     }
 
-    if (DisplayObservables.modalState.safariModal !== 'show') {
-      Safari.openModal();
-      skipTicks = autoSafariFastAnimationsState ? 2 : 1;
-    } else if (!Safari.inProgress() && Safari.canPay()) {
-      Safari.payEntranceFee();
-      forceSkipItems = false;
-      cachedPath.length = 0;
-      hasPrioritySpawns = 0;
-      
+    if ($('#safariModal').data('bs.modal')?._isShown) {
+      if (!Safari.inProgress() && Safari.canPay()) {
+        Safari.payEntranceFee();
+        forceSkipItems = false;
+        cachedPath.length = 0;
+        hasPrioritySpawns = 0;
+      } else {
+        toggleAutoSafari();
+      }
+      awaiting = false;      
     } else {
-      toggleAutoSafari();
-    }
+      awaiting = true;
+      $('#safariModal').one('shown.bs.modal', () => enterSafari());
+      if (DisplayObservables.modalState.safariModal === 'hidden') {
+        Safari.openModal();
+      } else if (DisplayObservables.modalState.safariModal === 'hide') {
+        $('#safariModal').one('hidden.bs.modal', () => Safari.openModal());        
+      }
+    }  
   }
 
   function processSafari() {
