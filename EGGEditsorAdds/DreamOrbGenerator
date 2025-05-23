@@ -1,0 +1,54 @@
+// ==UserScript==
+// @name         Dream Orb Online Collector
+// @description  Grants 1 random Dream Orb every hour while playing online.
+// @version      2.0
+// @author       Your Name
+// @match        *://www.pokeclicker.com/*
+// ==/UserScript==
+
+(function() {
+    const ONE_HOUR = 60 * 60 * 1000;
+
+    // Load the last saved orb time from localStorage (persist across refreshes)
+    window.lastOrbTime = Number(localStorage.getItem('dreamOrbOnline_lastOrbTime')) || Date.now();
+
+    /**
+     * Awards a random Dream Orb to the player.
+     */
+    window.awardDreamOrb = function() {
+        const colors = ['Pink', 'Green', 'Orange', 'Blue'];
+        const chosenColor = Rand.fromArray(colors);
+
+        const orb = App.game.dreamOrbController.orbs.find(o => o.color === chosenColor);
+        if (orb) {
+            orb.amount(orb.amount() + 1);
+
+            Notifier.notify({
+                message: `You received a ${chosenColor} Dream Orb!`,
+                type: NotificationConstants.NotificationOption.success,
+            });
+
+            console.log(`[DreamOrbOnline] Awarded: ${chosenColor} Dream Orb`);
+        } else {
+            console.error(`[DreamOrbOnline] Could not find Dream Orb of color: ${chosenColor}`);
+        }
+
+        window.lastOrbTime = Date.now();
+        localStorage.setItem('dreamOrbOnline_lastOrbTime', String(window.lastOrbTime));
+    };
+
+    /**
+     * Checks if it's time to award a Dream Orb, and awards one if necessary.
+     */
+    window.checkAndAwardOrb = function() {
+        const now = Date.now();
+        if (now - window.lastOrbTime >= ONE_HOUR) {
+            awardDreamOrb();
+        }
+    };
+
+    // Periodic check - every 30 seconds should be plenty in normal use (you can crank this to 1 second for testing)
+    setInterval(checkAndAwardOrb, 30000);
+
+    console.log('%c[DreamOrbOnline] Script loaded and running.', 'color: #4caf50; font-weight: bold;');
+})();
