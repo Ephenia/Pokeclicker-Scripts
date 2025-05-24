@@ -50,17 +50,18 @@ You may also [join my Discord server](https://discord.gg/nfbT8zJSkd) (can also c
 9. [**Script Fixer Upper**](#script-fixer-upper)
 10. [**Script Handler** (Included in desktop/app.asar)](#script-manager)
 # Custom Scripts
-1. [**Auto Quest Completer** ](#auto-quest-completer)
-9. [**Auto Safari Zone** ](#auto-safari-zone)
-2. [**Catch Speed Adjuster** ](#catch-speed-adjuster)
-3. [**Challenge Mode Changer** ](#challenge-mode-changer)
-4. [**Discord Code Generator** ](#discord-code-generator)
-5. [**Infinite Seasonal Events** ](#infinite-seasonal-events)
-6. [**Oak Items Unlimited** ](#oak-iems-unlimited)
-7. [**Omega Protein Gains** ](#omega-protein-gains)
-7. [**Overnight Berry Growth** ](#overnight-berry-growth)
-8. [**Perky Pokerus Pandemic** ](#perky-pokerus-pandemic)
-9. [**Simple Weather Changer** ](#simple-weather-changer)
+1. [**Auto Keep MissingNo** ](#auto-keep-missingno)
+2. [**Auto Quest Completer** ](#auto-quest-completer)
+3. [**Auto Safari Zone** ](#auto-safari-zone)
+4. [**Catch Speed Adjuster** ](#catch-speed-adjuster)
+5. [**Challenge Mode Changer** ](#challenge-mode-changer)
+6. [**Discord Code Generator** ](#discord-code-generator)
+7. [**Infinite Seasonal Events** ](#infinite-seasonal-events)
+8. [**Oak Items Unlimited** ](#oak-iems-unlimited)
+9. [**Omega Protein Gains** ](#omega-protein-gains)
+10. [**Overnight Berry Growth** ](#overnight-berry-growth)
+11. [**Perky Pokerus Pandemic** ](#perky-pokerus-pandemic)
+12. [**Simple Weather Changer** ](#simple-weather-changer)
 
 ```diff
 - Note: Please backup your saves before using any and all scripts that would be here!!!
@@ -322,6 +323,14 @@ This script provides desktop client support for userscripts, allowing you to run
 This script is only compatible with the desktop client. For detailed instructions on installing and using the script manager, see [here](//github.com/Ephenia/Pokeclicker-Scripts/blob/master/desktop/).
 
 <img width="840" alt="Script manager options" src="https://github.com/Ephenia/Pokeclicker-Scripts/assets/12092270/dc19411e-c565-48cb-8be6-6ac9b8abe17b">
+
+<hr>
+
+<a name="auto-keep-missingno"></a>
+## [Custom] Auto Keep MissingNo (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/blob/master/custom/autokeepmissingno.user.user.js">autokeepmissingno.user.user.js</a>) (<a href="https://github.com/Ephenia/Pokeclicker-Scripts/raw/master/custom/autokeepmissingno.user.user.js">One-Click Install</a>)
+
+This script lets you keep your MissingNo, which is automatically deleted when your pokeclicker save is updated.
+All the MissingNo's information (nickname, category, exp, etc.), the vitamins used and the object held are kept.
 
 <hr>
 
