@@ -25,18 +25,20 @@ function initAutoFarm() {
     var harvestState;
     var replantState;
     var mulchState;
+    var catchState;
 
     plantState = JSON.parse(localStorage.getItem('autoPlantState'));
     harvestState = JSON.parse(localStorage.getItem('autoHarvestState'));
     replantState = JSON.parse(localStorage.getItem('autoReplantState'));
     mulchState = JSON.parse(localStorage.getItem('autoMulchState'));
+    catchState = JSON.parse(localStorage.getItem('autoCatchState'));
 
     let plantSelected = JSON.parse(localStorage.getItem('autoPlantSelected'));
     FarmController.selectedBerry(plantSelected);
     FarmController.navigateIndex(Math.floor(plantSelected / FarmController.BERRIES_PER_PAGE));
 
     createMenu();
-    if (plantState || replantState || harvestState || mulchState) {
+    if (plantState || replantState || harvestState || mulchState || catchState) {
         toggleFarmLoop();
     }
 
@@ -44,16 +46,19 @@ function initAutoFarm() {
         var elemAF = document.createElement("div");
         var divMenu1 = document.createElement("div");
         var divMenu2 = document.createElement("div");
+        var divMenu3 = document.createElement("div");
         const shovelList = document.getElementById('shovelList');
 
         divMenu1.className = "row justify-content-center py-0";
         divMenu2.className = "row justify-content-center py-0";
+        divMenu3.className = "row justify-content-center py-0";
 
         elemAF.appendChild(divMenu1);
         elemAF.appendChild(divMenu2);
+        elemAF.appendChild(divMenu3);
         shovelList.before(elemAF);
 
-        const createButton = (name, state, func, rl, top) => {
+        const createButton = (name, state, func, rl, topState) => {
             var buttonDiv = document.createElement('div');
             buttonDiv.className = `col-6 p${rl}-0`;
 
@@ -66,21 +71,27 @@ function initAutoFarm() {
             button.onclick = function() { func(); };
 
             buttonDiv.appendChild(button);
-            if (top) {
-                divMenu1.appendChild(buttonDiv);
-            } else {
-                divMenu2.appendChild(buttonDiv);
+            switch (topState) {
+                case 1:
+                    divMenu1.appendChild(buttonDiv);
+                case 2:
+                    divMenu2.appendChild(buttonDiv);
+                case 3:
+                    divMenu3.appendChild(buttonDiv);
+                default:
+                    divMenu1.appendChild(buttonDiv);
             }
         }
 
-        createButton('plant', plantState, autoPlantToggle, 'r', true);
-        createButton('harvest', harvestState, autoHarvestToggle, 'l', true);
-        createButton('replant', replantState, autoReplantToggle, 'r', false);
-        createButton('mulch', mulchState, autoMulchToggle, 'l', false);
+        createButton('plant', plantState, autoPlantToggle, 'r', 1);
+        createButton('harvest', harvestState, autoHarvestToggle, 'l', 1);
+        createButton('replant', replantState, autoReplantToggle, 'r', 2);
+        createButton('mulch', mulchState, autoMulchToggle, 'l', 2);
+        createButton('catch', catchState, autoCatchToggle, 'l', 3);
     }
 
     function toggleFarmLoop() {
-        if (plantState || replantState || harvestState || mulchState) {
+        if (plantState || replantState || harvestState || mulchState || catchState) {
             if (!autoFarmLoop) {
                 autoFarmLoop = setInterval(autoFarmTick, 1000);
             }
@@ -102,6 +113,9 @@ function initAutoFarm() {
         }
         if (mulchState) {
             doMulch();
+        }
+        if (catchState) {
+            doCatch();
         }
     }
 
@@ -220,6 +234,31 @@ function initAutoFarm() {
             }
         }
     }
+
+    function autoCatchToggle() {
+        catchState = !catchState;
+        localStorage.setItem("autoCatchState", catchState);
+        toggleFarmLoop();
+        let elt = document.getElementById('auto-catch-toggle');
+        if (catchState) {
+            elt.innerText = "Auto Catch\n[ON]";
+            elt.classList.remove('btn-danger');
+            elt.classList.add('btn-success');
+        } else {
+            elt.innerText = "Auto Catch\n[OFF]";
+            elt.classList.remove('btn-success');
+            elt.classList.add('btn-danger');
+        }
+    }
+
+    function doCatch() {
+        for (let i = 0; i < 25; i++) {
+            var plot = App.game.farming.plotList[i];
+            if (plot.wanderer) {
+                App.game.farming.handleWanderer(plot);
+            }
+        }
+    }
 }
 
 function initSelectedBerryTracking() {
@@ -258,6 +297,7 @@ initLocalStorage("autoPlantState", false);
 initLocalStorage("autoHarvestState", false);
 initLocalStorage("autoReplantState", false);
 initLocalStorage("autoMulchState", false);
+initLocalStorage("autoCatchState", false);
 initLocalStorage("autoPlantSelected", 0);
 
 function loadEpheniaScript(scriptName, initFunction, priorityFunction) {
